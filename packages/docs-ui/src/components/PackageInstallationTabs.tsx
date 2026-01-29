@@ -30,7 +30,7 @@ export function PackageInstallationTabs({
   resolvedTheme,
 }: { packagesList: string } & Pick<CodeHighlighterProps, 'resolvedTheme'>) {
   return (
-    <div className="my-4">
+    <div className="tuwadocs:my-4">
       <Tabs items={tabsItems.map((tab) => tab.title)}>
         {tabsItems.map((tab) => (
           <Tabs.Tab key={tab.title}>

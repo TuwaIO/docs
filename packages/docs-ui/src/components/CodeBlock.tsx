@@ -24,21 +24,21 @@ export function CodeBlock({ title, titleIcons, children, textToCopy }: CodeBlock
   return (
     <div
       className={cn(
-        'group overflow-hidden rounded-lg border',
-        'border-[var(--tuwa-border-secondary)] bg-[var(--tuwa-bg-primary)]',
+        'tuwadocs:group tuwadocs:overflow-hidden tuwadocs:rounded-lg tuwadocs:border',
+        'tuwadocs:border-[var(--tuwa-border-secondary)] tuwadocs:bg-[var(--tuwa-bg-primary)]',
       )}
     >
       <div
         className={cn(
-          'flex items-center justify-between gap-4 px-4 py-2',
-          'border-b border-[var(--tuwa-border-secondary)] bg-[var(--tuwa-bg-secondary)]',
+          'tuwadocs:flex tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-4 tuwadocs:px-4 tuwadocs:py-2',
+          'tuwadocs:border-b tuwadocs:border-[var(--tuwa-border-secondary)] tuwadocs:bg-[var(--tuwa-bg-secondary)]',
         )}
       >
-        <div className="flex items-center gap-2">
-          <div className="h-[20px] w-[20px] text-[var(--tuwa-text-secondary)]">{titleIcons}</div>
-          <p className="text-sm font-medium text-[var(--tuwa-text-primary)]">{title}</p>
+        <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2">
+          <div className="tuwadocs:h-[20px] tuwadocs:w-[20px] tuwadocs:text-[var(--tuwa-text-secondary)]">{titleIcons}</div>
+          <p className="tuwadocs:text-sm tuwadocs:font-medium tuwadocs:text-[var(--tuwa-text-primary)]">{title}</p>
         </div>
-        <div className="transition md:opacity-0 group-hover:opacity-100">
+        <div className="tuwadocs:transition tuwadocs:md:opacity-0 tuwadocs:group-hover:opacity-100">
           <CopyIconButton isCopied={isCopied} onCopy={() => copy(textToCopy)} />
         </div>
       </div>

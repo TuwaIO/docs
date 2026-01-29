@@ -33,7 +33,7 @@ export function Navbar({ links }: NavProps) {
         </NoSSR>
       }
     >
-      <div className="flex items-center gap-3">
+      <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-3">
         {(links ?? baseNavLinks).map(({ title, href, image, className }) => (
           <a
             key={title}
@@ -41,7 +41,7 @@ export function Navbar({ links }: NavProps) {
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              'hidden sm:flex items-center gap-1 px-3 py-1.5 text-sm font-medium transition-colors text-gray-700 dark:text-gray-300',
+              'tuwadocs:hidden tuwadocs:sm:flex tuwadocs:items-center tuwadocs:gap-1 tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:text-sm tuwadocs:font-medium tuwadocs:transition-colors tuwadocs:text-gray-700 tuwadocs:dark:text-gray-300',
               className,
             )}
           >

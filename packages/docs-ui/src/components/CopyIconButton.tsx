@@ -12,10 +12,10 @@ export function CopyIconButton({ isCopied, onCopy }: CopyIconButtonProps) {
       onClick={onCopy}
       type="button"
       className={cn(
-        'h-6 w-6 cursor-pointer transition-colors',
+        'tuwadocs:h-6 tuwadocs:w-6 tuwadocs:cursor-pointer tuwadocs:transition-colors',
         isCopied
-          ? 'text-[var(--tuwa-success-icon)]'
-          : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]',
+          ? 'tuwadocs:text-[var(--tuwa-success-icon)]'
+          : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:text-[var(--tuwa-text-primary)]',
       )}
     >
       {isCopied ? <CheckCircleIcon /> : <Square2StackIcon />}

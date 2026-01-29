@@ -10,7 +10,7 @@ export interface CodeHighlighterProps {
 
 export function CodeHighlighter({ children, language, resolvedTheme }: CodeHighlighterProps) {
   return (
-    <div className="border-t border-[var(--tuwa-border-secondary)]">
+    <div className="tuwadocs:border-t tuwadocs:border-[var(--tuwa-border-secondary)]">
       <NoSSR>
         <Prism
           language={language ?? 'bash'}
