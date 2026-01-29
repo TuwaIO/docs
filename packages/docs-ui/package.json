@@ -64,18 +64,18 @@
     "nextra-theme-docs": ">=4.6"
   },
   "devDependencies": {
-    "next": "16.1.4",
+    "next": "16.1.6",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25",
-    "@types/react": "^19.2.9",
+    "@types/react": "^19.2.10",
     "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
-    "react": "^19.2.3",
+    "react": "^19.2.4",
     "tailwindcss": "^4.1.18",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
