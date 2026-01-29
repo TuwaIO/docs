@@ -1,4 +1,5 @@
 import { Prism } from 'react-syntax-highlighter';
+import { materialLight, materialOceanic } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 import NoSSR from './NoSSR';
 
@@ -15,13 +16,7 @@ export function CodeHighlighter({ children, language, resolvedTheme }: CodeHighl
         <Prism
           language={language ?? 'bash'}
           customStyle={{ margin: 0, background: 'transparent' }}
-          style={
-            resolvedTheme === 'dark'
-              ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-                require('react-syntax-highlighter/dist/esm/styles/prism').materialOceanic
-              : // eslint-disable-next-line @typescript-eslint/no-require-imports
-                require('react-syntax-highlighter/dist/esm/styles/prism').materialLight
-          }
+          style={resolvedTheme === 'dark' ? materialOceanic : materialLight}
         >
           {String(children).replace(/\n$/, '')}
         </Prism>
