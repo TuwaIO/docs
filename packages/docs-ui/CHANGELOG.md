@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.4...docs-ui-v0.0.5) (2026-01-29)
+
+
+### Bug Fixes
+
+* require imports ([13e8866](https://github.com/TuwaIO/docs/commit/13e88662403119269c1b69cbbdd30cad126b8832))
+
 ## [0.0.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.3...docs-ui-v0.0.4) (2026-01-29)
 
 
