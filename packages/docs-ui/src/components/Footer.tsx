@@ -1,3 +1,4 @@
+import { cn } from '@tuwaio/nova-core';
 import Image from 'next/image';
 import { Footer as NextraFooter } from 'nextra-theme-docs';
 
@@ -23,13 +24,13 @@ export function Footer({ links }: NavProps) {
           </div>
 
           <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:text-sm">
-            {(links ?? baseFooterLinks).map(({ title, href, image }) => (
+            {(links ?? baseFooterLinks).map(({ title, href, image, className }) => (
               <a
                 key={title}
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tuwa-footer-link tuwa-footer-link--npm tuwadocs:flex tuwadocs:items-center tuwadocs:gap-1"
+                className={cn('tuwa-footer-link tuwadocs:flex tuwadocs:items-center tuwadocs:gap-1', className)}
               >
                 {image}
                 <span className="tuwadocs:hidden tuwadocs:sm:inline">{title}</span>
