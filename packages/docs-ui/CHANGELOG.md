@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.3...docs-ui-v0.0.4) (2026-01-29)
+
+
+### Bug Fixes
+
+* footer links hover color ([bfb4e47](https://github.com/TuwaIO/docs/commit/bfb4e47b1a36b0b2de7de630623b64754f138b5f))
+
 ## [0.0.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.2...docs-ui-v0.0.3) (2026-01-29)
 
 
