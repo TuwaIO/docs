@@ -76,7 +76,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     <div
       className={cn(
         // Container with aspect ratio and responsive design
-        'tuwadocs:relative tuwadocs:w-full tuwadocs:overflow-hidden tuwadocs:rounded-lg tuwadocs:bg-black tuwadocs:my-4',
+        'tuwadocs:relative tuwadocs:w-full tuwadocs:overflow-hidden tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-black tuwadocs:my-4',
         aspectRatio, // Dynamically applies aspect ratio class
         className,
       )}
@@ -93,7 +93,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           'tuwadocs:absolute tuwadocs:inset-0 tuwadocs:h-full tuwadocs:w-full tuwadocs:object-contain',
           // Smooth transitions and focus states
           'tuwadocs:transition-opacity tuwadocs:duration-200',
-          'tuwadocs:focus:outline-none tuwadocs:focus:ring-2 tuwadocs:focus:ring-blue-500 tuwadocs:focus:ring-offset-2',
+          'tuwadocs:focus:outline-none tuwadocs:focus:ring-[length:var(--tuwa-ring-width)] tuwadocs:focus:ring-[var(--tuwa-text-accent)] tuwadocs:focus:ring-offset-[length:var(--tuwa-ring-width)] tuwadocs:focus:ring-offset-[var(--tuwa-bg-primary)]',
         )}
         onPlay={onPlay}
         onPause={onPause}
@@ -103,7 +103,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       >
         <track kind="captions" />
         Your browser does not support the video tag. Please{' '}
-        <a href={src} download className="tuwadocs:text-blue-400 tuwadocs:underline tuwadocs:hover:text-blue-300">
+        <a href={src} download className="tuwadocs:text-[var(--tuwa-text-accent)] tuwadocs:underline tuwadocs:hover:opacity-80">
           download the video
         </a>{' '}
         to watch it.

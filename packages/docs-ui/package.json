@@ -50,7 +50,7 @@
     }
   ],
   "dependencies": {
-    "@tuwaio/nova-core": "^0.2.6",
+    "@tuwaio/nova-core": "^0.3.0",
     "clsx": "^2.1.1",
     "react-syntax-highlighter": "^16.1.0",
     "@types/react-syntax-highlighter": "^15.5.13",
@@ -72,7 +72,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^25",
     "@types/react": "^19.2.10",
-    "autoprefixer": "^10.4.23",
+    "autoprefixer": "^10.4.24",
     "postcss": "^8.5.6",
     "postcss-cli": "^11.0.1",
     "react": "^19.2.4",

@@ -169,7 +169,7 @@
 [data-nextra-search] input {
   border-color: rgb(229 231 235);
   transition: all 0.2s ease;
-  border-radius: 0.5rem;
+  border-radius: var(--tuwa-rounded-corners);
 }
 
 [data-nextra-search] input:focus {
@@ -198,7 +198,7 @@
 }
 
 [data-nextra-code] {
-  border-radius: 0.5rem;
+  border-radius: var(--tuwa-rounded-corners);
   border: 1px solid rgb(229 231 235);
   background: rgb(249 250 251);
 }
@@ -289,7 +289,7 @@
 }
 
 .tuwa-button {
-  @apply tuwadocs:inline-flex tuwadocs:items-center tuwadocs:px-4 tuwadocs:py-2 tuwadocs:border tuwadocs:border-transparent tuwadocs:text-sm tuwadocs:font-medium tuwadocs:rounded-md;
+  @apply tuwadocs:inline-flex tuwadocs:items-center tuwadocs:px-4 tuwadocs:py-2 tuwadocs:border tuwadocs:border-transparent tuwadocs:text-sm tuwadocs:font-medium tuwadocs:rounded-[var(--tuwa-rounded-corners)];
   background: var(--tuwa-gradient);
   color: white;
   transition: all 0.2s ease;
@@ -301,7 +301,9 @@
 }
 
 .tuwa-card {
-  @apply tuwadocs:p-6 tuwadocs:bg-white tuwadocs:dark:bg-gray-900 tuwadocs:rounded-xl tuwadocs:border tuwadocs:border-gray-200 tuwadocs:dark:border-gray-700 tuwadocs:shadow-sm tuwadocs:hover:shadow-md tuwadocs:transition-all tuwadocs:duration-200;
+  @apply tuwadocs:p-6 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:shadow-sm tuwadocs:hover:shadow-md tuwadocs:transition-all tuwadocs:duration-200;
+  background-color: var(--tuwa-bg-primary);
+  border-color: var(--tuwa-border-primary);
 }
 
 .nextra-nav-container .nx-text-primary-600 {

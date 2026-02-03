@@ -41,7 +41,7 @@ export function Navbar({ links }: NavProps) {
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              'tuwadocs:hidden tuwadocs:sm:flex tuwadocs:items-center tuwadocs:gap-1 tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:text-sm tuwadocs:font-medium tuwadocs:transition-colors tuwadocs:text-gray-700 tuwadocs:dark:text-gray-300',
+              'tuwadocs:hidden tuwadocs:sm:flex tuwadocs:items-center tuwadocs:gap-1 tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:text-sm tuwadocs:font-medium tuwadocs:transition-colors tuwadocs:text-[var(--tuwa-text-primary)]',
               className,
             )}
           >

@@ -24,7 +24,7 @@ export function CodeBlock({ title, titleIcons, children, textToCopy }: CodeBlock
   return (
     <div
       className={cn(
-        'tuwadocs:group tuwadocs:overflow-hidden tuwadocs:rounded-lg tuwadocs:border',
+        'tuwadocs:group tuwadocs:overflow-hidden tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border',
         'tuwadocs:border-[var(--tuwa-border-secondary)] tuwadocs:bg-[var(--tuwa-bg-primary)]',
       )}
     >
