@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.7](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.6...docs-ui-v0.0.7) (2026-02-03)
+
+
+### Bug Fixes
+
+* update packages and rounded ([8fa7606](https://github.com/TuwaIO/docs/commit/8fa7606ef4a544f3fe18a5d26130cda1d63964c5))
+
 ## [0.0.6](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.5...docs-ui-v0.0.6) (2026-01-29)
 
 
