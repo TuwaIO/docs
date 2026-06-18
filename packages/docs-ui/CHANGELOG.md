@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.14](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.13...docs-ui-v0.0.14) (2026-06-18)
+
+
+### Bug Fixes
+
+* removed custom svg parser ([467c48c](https://github.com/TuwaIO/docs/commit/467c48ca0f37478f0ecc83480ee36a1ba91275fd))
+
 ## [0.0.13](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.12...docs-ui-v0.0.13) (2026-06-18)
 
 
