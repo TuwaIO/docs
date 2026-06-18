@@ -2,7 +2,7 @@ import { cn } from '@tuwaio/nova-core';
 import { Footer as NextraFooter } from 'nextra-theme-docs';
 
 import { baseFooterLinks } from '../utils';
-import { Logo } from './Logo';
+import { RemoteLogo } from './Logo';
 import { NavProps } from './NavBar';
 import NoSSR from './NoSSR';
 
@@ -13,7 +13,7 @@ export function Footer({ links }: NavProps) {
         <div className="tuwadocs:mb-6 tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:w-full tuwadocs:justify-between">
           <div className="tuwadocs:flex tuwadocs:items-center">
             <NoSSR>
-              <Logo width={100} height={42} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
+              <RemoteLogo width={100} height={42} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
             </NoSSR>
           </div>
 

@@ -1,29 +1,18 @@
-'use client';
+import React from 'react';
 
-import React, { useEffect, useState } from 'react';
+const LOGO_URL = 'https://raw.githubusercontent.com/TuwaIO/workflows/refs/heads/main/preview/logo_v1.svg';
 
-const LOGO_URL = 'https://raw.githubusercontent.com/TuwaIO/workflows/refs/heads/main/preview/tuwa_v1.svg';
+export interface RemoteLogoProps extends React.SVGProps<SVGSVGElement> {
+  url?: string;
+}
 
-// Simple global cache to avoid refetching the SVG on every mount
-let fetchPromise: Promise<string> | null = null;
-
-// Helper to convert kebab-case to camelCase
+// Convert kebab-case attributes to camelCase for React compliance
 function toCamelCase(str: string): string {
-  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  return str.replace(/-([a-z])/g, (_, g) => g.toUpperCase());
 }
 
-// Helper to sanitize attribute names for React SVG elements
-function cleanAttributeName(name: string): string {
-  if (name === 'class') return 'className';
-  if (name.includes(':')) {
-    const parts = name.split(':');
-    return parts[0] + parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-  }
-  return toCamelCase(name);
-}
-
-// Helper to parse CSS inline style strings to React style objects
-function parseStyleString(styleStr: string): Record<string, string> {
+// Parse inline style strings into a React-compatible object
+function parseInlineStyle(styleStr: string): Record<string, string> {
   const styles: Record<string, string> = {};
   styleStr.split(';').forEach((style) => {
     const trimmed = style.trim();
@@ -39,108 +28,197 @@ function parseStyleString(styleStr: string): Record<string, string> {
   return styles;
 }
 
-// Recursive function to turn DOM nodes into React elements without using dangerouslySetInnerHTML
-function domToReact(node: Node, key?: string): React.ReactNode {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return node.nodeValue;
-  }
-
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    const el = node as Element;
-    const tagName = el.tagName.toLowerCase();
-
-    // Map attributes
-    const attribs: Record<string, unknown> = {};
-    for (let i = 0; i < el.attributes.length; i++) {
-      const attr = el.attributes[i];
-      const cleanName = cleanAttributeName(attr.name);
-
-      if (cleanName === 'style') {
-        attribs.style = parseStyleString(attr.value);
-      } else {
-        attribs[cleanName] = attr.value;
-      }
-    }
-    attribs.key = key;
-
-    // Recursively convert children
-    const children: React.ReactNode[] = [];
-    for (let i = 0; i < el.childNodes.length; i++) {
-      const child = domToReact(el.childNodes[i], `${key || 'node'}-${i}`);
-      if (child !== null) {
-        children.push(child);
-      }
-    }
-
-    return React.createElement(tagName, attribs, ...children);
-  }
-
-  return null;
+interface SvgNode {
+  tag: string;
+  attrs: Record<string, string>;
+  children: (SvgNode | string)[];
 }
 
-export interface LogoProps extends React.SVGProps<SVGSVGElement> {
-  width?: number | string;
-  height?: number | string;
-}
+// Stack-based SVG parser that handles arbitrary nesting safely without regex backreference limitations
+function parseSvg(html: string): SvgNode[] {
+  const rootChildren: (SvgNode | string)[] = [];
+  const stack: SvgNode[] = [];
 
-export function Logo({ width = 120, height = 40, className, style, ...props }: LogoProps) {
-  const [svgPaths, setSvgPaths] = useState<React.ReactNode[] | null>(null);
-  const [viewBox, setViewBox] = useState<string>('0 0 620 238'); // Safe default matching tuwa_v1.svg dimensions
+  // Matches: comments, closing tags, opening/self-closing tags, and text content
+  const tokenRegex = /(<!--[\s\S]*?-->)|(<\s*\/\s*([a-zA-Z0-9:-]+)\s*>)|(<\s*([a-zA-Z0-9:-]+)([^>]*?)\/?>)|([^<]+)/g;
+  const attrRegex = /([a-zA-Z0-9:-]+)\s*=\s*(?:"([^"]*?)"|'([^']*?)')/g;
 
-  useEffect(() => {
-    if (!fetchPromise) {
-      fetchPromise = fetch(LOGO_URL)
-        .then((res) => {
-          if (!res.ok) throw new Error('Failed to fetch SVG');
-          return res.text();
-        })
-        .catch((err) => {
-          console.error('Error fetching logo SVG:', err);
-          return '';
-        });
+  let match;
+  while ((match = tokenRegex.exec(html)) !== null) {
+    if (match[1]) {
+      // Comment, ignore
+      continue;
     }
+    if (match[2]) {
+      // Closing tag
+      const tagName = match[3].toLowerCase();
+      const tempStack: SvgNode[] = [];
+      while (stack.length > 0 && stack[stack.length - 1].tag !== tagName) {
+        tempStack.push(stack.pop()!);
+      }
+      if (stack.length > 0) {
+        const closedNode = stack.pop()!;
+        closedNode.children = [...tempStack.reverse(), ...closedNode.children];
 
-    let isMounted = true;
-    fetchPromise.then((text) => {
-      if (!isMounted || !text) return;
-
-      try {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'image/svg+xml');
-        const svgElement = doc.querySelector('svg');
-
-        if (svgElement) {
-          const vb = svgElement.getAttribute('viewBox') || '0 0 620 238';
-          setViewBox(vb);
-
-          const reactChildren: React.ReactNode[] = [];
-          for (let i = 0; i < svgElement.childNodes.length; i++) {
-            const reactChild = domToReact(svgElement.childNodes[i], `logo-child-${i}`);
-            if (reactChild !== null) {
-              reactChildren.push(reactChild);
-            }
-          }
-          setSvgPaths(reactChildren);
+        if (stack.length > 0) {
+          stack[stack.length - 1].children.push(closedNode);
+        } else {
+          rootChildren.push(closedNode);
         }
-      } catch (err) {
-        console.error('Error parsing logo SVG:', err);
+      } else {
+        // Unmatched closing tag, restore stack
+        while (tempStack.length > 0) {
+          stack.push(tempStack.pop()!);
+        }
       }
+      continue;
+    }
+    if (match[4]) {
+      // Opening or self-closing tag
+      const tagName = match[5].toLowerCase();
+      const rawAttrs = match[6];
+      const isSelfClosing = match[4].endsWith('/>') || match[4].endsWith('/ >');
+
+      const attrs: Record<string, string> = {};
+      let attrMatch;
+      while ((attrMatch = attrRegex.exec(rawAttrs)) !== null) {
+        attrs[attrMatch[1]] = attrMatch[2] || attrMatch[3] || '';
+      }
+
+      const node: SvgNode = {
+        tag: tagName,
+        attrs,
+        children: [],
+      };
+
+      if (isSelfClosing) {
+        if (stack.length > 0) {
+          stack[stack.length - 1].children.push(node);
+        } else {
+          rootChildren.push(node);
+        }
+      } else {
+        stack.push(node);
+      }
+      continue;
+    }
+    if (match[7]) {
+      // Text content
+      const text = match[7].trim();
+      if (text) {
+        if (stack.length > 0) {
+          stack[stack.length - 1].children.push(text);
+        } else {
+          rootChildren.push(text);
+        }
+      }
+    }
+  }
+
+  while (stack.length > 0) {
+    const node = stack.pop()!;
+    if (stack.length > 0) {
+      stack[stack.length - 1].children.push(node);
+    } else {
+      rootChildren.push(node);
+    }
+  }
+
+  return rootChildren.filter((c): c is SvgNode => typeof c !== 'string');
+}
+
+// Convert parsed SVG node tree to safe React elements
+function svgNodeToReact(node: SvgNode, key: string): React.ReactNode {
+  const tagName = node.tag;
+  if (tagName === 'script') return null; // Security guard
+
+  const props: Record<string, unknown> = { key };
+  for (const [attrName, attrValue] of Object.entries(node.attrs)) {
+    if (attrName === 'class') {
+      props.className = attrValue;
+    } else if (attrName === 'style') {
+      props.style = parseInlineStyle(attrValue);
+    } else if (attrName.includes(':')) {
+      const [ns, name] = attrName.split(':');
+      props[`${ns}${name.charAt(0).toUpperCase() + name.slice(1)}`] = attrValue;
+    } else {
+      props[toCamelCase(attrName)] = attrValue;
+    }
+  }
+
+  const children = node.children
+    .map((child, index) => {
+      if (typeof child === 'string') {
+        return child;
+      }
+      return svgNodeToReact(child, `${key}-${index}`);
+    })
+    .filter(Boolean);
+
+  return React.createElement(tagName, props, ...children);
+}
+
+export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }: RemoteLogoProps) {
+  let children: React.ReactNode = null;
+  let rootProps: React.SVGProps<SVGSVGElement> = {};
+  let hasError = false;
+
+  try {
+    // Next.js patches fetch globally to handle server-side infrastructure caching
+    const response = await fetch(url, {
+      next: { revalidate: 86400 }, // Cache response for 24 hours
     });
 
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch SVG from remote source: ${response.status}`);
+    }
 
-  const mergedStyle: React.CSSProperties = {
-    height: style?.height || (height ? (typeof height === 'number' ? `${height}px` : height) : 'auto'),
-    width: width ? (typeof width === 'number' ? `${width}px` : width) : undefined,
-    ...style,
-  };
+    const rawText = await response.text();
+
+    // Clean comments and XML declarations safely
+    const cleanSvg = rawText
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<\?xml[\s\S]*?\?>/g, '')
+      .trim();
+
+    // Extract root SVG attributes and inner content
+    const svgRootMatch = cleanSvg.match(/<svg([^>]*?)>([\s\S]*?)<\/svg>/i);
+    if (!svgRootMatch) {
+      throw new Error('Invalid or corrupted SVG layout payload');
+    }
+
+    const rootAttrsRaw = svgRootMatch[1];
+    const innerContent = svgRootMatch[2];
+
+    // Parse root attributes to merge them with incoming component props
+    const parsedAttrs: Record<string, unknown> = {};
+    const attrRegex = /([a-zA-Z0-9:-]+)\s*=\s*(?:"([^"]*?)"|'([^']*?)')/g;
+    let attrMatch;
+
+    while ((attrMatch = attrRegex.exec(rootAttrsRaw)) !== null) {
+      const name = attrMatch[1];
+      const value = attrMatch[2] || attrMatch[3] || '';
+      if (name !== 'class' && name !== 'style') {
+        parsedAttrs[toCamelCase(name)] = value;
+      }
+    }
+    rootProps = parsedAttrs as React.SVGProps<SVGSVGElement>;
+
+    // Process nested pathing into typed React Nodes using stack-based parser
+    const parsedChildren = parseSvg(innerContent);
+    children = parsedChildren.map((child, index) => svgNodeToReact(child, `logo-node-${index}`));
+  } catch (error) {
+    console.error('Core/UI Runtime Error fetching remote SVG:', error);
+    hasError = true;
+  }
+
+  if (hasError) {
+    return <svg className={className} style={style} {...props} />;
+  }
 
   return (
-    <svg viewBox={viewBox} className={className} style={mergedStyle} {...props}>
-      {svgPaths}
+    <svg {...rootProps} className={className} style={style} {...props}>
+      {children}
     </svg>
   );
 }

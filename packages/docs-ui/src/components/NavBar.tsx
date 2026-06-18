@@ -5,7 +5,7 @@ import { Navbar as NextraNavbar } from 'nextra-theme-docs';
 import { ReactNode } from 'react';
 
 import { baseNavLinks } from '../utils';
-import { Logo } from './Logo';
+import { RemoteLogo } from './Logo';
 import NoSSR from './NoSSR';
 
 export type SocialLink = {
@@ -24,7 +24,7 @@ export function Navbar({ links }: NavProps) {
     <NextraNavbar
       logo={
         <NoSSR>
-          <Logo width={105} height={45} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
+          <RemoteLogo width={105} height={45} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
         </NoSSR>
       }
     >
