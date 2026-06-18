@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.13](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.12...docs-ui-v0.0.13) (2026-06-18)
+
+
+### Bug Fixes
+
+* logo logic ([eaf818a](https://github.com/TuwaIO/docs/commit/eaf818a7f95c1f86b2815d6d92e4b65a9d92e8f9))
+
 ## [0.0.12](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.11...docs-ui-v0.0.12) (2026-06-18)
 
 
