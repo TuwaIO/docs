@@ -28,6 +28,16 @@ function parseInlineStyle(styleStr: string): Record<string, string> {
   return styles;
 }
 
+// Convert attribute names to React compliant camelCase, mapping class and namespaced attributes
+function sanitizeAttrName(name: string): string {
+  if (name === 'class') return 'className';
+  if (name.includes(':')) {
+    const [ns, local] = name.split(':');
+    return ns + local.charAt(0).toUpperCase() + local.slice(1);
+  }
+  return toCamelCase(name);
+}
+
 interface SvgNode {
   tag: string;
   attrs: Record<string, string>;
@@ -134,15 +144,11 @@ function svgNodeToReact(node: SvgNode, key: string): React.ReactNode {
 
   const props: Record<string, unknown> = { key };
   for (const [attrName, attrValue] of Object.entries(node.attrs)) {
-    if (attrName === 'class') {
-      props.className = attrValue;
-    } else if (attrName === 'style') {
+    const cleanName = sanitizeAttrName(attrName);
+    if (cleanName === 'style') {
       props.style = parseInlineStyle(attrValue);
-    } else if (attrName.includes(':')) {
-      const [ns, name] = attrName.split(':');
-      props[`${ns}${name.charAt(0).toUpperCase() + name.slice(1)}`] = attrValue;
     } else {
-      props[toCamelCase(attrName)] = attrValue;
+      props[cleanName] = attrValue;
     }
   }
 
@@ -198,8 +204,9 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
     while ((attrMatch = attrRegex.exec(rootAttrsRaw)) !== null) {
       const name = attrMatch[1];
       const value = attrMatch[2] || attrMatch[3] || '';
-      if (name !== 'class' && name !== 'style') {
-        parsedAttrs[toCamelCase(name)] = value;
+      const cleanName = sanitizeAttrName(name);
+      if (cleanName !== 'className' && cleanName !== 'style') {
+        parsedAttrs[cleanName] = value;
       }
     }
     rootProps = parsedAttrs as React.SVGProps<SVGSVGElement>;
