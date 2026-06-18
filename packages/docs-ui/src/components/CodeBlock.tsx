@@ -35,7 +35,9 @@ export function CodeBlock({ title, titleIcons, children, textToCopy }: CodeBlock
         )}
       >
         <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2">
-          <div className="tuwadocs:h-[20px] tuwadocs:w-[20px] tuwadocs:text-[var(--tuwa-text-secondary)]">{titleIcons}</div>
+          <div className="tuwadocs:h-[20px] tuwadocs:w-[20px] tuwadocs:text-[var(--tuwa-text-secondary)]">
+            {titleIcons}
+          </div>
           <p className="tuwadocs:text-sm tuwadocs:font-medium tuwadocs:text-[var(--tuwa-text-primary)]">{title}</p>
         </div>
         <div className="tuwadocs:transition tuwadocs:md:opacity-0 tuwadocs:group-hover:opacity-100">

@@ -1,11 +1,11 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core';
-import Image from 'next/image';
 import { Navbar as NextraNavbar } from 'nextra-theme-docs';
 import { ReactNode } from 'react';
 
 import { baseNavLinks } from '../utils';
+import { Logo } from './Logo';
 import NoSSR from './NoSSR';
 
 export type SocialLink = {
@@ -24,12 +24,7 @@ export function Navbar({ links }: NavProps) {
     <NextraNavbar
       logo={
         <NoSSR>
-          <Image
-            width={120}
-            height={40}
-            src="https://raw.githubusercontent.com/TuwaIO/workflows/refs/heads/main/preview/tuwa_logo.svg"
-            alt="TUWA Logo"
-          />
+          <Logo width={105} height={45} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
         </NoSSR>
       }
     >

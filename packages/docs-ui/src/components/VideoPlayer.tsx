@@ -103,7 +103,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       >
         <track kind="captions" />
         Your browser does not support the video tag. Please{' '}
-        <a href={src} download className="tuwadocs:text-[var(--tuwa-text-accent)] tuwadocs:underline tuwadocs:hover:opacity-80">
+        <a
+          href={src}
+          download
+          className="tuwadocs:text-[var(--tuwa-text-accent)] tuwadocs:underline tuwadocs:hover:opacity-80"
+        >
           download the video
         </a>{' '}
         to watch it.

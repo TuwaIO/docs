@@ -3,6 +3,7 @@ export * from './components/CodeHighlighter';
 export * from './components/CopyIconButton';
 export * from './components/Features';
 export * from './components/Footer';
+export * from './components/Logo';
 export * from './components/NavBar';
 export * from './components/NoSSR';
 export * from './components/PackageInstallationTabs';

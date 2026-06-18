@@ -8,10 +8,10 @@ This repository serves as the central hub for the documentation infrastructure o
 
 This is a monorepo managed by `pnpm`.
 
-* **`packages/docs-ui`**: A shared library containing:
-* Custom Nextra theme configurations.
-* Reusable React components.
-* Shared Tailwind CSS design tokens.
+- **`packages/docs-ui`**: A shared library containing:
+- Custom Nextra theme configurations.
+- Reusable React components.
+- Shared Tailwind CSS design tokens.
 
 ## 🎯 Purpose
 
