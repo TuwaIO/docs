@@ -61,6 +61,10 @@
   --tuwa-footer-github-hover: rgb(243 244 246);
 }
 
+.dark .remote-logo {
+  filter: invert(1);
+}
+
 .tuwa-gradient-text {
   background: var(--tuwa-gradient);
   -webkit-background-clip: text;

@@ -29,10 +29,11 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
     return <svg className={className} style={style} {...props} />;
   }
 
-  // Strip XML declarations and doctype
+  // Strip XML declarations and doctype, and fix React xml:space warning
   const cleanSvg = rawSvg
     .replace(/<\?xml[\s\S]*?\?>/g, '')
     .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
+    .replace(/\sxml:space=/g, ' xmlSpace=')
     .trim();
 
   // Parse SVG string into React elements, overriding root <svg> attributes
@@ -41,8 +42,9 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
       if (domNode instanceof Element && domNode.name === 'svg') {
         // Merge fetched SVG root attributes with component props
         const children = domToReact(domNode.children as DOMNode[]);
+        const svgClassName = [className, 'remote-logo'].filter(Boolean).join(' ');
         return (
-          <svg {...domNode.attribs} className={className} style={style} {...props}>
+          <svg {...domNode.attribs} className={svgClassName} style={style} {...props}>
             {children}
           </svg>
         );
