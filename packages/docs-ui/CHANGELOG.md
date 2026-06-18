@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.16](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.15...docs-ui-v0.0.16) (2026-06-18)
+
+
+### Bug Fixes
+
+* logo for dark mode ([01fe141](https://github.com/TuwaIO/docs/commit/01fe141c1ab01ffa70d8dcade6fa6b8f7bbd1bed))
+
 ## [0.0.15](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.14...docs-ui-v0.0.15) (2026-06-18)
 
 
