@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.12](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.11...docs-ui-v0.0.12) (2026-06-18)
+
+
+### Bug Fixes
+
+* logo styles ([0d46c27](https://github.com/TuwaIO/docs/commit/0d46c279343df7f276f2a13243333eda019d9f9a))
+
 ## [0.0.11](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.10...docs-ui-v0.0.11) (2026-06-18)
 
 
