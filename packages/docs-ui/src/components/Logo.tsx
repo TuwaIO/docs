@@ -138,7 +138,7 @@ function parseSvg(html: string): SvgNode[] {
 }
 
 // Convert parsed SVG node tree to safe React elements
-function svgNodeToReact(node: SvgNode, key: string): React.ReactNode {
+function svgNodeToReact(node: SvgNode, key: string): React.ReactElement | null {
   const tagName = node.tag;
   if (tagName === 'script') return null; // Security guard
 
@@ -152,20 +152,27 @@ function svgNodeToReact(node: SvgNode, key: string): React.ReactNode {
     }
   }
 
-  const children = node.children
-    .map((child, index) => {
-      if (typeof child === 'string') {
-        return child;
+  const children: (React.ReactElement | string)[] = [];
+  for (let i = 0; i < node.children.length; i++) {
+    const child = node.children[i];
+    if (typeof child === 'string') {
+      children.push(child);
+    } else {
+      const reactChild = svgNodeToReact(child, `${key}-${i}`);
+      if (reactChild !== null) {
+        children.push(reactChild);
       }
-      return svgNodeToReact(child, `${key}-${index}`);
-    })
-    .filter(Boolean);
+    }
+  }
 
+  if (children.length === 0) {
+    return React.createElement(tagName, props);
+  }
   return React.createElement(tagName, props, ...children);
 }
 
 export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }: RemoteLogoProps) {
-  let children: React.ReactNode = null;
+  let parsedElements: React.ReactElement[] = [];
   let rootProps: React.SVGProps<SVGSVGElement> = {};
   let hasError = false;
 
@@ -213,7 +220,9 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
 
     // Process nested pathing into typed React Nodes using stack-based parser
     const parsedChildren = parseSvg(innerContent);
-    children = parsedChildren.map((child, index) => svgNodeToReact(child, `logo-node-${index}`));
+    parsedElements = parsedChildren
+      .map((child, index) => svgNodeToReact(child, `logo-node-${index}`))
+      .filter((el): el is React.ReactElement => el !== null);
   } catch (error) {
     console.error('Core/UI Runtime Error fetching remote SVG:', error);
     hasError = true;
@@ -225,7 +234,7 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
 
   return (
     <svg {...rootProps} className={className} style={style} {...props}>
-      {children}
+      {parsedElements}
     </svg>
   );
 }

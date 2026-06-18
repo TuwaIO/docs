@@ -1,21 +1,16 @@
 import { cn } from '@tuwaio/nova-core';
 import { Footer as NextraFooter } from 'nextra-theme-docs';
+import { ReactNode } from 'react';
 
 import { baseFooterLinks } from '../utils';
-import { RemoteLogo } from './Logo';
 import { NavProps } from './NavBar';
-import NoSSR from './NoSSR';
 
-export function Footer({ links }: NavProps) {
+export function Footer({ links, logo }: NavProps & { logo?: ReactNode }) {
   return (
     <NextraFooter>
       <div className="tuwadocs:flex tuwadocs:w-full tuwadocs:flex-col tuwadocs:items-center tuwadocs:sm:items-start tuwa-footer-border tuwadocs:pt-8">
         <div className="tuwadocs:mb-6 tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:w-full tuwadocs:justify-between">
-          <div className="tuwadocs:flex tuwadocs:items-center">
-            <NoSSR>
-              <RemoteLogo width={100} height={42} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
-            </NoSSR>
-          </div>
+          <div className="tuwadocs:flex tuwadocs:items-center">{logo}</div>
 
           <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:text-sm">
             {(links ?? baseFooterLinks).map(({ title, href, image, className }) => (
