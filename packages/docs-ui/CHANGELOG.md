@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.11](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.10...docs-ui-v0.0.11) (2026-06-18)
+
+
+### Bug Fixes
+
+* updated logo component ([a9968fd](https://github.com/TuwaIO/docs/commit/a9968fdf5a1d377deba1770e96c1aba806c6a038))
+
 ## [0.0.10](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.9...docs-ui-v0.0.10) (2026-06-18)
 
 ### Bug Fixes
