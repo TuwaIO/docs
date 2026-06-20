@@ -186,6 +186,13 @@
   box-shadow: 0 0 0 2px var(--tuwa-primary) !important;
 }
 
+[data-nextra-content] h1,
+[data-nextra-content] h2,
+[data-nextra-content] h3,
+[data-nextra-content] h4 {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
 [data-nextra-content] h1 {
   background: var(--tuwa-gradient);
   -webkit-background-clip: text;
