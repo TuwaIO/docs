@@ -188,32 +188,6 @@ article h4 {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
 }
 
-article h1 {
-  background: var(--tuwa-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-article h2 {
-  color: var(--tuwa-primary);
-}
-
-article h3 {
-  color: var(--tuwa-primary);
-}
-
-.nextra-code {
-  border-radius: var(--tuwa-rounded-corners);
-  border: 1px solid rgb(229 231 235);
-  background: rgb(249 250 251);
-}
-
-.dark .nextra-code {
-  border-color: rgb(55 65 81);
-  background: rgb(23 23 23);
-}
-
 .nextra-code button:hover {
   background-color: var(--tuwa-primary) !important;
 }
