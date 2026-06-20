@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.19](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.18...docs-ui-v0.0.19) (2026-06-20)
+
+
+### Bug Fixes
+
+* styles ([739dfdc](https://github.com/TuwaIO/docs/commit/739dfdc87dd187ee16041d21f6b6c05cd0b934d1))
+
 ## [0.0.18](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.17...docs-ui-v0.0.18) (2026-06-20)
 
 
