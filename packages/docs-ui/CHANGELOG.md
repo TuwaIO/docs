@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.17](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.16...docs-ui-v0.0.17) (2026-06-20)
+
+
+### Bug Fixes
+
+* caption fonts ([8874092](https://github.com/TuwaIO/docs/commit/88740924020c39c33e79d261058766bd717aa7b4))
+
 ## [0.0.16](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.15...docs-ui-v0.0.16) (2026-06-18)
 
 
