@@ -139,18 +139,6 @@
   background: linear-gradient(135deg, var(--tuwa-success) 0%, #059669 100%);
 }
 
-.nextra-navbar {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgb(229 231 235 / 0.8);
-}
-
-.dark .nextra-navbar {
-  background: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgb(55 65 81 / 0.8);
-}
-
 .nextra-sidebar {
   border-right: 1px solid rgb(229 231 235 / 0.8);
 }
