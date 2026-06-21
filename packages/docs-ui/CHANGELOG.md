@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.21](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.20...docs-ui-v0.0.21) (2026-06-21)
+
+
+### Bug Fixes
+
+* responsive styles ([4d97e71](https://github.com/TuwaIO/docs/commit/4d97e7118879dcd153f1f5a5455d243dba7e03be))
+
 ## [0.0.20](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.19...docs-ui-v0.0.20) (2026-06-20)
 
 ### Bug Fixes
