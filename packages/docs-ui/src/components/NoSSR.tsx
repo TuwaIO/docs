@@ -23,4 +23,3 @@ export default function NoSSR({ children }: { children: ReactNode }) {
 
   return <>{children}</>;
 }
-

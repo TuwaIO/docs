@@ -2,73 +2,63 @@
 
 ## [0.0.20](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.19...docs-ui-v0.0.20) (2026-06-20)
 
-
 ### Bug Fixes
 
-* styles ([8c826d6](https://github.com/TuwaIO/docs/commit/8c826d6c53502cb0e007ef7b57b75139181a5024))
+- styles ([8c826d6](https://github.com/TuwaIO/docs/commit/8c826d6c53502cb0e007ef7b57b75139181a5024))
 
 ## [0.0.19](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.18...docs-ui-v0.0.19) (2026-06-20)
 
-
 ### Bug Fixes
 
-* styles ([739dfdc](https://github.com/TuwaIO/docs/commit/739dfdc87dd187ee16041d21f6b6c05cd0b934d1))
+- styles ([739dfdc](https://github.com/TuwaIO/docs/commit/739dfdc87dd187ee16041d21f6b6c05cd0b934d1))
 
 ## [0.0.18](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.17...docs-ui-v0.0.18) (2026-06-20)
 
-
 ### Bug Fixes
 
-* updated styles ([3e1a37c](https://github.com/TuwaIO/docs/commit/3e1a37c0ce567515a474d25ab57e920adc22c3c1))
+- updated styles ([3e1a37c](https://github.com/TuwaIO/docs/commit/3e1a37c0ce567515a474d25ab57e920adc22c3c1))
 
 ## [0.0.17](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.16...docs-ui-v0.0.17) (2026-06-20)
 
-
 ### Bug Fixes
 
-* caption fonts ([8874092](https://github.com/TuwaIO/docs/commit/88740924020c39c33e79d261058766bd717aa7b4))
+- caption fonts ([8874092](https://github.com/TuwaIO/docs/commit/88740924020c39c33e79d261058766bd717aa7b4))
 
 ## [0.0.16](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.15...docs-ui-v0.0.16) (2026-06-18)
 
-
 ### Bug Fixes
 
-* logo for dark mode ([01fe141](https://github.com/TuwaIO/docs/commit/01fe141c1ab01ffa70d8dcade6fa6b8f7bbd1bed))
+- logo for dark mode ([01fe141](https://github.com/TuwaIO/docs/commit/01fe141c1ab01ffa70d8dcade6fa6b8f7bbd1bed))
 
 ## [0.0.15](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.14...docs-ui-v0.0.15) (2026-06-18)
 
-
 ### Bug Fixes
 
-* no SSR ([92448ef](https://github.com/TuwaIO/docs/commit/92448ef6d08dc21475f788bf2389ff46f94f5a49))
+- no SSR ([92448ef](https://github.com/TuwaIO/docs/commit/92448ef6d08dc21475f788bf2389ff46f94f5a49))
 
 ## [0.0.14](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.13...docs-ui-v0.0.14) (2026-06-18)
 
-
 ### Bug Fixes
 
-* removed custom svg parser ([467c48c](https://github.com/TuwaIO/docs/commit/467c48ca0f37478f0ecc83480ee36a1ba91275fd))
+- removed custom svg parser ([467c48c](https://github.com/TuwaIO/docs/commit/467c48ca0f37478f0ecc83480ee36a1ba91275fd))
 
 ## [0.0.13](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.12...docs-ui-v0.0.13) (2026-06-18)
 
-
 ### Bug Fixes
 
-* logo logic ([eaf818a](https://github.com/TuwaIO/docs/commit/eaf818a7f95c1f86b2815d6d92e4b65a9d92e8f9))
+- logo logic ([eaf818a](https://github.com/TuwaIO/docs/commit/eaf818a7f95c1f86b2815d6d92e4b65a9d92e8f9))
 
 ## [0.0.12](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.11...docs-ui-v0.0.12) (2026-06-18)
 
-
 ### Bug Fixes
 
-* logo styles ([0d46c27](https://github.com/TuwaIO/docs/commit/0d46c279343df7f276f2a13243333eda019d9f9a))
+- logo styles ([0d46c27](https://github.com/TuwaIO/docs/commit/0d46c279343df7f276f2a13243333eda019d9f9a))
 
 ## [0.0.11](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.10...docs-ui-v0.0.11) (2026-06-18)
 
-
 ### Bug Fixes
 
-* updated logo component ([a9968fd](https://github.com/TuwaIO/docs/commit/a9968fdf5a1d377deba1770e96c1aba806c6a038))
+- updated logo component ([a9968fd](https://github.com/TuwaIO/docs/commit/a9968fdf5a1d377deba1770e96c1aba806c6a038))
 
 ## [0.0.10](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.9...docs-ui-v0.0.10) (2026-06-18)
 

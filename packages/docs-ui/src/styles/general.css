@@ -3,6 +3,18 @@
 @import 'tailwindcss/theme.css' layer(theme) prefix(tuwadocs);
 @import 'tailwindcss/utilities.css' layer(utilities) prefix(tuwadocs);
 
+/* Responsive base font-size scaling to fit content beautifully on larger displays */
+html {
+  font-size: 16px;
+  transition: font-size 0.2s ease-in-out;
+}
+
+@media (max-width: 1536px) {
+  html {
+    font-size: 15px;
+  }
+}
+
 :root {
   --tuwa-primary: #6366f1;
   --tuwa-secondary: #8b5cf6;
@@ -172,8 +184,36 @@
 article h1,
 article h2,
 article h3,
-article h4 {
+article h4,
+article h5,
+article h6 {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  color: var(--tuwa-text-primary) !important;
+  @apply tuwadocs:tracking-tight;
+}
+
+article h1 {
+  @apply tuwadocs:font-extrabold tuwadocs:text-4xl tuwadocs:sm:text-5xl tuwadocs:xl:text-6xl;
+}
+
+article h2 {
+  @apply tuwadocs:font-bold tuwadocs:text-3xl tuwadocs:sm:text-4xl tuwadocs:lg:text-5xl;
+}
+
+article h3 {
+  @apply tuwadocs:font-bold tuwadocs:text-xl tuwadocs:md:text-2xl tuwadocs:lg:text-3xl;
+}
+
+article h4 {
+  @apply tuwadocs:font-semibold tuwadocs:text-lg tuwadocs:md:text-xl;
+}
+
+article h5 {
+  @apply tuwadocs:font-semibold tuwadocs:text-base tuwadocs:md:text-lg;
+}
+
+article h6 {
+  @apply tuwadocs:font-semibold tuwadocs:text-sm;
 }
 
 .nextra-code button:hover {
