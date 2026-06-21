@@ -151,14 +151,6 @@ html {
   background: linear-gradient(135deg, var(--tuwa-success) 0%, #059669 100%);
 }
 
-.nextra-sidebar {
-  border-right: 1px solid rgb(229 231 235 / 0.8);
-}
-
-.dark .nextra-sidebar {
-  border-right-color: rgb(55 65 81 / 0.8);
-}
-
 .nextra-sidebar a[data-active] {
   color: var(--tuwa-primary) !important;
   background-color: rgb(99 102 241 / 0.1) !important;
@@ -181,6 +173,11 @@ html {
   box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1) !important;
 }
 
+.nextra-breadcrumb,
+.nextra-breadcrumbs {
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
 article h1,
 article h2,
 article h3,
@@ -193,23 +190,23 @@ article h6 {
 }
 
 article h1 {
-  @apply tuwadocs:font-extrabold tuwadocs:text-4xl tuwadocs:sm:text-5xl tuwadocs:xl:text-6xl;
+  @apply tuwadocs:font-extrabold tuwadocs:text-3xl tuwadocs:sm:text-4xl;
 }
 
 article h2 {
-  @apply tuwadocs:font-bold tuwadocs:text-3xl tuwadocs:sm:text-4xl tuwadocs:lg:text-5xl;
+  @apply tuwadocs:font-bold tuwadocs:text-2xl tuwadocs:sm:text-3xl;
 }
 
 article h3 {
-  @apply tuwadocs:font-bold tuwadocs:text-xl tuwadocs:md:text-2xl tuwadocs:lg:text-3xl;
+  @apply tuwadocs:font-bold tuwadocs:text-xl tuwadocs:sm:text-2xl;
 }
 
 article h4 {
-  @apply tuwadocs:font-semibold tuwadocs:text-lg tuwadocs:md:text-xl;
+  @apply tuwadocs:font-semibold tuwadocs:text-lg tuwadocs:sm:text-xl;
 }
 
 article h5 {
-  @apply tuwadocs:font-semibold tuwadocs:text-base tuwadocs:md:text-lg;
+  @apply tuwadocs:font-semibold tuwadocs:text-base tuwadocs:sm:text-lg;
 }
 
 article h6 {
