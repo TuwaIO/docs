@@ -2,10 +2,9 @@
 
 ## [0.0.22](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.21...docs-ui-v0.0.22) (2026-06-21)
 
-
 ### Bug Fixes
 
-* styles ([2aff0f7](https://github.com/TuwaIO/docs/commit/2aff0f7c777e678437af97aa2d630cbb906ed83f))
+- styles ([2aff0f7](https://github.com/TuwaIO/docs/commit/2aff0f7c777e678437af97aa2d630cbb906ed83f))
 
 ## [0.0.21](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.20...docs-ui-v0.0.21) (2026-06-21)
 

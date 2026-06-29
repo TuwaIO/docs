@@ -1,7 +1,7 @@
 import parse, { type DOMNode, domToReact, Element } from 'html-react-parser';
 import React from 'react';
 
-const LOGO_URL = 'https://raw.githubusercontent.com/TuwaIO/workflows/refs/heads/main/preview/logo_v1.svg';
+const LOGO_URL = 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v1.svg';
 
 export interface RemoteLogoProps extends React.SVGProps<SVGSVGElement> {
   url?: string;
