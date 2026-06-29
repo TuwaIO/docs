@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.24](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.23...docs-ui-v0.0.24) (2026-06-29)
+
+
+### Bug Fixes
+
+* logo and no SSR ([a23e444](https://github.com/TuwaIO/docs/commit/a23e444ec0ac508561a88facdac1386b22674e31))
+
 ## [0.0.23](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.22...docs-ui-v0.0.23) (2026-06-29)
 
 ### Bug Fixes
