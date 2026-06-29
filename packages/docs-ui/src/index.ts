@@ -5,7 +5,7 @@ export * from './components/Features';
 export * from './components/Footer';
 export * from './components/Logo';
 export * from './components/NavBar';
-export * from './components/NoSSR';
+export { default as NoSSR } from './components/NoSSR';
 export * from './components/PackageInstallationTabs';
 export * from './components/StyledLink';
 export * from './components/VideoPlayer';

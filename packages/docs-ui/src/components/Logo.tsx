@@ -42,9 +42,17 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
       if (domNode instanceof Element && domNode.name === 'svg') {
         // Merge fetched SVG root attributes with component props
         const children = domToReact(domNode.children as DOMNode[]);
+        const attribs = { ...domNode.attribs };
+
+        // Map lowercase xmlspace to camelCase xmlSpace to avoid React DOM warning
+        if ('xmlspace' in attribs) {
+          attribs.xmlSpace = attribs.xmlspace;
+          delete attribs.xmlspace;
+        }
+
         const svgClassName = [className, 'remote-logo'].filter(Boolean).join(' ');
         return (
-          <svg {...domNode.attribs} className={svgClassName} style={style} {...props}>
+          <svg {...attribs} className={svgClassName} style={style} {...props}>
             {children}
           </svg>
         );
@@ -52,5 +60,8 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
     },
   });
 
-  return <>{parsed}</>;
+  const elements = Array.isArray(parsed) ? parsed : [parsed];
+  const svgElement = elements.find((el) => React.isValidElement(el) && el.type === 'svg');
+
+  return svgElement ? svgElement : <svg className={className} style={style} {...props} />;
 }
