@@ -11,3 +11,6 @@ export * from './components/StyledLink';
 export * from './components/VideoPlayer';
 export * from './utils';
 export * from '@tuwaio/nova-core';
+export * from './components/ThemeSwitcher';
+export { default as StarryBackground } from './components/StarryBackground';
+
