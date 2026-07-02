@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.28](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.27...docs-ui-v0.0.28) (2026-07-02)
+
+
+### Bug Fixes
+
+* theme switcher slide animation ([78ecbdf](https://github.com/TuwaIO/docs/commit/78ecbdf0f841a3a7731fd981eef2db53156bd3f4))
+
 ## [0.0.27](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.26...docs-ui-v0.0.27) (2026-07-02)
 
 ### Bug Fixes
