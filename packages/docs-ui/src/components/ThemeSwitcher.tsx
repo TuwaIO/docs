@@ -41,21 +41,19 @@ export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
       )}
       aria-label="Toggle theme"
     >
-      {/* Mobile slide indicator with custom spring-like cubic-bezier transition */}
+      {/* Mobile slide indicator with custom spring-like keyframe animation */}
       <div
-        className="tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:md:hidden"
-        style={{
-          transform: isDark ? 'translateX(38px)' : 'translateX(0)',
-          transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}
+        className={cn(
+          'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:md:hidden',
+          isDark ? 'tuwa-slide-dark-mobile' : 'tuwa-slide-light-mobile',
+        )}
       />
-      {/* Desktop slide indicator with custom spring-like cubic-bezier transition */}
+      {/* Desktop slide indicator with custom spring-like keyframe animation */}
       <div
-        className="tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:md:h-7 tuwadocs:md:w-7 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:hidden tuwadocs:md:block"
-        style={{
-          transform: isDark ? 'translateX(30px)' : 'translateX(0)',
-          transition: 'transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-        }}
+        className={cn(
+          'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:md:h-7 tuwadocs:md:w-7 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:hidden tuwadocs:md:block',
+          isDark ? 'tuwa-slide-dark-desktop' : 'tuwa-slide-light-desktop',
+        )}
       />
 
       <div className="tuwadocs:relative tuwadocs:z-20 tuwadocs:flex tuwadocs:w-full tuwadocs:justify-between">
