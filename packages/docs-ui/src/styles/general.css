@@ -300,12 +300,12 @@ article .nextra-border a:hover {
     transform: translateX(0);
   }
   to {
-    transform: translateX(100%);
+    transform: translateX(107%);
   }
 }
 @keyframes slideToLight {
   from {
-    transform: translateX(100%);
+    transform: translateX(107%);
   }
   to {
     transform: translateX(0);

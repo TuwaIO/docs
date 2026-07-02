@@ -5,11 +5,8 @@ import pkg from './package.json';
 export default defineConfig([
   {
     format: ['cjs', 'esm'],
-    entry: ['./src/index.ts'],
-    treeshake: true,
-    sourcemap: false,
-    splitting: true,
-    minify: true,
+    entry: ['./src/**/*.ts', './src/**/*.tsx'],
+    bundle: false,
     clean: true,
     dts: true,
     outExtension({ format }) {

@@ -2,10 +2,9 @@
 
 ## [0.0.29](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.28...docs-ui-v0.0.29) (2026-07-02)
 
-
 ### Bug Fixes
 
-* theme switcher ([30bfab6](https://github.com/TuwaIO/docs/commit/30bfab6b9d2a4e876a4e0ff56cc5cc124e04dc3e))
+- theme switcher ([30bfab6](https://github.com/TuwaIO/docs/commit/30bfab6b9d2a4e876a4e0ff56cc5cc124e04dc3e))
 
 ## [0.0.28](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.27...docs-ui-v0.0.28) (2026-07-02)
 

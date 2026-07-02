@@ -1,0 +1,21 @@
+{
+  "name": "TUWA Docs Hub",
+  "short_name": "TUWA Docs",
+  "description": "Central documentation gateway for the TUWA Web3 ecosystem.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#030303",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/icon0.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

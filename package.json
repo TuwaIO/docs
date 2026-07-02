@@ -8,6 +8,9 @@
   "description": "Monorepo for the unified documentation infrastructure for the TUWA Ecosystem.",
   "scripts": {
     "build": "pnpm --filter \"./packages/**\" build",
+    "build:hub": "pnpm --filter @tuwaio/docs-hub build",
+    "dev:hub": "pnpm --filter @tuwaio/docs-hub dev",
+    "start:hub": "pnpm --filter @tuwaio/docs-hub start",
     "postinstall": "pnpm build",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write .",
