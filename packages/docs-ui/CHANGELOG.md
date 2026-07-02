@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.30](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.29...docs-ui-v0.0.30) (2026-07-02)
+
+
+### Bug Fixes
+
+* added TUWA docs hub ([a28f09b](https://github.com/TuwaIO/docs/commit/a28f09b8ba7e0df8520616fc67be533523ec9b08))
+
 ## [0.0.29](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.28...docs-ui-v0.0.29) (2026-07-02)
 
 ### Bug Fixes
