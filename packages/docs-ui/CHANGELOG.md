@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.25](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.24...docs-ui-v0.0.25) (2026-07-02)
+
+
+### Bug Fixes
+
+* added theme switcher and starry background ([8abb1f8](https://github.com/TuwaIO/docs/commit/8abb1f81ea65b65282d039ad0c826cc4b5284144))
+
 ## [0.0.24](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.23...docs-ui-v0.0.24) (2026-06-29)
 
 
