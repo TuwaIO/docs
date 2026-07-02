@@ -45,14 +45,14 @@ export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
       <div
         className={cn(
           'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:md:hidden',
-          isDark ? 'tuwa-slide-dark-mobile' : 'tuwa-slide-light-mobile',
+          isDark ? 'tuwa-slide-dark' : 'tuwa-slide-light',
         )}
       />
       {/* Desktop slide indicator with custom spring-like keyframe animation */}
       <div
         className={cn(
           'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:md:h-7 tuwadocs:md:w-7 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:hidden tuwadocs:md:block',
-          isDark ? 'tuwa-slide-dark-desktop' : 'tuwa-slide-light-desktop',
+          isDark ? 'tuwa-slide-dark' : 'tuwa-slide-light',
         )}
       />
 
