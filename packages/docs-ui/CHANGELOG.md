@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.27](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.26...docs-ui-v0.0.27) (2026-07-02)
+
+
+### Bug Fixes
+
+* linting and added dark styles ([1feeba2](https://github.com/TuwaIO/docs/commit/1feeba2d136f8849015caeba705c4603eed09255))
+
 ## [0.0.26](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.25...docs-ui-v0.0.26) (2026-07-02)
 
 ### Bug Fixes
