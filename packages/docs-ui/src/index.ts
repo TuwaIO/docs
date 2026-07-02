@@ -7,10 +7,9 @@ export * from './components/Logo';
 export * from './components/NavBar';
 export { default as NoSSR } from './components/NoSSR';
 export * from './components/PackageInstallationTabs';
+export { default as StarryBackground } from './components/StarryBackground';
 export * from './components/StyledLink';
+export * from './components/ThemeSwitcher';
 export * from './components/VideoPlayer';
 export * from './utils';
 export * from '@tuwaio/nova-core';
-export * from './components/ThemeSwitcher';
-export { default as StarryBackground } from './components/StarryBackground';
-

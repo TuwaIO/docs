@@ -2,24 +2,21 @@
 
 ## [0.0.26](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.25...docs-ui-v0.0.26) (2026-07-02)
 
-
 ### Bug Fixes
 
-* styles ([f2d0a1a](https://github.com/TuwaIO/docs/commit/f2d0a1a2bac39add197544f9c89969340b011024))
+- styles ([f2d0a1a](https://github.com/TuwaIO/docs/commit/f2d0a1a2bac39add197544f9c89969340b011024))
 
 ## [0.0.25](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.24...docs-ui-v0.0.25) (2026-07-02)
 
-
 ### Bug Fixes
 
-* added theme switcher and starry background ([8abb1f8](https://github.com/TuwaIO/docs/commit/8abb1f81ea65b65282d039ad0c826cc4b5284144))
+- added theme switcher and starry background ([8abb1f8](https://github.com/TuwaIO/docs/commit/8abb1f81ea65b65282d039ad0c826cc4b5284144))
 
 ## [0.0.24](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.23...docs-ui-v0.0.24) (2026-06-29)
 
-
 ### Bug Fixes
 
-* logo and no SSR ([a23e444](https://github.com/TuwaIO/docs/commit/a23e444ec0ac508561a88facdac1386b22674e31))
+- logo and no SSR ([a23e444](https://github.com/TuwaIO/docs/commit/a23e444ec0ac508561a88facdac1386b22674e31))
 
 ## [0.0.23](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.22...docs-ui-v0.0.23) (2026-06-29)
 
