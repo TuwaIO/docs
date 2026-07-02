@@ -58,6 +58,14 @@ export interface VideoPlayerProps {
  * />
  * ```
  */
+const aspectMap = {
+  'aspect-square': 'tuwadocs:aspect-square',
+  'aspect-video': 'tuwadocs:aspect-video',
+  'aspect-[4/3]': 'tuwadocs:aspect-[4/3]',
+  'aspect-[3/2]': 'tuwadocs:aspect-[3/2]',
+  'aspect-[21/9]': 'tuwadocs:aspect-[21/9]',
+};
+
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   src,
   poster,
@@ -72,12 +80,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onEnded,
   'aria-label': ariaLabel,
 }) => {
+  const mappedAspectRatio = aspectMap[aspectRatio] || 'tuwadocs:aspect-video';
+
   return (
     <div
       className={cn(
         // Container with aspect ratio and responsive design
         'tuwadocs:relative tuwadocs:w-full tuwadocs:overflow-hidden tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-black tuwadocs:my-4',
-        aspectRatio, // Dynamically applies aspect ratio class
+        mappedAspectRatio,
         className,
       )}
     >
