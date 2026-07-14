@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-const navbarLogo = <RemoteLogo width={105} height={45} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
+const navbarLogo = <RemoteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
 
 export const metadata: Metadata = {
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',
@@ -79,7 +79,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
+      >
         <Providers>
           <div className="relative min-h-screen flex flex-col">
             <Header logo={navbarLogo} />

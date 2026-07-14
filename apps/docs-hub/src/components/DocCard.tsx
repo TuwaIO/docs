@@ -24,7 +24,7 @@ export function DocCard({ name, tagline, icon: Icon, gradientFrom, gradientTo, d
       <div className="flex items-center gap-4 p-4 sm:p-5">
         {/* Icon badge */}
         <div
-          className={`shrink-0 w-10 h-10 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-[var(--tuwa-rounded-corners)] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-300`}
+          className={`shrink-0 w-10 h-10 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-300`}
         >
           <Icon className="w-5 h-5 text-white" />
         </div>
