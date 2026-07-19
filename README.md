@@ -15,7 +15,7 @@ This is a monorepo managed by `pnpm`.
 
 ## 🎯 Purpose
 
-The goal of this repository is to adhere to the **DRY (Don't Repeat Yourself)** principle. Instead of duplicating styles and components across `orbit`, `satellite`, and `pulsar` documentation sites, we consume them from this single source of truth.
+The goal of this repository is to adhere to the **DRY (Don't Repeat Yourself)** principle. Instead of duplicating styles and components across `Orbit`, `Satellite`, `Pulsar`, `Nova`, `Quasar`, and `SDK` documentation sites, we consume them from this single source of truth.
 
 ## 📄 License
 

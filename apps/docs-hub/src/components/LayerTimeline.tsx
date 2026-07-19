@@ -1,15 +1,8 @@
-import {
-  BoltIcon,
-  CloudArrowUpIcon,
-  CubeTransparentIcon,
-  GlobeAltIcon,
-  LinkIcon,
-  SwatchIcon,
-} from '@heroicons/react/24/outline';
+import { BoltIcon, CubeTransparentIcon, GlobeAltIcon, LinkIcon, SwatchIcon } from '@heroicons/react/24/outline';
 
 import { DocCard } from './DocCard';
-
 /* ─────────────────────────── Data ─────────────────────────── */
+import { PackageBadge } from './DocCard';
 
 interface DocEntry {
   id: string;
@@ -20,6 +13,7 @@ interface DocEntry {
   gradientTo: string;
   docsUrl: string;
   githubUrl: string;
+  packages?: PackageBadge[];
 }
 
 interface EcosystemLayer {
@@ -32,7 +26,7 @@ interface EcosystemLayer {
 
 const layers: EcosystemLayer[] = [
   {
-    label: 'Layer 1 — Foundational Core',
+    label: 'Stage 1 — Foundational Core',
     subtitle: 'Framework-agnostic multi-chain primitives',
     accentClass: 'text-emerald-400',
     dotGradient: 'from-emerald-500 to-teal-600',
@@ -46,11 +40,16 @@ const layers: EcosystemLayer[] = [
         gradientTo: 'to-teal-600',
         docsUrl: 'https://orbit.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/orbit',
+        packages: [
+          { name: '@tuwaio/orbit-core', layer: 'L1' },
+          { name: '@tuwaio/orbit-evm', layer: 'L2' },
+          { name: '@tuwaio/orbit-solana', layer: 'L2' },
+        ],
       },
     ],
   },
   {
-    label: 'Layer 2 — State & Connection',
+    label: 'Stage 2 — State & Connection',
     subtitle: 'Transaction tracking & wallet connectivity',
     accentClass: 'text-indigo-400',
     dotGradient: 'from-indigo-500 to-amber-500',
@@ -64,6 +63,13 @@ const layers: EcosystemLayer[] = [
         gradientTo: 'to-blue-600',
         docsUrl: 'https://satellite.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/satellite-connect',
+        packages: [
+          { name: '@tuwaio/satellite-core', layer: 'L3' },
+          { name: '@tuwaio/satellite-evm', layer: 'L4' },
+          { name: '@tuwaio/satellite-solana', layer: 'L4' },
+          { name: '@tuwaio/satellite-react', layer: 'L4' },
+          { name: '@tuwaio/satellite-siwe-next-auth', layer: 'L4' },
+        ],
       },
       {
         id: 'pulsar',
@@ -74,11 +80,36 @@ const layers: EcosystemLayer[] = [
         gradientTo: 'to-orange-600',
         docsUrl: 'https://pulsar.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/pulsar-core',
+        packages: [
+          { name: '@tuwaio/pulsar-core', layer: 'L3' },
+          { name: '@tuwaio/pulsar-evm', layer: 'L4' },
+          { name: '@tuwaio/pulsar-solana', layer: 'L4' },
+          { name: '@tuwaio/pulsar-react', layer: 'L4' },
+        ],
       },
     ],
   },
   {
-    label: 'Layer 3 — User Interface',
+    label: 'Stage 3 — Cloud Integration',
+    subtitle: 'SaaS orchestrator & unified SDK',
+    accentClass: 'text-cyan-500',
+    dotGradient: 'from-cyan-500 to-indigo-600',
+    entries: [
+      {
+        id: 'sdk',
+        name: 'TUWA SDK',
+        tagline: 'Unified developer integration package',
+        icon: CubeTransparentIcon,
+        gradientFrom: 'from-blue-500',
+        gradientTo: 'to-purple-600',
+        docsUrl: 'https://sdk.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/sdk',
+        packages: [{ name: '@tuwaio/quasar-sdk', layer: 'L5' }],
+      },
+    ],
+  },
+  {
+    label: 'Stage 4 — User Interface',
     subtitle: 'React components for Satellite & Pulsar',
     accentClass: 'text-violet-400',
     dotGradient: 'from-violet-500 to-purple-600',
@@ -92,34 +123,11 @@ const layers: EcosystemLayer[] = [
         gradientTo: 'to-purple-600',
         docsUrl: 'https://stories.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/nova-uikit',
-      },
-    ],
-  },
-  {
-    label: 'Layer 4 — Cloud Integration',
-    subtitle: 'SaaS orchestrator & unified SDK',
-    accentClass: 'text-cyan-500',
-    dotGradient: 'from-cyan-500 to-indigo-600',
-    entries: [
-      // {
-      //   id: 'quasar',
-      //   name: 'Quasar Cloud',
-      //   tagline: 'Multi-tenant indexing & webhook delivery',
-      //   icon: CloudArrowUpIcon,
-      //   gradientFrom: 'from-cyan-500',
-      //   gradientTo: 'to-indigo-600',
-      //   docsUrl: 'https://tuwa.io/quasar',
-      //   githubUrl: 'https://quasar.tuwa.io',
-      // },
-      {
-        id: 'sdk',
-        name: 'TUWA SDK',
-        tagline: 'Unified developer integration package',
-        icon: CubeTransparentIcon,
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-purple-600',
-        docsUrl: 'https://sdk.docs.tuwa.io/',
-        githubUrl: 'https://github.com/TuwaIO/sdk',
+        packages: [
+          { name: '@tuwaio/nova-core', layer: 'L6' },
+          { name: '@tuwaio/nova-connect', layer: 'L7' },
+          { name: '@tuwaio/nova-transactions', layer: 'L7' },
+        ],
       },
     ],
   },

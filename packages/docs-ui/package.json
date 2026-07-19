@@ -54,7 +54,7 @@
     "@tuwaio/nova-core": "^0.4.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "clsx": "^2.1.1",
-    "html-react-parser": "^6.1.4",
+    "html-react-parser": "^6.1.5",
     "react-syntax-highlighter": "^16.1.1",
     "tailwind-merge": "^3.6.0"
   },
@@ -67,18 +67,18 @@
   },
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
-    "@tailwindcss/postcss": "^4.3.2",
-    "@tailwindcss/vite": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26",
     "@types/react": "^19.2.17",
-    "autoprefixer": "^10.5.2",
+    "autoprefixer": "^10.5.4",
     "next": "16.2.10",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
     "postcss": "^8.5.19",
     "postcss-cli": "^11.0.1",
     "react": "^19.2.7",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   }

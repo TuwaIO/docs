@@ -1,6 +1,11 @@
 import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
-interface DocCardProps {
+export interface PackageBadge {
+  name: string;
+  layer: string;
+}
+
+export interface DocCardProps {
   name: string;
   tagline: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -8,12 +13,22 @@ interface DocCardProps {
   gradientTo: string;
   docsUrl: string;
   githubUrl: string;
+  packages?: PackageBadge[];
 }
 
 /**
  * Minimalist card linking to docs and GitHub for a single TUWA module.
  */
-export function DocCard({ name, tagline, icon: Icon, gradientFrom, gradientTo, docsUrl, githubUrl }: DocCardProps) {
+export function DocCard({
+  name,
+  tagline,
+  icon: Icon,
+  gradientFrom,
+  gradientTo,
+  docsUrl,
+  githubUrl,
+  packages,
+}: DocCardProps) {
   return (
     <div className="group relative overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/30 dark:bg-white/[0.015] backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
       {/* Top accent line */}
@@ -59,6 +74,28 @@ export function DocCard({ name, tagline, icon: Icon, gradientFrom, gradientTo, d
           </a>
         </div>
       </div>
+
+      {/* Packages section */}
+      {packages && packages.length > 0 && (
+        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 flex flex-wrap gap-2">
+          {packages.map((pkg) => (
+            <a
+              key={pkg.name}
+              href={`https://www.npmjs.com/package/${pkg.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group/badge inline-flex items-center gap-1.5 rounded-full bg-[var(--tuwa-bg-secondary)] dark:bg-white/[0.02] px-2.5 py-1 text-[11px] font-medium text-[var(--tuwa-text-secondary)] border border-[var(--tuwa-border-primary)]/50 transition-colors hover:border-[var(--tuwa-text-accent)]/50 hover:bg-[var(--tuwa-bg-primary)] hover:text-[var(--tuwa-text-primary)]"
+            >
+              <span
+                className={`font-mono text-[9px] uppercase tracking-wider font-bold bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent`}
+              >
+                {pkg.layer}
+              </span>
+              <span className="font-mono truncate">{pkg.name}</span>
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

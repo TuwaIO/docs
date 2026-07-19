@@ -118,13 +118,13 @@ The hub is deployed to **Vercel**.
 
 ## 🔗 Quick Links
 
-| Resource                      | Link                                                                                          |
-| ----------------------------- | --------------------------------------------------------------------------------------------- |
-| **Live Docs Hub**             | [**docs.tuwa.io**](https://docs.tuwa.io)                                                      |
-| **Shared UI (`docs-ui`)**     | [`../../packages/docs-ui`](../../packages/docs-ui)                                            |
-| **TUWA GitHub Organization**  | [`github.com/TuwaIO`](https://github.com/TuwaIO)                                              |
-| **Next.js App Router Docs**   | [`nextjs.org/docs/app`](https://nextjs.org/docs/app)                                          |
-| **Tailwind CSS Docs**         | [`tailwindcss.com/docs`](https://tailwindcss.com/docs)                                        |
+| Resource                     | Link                                                   |
+| ---------------------------- | ------------------------------------------------------ |
+| **Live Docs Hub**            | [**docs.tuwa.io**](https://docs.tuwa.io)               |
+| **Shared UI (`docs-ui`)**    | [`../../packages/docs-ui`](../../packages/docs-ui)     |
+| **TUWA GitHub Organization** | [`github.com/TuwaIO`](https://github.com/TuwaIO)       |
+| **Next.js App Router Docs**  | [`nextjs.org/docs/app`](https://nextjs.org/docs/app)   |
+| **Tailwind CSS Docs**        | [`tailwindcss.com/docs`](https://tailwindcss.com/docs) |
 
 ## 📄 License
 
