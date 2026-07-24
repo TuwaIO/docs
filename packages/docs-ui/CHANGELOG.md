@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.34](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.33...docs-ui-v0.0.34) (2026-07-24)
+
+
+### Bug Fixes
+
+* updated styles & added quick start & added socket.json ([474803f](https://github.com/TuwaIO/docs/commit/474803f46d047c287b6b8e59fd825448d0c3c63a))
+
 ## [0.0.33](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.32...docs-ui-v0.0.33) (2026-07-24)
 
 ### Bug Fixes
