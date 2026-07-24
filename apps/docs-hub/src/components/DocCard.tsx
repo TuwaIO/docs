@@ -78,7 +78,7 @@ export function DocCard({
 
       {/* Packages section */}
       {packages && packages.length > 0 && (
-        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 flex flex-wrap items-stretch gap-2.5">
+        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 flex flex-col gap-2">
           {packages.map((pkg) => {
             const isNpmPkg = pkg.name.startsWith('@tuwaio/');
             return (
@@ -87,29 +87,39 @@ export function DocCard({
                 href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group/badge inline-flex flex-col justify-center gap-1 rounded-xl bg-[var(--tuwa-bg-secondary)] dark:bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-[var(--tuwa-text-secondary)] border border-[var(--tuwa-border-primary)]/50 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/50 hover:bg-[var(--tuwa-bg-primary)] hover:text-[var(--tuwa-text-primary)]"
+                className="group/badge flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.015] px-3 py-2 text-xs border border-[var(--tuwa-border-primary)]/40 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-bg-primary)]/80"
               >
-                <div className="flex items-center gap-1.5">
+                {/* Left: Layer badge & Package name */}
+                <div className="flex items-center gap-2 min-w-0">
                   {pkg.layer && (
                     <span
-                      className={`font-mono text-[9px] uppercase tracking-wider font-bold bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent`}
+                      className={`shrink-0 font-mono text-[9px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-[var(--tuwa-bg-primary)] dark:bg-white/5 border border-[var(--tuwa-border-primary)]/50 bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent`}
                     >
                       {pkg.layer}
                     </span>
                   )}
-                  <span className="font-mono truncate">{pkg.name}</span>
+                  <span className="font-mono text-[11px] sm:text-xs font-semibold text-[var(--tuwa-text-primary)] group-hover/badge:text-[var(--tuwa-text-accent)] transition-colors truncate">
+                    {pkg.name}
+                  </span>
                 </div>
+
+                {/* Right: Clean, aligned badges (Socket, Downloads, Size) */}
                 {isNpmPkg && (
-                  <div className="flex items-center gap-1.5 self-start">
+                  <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
                     <img
                       src={`https://socket.dev/api/badge/npm/package/${pkg.name}`}
                       alt={`${pkg.name} Socket security score`}
-                      className="h-3.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
+                      className="h-4 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
                     />
                     <img
                       src={`https://img.shields.io/npm/dm/${pkg.name}.svg?style=flat-square&colorB=5e6ad2`}
                       alt={`${pkg.name} monthly downloads`}
-                      className="h-3.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
+                      className="h-4 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
+                    />
+                    <img
+                      src={`https://img.shields.io/npm/unpacked-size/${pkg.name}?style=flat-square&colorB=3b82f6&label=size`}
+                      alt={`${pkg.name} size`}
+                      className="h-4 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
                     />
                   </div>
                 )}

@@ -2,6 +2,7 @@ import { StarryBackground } from '@tuwaio/docs-ui';
 
 import { HeroSection } from '../components/HeroSection';
 import { LayerTimeline } from '../components/LayerTimeline';
+import { QuickStartSection } from '../components/QuickStartSection';
 
 /**
  * Docs Hub main page — StarryBackground on desktop, decorative orbs on mobile.
@@ -24,6 +25,7 @@ export default function DocsHubPage() {
         <div className="mx-auto max-w-5xl px-2 sm:px-6">
           <HeroSection />
           <LayerTimeline />
+          <QuickStartSection />
         </div>
       </div>
     </>

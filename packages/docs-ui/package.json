@@ -22,7 +22,8 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist",
+    "socket.json"
   ],
   "scripts": {
     "build": "tsup && pnpm exec postcss src/styles/general.css -o ./dist/index.css"
