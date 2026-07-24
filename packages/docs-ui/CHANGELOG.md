@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.33](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.32...docs-ui-v0.0.33) (2026-07-24)
+
+
+### Bug Fixes
+
+* updated docs ([d4b1c56](https://github.com/TuwaIO/docs/commit/d4b1c56f757fa24611af6d20b1f1ee8aab64a988))
+
 ## [0.0.32](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.31...docs-ui-v0.0.32) (2026-07-19)
 
 ### Bug Fixes
