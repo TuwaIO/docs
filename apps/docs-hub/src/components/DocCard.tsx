@@ -2,7 +2,8 @@ import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/out
 
 export interface PackageBadge {
   name: string;
-  layer: string;
+  layer?: string;
+  url?: string;
 }
 
 export interface DocCardProps {
@@ -77,23 +78,44 @@ export function DocCard({
 
       {/* Packages section */}
       {packages && packages.length > 0 && (
-        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 flex flex-wrap gap-2">
-          {packages.map((pkg) => (
-            <a
-              key={pkg.name}
-              href={`https://www.npmjs.com/package/${pkg.name}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/badge inline-flex items-center gap-1.5 rounded-full bg-[var(--tuwa-bg-secondary)] dark:bg-white/[0.02] px-2.5 py-1 text-[11px] font-medium text-[var(--tuwa-text-secondary)] border border-[var(--tuwa-border-primary)]/50 transition-colors hover:border-[var(--tuwa-text-accent)]/50 hover:bg-[var(--tuwa-bg-primary)] hover:text-[var(--tuwa-text-primary)]"
-            >
-              <span
-                className={`font-mono text-[9px] uppercase tracking-wider font-bold bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent`}
+        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 flex flex-wrap items-stretch gap-2.5">
+          {packages.map((pkg) => {
+            const isNpmPkg = pkg.name.startsWith('@tuwaio/');
+            return (
+              <a
+                key={pkg.name}
+                href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/badge inline-flex flex-col justify-center gap-1 rounded-xl bg-[var(--tuwa-bg-secondary)] dark:bg-white/[0.02] px-3 py-1.5 text-[11px] font-medium text-[var(--tuwa-text-secondary)] border border-[var(--tuwa-border-primary)]/50 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/50 hover:bg-[var(--tuwa-bg-primary)] hover:text-[var(--tuwa-text-primary)]"
               >
-                {pkg.layer}
-              </span>
-              <span className="font-mono truncate">{pkg.name}</span>
-            </a>
-          ))}
+                <div className="flex items-center gap-1.5">
+                  {pkg.layer && (
+                    <span
+                      className={`font-mono text-[9px] uppercase tracking-wider font-bold bg-gradient-to-r ${gradientFrom} ${gradientTo} bg-clip-text text-transparent`}
+                    >
+                      {pkg.layer}
+                    </span>
+                  )}
+                  <span className="font-mono truncate">{pkg.name}</span>
+                </div>
+                {isNpmPkg && (
+                  <div className="flex items-center gap-1.5 self-start">
+                    <img
+                      src={`https://socket.dev/api/badge/npm/package/${pkg.name}`}
+                      alt={`${pkg.name} Socket security score`}
+                      className="h-3.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
+                    />
+                    <img
+                      src={`https://img.shields.io/npm/dm/${pkg.name}.svg?style=flat-square&colorB=5e6ad2`}
+                      alt={`${pkg.name} monthly downloads`}
+                      className="h-3.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
+                    />
+                  </div>
+                )}
+              </a>
+            );
+          })}
         </div>
       )}
     </div>

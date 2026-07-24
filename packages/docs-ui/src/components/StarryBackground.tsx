@@ -203,7 +203,7 @@ export default function StarryBackground() {
   return (
     <canvas
       ref={canvasRef}
-      className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:w-full tuwadocs:h-full tuwadocs:bg-gradient-to-b tuwadocs:from-slate-200 tuwadocs:to-slate-350 tuwadocs:dark:from-[#0a0e27] tuwadocs:dark:to-[#1a1f3a]"
+      className="tuwadocs:fixed tuwadocs:inset-0 tuwadocs:w-full tuwadocs:h-full tuwadocs:pointer-events-none tuwadocs:bg-gradient-to-b tuwadocs:from-slate-200 tuwadocs:to-slate-350 tuwadocs:dark:from-[#0a0e27] tuwadocs:dark:to-[#1a1f3a]"
     />
   );
 }

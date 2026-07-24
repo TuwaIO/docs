@@ -2,10 +2,9 @@
 
 ## [0.0.32](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.31...docs-ui-v0.0.32) (2026-07-19)
 
-
 ### Bug Fixes
 
-* packages updated ([9460af0](https://github.com/TuwaIO/docs/commit/9460af02eb65cb6c9d48ed96393e35dea83b5fc3))
+- packages updated ([9460af0](https://github.com/TuwaIO/docs/commit/9460af02eb65cb6c9d48ed96393e35dea83b5fc3))
 
 ## [0.0.31](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.30...docs-ui-v0.0.31) (2026-07-14)
 

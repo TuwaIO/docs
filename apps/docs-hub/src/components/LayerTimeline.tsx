@@ -1,8 +1,15 @@
-import { BoltIcon, CubeTransparentIcon, GlobeAltIcon, LinkIcon, SwatchIcon } from '@heroicons/react/24/outline';
+import {
+  BoltIcon,
+  CloudIcon,
+  CubeTransparentIcon,
+  GlobeAltIcon,
+  LinkIcon,
+  SwatchIcon,
+} from '@heroicons/react/24/outline';
 
-import { DocCard } from './DocCard';
+import { DocCard, PackageBadge } from './DocCard';
+
 /* ─────────────────────────── Data ─────────────────────────── */
-import { PackageBadge } from './DocCard';
 
 interface DocEntry {
   id: string;
@@ -23,6 +30,8 @@ interface EcosystemLayer {
   dotGradient: string;
   entries: DocEntry[];
 }
+
+const QUASAR_DASHBOARD_URL = process.env.NEXT_PUBLIC_QUASAR_DASHBOARD_URL || 'https://quasar.tuwa.io/';
 
 const layers: EcosystemLayer[] = [
   {
@@ -92,19 +101,22 @@ const layers: EcosystemLayer[] = [
   {
     label: 'Stage 3 — Cloud Integration',
     subtitle: 'SaaS orchestrator & unified SDK',
-    accentClass: 'text-cyan-500',
+    accentClass: 'text-cyan-400',
     dotGradient: 'from-cyan-500 to-indigo-600',
     entries: [
       {
-        id: 'sdk',
-        name: 'TUWA SDK',
-        tagline: 'Unified developer integration package',
-        icon: CubeTransparentIcon,
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-purple-600',
-        docsUrl: 'https://sdk.docs.tuwa.io/',
-        githubUrl: 'https://github.com/TuwaIO/sdk',
-        packages: [{ name: '@tuwaio/quasar-sdk', layer: 'L5' }],
+        id: 'quasar',
+        name: 'Quasar',
+        tagline: 'SaaS orchestrator & transaction indexing',
+        icon: CloudIcon,
+        gradientFrom: 'from-cyan-500',
+        gradientTo: 'to-indigo-600',
+        docsUrl: 'https://sdk.docs.tuwa.io/quasar-cloud/overview',
+        githubUrl: 'https://github.com/TuwaIO/quasar',
+        packages: [
+          { name: '@tuwaio/quasar-sdk', layer: 'L5' },
+          { name: 'Quasar Dashboard', url: QUASAR_DASHBOARD_URL },
+        ],
       },
     ],
   },
@@ -127,6 +139,29 @@ const layers: EcosystemLayer[] = [
           { name: '@tuwaio/nova-core', layer: 'L6' },
           { name: '@tuwaio/nova-connect', layer: 'L7' },
           { name: '@tuwaio/nova-transactions', layer: 'L7' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Stage 5 — SDK Integration Layer',
+    subtitle: 'Core SDK & network-specific adapters',
+    accentClass: 'text-blue-400',
+    dotGradient: 'from-blue-500 to-purple-600',
+    entries: [
+      {
+        id: 'sdk',
+        name: 'TUWA Client SDKs',
+        tagline: 'Unified client SDK & EVM/Solana network adapters',
+        icon: CubeTransparentIcon,
+        gradientFrom: 'from-blue-500',
+        gradientTo: 'to-purple-600',
+        docsUrl: 'https://sdk.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/sdk',
+        packages: [
+          { name: '@tuwaio/sdk', layer: 'L8' },
+          { name: '@tuwaio/evm-sdk', layer: 'L9' },
+          { name: '@tuwaio/solana-sdk', layer: 'L9' },
         ],
       },
     ],

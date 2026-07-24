@@ -51,7 +51,7 @@
     }
   ],
   "dependencies": {
-    "@tuwaio/nova-core": "^0.4.4",
+    "@tuwaio/nova-core": "^0.4.5",
     "@types/react-syntax-highlighter": "^15.5.13",
     "clsx": "^2.1.1",
     "html-react-parser": "^6.1.5",
@@ -72,12 +72,12 @@
     "@types/node": "^26",
     "@types/react": "^19.2.17",
     "autoprefixer": "^10.5.4",
-    "next": "16.2.10",
+    "next": "16.2.11",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "postcss": "^8.5.19",
+    "postcss": "^8.5.22",
     "postcss-cli": "^11.0.1",
-    "react": "^19.2.7",
+    "react": "^19.2.8",
     "tailwindcss": "^4.3.3",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3"
