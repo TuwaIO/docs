@@ -185,10 +185,12 @@ export function LayerTimeline() {
 
           {/* Layer label */}
           <div className="mb-3 sm:mb-4">
-            <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-widest ${layer.accentClass}`}>
+            <span
+              className={`text-[11px] sm:text-xs 2xl:text-sm font-bold uppercase tracking-widest ${layer.accentClass}`}
+            >
               {layer.label}
             </span>
-            <span className="hidden sm:inline text-[11px] text-[var(--tuwa-text-secondary)] ml-2">
+            <span className="hidden sm:inline text-[11px] 2xl:text-xs text-[var(--tuwa-text-secondary)] ml-2">
               — {layer.subtitle}
             </span>
           </div>

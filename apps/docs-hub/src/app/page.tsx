@@ -22,7 +22,7 @@ export default function DocsHubPage() {
       </div>
 
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">
-        <div className="mx-auto max-w-5xl px-2 sm:px-6">
+        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6">
           <HeroSection />
           <LayerTimeline />
           <QuickStartSection />
