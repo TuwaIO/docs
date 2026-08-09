@@ -5,6 +5,7 @@ import {
   GlobeAltIcon,
   LinkIcon,
   SwatchIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 import { DocCard, PackageBadge } from './DocCard';
@@ -35,11 +36,28 @@ const QUASAR_DASHBOARD_URL = process.env.NEXT_PUBLIC_QUASAR_DASHBOARD_URL || 'ht
 
 const layers: EcosystemLayer[] = [
   {
-    label: 'Stage 1 — Foundational Core',
-    subtitle: 'Framework-agnostic multi-chain primitives',
+    label: 'Stage 1 — Core Auth & Primitives',
+    subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
     accentClass: 'text-emerald-400',
     dotGradient: 'from-emerald-500 to-teal-600',
     entries: [
+      {
+        id: 'siwx',
+        name: 'Sign-In With X (SIWX)',
+        tagline: 'CAIP-122 authentication engine & adapters',
+        icon: ShieldCheckIcon,
+        gradientFrom: 'from-emerald-500',
+        gradientTo: 'to-green-600',
+        docsUrl: 'https://siwx.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/siwx',
+        packages: [
+          { name: '@tuwaio/siwx-core', layer: 'L1' },
+          { name: '@tuwaio/siwx-evm', layer: 'L2' },
+          { name: '@tuwaio/siwx-solana', layer: 'L2' },
+          { name: '@tuwaio/siwx-react', layer: 'L2' },
+          { name: '@tuwaio/siwx-server', layer: 'L2' },
+        ],
+      },
       {
         id: 'orbit',
         name: 'Orbit Utils',
@@ -77,7 +95,7 @@ const layers: EcosystemLayer[] = [
           { name: '@tuwaio/satellite-evm', layer: 'L4' },
           { name: '@tuwaio/satellite-solana', layer: 'L4' },
           { name: '@tuwaio/satellite-react', layer: 'L4' },
-          { name: '@tuwaio/satellite-siwe-next-auth', layer: 'L4' },
+          { name: '@tuwaio/satellite-siwe-next-auth', layer: 'L4', isDeprecated: true },
         ],
       },
       {

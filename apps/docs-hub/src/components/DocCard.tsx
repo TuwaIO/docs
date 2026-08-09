@@ -4,6 +4,7 @@ export interface PackageBadge {
   name: string;
   layer?: string;
   url?: string;
+  isDeprecated?: boolean;
 }
 
 export interface DocCardProps {
@@ -98,9 +99,14 @@ export function DocCard({
                       {pkg.layer}
                     </span>
                   )}
-                  <span className="font-mono text-[11px] sm:text-xs 2xl:text-sm font-semibold text-[var(--tuwa-text-primary)] group-hover/badge:text-[var(--tuwa-text-accent)] transition-colors truncate">
+                  <span className={`font-mono text-[11px] sm:text-xs 2xl:text-sm font-semibold text-[var(--tuwa-text-primary)] group-hover/badge:text-[var(--tuwa-text-accent)] transition-colors truncate ${pkg.isDeprecated ? 'line-through opacity-60' : ''}`}>
                     {pkg.name}
                   </span>
+                  {pkg.isDeprecated && (
+                    <span className="shrink-0 text-[9px] 2xl:text-[10px] uppercase font-bold text-red-500/90 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">
+                      Deprecated
+                    </span>
+                  )}
                 </div>
 
                 {/* Right: Clean, aligned badges (Socket, Downloads, Size) */}

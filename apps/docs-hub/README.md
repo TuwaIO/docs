@@ -6,7 +6,7 @@
 
 ## About This Project
 
-**Docs Hub** is the central landing page for the entire **TUWA Web3 ecosystem**. From this single entry point, developers can jump into the documentation of every TUWA project — `Orbit`, `Satellite`, `Pulsar`, `Nova`, `Quasar`, and the shared **TUWA SDK** — without hunting across separate sites.
+**Docs Hub** is the central landing page for the entire **TUWA Web3 ecosystem**. From this single entry point, developers can jump into the documentation of every TUWA project — `SIWX`, `Orbit`, `Satellite`, `Pulsar`, `Nova`, `Quasar`, and the shared **TUWA SDK** — without hunting across separate sites.
 
 Unlike the individual project docs (which are Nextra-based), this hub is a lean **Next.js App Router** app that renders a gradient hero, a layered ecosystem timeline, and doc cards linking out to each project. It consumes shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../../packages/docs-ui) and [`@tuwaio/nova-core`](https://www.npmjs.com/package/@tuwaio/nova-core) so the visual identity stays consistent with the rest of the ecosystem.
 
