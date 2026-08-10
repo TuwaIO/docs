@@ -38,16 +38,16 @@ const layers: EcosystemLayer[] = [
   {
     label: 'Stage 1 — Core Auth & Primitives',
     subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
-    accentClass: 'bg-gradient-to-r from-emerald-400 to-rose-400 bg-clip-text text-transparent',
-    dotGradient: 'from-emerald-500 to-rose-500',
+    accentClass: 'text-emerald-400',
+    dotGradient: 'from-emerald-500 to-teal-600',
     entries: [
       {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         tagline: 'CAIP-122 authentication engine & adapters',
         icon: KeyIcon,
-        gradientFrom: 'from-rose-500',
-        gradientTo: 'to-pink-600',
+        gradientFrom: 'from-emerald-500',
+        gradientTo: 'to-green-600',
         docsUrl: 'https://siwx.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/siwx',
         packages: [
