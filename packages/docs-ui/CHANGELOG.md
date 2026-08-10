@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.36](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.35...docs-ui-v0.0.36) (2026-08-10)
+
+
+### Bug Fixes
+
+* updated docs and added orb ([75f9752](https://github.com/TuwaIO/docs/commit/75f9752ea8436f2a5439c86d8bf9c5f57a9f2031))
+
 ## [0.0.35](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.34...docs-ui-v0.0.35) (2026-08-09)
 
 ### Bug Fixes
