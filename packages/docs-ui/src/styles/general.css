@@ -398,3 +398,51 @@ article:focus {
   outline: 2px solid var(--tuwa-primary);
   outline-offset: 2px;
 }
+
+/* Orb Component Animations */
+@keyframes orb-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orb-pulse-slow {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes orb-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-3%) rotate(5deg);
+  }
+}
+
+.tuwa-orb-spin {
+  animation: orb-spin 20s linear infinite;
+}
+
+.tuwa-orb-spin-reverse {
+  animation: orb-spin 25s linear infinite reverse;
+}
+
+.tuwa-orb-float {
+  animation: orb-float 8s ease-in-out infinite;
+}
+
+.tuwa-orb-pulse {
+  animation: orb-pulse-slow 4s ease-in-out infinite;
+}

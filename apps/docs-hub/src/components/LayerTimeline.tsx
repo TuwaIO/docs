@@ -1,11 +1,13 @@
+'use client';
+
 import {
   BoltIcon,
-  CloudArrowUpIcon,
+  CloudIcon,
+  CodeBracketSquareIcon,
+  CpuChipIcon,
   CubeIcon,
   GlobeAltIcon,
   KeyIcon,
-  LinkIcon,
-  SwatchIcon,
 } from '@heroicons/react/24/outline';
 
 import { DocCard, PackageBadge } from './DocCard';
@@ -17,6 +19,7 @@ interface DocEntry {
   name: string;
   tagline: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+
   gradientFrom: string;
   gradientTo: string;
   docsUrl: string;
@@ -46,6 +49,7 @@ const layers: EcosystemLayer[] = [
         name: 'Sign-In With X (SIWX)',
         tagline: 'CAIP-122 authentication engine & adapters',
         icon: KeyIcon,
+
         gradientFrom: 'from-emerald-500',
         gradientTo: 'to-green-600',
         docsUrl: 'https://siwx.docs.tuwa.io/',
@@ -63,6 +67,7 @@ const layers: EcosystemLayer[] = [
         name: 'Orbit Utils',
         tagline: 'Multi-chain utilities for EVM & Solana',
         icon: GlobeAltIcon,
+
         gradientFrom: 'from-emerald-500',
         gradientTo: 'to-teal-600',
         docsUrl: 'https://orbit.docs.tuwa.io/',
@@ -85,7 +90,8 @@ const layers: EcosystemLayer[] = [
         id: 'satellite',
         name: 'Satellite Connect',
         tagline: 'Headless wallet connection state machine',
-        icon: LinkIcon,
+        icon: CpuChipIcon,
+
         gradientFrom: 'from-indigo-500',
         gradientTo: 'to-blue-600',
         docsUrl: 'https://satellite.docs.tuwa.io/',
@@ -103,6 +109,7 @@ const layers: EcosystemLayer[] = [
         name: 'Pulsar Engine',
         tagline: 'Transaction lifecycle indexing & polling',
         icon: BoltIcon,
+
         gradientFrom: 'from-amber-500',
         gradientTo: 'to-orange-600',
         docsUrl: 'https://pulsar.docs.tuwa.io/',
@@ -126,7 +133,8 @@ const layers: EcosystemLayer[] = [
         id: 'quasar',
         name: 'Quasar',
         tagline: 'SaaS orchestrator & transaction indexing',
-        icon: CloudArrowUpIcon,
+        icon: CloudIcon,
+
         gradientFrom: 'from-cyan-500',
         gradientTo: 'to-indigo-600',
         docsUrl: 'https://sdk.docs.tuwa.io/quasar-cloud/overview',
@@ -148,7 +156,8 @@ const layers: EcosystemLayer[] = [
         id: 'nova',
         name: 'Nova UI Kit',
         tagline: 'Design system & component library',
-        icon: SwatchIcon,
+        icon: CubeIcon,
+
         gradientFrom: 'from-violet-500',
         gradientTo: 'to-purple-600',
         docsUrl: 'https://stories.tuwa.io/',
@@ -171,7 +180,8 @@ const layers: EcosystemLayer[] = [
         id: 'sdk',
         name: 'TUWA Client SDKs',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
-        icon: CubeIcon,
+        icon: CodeBracketSquareIcon,
+
         gradientFrom: 'from-blue-500',
         gradientTo: 'to-purple-600',
         docsUrl: 'https://sdk.docs.tuwa.io/',

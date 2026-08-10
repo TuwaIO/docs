@@ -21,7 +21,7 @@ export function Header({ logo }: { logo: ReactNode }) {
   const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/50 dark:bg-[#030303]/30 backdrop-blur-xl">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/80 dark:bg-[#030303]/60 sm:bg-[var(--tuwa-bg-primary)]/50 sm:dark:bg-[#030303]/30 sm:backdrop-blur-xl">
       <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6 h-14 flex items-center justify-between">
         {logo}
         {mounted && <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} />}

@@ -1,4 +1,8 @@
+'use client';
+
 import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { Orb, PackageType } from '@tuwaio/docs-ui';
+import React from 'react';
 
 export interface PackageBadge {
   name: string;
@@ -10,6 +14,7 @@ export interface PackageBadge {
 export interface DocCardProps {
   name: string;
   tagline: string;
+  id: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   gradientFrom: string;
   gradientTo: string;
@@ -24,7 +29,8 @@ export interface DocCardProps {
 export function DocCard({
   name,
   tagline,
-  icon: Icon,
+  id,
+  icon,
   gradientFrom,
   gradientTo,
   docsUrl,
@@ -32,18 +38,23 @@ export function DocCard({
   packages,
 }: DocCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/30 dark:bg-white/[0.015] backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
+    <div className="group relative overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
       {/* Top accent line */}
       <div
         className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${gradientFrom} ${gradientTo} opacity-40 group-hover:opacity-80 transition-opacity duration-300`}
       />
 
       <div className="flex items-center gap-4 p-4 sm:p-5 2xl:p-6">
-        {/* Icon badge */}
+        {/* Mobile fallback badge */}
         <div
-          className={`shrink-0 w-10 h-10 2xl:w-12 2xl:h-12 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-full flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-300`}
+          className={`shrink-0 w-10 h-10 2xl:w-12 2xl:h-12 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-full flex sm:hidden items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-300`}
         >
-          <Icon className="w-5 h-5 2xl:w-6 2xl:h-6 text-white" />
+          {icon && React.createElement(icon, { className: 'w-5 h-5 2xl:w-6 2xl:h-6 text-white' })}
+        </div>
+
+        {/* Desktop Orb badge */}
+        <div className="shrink-0 hidden sm:flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+          <Orb packageType={id as PackageType} size={48} className="2xl:scale-125 origin-left" icon={icon} />
         </div>
 
         {/* Text */}
