@@ -19,7 +19,17 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-const navbarLogo = <RemoteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
+const navbarLogo = (
+  <a
+    href="https://tuwa.io"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="hover:opacity-80 transition-opacity duration-200"
+    aria-label="TUWA Ecosystem Website"
+  >
+    <RemoteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
+  </a>
+);
 
 export const metadata: Metadata = {
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',

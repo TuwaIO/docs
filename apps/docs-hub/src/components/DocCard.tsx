@@ -99,7 +99,9 @@ export function DocCard({
                       {pkg.layer}
                     </span>
                   )}
-                  <span className={`font-mono text-[11px] sm:text-xs 2xl:text-sm font-semibold text-[var(--tuwa-text-primary)] group-hover/badge:text-[var(--tuwa-text-accent)] transition-colors truncate ${pkg.isDeprecated ? 'line-through opacity-60' : ''}`}>
+                  <span
+                    className={`font-mono text-[11px] sm:text-xs 2xl:text-sm font-semibold text-[var(--tuwa-text-primary)] group-hover/badge:text-[var(--tuwa-text-accent)] transition-colors truncate ${pkg.isDeprecated ? 'line-through opacity-60' : ''}`}
+                  >
                     {pkg.name}
                   </span>
                   {pkg.isDeprecated && (

@@ -1,11 +1,11 @@
 import {
   BoltIcon,
-  CloudIcon,
-  CubeTransparentIcon,
+  CloudArrowUpIcon,
+  CubeIcon,
   GlobeAltIcon,
+  KeyIcon,
   LinkIcon,
   SwatchIcon,
-  ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 import { DocCard, PackageBadge } from './DocCard';
@@ -38,16 +38,16 @@ const layers: EcosystemLayer[] = [
   {
     label: 'Stage 1 — Core Auth & Primitives',
     subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
-    accentClass: 'text-emerald-400',
-    dotGradient: 'from-emerald-500 to-teal-600',
+    accentClass: 'bg-gradient-to-r from-emerald-400 to-rose-400 bg-clip-text text-transparent',
+    dotGradient: 'from-emerald-500 to-rose-500',
     entries: [
       {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         tagline: 'CAIP-122 authentication engine & adapters',
-        icon: ShieldCheckIcon,
-        gradientFrom: 'from-emerald-500',
-        gradientTo: 'to-green-600',
+        icon: KeyIcon,
+        gradientFrom: 'from-rose-500',
+        gradientTo: 'to-pink-600',
         docsUrl: 'https://siwx.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/siwx',
         packages: [
@@ -126,7 +126,7 @@ const layers: EcosystemLayer[] = [
         id: 'quasar',
         name: 'Quasar',
         tagline: 'SaaS orchestrator & transaction indexing',
-        icon: CloudIcon,
+        icon: CloudArrowUpIcon,
         gradientFrom: 'from-cyan-500',
         gradientTo: 'to-indigo-600',
         docsUrl: 'https://sdk.docs.tuwa.io/quasar-cloud/overview',
@@ -171,7 +171,7 @@ const layers: EcosystemLayer[] = [
         id: 'sdk',
         name: 'TUWA Client SDKs',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
-        icon: CubeTransparentIcon,
+        icon: CubeIcon,
         gradientFrom: 'from-blue-500',
         gradientTo: 'to-purple-600',
         docsUrl: 'https://sdk.docs.tuwa.io/',
