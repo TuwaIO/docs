@@ -1,12 +1,9 @@
 import './globals.css';
 
-import { RemoteLogo } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { Footer } from '../components/Footer';
-import { Header } from '../components/Header';
 import { Providers } from './providers';
 
 const geistSans = Geist({
@@ -18,18 +15,6 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
 });
-
-const navbarLogo = (
-  <a
-    href="https://tuwa.io"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="hover:opacity-80 transition-opacity duration-200"
-    aria-label="TUWA Ecosystem Website"
-  >
-    <RemoteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
-  </a>
-);
 
 export const metadata: Metadata = {
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',
@@ -92,13 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
       >
-        <Providers>
-          <div className="relative min-h-screen flex flex-col">
-            <Header logo={navbarLogo} />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

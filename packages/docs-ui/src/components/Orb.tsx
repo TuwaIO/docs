@@ -59,7 +59,12 @@ const getCosmicFilter = (type: PackageType, id: string) => {
         <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
           {starField('0.06', '9', '14s')}
           <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.018;0.024;0.016;0.018" dur="18s" repeatCount="indefinite" />
+            <animate
+              attributeName="baseFrequency"
+              values="0.018;0.024;0.016;0.018"
+              dur="18s"
+              repeatCount="indefinite"
+            />
           </feTurbulence>
           <feColorMatrix
             type="matrix"
@@ -101,7 +106,12 @@ const getCosmicFilter = (type: PackageType, id: string) => {
         <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
           {starField('0.15', '42', '22s')}
           <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="12" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.012;0.018;0.010;0.012" dur="20s" repeatCount="indefinite" />
+            <animate
+              attributeName="baseFrequency"
+              values="0.012;0.018;0.010;0.012"
+              dur="20s"
+              repeatCount="indefinite"
+            />
           </feTurbulence>
           <feColorMatrix
             type="matrix"
@@ -113,7 +123,14 @@ const getCosmicFilter = (type: PackageType, id: string) => {
             <feMergeNode in="nebula" />
             <feMergeNode in="stars" />
           </feMerge>
-          <feDisplacementMap in="preMerge" in2="nebulaNoise" scale="18" xChannelSelector="R" yChannelSelector="G" result="warped" />
+          <feDisplacementMap
+            in="preMerge"
+            in2="nebulaNoise"
+            scale="18"
+            xChannelSelector="R"
+            yChannelSelector="G"
+            result="warped"
+          />
           <feGaussianBlur in="warped" stdDeviation="0.8" result="softCosmic" />
           <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
         </filter>
@@ -135,7 +152,14 @@ const getCosmicFilter = (type: PackageType, id: string) => {
             <feMergeNode in="nebula" />
             <feMergeNode in="stars" />
           </feMerge>
-          <feDisplacementMap in="preMerge" in2="nebulaNoise" scale="28" xChannelSelector="R" yChannelSelector="B" result="warped" />
+          <feDisplacementMap
+            in="preMerge"
+            in2="nebulaNoise"
+            scale="28"
+            xChannelSelector="R"
+            yChannelSelector="B"
+            result="warped"
+          />
           <feGaussianBlur in="warped" stdDeviation="1.5" result="softCosmic" />
           <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
         </filter>
@@ -157,7 +181,14 @@ const getCosmicFilter = (type: PackageType, id: string) => {
             <feMergeNode in="nebula" />
             <feMergeNode in="stars" />
           </feMerge>
-          <feDisplacementMap in="preMerge" in2="nebulaNoise" scale="40" xChannelSelector="G" yChannelSelector="B" result="warped" />
+          <feDisplacementMap
+            in="preMerge"
+            in2="nebulaNoise"
+            scale="40"
+            xChannelSelector="G"
+            yChannelSelector="B"
+            result="warped"
+          />
           <feGaussianBlur in="warped" stdDeviation="1.0" result="softCosmic" />
           <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
         </filter>
@@ -194,7 +225,12 @@ const getCosmicFilter = (type: PackageType, id: string) => {
         <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
           {starField('0.10', '3', '28s')}
           <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="3" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.014;0.020;0.010;0.014" dur="22s" repeatCount="indefinite" />
+            <animate
+              attributeName="baseFrequency"
+              values="0.014;0.020;0.010;0.014"
+              dur="22s"
+              repeatCount="indefinite"
+            />
           </feTurbulence>
           <feColorMatrix
             type="matrix"

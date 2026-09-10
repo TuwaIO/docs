@@ -6,29 +6,34 @@
   "license": "Apache-2.0",
   "description": "Central documentation hub and gateway portal for the TUWA Web3 ecosystem.",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --turbopack",
+    "build": "next build && pnpm postbuild",
+    "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tuwaio/docs-ui": "workspace:*",
-    "@tuwaio/nova-core": "^0.5.0",
+    "@tuwaio/nova-core": "^0.6.0",
     "clsx": "^2.1.1",
-    "next": "^16.3.0",
+    "next": "^16.3.4",
     "next-themes": "^0.4.6",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "nextjs-toploader": "^3.9.17",
+    "nextra": "^4.6.1",
+    "nextra-theme-docs": "^4.6.1",
+    "pagefind": "^1.5.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
-    "postcss": "^8.5.26",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
     "tailwindcss": "^4.3.3",
-    "typescript": "^6.0.3"
+    "typescript": "6.0.3"
   }
 }

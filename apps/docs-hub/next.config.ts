@@ -1,5 +1,14 @@
-import type { NextConfig } from 'next';
+import nextra from 'nextra';
 
-const nextConfig: NextConfig = {};
+// Set up Nextra with its configuration
+const withNextra = nextra({
+  defaultShowCopyCode: true,
+});
 
-export default nextConfig;
+// Export the final Next.js config with Nextra included
+export default withNextra({
+  webpack: (config) => {
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    return config;
+  },
+});

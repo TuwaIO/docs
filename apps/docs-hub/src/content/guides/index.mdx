@@ -1,0 +1,47 @@
+---
+title: Engineering Deep Dives & Architectural Blueprints
+description: High-level Web3 architecture blueprints, production battle-testing, lifecycle state machines, and real-world implementation recipes for the TUWA ecosystem.
+---
+
+# Architecture Blueprints & Deep Dives
+
+While individual package documentation provides granular, function-level API references, this hub is dedicated to **high-level Web3 architecture, production battle-testing, and real-world execution recipes**.
+
+We do not write generic "Hello World" tutorials. Web3 engineering collapses when real-world blockchain mechanics meet naive frontend code: mempool congestion, fee spikes, dropped nonces, speed-ups, tab switching, and component unmounting. The blueprints documented here solve these non-trivial problems using local-first, headless, and self-custodial architectural patterns.
+
+---
+
+> [!IMPORTANT]
+> **Authoritative Specification for Developers & AI Agents**  
+> For the ground-truth system design rules, strict package isolation boundaries, inter-layer contracts, and agent behavior constraints across the entire ecosystem, consult [`workflows/TUWA_Agents.md`](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md). It serves as the single source of architectural truth for human engineers and autonomous agents alike.
+
+---
+
+## Deep-Dive Guides
+
+Comprehensive engineering breakdowns focused on solving systemic vulnerabilities in modern dApps:
+
+### ⚡ [Why Web3 Transaction State Management is Broken (And Why useState is an Anti-Pattern)](/guides/why-web3-transaction-state-is-broken)
+
+A deep-dive investigation into why modeling blockchain writes with React `useState` leads to component unmount bugs, orphaned speed-up transactions, and desynchronized user sessions. Demonstrates how to decouple execution from the UI tree using headless state machines and nonce-aware mempool polling.
+
+- **Focus:** Mempool mechanics, replacement transactions, cross-tab synchronization.
+- **Key Solution:** Decoupled transaction lifecycles powered by `@tuwaio/pulsar-core`.
+
+---
+
+## Package API References
+
+Looking for granular API references, hook signatures, type definitions, or installation instructions for individual packages?
+
+All dedicated package documentation spaces (`@tuwaio/siwx`, `@tuwaio/orbit`, `@tuwaio/satellite`, `@tuwaio/pulsar`, `Quasar`, `@tuwaio/nova`, `@tuwaio/sdk`) are indexed on our **[Main Screen](/)**. Visit the main portal to explore the complete interactive layer roadmap and jump directly into specific package documentation.
+
+---
+
+## Architectural Principles
+
+Every blueprint in this repository adheres to three non-negotiable engineering principles:
+
+1. **Self-Custodial & Sovereign Architecture:** Frontends operate with uncompromising self-custody—free from proprietary, closed-source Wallet-as-a-Service (WaaS) lock-in. Client applications maintain resilient local-first state, seamlessly augmented by self-hosted cloud infrastructure (Quasar) for multi-device indexing, webhook delivery, and backend orchestration without sacrificing user sovereignty.
+2. **Headless Separation of Concerns:** Core logic lives in framework-agnostic state stores (`satellite`, `pulsar`, `orbit`). Presentation lives in disposable UI views (`nova`). Changes to UI styling never jeopardize underlying Web3 state machines.
+3. **Strict Type Safety & Zero Bloat:** Zero tolerance for `any` types, legacy `@solana/web3.js` bundles, or bloated `ethers.js` packages. Only modern, high-performance primitives (`viem`, `@solana/kit`).
