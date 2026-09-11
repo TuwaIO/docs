@@ -181,7 +181,7 @@ To build resilient Web3 frontends, transaction tracking must **never live in Rea
 A production-grade Web3 transaction architecture enforces four non-negotiable rules:
 
 1. **Persistent Store as Single Source of Truth:** Broadcasted transactions must be synchronously serialized and saved to persistent storage (`localStorage` / `IndexedDB`) before awaiting network confirmation.
-2. **Nonce-Aware Replacement Detection:** The tracker must listen for replacement events. When `H1` is replaced by `H2`, the store updates the record to `TransactionStatus.Replaced`, registers `replacedTxHash`, and transparently redirects tracking to `H2`.
+2. **Nonce-Aware Replacement Detection:** The tracker detects when a transaction with hash `H1` is replaced in the mempool (e.g., speed-up or cancel via identical nonce). The store transitions `H1` to `TransactionStatus.Replaced`, records `replacedTxHash` (`H2`), and fires the `onReplaced(newTx, oldTx)` callback. Pulsar marks the superseded record and hands off the newly emitted transaction to the consuming application layer.
 3. **Resilient Session Resumption:** When a user refreshes or reopens the application, a bootstrap routine scans the pool and concurrently resumes polling for all transactions still marked as `pending: true`.
 4. **Passive UI Binding:** Components do not manage transaction promises. They merely read state slices via selectors (`selectPendingTransactions`, `selectTxByKey`).
 
@@ -238,10 +238,7 @@ import type { TransactionUnion } from '@/types/transactions';
 
 const initialStore = createPulsarStore<TransactionUnion>({
   name: 'tuwa-transactions-storage',
-  adapter: [
-    pulsarEvmAdapter(wagmiConfig, appChains),
-    pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls }),
-  ],
+  adapter: [pulsarEvmAdapter(wagmiConfig, appChains), pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls })],
   // Pre-flight: verify SIWX session + Quasar Cloud reachability before wallet prompt
   beforeTxProcess: async () => {
     await preFlightTxCheck(QUASAR_BASE_URL);
@@ -302,47 +299,85 @@ export async function syncTransaction(tx: Transaction) {
 
 ### Step 3: Dispatching Write Actions via `executeTxAction`
 
-Instead of calling `walletClient.sendTransaction` inside a component closure, dispatch the operation to the Pulsar state machine:
+Instead of embedding arbitrary wallet calls inside a component closure, extract your transaction dispatch into a clean `@wagmi/core` action and pass it to `executeTxAction`:
+
+```tsx
+// src/transactions/evm/swapTokens.ts
+import { writeContract } from '@wagmi/core';
+import { parseUnits } from 'viem';
+import { wagmiConfig } from '@/configs/wagmi';
+import { ROUTER_ABI, ROUTER_ADDRESS } from '@/contracts/router';
+
+export async function swapTokens({
+  tokenIn,
+  tokenOut,
+  amount,
+  recipient,
+}: {
+  tokenIn: `0x${string}`;
+  tokenOut: `0x${string}`;
+  amount: string;
+  recipient: `0x${string}`;
+}) {
+  return writeContract(wagmiConfig, {
+    abi: ROUTER_ABI,
+    address: ROUTER_ADDRESS,
+    functionName: 'exactInputSingle',
+    args: [
+      {
+        tokenIn,
+        tokenOut,
+        fee: 3000,
+        recipient,
+        amountIn: parseUnits(amount, 6),
+        amountOutMinimum: 0n,
+        sqrtPriceLimitX96: 0n,
+      },
+    ],
+    chainId: 1,
+  });
+}
+```
 
 ```tsx
 // src/components/SwapActionButton.tsx
+'use client';
+
 import { usePulsarStore } from '@/stores/pulsarStore';
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { AppTxType } from '@/types/transactions';
-import { encodeFunctionData, parseUnits } from 'viem';
+import { swapTokens } from '@/transactions/evm/swapTokens';
 
-export function SwapActionButton({ amount }: { amount: string }) {
+export function SwapActionButton({
+  amount,
+  tokenIn,
+  tokenOut,
+  recipient,
+}: {
+  amount: string;
+  tokenIn: `0x${string}`;
+  tokenOut: `0x${string}`;
+  recipient: `0x${string}`;
+}) {
   const executeTxAction = usePulsarStore((state) => state.executeTxAction);
 
   const handleSwap = async () => {
     await executeTxAction({
-      actionFunction: async () => {
-        // Execute the wallet interaction; returns the initial transaction hash (Hex)
-        const hash = await walletClient.sendTransaction({
-          to: ROUTER_ADDRESS,
-          data: encodeFunctionData({ ... }),
-        });
-        return hash;
-      },
+      actionFunction: () => swapTokens({ tokenIn, tokenOut, amount, recipient }),
       params: {
         type: AppTxType.TOKEN_SWAP,
         adapter: OrbitAdapter.EVM,
         desiredChainID: 1, // Automatic chain validation & switching
-        title: [
-          'Swapping Tokens',
-          'Swap Confirmed',
-          'Swap Failed',
-          'Transaction Sped Up',
-        ],
+        title: ['Swapping Tokens', 'Swap Confirmed', 'Swap Failed', 'Transaction Sped Up'],
         description: [
           `Swapping ${amount} USDC for ETH...`,
           `Successfully swapped ${amount} USDC for ETH.`,
           'Transaction reverted on-chain.',
-          'Gas fee was increased; tracking replacement hash...',
+          'Gas fee was increased; replacement hash emitted via callback.',
         ],
         payload: {
-          tokenIn: 'USDC',
-          tokenOut: 'ETH',
+          tokenIn,
+          tokenOut,
           amount,
         },
         withTrackedModal: true, // Triggers Nova UIKit modal sheet
@@ -352,7 +387,8 @@ export function SwapActionButton({ amount }: { amount: string }) {
         console.log('[Pulsar] Transaction finalized:', tx.txKey);
       },
       onReplaced: (newTx, oldTx) => {
-        console.warn(`[Pulsar] Replaced ${oldTx.txKey} with ${newTx.txKey}`);
+        // Pulsar flags oldTx as Replaced and emits newTx for application handoff
+        console.warn(`[Pulsar] Replaced ${oldTx.txKey} with new hash: ${newTx.txKey}`);
       },
       onError: (err, tx) => {
         console.error('[Pulsar] Execution error:', err);
