@@ -63,8 +63,7 @@ flowchart TD
     Prompt -->|Signed & Broadcasted<br/>Hash Acquired| Mempool[InMempool: Pending in Nodes]
 
     %% Phase 2: Mempool Layer & Edge Cases
-    Mempool -->|Speed-Up: Same Nonce<br/>+ Higher Gas| Replaced[Replaced: New Hash]
-    Replaced -.->|Re-track New Hash| Mempool
+    Mempool -->|Speed-Up: Same Nonce<br/>+ Higher Gas| Replaced([Replaced: Emits Replacement Hash])
 
     Mempool -->|Cancel: Zero-Value<br/>Self-Transfer| Cancelled([Cancelled: Nonce Consumed])
 
@@ -121,13 +120,20 @@ Here is what happens at the network layer:
 Hash(T2) ≠ Hash(T1)    (Account Nonce N is identical)
 ```
 
-Your naive component is still awaiting receipt for the orphaned hash $H_1$:
+In naive component code, developers simply await the receipt of the initial hash:
 
 ```ts
-await publicClient.waitForTransactionReceipt({ hash: H1 }); // ❌ WILL NEVER RESOLVE
+// Naive component handler:
+const receipt = await publicClient.waitForTransactionReceipt({ hash: H1 });
 ```
 
-Validators mine $T_2$. The nonce $N$ is consumed. The original transaction $H_1$ is permanently evicted from the mempool. **Your dApp stays locked in an infinite loading spinner** until the user hard-refreshes the browser.
+Although modern lower-level libraries like `viem` provide internal replacement detection (via block scanning and the `onReplaced` callback), **a naive component relying on local `useState` breaks down in production**:
+
+1. **State Desynchronization:** The component's local `hash` state remains bound to the superseded $H_1$. If the UI renders an explorer link (`etherscan.io/tx/{hash}`), it directs users to an evicted transaction that returns a 404 error.
+2. **Component Isolation:** Even if an inline `onReplaced` callback intercepts $H_2$, an isolated button component cannot propagate the replacement hash to global navigation bars, activity drawers, or notification feeds.
+3. **Premature Error Rejection:** If the wallet user submits a cancellation or the RPC poll times out before the replacement is mined, the promise rejects with an unhandled exception—displaying a failure modal even though the replacement transaction $T_2$ was mined successfully.
+
+Pulsar solves this by intercepting Viem's `onReplaced` event at the adapter level, updating the transaction record in the central persistent store (`status = TransactionStatus.Replaced`, `replacedTxHash = H2`, `pending: false`), and emitting the replacement hash via the `onReplaced` callback for application-level handling.
 
 ### Failure Mode 3: Cross-Tab & Browser Reload Amnesia
 
@@ -181,7 +187,7 @@ To build resilient Web3 frontends, transaction tracking must **never live in Rea
 A production-grade Web3 transaction architecture enforces four non-negotiable rules:
 
 1. **Persistent Store as Single Source of Truth:** Broadcasted transactions must be synchronously serialized and saved to persistent storage (`localStorage` / `IndexedDB`) before awaiting network confirmation.
-2. **Nonce-Aware Replacement Detection:** The tracker detects when a transaction with hash `H1` is replaced in the mempool (e.g., speed-up or cancel via identical nonce). The store transitions `H1` to `TransactionStatus.Replaced`, records `replacedTxHash` (`H2`), and fires the `onReplaced(newTx, oldTx)` callback. Pulsar marks the superseded record and hands off the newly emitted transaction to the consuming application layer.
+2. **Nonce-Aware Replacement Detection:** The tracker detects when a transaction with hash `H1` is replaced in the mempool (e.g., speed-up or cancel via identical nonce). The store transitions `H1` to `TransactionStatus.Replaced`, records `replacedTxHash` (`H2`), sets `pending: false`, and fires the `onReplaced(newTx, oldTx)` callback. Pulsar stops tracking the superseded record and hands off the replacement hash to the consuming application layer.
 3. **Resilient Session Resumption:** When a user refreshes or reopens the application, a bootstrap routine scans the pool and concurrently resumes polling for all transactions still marked as `pending: true`.
 4. **Passive UI Binding:** Components do not manage transaction promises. They merely read state slices via selectors (`selectPendingTransactions`, `selectTxByKey`).
 
@@ -387,8 +393,8 @@ export function SwapActionButton({
         console.log('[Pulsar] Transaction finalized:', tx.txKey);
       },
       onReplaced: (newTx, oldTx) => {
-        // Pulsar flags oldTx as Replaced and emits newTx for application handoff
-        console.warn(`[Pulsar] Replaced ${oldTx.txKey} with new hash: ${newTx.txKey}`);
+        // Pulsar flags oldTx as Replaced (pending: false), persists replacedTxHash, and fires callback
+        console.warn(`[Pulsar] Transaction ${oldTx.txKey} was replaced by: ${newTx.replacedTxHash}`);
       },
       onError: (err, tx) => {
         console.error('[Pulsar] Execution error:', err);
@@ -458,14 +464,14 @@ export function PendingTransactionsBadge() {
 
 ## 5. Architectural Comparison: `useState` vs. Pulsar Engine
 
-| Scenario                     | Naive `useState` Pattern                                     | TUWA Pulsar Engine                                               |
-| :--------------------------- | :----------------------------------------------------------- | :--------------------------------------------------------------- |
-| **Route Navigation**         | ❌ Component unmounts; tracking promise destroyed.           | ✅ Outlives DOM; updates persist in central store.               |
-| **User Speeds Up Tx**        | ❌ Awaits dead hash; gets stuck in infinite loading spinner. | ✅ Detects replacement via `onReplaced`; re-indexes new hash.    |
-| **Browser Refresh**          | ❌ In-flight state obliterated; reset to idle.               | ✅ Resumes tracking pending pool automatically upon mount.       |
-| **Multi-Tab Consistency**    | ❌ Tabs are completely desynchronized.                       | ✅ Storage event synchronization reflects states across tabs.    |
-| **Multi-Chain Support**      | ❌ Ad-hoc Viem/Solana hook spaghetti.                        | ✅ Unified interface across EVM and Solana clusters.             |
-| **Re-Org & Revert Handling** | ❌ Throws raw unformatted error into component.              | ✅ Structured `TransactionStatus` with normalized error objects. |
+| Scenario                     | Naive `useState` Pattern                                | TUWA Pulsar Engine                                                                                |
+| :--------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
+| **Route Navigation**         | ❌ Component unmounts; tracking promise destroyed.      | ✅ Outlives DOM; updates persist in central store.                                                |
+| **User Speeds Up / Cancels** | ❌ Naive promise rejects or desyncs from replaced hash. | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback. |
+| **Browser Refresh**          | ❌ In-flight state obliterated; reset to idle.          | ✅ Resumes tracking pending pool automatically upon mount.                                        |
+| **Multi-Tab Consistency**    | ❌ Tabs are completely desynchronized.                  | ✅ Storage event synchronization reflects states across tabs.                                     |
+| **Multi-Chain Support**      | ❌ Ad-hoc Viem/Solana hook spaghetti.                   | ✅ Unified interface across EVM and Solana clusters.                                              |
+| **Re-Org & Revert Handling** | ❌ Throws raw unformatted error into component.         | ✅ Structured `TransactionStatus` with normalized error objects.                                  |
 
 ---
 

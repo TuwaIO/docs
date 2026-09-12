@@ -7,13 +7,13 @@ description: High-level Web3 architecture blueprints, production battle-testing,
 
 While individual package documentation provides granular, function-level API references, this hub is dedicated to **high-level Web3 architecture, production battle-testing, and real-world execution recipes**.
 
-We do not write generic "Hello World" tutorials. Web3 engineering collapses when real-world blockchain mechanics meet naive frontend code: mempool congestion, fee spikes, dropped nonces, speed-ups, tab switching, and component unmounting. The blueprints documented here solve these non-trivial problems using local-first, headless, and self-custodial architectural patterns.
+Web3 engineering fails when distributed ledger realities meet naive frontend assumptions: mempool congestion, dynamic gas spikes, dropped nonces, speed-up replacements, background tab throttling, and component unmounting. The blueprints documented here resolve these systemic issues using local-first, headless, and self-custodial architectural patterns.
 
 ---
 
 > [!IMPORTANT]
 > **Authoritative Specification for Developers & AI Agents**  
-> For the ground-truth system design rules, strict package isolation boundaries, inter-layer contracts, and agent behavior constraints across the entire ecosystem, consult [`workflows/TUWA_Agents.md`](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md). It serves as the single source of architectural truth for human engineers and autonomous agents alike.
+> For the ground-truth system design rules, strict package isolation boundaries, inter-layer contracts, and agent behavior constraints across the entire ecosystem, consult [`workflows/TUWA_AGENTS.md`](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md). It serves as the single source of architectural truth for human engineers and autonomous agents alike.
 
 ---
 
@@ -23,17 +23,24 @@ Comprehensive engineering breakdowns focused on solving systemic vulnerabilities
 
 ### 🔐 [Multi-Chain Authentication with SIWX (CAIP-122 Beyond EVM Silos)](/guides/multi-chain-auth-siwx-caip122)
 
-Why EIP-4361 limits modern multi-chain dApps, how CAIP-122 unifies EVM and Solana authentication into a single cryptographic boundary, and how to implement zero-custody, cryptographically verified sessions with anti-replay protection.
+Why EIP-4361 limits modern multi-chain applications, how CAIP-122 unifies EVM and Solana authentication into a single cryptographic boundary, and how to implement stateless, cryptographically verified sessions with anti-replay protection.
 
-- **Focus:** CAIP-122 protocol, cross-chain session synchronization, EIP-191/1271 & ed25519 verification.
+- **Focus:** CAIP-122 protocol, cross-chain session synchronization, EIP-191/1271 & ed25519 signature verification.
 - **Key Solution:** Universal multi-chain authentication powered by `@tuwaio/siwx`.
 
 ### ⚡ [Why Web3 Transaction State Management is Broken (And Why useState is an Anti-Pattern)](/guides/why-web3-transaction-state-is-broken)
 
-A deep-dive investigation into why modeling blockchain writes with React `useState` leads to component unmount bugs, orphaned speed-up transactions, and desynchronized user sessions. Demonstrates how to decouple execution from the UI tree using headless state machines and nonce-aware mempool polling.
+An in-depth investigation into why modeling blockchain writes with React `useState` leads to component unmount bugs, orphaned speed-up transactions, and desynchronized user sessions. Demonstrates how to decouple execution from the UI tree using headless state machines and nonce-aware lifecycle tracking.
 
-- **Focus:** Mempool mechanics, replacement transactions, cross-tab synchronization.
+- **Focus:** Mempool mechanics, transaction replacements, cross-tab synchronization.
 - **Key Solution:** Decoupled transaction lifecycles powered by `@tuwaio/pulsar-core`.
+
+### 🛡️ [Demystifying ERC-4337: Sovereign Account Abstraction (Avoiding Vendor Lock-In)](/guides/erc-4337-sovereign-account-abstraction)
+
+Why Account Abstraction does not require proprietary WaaS lock-in, how the alternative mempool and `userOpHash` vs `txHash` lifecycle works, and how to build gas-optimized, sovereign smart accounts with Solady, Orbit EVM, Pulsar, and Quasar Cloud.
+
+- **Focus:** Canonical EntryPoint v0.7, Solady counterfactual accounts, Pimlico bundler/paymaster RPCs, Two-Stage UserOp tracking.
+- **Key Solution:** Sovereign, gas-sponsored smart accounts powered by `@tuwaio/orbit-evm`, `@tuwaio/pulsar-core`, and Quasar Cloud.
 
 ---
 
@@ -41,7 +48,7 @@ A deep-dive investigation into why modeling blockchain writes with React `useSta
 
 Looking for granular API references, hook signatures, type definitions, or installation instructions for individual packages?
 
-All dedicated package documentation spaces (`@tuwaio/siwx`, `@tuwaio/orbit`, `@tuwaio/satellite`, `@tuwaio/pulsar`, `@tuwaio/nova-uikit`, `@tuwaio/sdk`, `Quasar`) are indexed on our **[Main Screen](/)**. Visit the main portal to explore the complete interactive layer roadmap and jump directly into specific package documentation.
+All dedicated package documentation spaces (`@tuwaio/siwx`, `@tuwaio/orbit`, `@tuwaio/satellite`, `@tuwaio/pulsar`, `@tuwaio/nova-uikit`, `@tuwaio/sdk`, and `@tuwaio/quasar-sdk`) are indexed on our **[Main Screen](/)**. Visit the main portal to explore the complete interactive layer roadmap and jump directly into specific package documentation.
 
 ---
 
@@ -49,6 +56,6 @@ All dedicated package documentation spaces (`@tuwaio/siwx`, `@tuwaio/orbit`, `@t
 
 Every blueprint in this repository adheres to three non-negotiable engineering principles:
 
-1. **Self-Custodial & Sovereign Architecture:** Frontends operate with uncompromising self-custody—free from proprietary, closed-source Wallet-as-a-Service (WaaS) lock-in. Client applications maintain resilient local-first state, seamlessly augmented by self-hosted cloud infrastructure (Quasar) for multi-device indexing, webhook delivery, and backend orchestration without sacrificing user sovereignty.
-2. **Headless Separation of Concerns:** Core logic lives in framework-agnostic state stores (`satellite`, `pulsar`, `orbit`). Presentation lives in disposable UI views (`nova`). Changes to UI styling never jeopardize underlying Web3 state machines.
-3. **Strict Type Safety & Zero Bloat:** Zero tolerance for `any` types, legacy `@solana/web3.js` bundles, or bloated `ethers.js` packages. Only modern, high-performance primitives (`viem`, `@solana/kit`).
+1. **Self-Custodial & Sovereign Architecture:** Frontends operate with uncompromising self-custody—free from closed-source, proprietary Wallet-as-a-Service (WaaS) lock-in. Client applications maintain resilient, local-first state, seamlessly augmented by managed cloud infrastructure (Quasar) for multi-device indexing, webhook delivery, and backend orchestration without sacrificing user sovereignty.
+2. **Headless Separation of Concerns:** Core business logic lives in framework-agnostic stores (`satellite`, `pulsar`) and low-level protocol adapters (`orbit`). Presentation lives in disposable UI views (`nova`). Changes to UI styling never jeopardize underlying Web3 state machines.
+3. **Strict Type Safety & Zero Bloat:** Zero tolerance for `any` types, legacy `@solana/web3.js` v1 bundles, or monolithic `ethers.js` packages. Only modern, tree-shakeable, high-performance primitives (`viem`, `@solana/kit`).

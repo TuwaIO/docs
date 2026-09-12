@@ -135,8 +135,8 @@ The table below contrasts how SIWX adapters unify divergent blockchain cryptogra
 | **Cryptographic Curve**     | `secp256k1` (Koblitz curve ECDSA)                                           | `ed25519` (Edwards-curve Digital Signature)                       |
 | **Signature Format**        | 65-byte Hex string (`0x` + 130 chars: `r, s, v`)                            | 64-byte Base58 string (88 characters)                             |
 | **Supported Wallets**       | MetaMask, Rabby, Rainbow, Coinbase, Safe, and all EIP-1193 standard wallets | Phantom, Solflare, Backpack, OKX, and all Wallet Standard wallets |
-| **Smart Contract Accounts** | Supported natively via EIP-1271 (`isValidSignature`)                        | Program-Derived Addresses (PDAs) with authority checks            |
-| **Verification Engine**     | Viem `recoverAddress` + RPC `readContract`                                  | Web Crypto API `crypto.subtle.verify` (Zero Deps)                 |
+| **Smart Contract Accounts** | Supported via EIP-1271 (`isValidSignature`) (deployed contracts)            | Not supported (Keypairs only; PDAs are off-curve & keyless)       |
+| **Verification Engine**     | Viem `recoverAddress` (EIP-191) + RPC `readContract` (EIP-1271)             | Native Web Crypto API `crypto.subtle.verify` (Ed25519, Zero Deps) |
 
 ---
 
@@ -249,7 +249,10 @@ export function MultiChainAuth({ solanaWallet }: { solanaWallet?: any }) {
 
 #### Declarative Watcher Pattern with Satellite & Nova UIKit
 
-For apps using Satellite Connect and Nova UIKit, sessions and wallet connections synchronize automatically through declarative connector watchers:
+For apps using Satellite Connect and Nova UIKit, sessions and wallet connections synchronize automatically through declarative connector watchers.
+
+> [!NOTE]
+> In full-stack TUWA applications, developers can import either from granular packages (`@tuwaio/nova-connect`, `@tuwaio/siwx-react`, `@tuwaio/satellite-*`) or from unified metapackage subpaths (`@tuwaio/sdk`, `@tuwaio/evm-sdk`, `@tuwaio/solana-sdk`). Both provide identical API surfaces.
 
 ```tsx
 // src/providers/SatelliteConnectProviders.tsx
@@ -317,20 +320,24 @@ While the reference implementations below demonstrate **Next.js App Router** rou
 ```typescript
 // src/app/api/siwx/[...siwx]/route.ts
 import { createSiwxApiHandler } from '@tuwaio/siwx-server/next';
+import type { SiwxSession, SiwxSessionRecord, SiwxSessionStore } from '@tuwaio/siwx-server';
 import { redisClient } from '@/lib/redis';
 
-// Atomic Redis session store implementation
-const sessionStore = {
-  async get(id: string) {
+// Atomic Redis session store conforming to SiwxSessionStore
+const sessionStore: SiwxSessionStore = {
+  async get(id: string): Promise<SiwxSessionRecord | null> {
     const data = await redisClient.get(`siwx:sess:${id}`);
-    return data ? JSON.parse(data) : null;
+    return data ? (JSON.parse(data) as SiwxSessionRecord) : null;
   },
-  async create({ session, ttlSeconds }: { session: any; ttlSeconds: number }) {
+  async create({ session, ttlSeconds }: { session: SiwxSession; ttlSeconds: number }): Promise<SiwxSessionRecord> {
     const id = crypto.randomUUID();
-    await redisClient.set(`siwx:sess:${id}`, JSON.stringify({ session }), 'EX', ttlSeconds);
-    return { id, session };
+    const createdAt = Date.now();
+    const expiresAt = createdAt + ttlSeconds * 1000;
+    const record: SiwxSessionRecord = { id, session, createdAt, expiresAt };
+    await redisClient.set(`siwx:sess:${id}`, JSON.stringify(record), 'EX', ttlSeconds);
+    return record;
   },
-  async revoke(id: string) {
+  async revoke(id: string): Promise<void> {
     await redisClient.del(`siwx:sess:${id}`);
   },
 };
@@ -371,7 +378,7 @@ For prototypes or benchmark templates without a running Redis instance, use `cre
 
 ```typescript
 // src/app/api/siwx/[...siwx]/route.ts
-import { createStatelessDemoSiwxHandler } from '@tuwaio/sdk/siwx/server-next';
+import { createStatelessDemoSiwxHandler } from '@tuwaio/siwx-server/next';
 
 const handler = createStatelessDemoSiwxHandler({
   signingSecret: process.env.SIWX_SIGNING_SECRET!, // Minimum 32 characters
