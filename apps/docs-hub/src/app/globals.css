@@ -22,97 +22,38 @@ html {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
 }
 
-/* Custom styling for Mermaid sequence diagrams matching TUWA design system (why-web3-transaction-state-is-broken.mdx) */
-.mermaid g.actor rect,
-.mermaid rect.actor,
-.mermaid .actor rect {
-  fill: #111827 !important;
-  stroke: #6366f1 !important;
-  stroke-width: 1.5px !important;
-  rx: 8px !important;
-  ry: 8px !important;
-}
-
-.mermaid g.actor text,
-.mermaid text.actor,
-.mermaid .actor text,
-.mermaid text.actor > tspan,
-.mermaid g.actor text > tspan {
-  fill: #f8fafc !important;
-  font-weight: 600 !important;
-  font-family: inherit !important;
-}
-
-.mermaid line.actor-line,
-.mermaid .actor-line {
-  stroke: #6366f1 !important;
-  stroke-width: 1.5px !important;
-  stroke-dasharray: 4, 4 !important;
-}
-
-/* Arrow message text - high contrast in both themes */
-.mermaid text.messageText,
-.mermaid .messageText {
-  font-weight: 500 !important;
-  font-family: inherit !important;
-}
-
-:root:not(.dark) .mermaid text.messageText,
-:root:not(.dark) .mermaid .messageText {
+/* Sequence Diagram theme adaptation (Light & Dark) */
+svg[aria-roledescription='sequence'] text.actor-man,
+svg[aria-roledescription='sequence'] .actor-man text,
+svg[aria-roledescription='sequence'] .actor-man tspan {
   fill: #0f172a !important;
-}
-
-.dark .mermaid text.messageText,
-.dark .mermaid .messageText {
-  fill: #f8fafc !important;
-}
-
-/* Arrow message lines */
-:root:not(.dark) .mermaid line.messageLine0,
-:root:not(.dark) .mermaid line.messageLine1,
-:root:not(.dark) .mermaid .messageLine0,
-:root:not(.dark) .mermaid .messageLine1 {
-  stroke: #475569 !important;
-}
-
-.dark .mermaid line.messageLine0,
-.dark .mermaid line.messageLine1,
-.dark .mermaid .messageLine0,
-.dark .mermaid .messageLine1 {
-  stroke: #94a3b8 !important;
-}
-
-/* Note box styling: emerald green badge matching why-web3-transaction-state-is-broken.mdx */
-.mermaid g.note rect,
-.mermaid rect.note,
-.mermaid .note rect,
-.mermaid rect[class*='note'] {
-  fill: #064e3b !important;
-  stroke: #10b981 !important;
-  stroke-width: 1.5px !important;
-  rx: 8px !important;
-  ry: 8px !important;
-}
-
-.mermaid g.note text,
-.mermaid text.noteText,
-.mermaid .note text,
-.mermaid text.noteText > tspan,
-.mermaid g.note text > tspan,
-.mermaid .note text > tspan {
-  fill: #ecfdf5 !important;
   font-weight: 600 !important;
-  font-family: inherit !important;
 }
 
-/* Autonumber sequence badges */
-.mermaid circle {
-  fill: #6366f1 !important;
-  stroke: #4f46e5 !important;
+svg[aria-roledescription='sequence'] text.messageText {
+  fill: #334155 !important;
+  font-weight: 500 !important;
 }
 
-.mermaid .sequenceNumber,
-.mermaid text.labelText {
-  fill: #ffffff !important;
-  font-weight: 700 !important;
+.dark svg[aria-roledescription='sequence'] text.actor-man,
+.dark svg[aria-roledescription='sequence'] .actor-man text,
+.dark svg[aria-roledescription='sequence'] .actor-man tspan,
+html.dark svg[aria-roledescription='sequence'] text.actor-man,
+html.dark svg[aria-roledescription='sequence'] .actor-man text,
+html.dark svg[aria-roledescription='sequence'] .actor-man tspan {
+  fill: #f8fafc !important;
+  font-weight: 600 !important;
+}
+
+.dark svg[aria-roledescription='sequence'] text.messageText,
+html.dark svg[aria-roledescription='sequence'] text.messageText {
+  fill: #f8fafc !important;
+  font-weight: 500 !important;
+}
+
+.dark svg[aria-roledescription='sequence'] line.messageLine0,
+.dark svg[aria-roledescription='sequence'] line.messageLine1,
+html.dark svg[aria-roledescription='sequence'] line.messageLine0,
+html.dark svg[aria-roledescription='sequence'] line.messageLine1 {
+  stroke: #94a3b8 !important;
 }
