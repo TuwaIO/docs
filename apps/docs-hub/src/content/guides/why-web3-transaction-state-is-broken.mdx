@@ -245,7 +245,7 @@ import type { TransactionUnion } from '@/types/transactions';
 const initialStore = createPulsarStore<TransactionUnion>({
   name: 'tuwa-transactions-storage',
   adapter: [pulsarEvmAdapter(wagmiConfig, appChains), pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls })],
-  // Pre-flight: verify SIWX session + Quasar Cloud reachability before wallet prompt
+  // Pre-flight: verify the SIWX session and that the Quasar engine (Cloud or self-hosted) is reachable
   beforeTxProcess: async () => {
     await preFlightTxCheck(QUASAR_BASE_URL);
   },
@@ -275,8 +275,10 @@ import { isSessionMatchingTarget } from '@tuwaio/sdk/siwx';
 import { getSiwxServerSession } from '@tuwaio/sdk/siwx/server';
 import { cookies } from 'next/headers';
 
+import { QUASAR_BASE_URL } from '@/constants';
+
 const quasar = new Quasar({
-  baseUrl: process.env.QUASAR_BASE_URL ?? '',
+  baseUrl: QUASAR_BASE_URL,
   secretKey: process.env.QUASAR_SDK_SK ?? '',
 });
 
@@ -300,6 +302,9 @@ export async function syncTransaction(tx: Transaction) {
   return { success: true };
 }
 ```
+
+> [!TIP]
+> **Cloud or self-hosted:** `QUASAR_BASE_URL` (read from `NEXT_PUBLIC_QUASAR_BASE_URL`) is the only setting that decides which Quasar you talk to. Leave it at Quasar Cloud (`https://api.tuwa.io`), or point it at your own [Quasar Community Edition](https://github.com/TuwaIO/quasar-community) node (for example `https://api.your-domain.com`) and use a secret key created in that node's admin panel. Pulsar sync, history, and webhooks work the same way.
 
 ---
 

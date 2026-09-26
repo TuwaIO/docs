@@ -3,13 +3,13 @@ title: 'Demystifying ERC-4337: Sovereign Account Abstraction with Viem, Solady, 
 description: 'An architectural deep-dive into ERC-4337 v0.7: alternative mempools, dual identifiers (userOpHash vs txHash), Solady vs ERC-7579 trade-offs, and comparing canonical Viem AA with TUWA open-source primitives and Quasar indexing.'
 ---
 
-# Demystifying ERC-4337: Sovereign Account Abstraction with Viem, Solady, and Pimlico (Avoiding Vendor Lock-In)
+# Demystifying ERC-4337: Sovereign Account Abstraction with Viem, Solady, and Pimlico
 
 Account Abstraction (ERC-4337) fundamentally transforms how users interact with the Ethereum Virtual Machine (EVM): replacing fragile seed phrases with smart contract authorization, enabling sponsored transactions via paymasters, and executing atomic multi-call batches.
 
-However, the ecosystem's initial rush toward adoption introduced widespread confusion between **convenience** and **sovereignty**. Many teams adopted monolithic Wallet-as-a-Service (WaaS) suites under the assumption that Account Abstraction requires proprietary relayer networks and vendor-locked clouds.
+However, the ecosystem's initial rush toward adoption introduced widespread confusion between **convenience** and **sovereignty**. Many teams adopted monolithic Wallet-as-a-Service (WaaS) suites under the assumption that Account Abstraction requires proprietary relayer networks and vendor-hosted wallet infrastructure.
 
-This guide provides an exhaustive architectural audit of ERC-4337 v0.7. It deconstructs the alternative mempool mechanics, details the dual-identifier lifecycle (`userOpHash` vs `txHash`), analyzes the trade-offs between assembly-optimized accounts (Solady) and modular architectures (ERC-7579), and contrasts **canonical, framework-neutral Viem implementations** with **TUWA's modular open-source toolkit (`@tuwaio/orbit-evm`, `@tuwaio/pulsar-evm`)** and optional cloud indexing.
+This guide provides an exhaustive architectural audit of ERC-4337 v0.7. It deconstructs the alternative mempool mechanics, details the dual-identifier lifecycle (`userOpHash` vs `txHash`), analyzes the trade-offs between assembly-optimized accounts (Solady) and modular architectures (ERC-7579), and contrasts **canonical, framework-neutral Viem implementations** with **TUWA's modular open-source toolkit (`@tuwaio/orbit-evm`, `@tuwaio/pulsar-evm`)** and optional Quasar indexing — managed cloud or self-hosted.
 
 ---
 
@@ -479,7 +479,7 @@ export const CounterButton = () => {
 
 ---
 
-## 5. Cross-Device Persistence: Self-Hosted Indexing vs. Quasar Cloud
+## 5. Cross-Device Persistence: Build Your Own Indexer or Use Quasar
 
 A persistent challenge in frontend engineering is the **Tab-Close Dilemma**: users frequently close their browser tab immediately after approving a transaction prompt, terminating all client-side JavaScript polling.
 
@@ -489,22 +489,22 @@ Engineering teams have two paths for solving persistence:
 ┌────────────────────────────────────────────────────────────────────────┐
 │                   Cross-Device Architecture Options                    │
 ├───────────────────────────────────┬────────────────────────────────────┤
-│ Option A: Self-Hosted Open Source │ Option B: Managed Cloud (Quasar)   │
+│ Option A: Build Your Own Indexer  │ Option B: Quasar Engine            │
 ├───────────────────────────────────┼────────────────────────────────────┤
-│ • Ponder or Envio Event Indexer   │ • Zero-Custody Managed Metadata API│
-│ • Custom PostgreSQL database      │ • Turnkey Multi-Device WebSocket   │
-│ • Self-managed Docker / VPS node  │ • Built-in SIWX Session Security   │
-│ • Zero SaaS subscription cost     │ • Automated HMAC Webhook Rails     │
-│ • 100% On-Premise Data Isolation │ • Instant Out-of-the-Box Sync      │
+│ • Ponder or Envio event indexer   │ • Cloud: managed, usage-based      │
+│ • Custom PostgreSQL schema        │ • Community Edition: self-hosted   │
+│ • Your own sync API & webhooks    │ • Same @tuwaio/quasar-sdk for both │
+│ • Full control of data model      │ • Two-phase EVM & Solana tracking  │
+│ • You build and operate it all    │ • HMAC-signed webhook delivery     │
 └───────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### Option A: Self-Hosted Indexer Architecture (Ponder / Envio)
+### Option A: Build Your Own Indexer (Ponder / Envio)
 
-Teams requiring total independence can deploy a lightweight open-source indexer (such as [Ponder](https://ponder.sh) or [Envio](https://envio.dev)) listening to the canonical EntryPoint v0.7 contract:
+Teams that want a fully custom data model can deploy a lightweight open-source indexer (such as [Ponder](https://ponder.sh) or [Envio](https://envio.dev)) listening to the canonical EntryPoint v0.7 contract:
 
 1. The client registers the pending `userOpHash` and user session in your application database via a standard Next.js Server Action.
-2. Your self-hosted Ponder indexer monitors the EntryPoint contract for events:
+2. Your Ponder indexer monitors the EntryPoint contract for events:
    ```solidity
    event UserOperationEvent(
        bytes32 indexed userOpHash,
@@ -518,22 +518,27 @@ Teams requiring total independence can deploy a lightweight open-source indexer 
    ```
 3. When `UserOperationEvent` is emitted, Ponder updates the transaction status in your PostgreSQL database and dispatches Server-Sent Events (SSE) or WebSockets to connected client sessions.
 
-### Option B: Managed Non-Custodial Sync with Quasar
+### Option B: Non-Custodial Sync with Quasar (Cloud or Self-Hosted)
 
 > [!NOTE]
 > **Partial Implementation Notice:**
-> The code example below demonstrates a **partial server-side handler** focused on SIWX session authorization and forwarding the transaction record to Quasar Cloud.
+> The code example below demonstrates a **partial server-side handler** focused on SIWX session authorization and forwarding the transaction record to Quasar.
 > For the complete end-to-end integration—including client-side store sync hooks (`onRemoteCreate`), multi-device transaction reconciliation (`injectExternalPendingTxs`), and history retrieval—refer to the [TUWA SDK Documentation](https://sdk.docs.tuwa.io/) or inspect the production templates in the [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground/tree/main/examples/nextjs-tuwa-quasar).
 
-For teams that prefer not to build, deploy, and maintain custom event indexing infrastructure, **Quasar Cloud** provides an optional, non-custodial synchronization and webhook service:
+For teams that prefer not to build their own event indexer, **Quasar** provides an optional, non-custodial synchronization and webhook engine. It ships in two editions that run the same engine behind the same Engine API:
+
+- **Quasar Cloud** — managed and multi-tenant. TUWA operates the infrastructure; you get the developer dashboard and usage-based pricing.
+- **Quasar Community Edition** — open source (Apache-2.0) and single-tenant. You run it on your own servers with Docker Compose and manage it from a Payload admin panel. Source and deployment guides: [TuwaIO/quasar-community](https://github.com/TuwaIO/quasar-community).
+
+From your dApp's point of view, both editions behave the same:
 
 - **Non-Custodial Data Model & Stored Transaction State:** Quasar never receives or stores private keys, mnemonic seeds, or signer secrets. It stores the complete operational transaction record emitted by the client:
   - **Routing & Identifiers:** `txKey` (`userOpHash`), `chainId`, `from` (smart account address), `adapter` (`OrbitAdapter`), and `tracker` (`TransactionTracker.ERC4337`).
   - **UI Context & Feedback:** `type`, `title`, and `description` (4-state lifecycle notification strings).
   - **Custom Application Payload:** The arbitrary `payload` JSON object specified directly in the UI action parameters (e.g., target contract address, dynamic arguments, transfer amounts, or internal order IDs).
   - **Settlement & Execution Metadata:** `status`, `hash` (outer mined bundle `txHash`), gas metrics, timestamps (`localTimestamp`, `finishedTimestamp`), and bundler configurations.
-- **SIWX Session Verification:** Communications are authenticated via **SIWX (Sign-In With X) HttpOnly cookies**, ensuring that only authorized users can register operations.
-- **Automated Webhooks:** When Pimlico mines the bundle on-chain, Quasar detects block inclusion and dispatches an authenticated HMAC-SHA256 webhook to your server.
+- **Two Layers of Authorization:** Your backend verifies the user's SIWX session (HttpOnly cookie via `@tuwaio/siwx-server`) before forwarding anything, and Quasar authenticates your backend with a server-side secret key. The SIWX check lives in your dApp, so it works with either edition.
+- **Signed Webhooks:** When the bundle is mined, the Quasar engine detects block inclusion and delivers an HMAC-SHA256-signed webhook to your server.
 
 ```typescript
 // src/app/actions/syncTransaction.ts
@@ -546,13 +551,14 @@ import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 
 const quasar = new Quasar({
-  baseUrl: process.env.QUASAR_API_URL || 'https://api.quasar.tuwa.io',
-  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  // Quasar Cloud by default; set to your Community Edition node, e.g. https://api.your-domain.com
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL || 'https://api.tuwa.io',
+  secretKey: process.env.QUASAR_SDK_SK ?? '',
 });
 
 /**
  * Syncs an ERC-4337 UserOperation transaction to Quasar for cross-device persistence and webhooks.
- * Authenticates the caller via SIWX session to protect API quota.
+ * Authenticates the caller via SIWX session before anything reaches Quasar.
  * Accurately validates the cryptographic relationship between EOA Signer and Smart Account Sender.
  */
 export async function syncTransaction(tx: Transaction) {
@@ -621,22 +627,26 @@ export async function syncTransaction(tx: Transaction) {
 }
 ```
 
+> [!NOTE]
+> **Switching editions:** Moving between Quasar Cloud and a self-hosted node means changing `baseUrl` and the secret key — the SDK calls stay the same. Existing Cloud history is not migrated automatically yet; an export from Cloud to self-hosted nodes is on the roadmap.
+
 ---
 
 ## 6. Comprehensive Architectural Comparison Matrix
 
-| Dimension                       | Classic EOA (Viem / Wagmi)           | Embedded WaaS (Privy / Dynamic)                       | Canonical Open Source (Viem AA + ERC-7579 / Solady)    | TUWA Modular Stack (Orbit + Pulsar + opt. Quasar)     |
-| :------------------------------ | :----------------------------------- | :---------------------------------------------------- | :----------------------------------------------------- | :---------------------------------------------------- |
-| **Architecture & Layering**     | Standard low-level JSON-RPC client   | Monolithic vendor SDK & relayer cloud                 | Raw protocol primitives (boilerplate client caching)   | **Ergonomic client layers (`orbit` + `pulsar`)**      |
-| **Private Key Ownership**       | 100% User (Hardware / Browser EOA)   | Non-custodial 2-of-3 SSS in TEE enclaves (exportable) | **100% User (Hardware / Local / Passkey with module)** | **100% User (Hardware / Local / EOA)**                |
-| **Execution Primitives**        | Single standalone call per signature | Proprietary relayer or standard AA                    | **Native ERC-4337 v0.7 Multi-Call Batching**           | **Native ERC-4337 v0.7 Multi-Call Batching**          |
-| **Gas Policy (Paymaster)**      | Native ETH/MATIC only (User pays)    | Vendor-managed sponsorship rules                      | **Open ERC-4337 Paymaster (Pimlico, Biconomy, etc.)**  | **Pluggable Paymaster via `@tuwaio/orbit-evm`**       |
-| **Smart Account Architecture**  | None (Standard Account)              | Proprietary contracts or modular proxy                | **Choice: Assembly Solady or Modular ERC-7579**        | **Solady Single-Owner via `@tuwaio/orbit-evm`**       |
-| **Passkey Support**             | Unsupported                          | Proprietary biometric authentication                  | **Native on ERC-7579 / EIP-7212 (requires module)**    | **Requires external Passkey verifier / module**       |
-| **Transaction State Model**     | Basic `txHash` polling in memory     | Proprietary vendor cloud webhooks                     | **Viem `waitForUserOperationReceipt` (Custom FSM)**    | **Deterministic Two-Stage (`userOp` ➔ `txHash`) FSM** |
-| **Mempool Tracking & Explorer** | N/A (Standard node mempool)          | Proprietary modal status view                         | **Mempool: Bundler RPC / Settled: Block Explorer**     | **Two-Stage: Bundler Status ➔ Canonical Explorer**    |
-| **Cross-Device Persistence**    | Lost on tab close                    | Vendor account cloud sync                             | **Self-hosted Open Indexer (Ponder / Envio + DB)**     | **Open-source local state + Optional Quasar Cloud**   |
-| **License & Extensibility**     | Open Source (MIT)                    | Closed-source SDKs & enterprise billing               | **100% Open Source (MIT / Apache-2.0)**                | **100% Open Source SDKs (Optional Quasar SaaS)**      |
+| Dimension                       | Classic EOA (Viem / Wagmi)           | Embedded WaaS (Privy / Dynamic)                       | Canonical Open Source (Viem AA + ERC-7579 / Solady)    | TUWA Modular Stack (Orbit + Pulsar + opt. Quasar)                         |
+| :------------------------------ | :----------------------------------- | :---------------------------------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------------ |
+| **Architecture & Layering**     | Standard low-level JSON-RPC client   | Monolithic vendor SDK & relayer cloud                 | Raw protocol primitives (boilerplate client caching)   | **Ergonomic client layers (`orbit` + `pulsar`)**                          |
+| **Private Key Ownership**       | 100% User (Hardware / Browser EOA)   | Non-custodial 2-of-3 SSS in TEE enclaves (exportable) | **100% User (Hardware / Local / Passkey with module)** | **100% User (Hardware / Local / EOA)**                                    |
+| **Execution Primitives**        | Single standalone call per signature | Proprietary relayer or standard AA                    | **Native ERC-4337 v0.7 Multi-Call Batching**           | **Native ERC-4337 v0.7 Multi-Call Batching**                              |
+| **Gas Policy (Paymaster)**      | Native ETH/MATIC only (User pays)    | Vendor-managed sponsorship rules                      | **Open ERC-4337 Paymaster (Pimlico, Biconomy, etc.)**  | **Pluggable Paymaster via `@tuwaio/orbit-evm`**                           |
+| **Smart Account Architecture**  | None (Standard Account)              | Proprietary contracts or modular proxy                | **Choice: Assembly Solady or Modular ERC-7579**        | **Solady Single-Owner via `@tuwaio/orbit-evm`**                           |
+| **Passkey Support**             | Unsupported                          | Proprietary biometric authentication                  | **Native on ERC-7579 / EIP-7212 (requires module)**    | **Requires external Passkey verifier / module**                           |
+| **Transaction State Model**     | Basic `txHash` polling in memory     | Proprietary vendor cloud webhooks                     | **Viem `waitForUserOperationReceipt` (Custom FSM)**    | **Deterministic Two-Stage (`userOp` ➔ `txHash`) FSM**                     |
+| **Mempool Tracking & Explorer** | N/A (Standard node mempool)          | Proprietary modal status view                         | **Mempool: Bundler RPC / Settled: Block Explorer**     | **Two-Stage: Bundler Status ➔ Canonical Explorer**                        |
+| **Cross-Device Persistence**    | Lost on tab close                    | Vendor account cloud sync                             | **Self-built open indexer (Ponder / Envio + DB)**      | **Local-first state + optional Quasar (Cloud or self-hosted)**            |
+| **Backend Hosting**             | N/A (client-only)                    | Vendor-hosted only                                    | **Self-built & self-operated**                         | **Quasar Cloud or self-hosted Community Edition**                         |
+| **License & Extensibility**     | Open Source (MIT)                    | Closed-source SDKs & enterprise billing               | **100% Open Source (MIT / Apache-2.0)**                | **Apache-2.0 SDKs & self-hostable Quasar; managed Quasar Cloud optional** |
 
 ---
 
@@ -648,7 +658,7 @@ Account Abstraction represents a major leap forward for Web3 UX, but building ro
 2. **Handle the Two-Stage Lifecycle Correctly:** Poll `userOpHash` against Bundler RPC endpoints during Stage 1, and link canonical block explorers once the outer bundle `txHash` is confirmed on-chain.
 3. **Guard Against Silent Execution Reverts:** Never rely on outer transaction receipt status (`receipt.status === 1`). Always verify `receipt.success === true` from the UserOperation receipt.
 4. **Choose the Right Contract Archetype:** Deploy **Solady** for ultra-optimized, single-owner EOA accounts; deploy **ERC-7579** when your application demands dynamic plugins, session keys, or biometric Passkeys.
-5. **Select Your Persistence Strategy:** TUWA's core client libraries (`orbit`, `pulsar`, `satellite`, `nova`) are **100% open-source and framework-neutral**, capable of operating standalone alongside self-hosted indexers (Ponder/Envio) or connecting to Quasar Cloud for turnkey cross-device sync.
+5. **Select Your Persistence Strategy:** TUWA's core client libraries (`orbit`, `pulsar`, `satellite`, `nova`) are **open source (Apache-2.0) and headless-first**. They run standalone next to a custom indexer (Ponder/Envio), or connect to Quasar for cross-device sync — managed on Quasar Cloud or self-hosted with the open-source Community Edition.
 
 ---
 
@@ -657,4 +667,5 @@ Account Abstraction represents a major leap forward for Web3 UX, but building ro
 - **Orbit EVM Documentation:** Explore Solady smart account utilities, EntryPoint v0.7 configurations, and Pimlico RPC helpers on the [@tuwaio/orbit Documentation Space](https://orbit.docs.tuwa.io/).
 - **Transaction Lifecycle Engine:** Read [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken) and explore how [Pulsar Engine](https://pulsar.docs.tuwa.io/) orchestrates Two-Stage UserOperation state machines.
 - **Multi-Chain Authentication:** Learn how CAIP-122 unifies sovereign session authentication across EVM (EIP-191/1271) and Solana (ed25519) in [Multi-Chain Auth with SIWX](/guides/multi-chain-auth-siwx-caip122).
+- **Self-Hosted Quasar:** Run the Apache-2.0 [Quasar Community Edition](https://github.com/TuwaIO/quasar-community) on your own servers, or explore its [live showcase](https://github.com/TuwaIO/quasar-community#live-community-showcase) first.
 - **Reference Examples & Starters:** Inspect production-ready account abstraction templates in the [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground).

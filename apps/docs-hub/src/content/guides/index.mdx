@@ -35,12 +35,12 @@ An in-depth investigation into why modeling blockchain writes with React `useSta
 - **Focus:** Mempool mechanics, transaction replacements, cross-tab synchronization.
 - **Key Solution:** Decoupled transaction lifecycles powered by `@tuwaio/pulsar-core`.
 
-### 🛡️ [Demystifying ERC-4337: Sovereign Account Abstraction (Avoiding Vendor Lock-In)](/guides/erc-4337-sovereign-account-abstraction)
+### 🛡️ [Demystifying ERC-4337: Sovereign Account Abstraction Without Proprietary WaaS](/guides/erc-4337-sovereign-account-abstraction)
 
-Why Account Abstraction does not require proprietary WaaS lock-in, how the alternative mempool and `userOpHash` vs `txHash` lifecycle works, and how to build gas-optimized, sovereign smart accounts with Solady, Orbit EVM, Pulsar, and Quasar Cloud.
+Why Account Abstraction does not require a proprietary WaaS platform, how the alternative mempool and `userOpHash` vs `txHash` lifecycle works, and how to build gas-optimized, sovereign smart accounts with Solady, Orbit EVM, Pulsar, and Quasar.
 
 - **Focus:** Canonical EntryPoint v0.7, Solady counterfactual accounts, Pimlico bundler/paymaster RPCs, Two-Stage UserOp tracking.
-- **Key Solution:** Sovereign, gas-sponsored smart accounts powered by `@tuwaio/orbit-evm`, `@tuwaio/pulsar-core`, and Quasar Cloud.
+- **Key Solution:** Sovereign, gas-sponsored smart accounts powered by `@tuwaio/orbit-evm`, `@tuwaio/pulsar-core`, and Quasar — managed cloud or self-hosted Community Edition.
 
 ---
 
@@ -50,12 +50,14 @@ Looking for granular API references, hook signatures, type definitions, or insta
 
 All dedicated package documentation spaces (`@tuwaio/siwx`, `@tuwaio/orbit`, `@tuwaio/satellite`, `@tuwaio/pulsar`, `@tuwaio/nova-uikit`, `@tuwaio/sdk`, and `@tuwaio/quasar-sdk`) are indexed on our **[Main Screen](/)**. Visit the main portal to explore the complete interactive layer roadmap and jump directly into specific package documentation.
 
+The self-hosted **Quasar Community Edition** is documented in its own repository, [TuwaIO/quasar-community](https://github.com/TuwaIO/quasar-community): quick start, production deployment, and CI/CD guides live in its `docs/` folder.
+
 ---
 
 ## Architectural Principles
 
 Every blueprint in this repository adheres to three non-negotiable engineering principles:
 
-1. **Self-Custodial & Sovereign Architecture:** Frontends operate with uncompromising self-custody—free from closed-source, proprietary Wallet-as-a-Service (WaaS) lock-in. Client applications maintain resilient, local-first state, seamlessly augmented by managed cloud infrastructure (Quasar) for multi-device indexing, webhook delivery, and backend orchestration without sacrificing user sovereignty.
+1. **Self-Custodial & Sovereign Architecture:** Frontends stay self-custodial and do not require a closed-source, proprietary Wallet-as-a-Service (WaaS) platform. Client applications keep resilient, local-first state and can add Quasar for multi-device indexing, webhook delivery, and backend orchestration — as a managed cloud or as the open-source, self-hosted Community Edition (Apache-2.0) — without ever taking custody of user keys.
 2. **Headless Separation of Concerns:** Core business logic lives in framework-agnostic stores (`satellite`, `pulsar`) and low-level protocol adapters (`orbit`). Presentation lives in disposable UI views (`nova`). Changes to UI styling never jeopardize underlying Web3 state machines.
 3. **Strict Type Safety & Zero Bloat:** Zero tolerance for `any` types, legacy `@solana/web3.js` v1 bundles, or monolithic `ethers.js` packages. Only modern, tree-shakeable, high-performance primitives (`viem`, `@solana/kit`).
