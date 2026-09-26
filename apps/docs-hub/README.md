@@ -6,9 +6,14 @@
 
 ## About This Project
 
-**Docs Hub** is the central landing page for the entire **TUWA Web3 ecosystem**. From this single entry point, developers can jump into the documentation of every TUWA project — `SIWX`, `Orbit`, `Satellite`, `Pulsar`, `Nova`, `Quasar`, and the shared **TUWA SDK** — without hunting across separate sites.
+**Docs Hub** is the central landing page for the entire **TUWA Web3 ecosystem**. From this single entry point, developers can jump into the documentation of every TUWA project — `SIWX`, `Orbit`, `Satellite`, `Pulsar`, `Nova`, `Quasar` (managed cloud and the self-hosted Community Edition), and the shared **TUWA SDK** — without hunting across separate sites.
 
-Unlike the individual project docs (which are Nextra-based), this hub is a lean **Next.js App Router** app that renders a gradient hero, a layered ecosystem timeline, and doc cards linking out to each project. It consumes shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../../packages/docs-ui) and [`@tuwaio/nova-core`](https://www.npmjs.com/package/@tuwaio/nova-core) so the visual identity stays consistent with the rest of the ecosystem.
+The app has two surfaces:
+
+- **Main screen (`/`)** — a hand-crafted React page: a gradient hero, a layered ecosystem timeline, doc cards linking out to each project, and a Cosmos Playground quick start.
+- **Guides (`/guides`)** — architecture deep dives written in MDX and rendered by **Nextra 4** with the docs theme, sidebar, and full-text search.
+
+Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../../packages/docs-ui) and [`@tuwaio/nova-core`](https://www.npmjs.com/package/@tuwaio/nova-core), so the visual identity stays consistent with the rest of the ecosystem. Individual TUWA project docs (Orbit, Satellite, etc.) live in their own repositories on the same Nextra stack.
 
 ---
 
@@ -16,13 +21,13 @@ Unlike the individual project docs (which are Nextra-based), this hub is a lean 
 
 - **Framework:** Next.js 16+ (App Router, Server Components)
 - **UI Runtime:** React 19+
+- **Guides:** Nextra 4 (`nextra`, `nextra-theme-docs`) — MDX pages, `_meta.tsx` navigation, Mermaid diagrams, GitHub-style callouts
+- **Search:** Pagefind, indexed after every production build
 - **Styling:** Tailwind CSS 4+ with PostCSS, plus TUWA design tokens from `@tuwaio/nova-core` and `@tuwaio/docs-ui`
 - **Icons:** `@heroicons/react`
 - **Theme:** `next-themes` for dark/light mode
-- **Utilities:** `clsx`, `tailwind-merge`
+- **Utilities:** `clsx`, `tailwind-merge`, `nextjs-toploader`
 - **Deployment:** Vercel
-
-No Nextra, no MDX, no TypeDoc — the hub is a hand-crafted React surface. Individual TUWA project docs (Orbit, Satellite, etc.) live in their own repositories and use the Nextra-based stack from `@tuwaio/docs-ui`.
 
 ---
 
@@ -39,51 +44,76 @@ pnpm install
 
 This installs dependencies for every workspace package, builds `packages/docs-ui`, and links it into the app.
 
-### 2. Running the Dev Server
+### 2. Environment Variables
+
+Copy `.env.example` to `.env.local`. Both variables are optional:
+
+| Variable                           | Purpose                                                                                                                                                     |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_QUASAR_DASHBOARD_URL` | Link to the Quasar Cloud dashboard. Defaults to `https://quasar.tuwa.io/`.                                                                                  |
+| `GITHUB_TOKEN`                     | Server-only. Raises the GitHub API rate limit for the Quasar Community release badge. Without it, the badge still works within 60 requests per hour per IP. |
+
+### 3. Running the Dev Server
 
 Start the Next.js dev server for the hub from the monorepo root:
 
 ```bash
-pnpm --filter @tuwaio/docs-hub dev
+pnpm dev:hub
 ```
 
-_(The filter `@tuwaio/docs-hub` targets this specific app via its `name` in `apps/docs-hub/package.json`.)_
+_(A shortcut for `pnpm --filter @tuwaio/docs-hub dev`, which targets this app via its `name` in `apps/docs-hub/package.json`.)_
 
 The site will be available at **[http://localhost:3000](http://localhost:3000)**.
 
-### 3. Production Build
+### 4. Production Build
 
 ```bash
-pnpm --filter @tuwaio/docs-hub build
-pnpm --filter @tuwaio/docs-hub start
+pnpm build:hub
+pnpm start:hub
 ```
+
+`build` runs `next build`, then `postbuild` indexes the rendered pages with Pagefind into `public/_pagefind`. That folder is generated and git-ignored, so run a production build at least once to get search in `/guides` locally.
 
 ---
 
 ## ✍️ How to Edit Content
-
-The hub is a **component-driven** page, not an MDX site. All content lives in React components under `src/`.
 
 ### Project Structure
 
 ```
 apps/docs-hub/
 ├── public/
-│   └── manifest.json          # PWA manifest
+│   └── manifest.json                # PWA manifest
 ├── src/
 │   ├── app/
-│   │   ├── globals.css        # Tailwind + design-token imports
-│   │   ├── layout.tsx         # Root layout, <Metadata>, fonts, Providers
-│   │   ├── page.tsx           # Home — StarryBackground, mobile orbs, sections
-│   │   └── providers.tsx      # next-themes ThemeProvider
-│   └── components/
-│       ├── Header.tsx         # Fixed glassmorphic header + theme switcher
-│       ├── HeroSection.tsx    # Gradient title + subtitle
-│       ├── LayerTimeline.tsx  # Vertical timeline of ecosystem layers
-│       ├── DocCard.tsx        # Card linking to a project's Docs + GitHub
-│       ├── Footer.tsx         # Footer with links and copyright
-│       └── index.ts           # Barrel export
-├── next.config.ts
+│   │   ├── (home)/
+│   │   │   ├── layout.tsx           # Header + Footer shell of the main screen
+│   │   │   └── page.tsx             # Main screen: hero, timeline, quick start
+│   │   ├── guides/
+│   │   │   ├── [[...mdxPath]]/
+│   │   │   │   └── page.tsx         # Renders MDX pages from src/content/guides
+│   │   │   └── layout.tsx           # Nextra docs layout (navbar, sidebar, footer)
+│   │   ├── globals.css              # Tailwind, Nextra and design-token imports
+│   │   ├── layout.tsx               # Root layout, <Metadata>, fonts, Providers
+│   │   └── providers.tsx            # next-themes ThemeProvider
+│   ├── components/
+│   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
+│   │   ├── Footer.tsx               # Footer of the main screen
+│   │   ├── Header.tsx               # Fixed glassmorphic header + theme switcher
+│   │   ├── HeroSection.tsx          # Gradient title + subtitle
+│   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
+│   │   ├── QuickStartSection.tsx    # Cosmos Playground CLI quick start
+│   │   └── index.ts                 # Barrel export
+│   ├── content/
+│   │   ├── _meta.tsx                # Top-level Nextra navigation
+│   │   └── guides/
+│   │       ├── _meta.tsx            # Guides sidebar order and titles
+│   │       ├── index.mdx            # Guides overview page
+│   │       └── *.mdx                # One file per guide
+│   ├── lib/
+│   │   └── github.ts                # Latest release tag from the GitHub API
+│   └── mdx-components.ts            # MDX component map for Nextra
+├── next.config.ts                   # Nextra plugin setup
 ├── postcss.config.mjs
 ├── tsconfig.json
 └── package.json
@@ -96,6 +126,17 @@ The timeline of TUWA projects is defined inline in `src/components/LayerTimeline
 1. Open `src/components/LayerTimeline.tsx`.
 2. Add a new object to the appropriate layer (or introduce a new layer) with the correct `name`, `tagline`, `icon`, gradient classes, and links (`docsUrl`, `githubUrl`).
 3. If the icon is not yet imported, add it from `@heroicons/react/24/outline`.
+4. The desktop orb is picked by `id`. If the project has no orb of its own in `@tuwaio/docs-ui`, set `orb` to an existing one (the Quasar Community card uses `orb: 'quasar'`).
+
+To show a project's latest `vX.Y.Z` tag, fetch it in `src/app/(home)/page.tsx` with `fetchLatestTag('<owner>/<repo>')` and pass it to `<LayerTimeline releases={{ '<entry id>': release }} />`. The page is revalidated once per hour, and the badge is hidden if the GitHub API is unavailable.
+
+### Writing a Guide
+
+1. Create `src/content/guides/<slug>.mdx` with `title` and `description` in the frontmatter — they become the page's `<title>` and meta description.
+2. Register the page in `src/content/guides/_meta.tsx`. The key is the slug, the value is the sidebar title. Order in the object is order in the sidebar.
+3. Add a short card for it to `src/content/guides/index.mdx`.
+
+Guides support Mermaid code blocks (` ```mermaid `) and GitHub-style callouts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`).
 
 ### Design Tokens
 
@@ -103,7 +144,7 @@ Rounded corners, colors, gradients, and other visual tokens are provided as CSS 
 
 ### Metadata, Favicon, and Manifest
 
-- SEO metadata (OpenGraph, Twitter, icons, manifest) is declared via the Next.js **Metadata API** in `src/app/layout.tsx`.
+- SEO metadata (OpenGraph, Twitter, icons, manifest) for the main screen is declared via the Next.js **Metadata API** in `src/app/layout.tsx`. Guides take their title and description from MDX frontmatter, with the `%s – TUWA Guides` template from `src/app/guides/layout.tsx`.
 - Favicon assets are served from the shared CDN (`cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/…`), so there are no binary favicons committed to this app.
 - The web app manifest lives at `public/manifest.json`.
 
@@ -124,6 +165,7 @@ The hub is deployed to **Vercel**.
 | **Shared UI (`docs-ui`)**    | [`../../packages/docs-ui`](../../packages/docs-ui)     |
 | **TUWA GitHub Organization** | [`github.com/TuwaIO`](https://github.com/TuwaIO)       |
 | **Next.js App Router Docs**  | [`nextjs.org/docs/app`](https://nextjs.org/docs/app)   |
+| **Nextra Docs**              | [`nextra.site`](https://nextra.site)                   |
 | **Tailwind CSS Docs**        | [`tailwindcss.com/docs`](https://tailwindcss.com/docs) |
 
 ## 📄 License
