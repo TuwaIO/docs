@@ -3,11 +3,14 @@ import { StarryBackground } from '@tuwaio/docs-ui';
 import { HeroSection } from '../../components/HeroSection';
 import { LayerTimeline } from '../../components/LayerTimeline';
 import { QuickStartSection } from '../../components/QuickStartSection';
+import { fetchLatestTag } from '../../lib/github';
 
 /**
  * Docs Hub main page — StarryBackground on desktop, decorative orbs on mobile.
  */
-export default function DocsHubPage() {
+export default async function DocsHubPage() {
+  const quasarCommunityRelease = await fetchLatestTag('TuwaIO/quasar-community');
+
   return (
     <>
       <div className="hidden md:block">
@@ -24,7 +27,7 @@ export default function DocsHubPage() {
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6">
           <HeroSection />
-          <LayerTimeline />
+          <LayerTimeline releases={{ 'quasar-community': quasarCommunityRelease }} />
           <QuickStartSection />
         </div>
       </div>

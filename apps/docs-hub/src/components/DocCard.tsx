@@ -15,6 +15,8 @@ export interface DocCardProps {
   name: string;
   tagline: string;
   id: string;
+  /** Orb style to render; defaults to `id`. Lets an entry without its own orb reuse another's. */
+  orb?: PackageType;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   gradientFrom: string;
   gradientTo: string;
@@ -30,6 +32,7 @@ export function DocCard({
   name,
   tagline,
   id,
+  orb,
   icon,
   gradientFrom,
   gradientTo,
@@ -54,7 +57,7 @@ export function DocCard({
 
         {/* Desktop Orb badge */}
         <div className="shrink-0 hidden sm:flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-          <Orb packageType={id as PackageType} size={48} className="2xl:scale-125 origin-left" icon={icon} />
+          <Orb packageType={orb ?? (id as PackageType)} size={48} className="2xl:scale-125 origin-left" icon={icon} />
         </div>
 
         {/* Text */}

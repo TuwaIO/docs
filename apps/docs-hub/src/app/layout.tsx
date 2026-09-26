@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',
   description:
-    'Central documentation gateway for the TUWA Web3 ecosystem. Explore Orbit, Satellite, Pulsar, Nova, Quasar, and the TUWA SDK.',
+    'Central documentation gateway for the TUWA Web3 ecosystem. Explore SIWX, Orbit, Satellite, Pulsar, Nova, Quasar (managed cloud or self-hosted Community Edition), and the TUWA SDK.',
   manifest: '/manifest.json',
   icons: {
     icon: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/icon0.svg',
@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     'pulsar',
     'nova',
     'quasar',
+    'quasar community edition',
+    'self-hosted transaction indexer',
+    'siwx',
     'zustand',
     'wagmi',
     'viem',

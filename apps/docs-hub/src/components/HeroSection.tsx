@@ -11,7 +11,7 @@ export function HeroSection() {
       </h1>
       <p className="text-lg sm:text-xl text-[var(--tuwa-text-secondary)] leading-relaxed max-w-2xl mx-auto">
         The single entry point to the entire TUWA Web3 ecosystem. Explore documentation for every module in one place —
-        from low-level chain primitives to cloud orchestration.
+        from low-level chain primitives to the Quasar backend, managed or self-hosted.
       </p>
     </div>
   );

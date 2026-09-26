@@ -8,14 +8,18 @@ import {
   CubeIcon,
   GlobeAltIcon,
   KeyIcon,
+  ServerStackIcon,
 } from '@heroicons/react/24/outline';
+import type { PackageType } from '@tuwaio/docs-ui';
 
+import type { RepoRelease } from '../lib/github';
 import { DocCard, PackageBadge } from './DocCard';
 
 /* ─────────────────────────── Data ─────────────────────────── */
 
 interface DocEntry {
   id: string;
+  orb?: PackageType;
   name: string;
   tagline: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -124,24 +128,40 @@ const layers: EcosystemLayer[] = [
     ],
   },
   {
-    label: 'Stage 3 — Cloud Integration',
-    subtitle: 'SaaS orchestrator & unified SDK',
+    label: 'Stage 3 — Backend & Sync',
+    subtitle: 'Managed cloud or self-hosted Quasar engine',
     accentClass: 'text-cyan-400',
     dotGradient: 'from-cyan-500 to-indigo-600',
     entries: [
       {
         id: 'quasar',
-        name: 'Quasar',
-        tagline: 'SaaS orchestrator & transaction indexing',
+        name: 'Quasar Cloud',
+        tagline: 'Managed cloud · Transaction indexing & sync',
         icon: CloudIcon,
 
         gradientFrom: 'from-cyan-500',
         gradientTo: 'to-indigo-600',
         docsUrl: 'https://sdk.docs.tuwa.io/quasar-cloud/overview',
-        githubUrl: 'https://github.com/TuwaIO/quasar',
+        githubUrl: 'https://github.com/TuwaIO/sdk/tree/main/packages/quasar-sdk',
         packages: [
           { name: '@tuwaio/quasar-sdk', layer: 'L5' },
           { name: 'Quasar Dashboard', url: QUASAR_DASHBOARD_URL },
+        ],
+      },
+      {
+        id: 'quasar-community',
+        orb: 'quasar',
+        name: 'Quasar Community',
+        tagline: 'Self-hosted engine & admin · Apache-2.0',
+        icon: ServerStackIcon,
+
+        gradientFrom: 'from-emerald-500',
+        gradientTo: 'to-cyan-600',
+        docsUrl: 'https://github.com/TuwaIO/quasar-community/tree/main/docs',
+        githubUrl: 'https://github.com/TuwaIO/quasar-community',
+        packages: [
+          { name: 'Self-Hosting Guide', url: 'https://tuwa.io/quasar#self-hosted' },
+          { name: 'Live Showcase', url: 'https://github.com/TuwaIO/quasar-community#live-community-showcase' },
         ],
       },
     ],
@@ -199,9 +219,21 @@ const layers: EcosystemLayer[] = [
 /* ─────────────────────── Component ─────────────────────── */
 
 /**
- * Vertical timeline of TUWA ecosystem layers with doc cards.
+ * Appends a "Latest Release" badge when the entry's current tag is known.
  */
-export function LayerTimeline() {
+function withRelease(entry: DocEntry, release?: RepoRelease | null): DocEntry {
+  if (!release) return entry;
+  return {
+    ...entry,
+    packages: [...(entry.packages ?? []), { name: `Latest Release ${release.tag}`, url: release.url }],
+  };
+}
+
+/**
+ * Vertical timeline of TUWA ecosystem layers with doc cards.
+ * @param props.releases - Latest git tags fetched on the server, keyed by entry id.
+ */
+export function LayerTimeline({ releases = {} }: { releases?: Record<string, RepoRelease | null> }) {
   return (
     <div className="relative pl-4 sm:pl-8 border-l border-dashed border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06] flex flex-col gap-10 sm:gap-12">
       {layers.map((layer) => (
@@ -226,7 +258,7 @@ export function LayerTimeline() {
           {/* Cards stack */}
           <div className="flex flex-col gap-2.5">
             {layer.entries.map((entry) => (
-              <DocCard key={entry.id} {...entry} />
+              <DocCard key={entry.id} {...withRelease(entry, releases[entry.id])} />
             ))}
           </div>
         </div>
