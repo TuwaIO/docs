@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.38](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.37...docs-ui-v0.0.38) (2026-09-26)
+
+
+### Bug Fixes
+
+* drop "zero vendor lock-in" from shared footer ([1efc961](https://github.com/TuwaIO/docs/commit/1efc961cd15322ed66b89d6e3fa7d0ee88d2744c))
+
 ## [0.0.37](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.36...docs-ui-v0.0.37) (2026-09-10)
 
 
