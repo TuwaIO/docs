@@ -95,6 +95,7 @@ sequenceDiagram
 ```
 
 > [!WARNING]
+>
 > **Critical Rule: Mandatory Re-Sign on Account or Network Changes**
 > CAIP-122 cryptographic proofs tightly bind the session to an exact wallet address and chain identifier (`session.address` and `session.chainId`). Whenever a user switches their active account or changes network in their wallet extension (e.g., MetaMask, Rabby, or Phantom), **a re-sign (`resign`) is strictly required**. Without performing a re-sign, the cryptographic session becomes invalid and the connection will be broken (`isSessionMatchingTarget` and `isSessionMatchingConnection` will immediately reject subsequent requests).
 
@@ -252,6 +253,7 @@ export function MultiChainAuth({ solanaWallet }: { solanaWallet?: any }) {
 For apps using Satellite Connect and Nova UIKit, sessions and wallet connections synchronize automatically through declarative connector watchers.
 
 > [!NOTE]
+>
 > In full-stack TUWA applications, developers can import either from granular packages (`@tuwaio/nova-connect`, `@tuwaio/siwx-react`, `@tuwaio/satellite-*`) or from unified metapackage subpaths (`@tuwaio/sdk`, `@tuwaio/evm-sdk`, `@tuwaio/solana-sdk`). Both provide identical API surfaces.
 
 ```tsx
@@ -306,6 +308,7 @@ export function SatelliteConnectProviders({ children }: { children: React.ReactN
 ```
 
 > [!WARNING]
+>
 > **Mandatory Session Re-Signing on Account or Network Drift:**
 > CAIP-122 cryptographic proofs bind a session to an exact address and chain ID (`session.address` and `session.chainId`). Whenever a user switches accounts or changes the active network in their wallet extension, the existing session becomes stale. **A re-sign (`resign`) is strictly required; otherwise, the connection will be broken**, as subsequent backend operations and client-side guards will reject the mismatched credentials. Declarative watchers like `<EVMConnectorsWatcher />` and `<SolanaConnectorsWatcher />` continuously monitor these wallet transitions, automatically invalidating stale sessions and prompting the user to re-authenticate.
 
@@ -450,6 +453,7 @@ export async function submitProtectedOperation({
 ```
 
 > [!IMPORTANT]
+>
 > `isSessionMatchingTarget` provides cross-chain address equivalence. It normalizes raw EVM hex strings (`0x1234...`), checksummed representations, Solana Base58 strings, and fully qualified CAIP-10 strings (`eip155:1:0x1234...` or `solana:5eykt4Us...`). If an account or network switch occurred in the user's wallet without a subsequent re-sign (`resign`), this validation will reject the request, ensuring unauthenticated or drifted connections never execute protected state transitions.
 
 ---

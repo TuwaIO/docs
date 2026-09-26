@@ -122,6 +122,7 @@ In standard transactions, `receipt.status === 1` guarantees that all internal ca
 - The EntryPoint contract emits a `UserOperationEvent` with `success == false` and a `UserOperationRevertReason` event containing the revert data.
 
 > [!CAUTION]
+>
 > A standard transaction receipt monitor checking `receipt.status === 1` will report **"Success"**, falsely confirming an operation that completely reverted on-chain! Production systems must explicitly verify `receipt.success === true` from `eth_getUserOperationReceipt`.
 
 ---
@@ -296,6 +297,7 @@ export async function executeCanonicalTransfer({
 ```
 
 > [!TIP]
+>
 > **Solady Assembly Mechanics & Salt Safety:**  
 > In Solady's `ERC4337Factory.sol`, the owner address is packed directly into the most significant 160 bits (upper 20 bytes) of `bytes32 ownSalt` and extracted at the assembly level using `shr(96, ownSalt)`. The owner address is not passed as an independent function argument. If you pass an arbitrary unpadded salt without the owner address in the upper 20 bytes, the transaction will **not revert**—the factory will deploy the account, but will initialize ownership to a random, unusable address extracted from the top bytes of the salt, permanently locking the smart account and any deposited assets! `pad(ownerAccount.address, { dir: 'right', size: 32 })` guarantees that the top 160 bits properly identify the intended owner.
 
@@ -343,6 +345,7 @@ export async function getOrbitSmartAccountClient(wagmiConfig: Config) {
 #### Step 2: Reactive Two-Stage Tracking with Pulsar Engine
 
 > [!NOTE]
+>
 > **Partial Setup Notice & Central Architecture:**
 > The code below demonstrates a **partial configuration focused specifically on transaction execution and action dispatching**.
 > For complete application setup—including centralized store initialization (`createPulsarStore`), cross-chain adapters, persistence, and pre-flight validation hooks—refer to the comprehensive [Pulsar Engine Documentation](https://pulsar.docs.tuwa.io/).
@@ -521,6 +524,7 @@ Teams that want a fully custom data model can deploy a lightweight open-source i
 ### Option B: Non-Custodial Sync with Quasar (Cloud or Self-Hosted)
 
 > [!NOTE]
+>
 > **Partial Implementation Notice:**
 > The code example below demonstrates a **partial server-side handler** focused on SIWX session authorization and forwarding the transaction record to Quasar.
 > For the complete end-to-end integration—including client-side store sync hooks (`onRemoteCreate`), multi-device transaction reconciliation (`injectExternalPendingTxs`), and history retrieval—refer to the [TUWA SDK Documentation](https://sdk.docs.tuwa.io/) or inspect the production templates in the [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground/tree/main/examples/nextjs-tuwa-quasar).
@@ -628,6 +632,7 @@ export async function syncTransaction(tx: Transaction) {
 ```
 
 > [!NOTE]
+>
 > **Switching editions:** Moving between Quasar Cloud and a self-hosted node means changing `baseUrl` and the secret key — the SDK calls stay the same. Existing Cloud history is not migrated automatically yet; an export from Cloud to self-hosted nodes is on the roadmap.
 
 ---
