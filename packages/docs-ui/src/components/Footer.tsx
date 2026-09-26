@@ -32,8 +32,8 @@ export function Footer({ links, logo }: NavProps & { logo?: ReactNode }) {
           <div className="tuwadocs:flex tuwadocs:flex-col tuwadocs:sm:flex-row tuwadocs:justify-between tuwadocs:items-start tuwadocs:sm:items-center tuwadocs:gap-4">
             <div className="tuwadocs:flex-1">
               <p className="tuwa-footer-description">
-                The modular, headless-first Web3 infrastructure. Build self-custodial applications with zero vendor
-                lock-in.
+                The modular, headless-first Web3 infrastructure. Build self-custodial applications on open-source,
+                portable building blocks.
               </p>
               <p className="tuwa-footer-license">Licensed under Apache 2.0. Open source and free to use.</p>
             </div>
