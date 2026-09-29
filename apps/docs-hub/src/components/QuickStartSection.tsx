@@ -8,6 +8,7 @@ import {
   RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 import { useCopyToClipboard } from '@tuwaio/nova-core';
+import Link from 'next/link';
 
 export function QuickStartSection() {
   const { isCopied, copy } = useCopyToClipboard(2000);
@@ -125,7 +126,13 @@ export function QuickStartSection() {
                 Select template
               </h3>
               <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                Choose React or Next.js templates for EVM, Solana, or Multi-chain.
+                Choose React or Next.js templates for EVM, Solana, or Multi-chain.{' '}
+                <Link
+                  href="/guides/starter-templates"
+                  className="text-[var(--tuwa-text-accent)] underline-offset-2 hover:underline"
+                >
+                  Compare templates
+                </Link>
               </p>
             </div>
           </div>

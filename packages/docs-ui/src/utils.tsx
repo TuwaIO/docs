@@ -1,4 +1,10 @@
-export const baseNavLinks = [
+import type { SocialLink } from './components/NavBar';
+
+/**
+ * The default links of {@link Navbar}: the npm organization of TUWA. Sites spread it into their own `links` to keep it
+ * next to site-specific links (for example the GitHub repository).
+ */
+export const baseNavLinks: SocialLink[] = [
   {
     title: 'NPM',
     href: 'https://npmjs.com/org/tuwaio',
@@ -11,7 +17,10 @@ export const baseNavLinks = [
   },
 ];
 
-export const baseFooterLinks = [
+/**
+ * The default links of {@link Footer}: the npm organization and the GitHub organization of TUWA.
+ */
+export const baseFooterLinks: SocialLink[] = [
   {
     title: 'NPM',
     href: 'https://npmjs.com/org/tuwaio',

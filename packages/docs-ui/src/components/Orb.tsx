@@ -3,11 +3,20 @@
 import { cn } from '@tuwaio/nova-core';
 import React from 'react';
 
+/**
+ * A TUWA project with its own brand color and {@link Orb} texture.
+ */
 export type PackageType = 'orbit' | 'pulsar' | 'satellite' | 'nova' | 'quasar' | 'siwx' | 'sdk';
 
+/**
+ * Props of {@link Orb}; the other props are applied to the root `div`.
+ */
 export interface OrbProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** The project, which selects the color and the animated texture */
   packageType: PackageType;
+  /** Diameter in pixels (default: `120`) */
   size?: number;
+  /** Icon rendered in the center */
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
@@ -250,14 +259,16 @@ const getCosmicFilter = (type: PackageType, id: string) => {
 };
 
 /**
- * Orb — Premium 3D cosmic sphere for TUWA package visualization.
+ * An animated glass sphere in the brand color of a TUWA project, with an SVG texture (animated SVG filters) and an
+ * optional icon in the center. The SVG ids include `packageType`, so two orbs of the same project on one page share
+ * their filters.
  *
- * @param packageType - Which TUWA package this orb represents
- * @param size - Diameter in pixels (default: 120)
- * @param icon - SVG icon component rendered centered inside the orb
+ * @param props - See {@link OrbProps}.
+ * @param ref - Ref of the root `div`.
+ * @returns The orb.
  */
 export const Orb = React.forwardRef<HTMLDivElement, OrbProps>(
-  ({ packageType, size = 120, icon: Icon, className, ...props }, ref) => {
+  ({ packageType, size = 120, icon: Icon, className, style, ...props }, ref) => {
     const color = packageColors[packageType];
     const tint = packageTints[packageType];
     const filterId = `orb-filter-${packageType}`;
@@ -271,7 +282,7 @@ export const Orb = React.forwardRef<HTMLDivElement, OrbProps>(
           'tuwadocs:relative tuwadocs:flex tuwadocs:items-center tuwadocs:justify-center tuwa-orb-float',
           className,
         )}
-        style={{ width: size, height: size, flexShrink: 0, ...props.style }}
+        style={{ width: size, height: size, flexShrink: 0, ...style }}
         {...props}
       >
         {/* Soft tinted glass sphere base */}

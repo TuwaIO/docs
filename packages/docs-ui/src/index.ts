@@ -1,16 +1,8 @@
-export * from './components/CodeBlock';
-export * from './components/CodeHighlighter';
-export * from './components/CopyIconButton';
-export * from './components/Features';
 export * from './components/Footer';
 export * from './components/Logo';
 export * from './components/NavBar';
 export { default as NoSSR } from './components/NoSSR';
 export * from './components/Orb';
-export * from './components/PackageInstallationTabs';
 export { default as StarryBackground } from './components/StarryBackground';
-export * from './components/StyledLink';
 export * from './components/ThemeSwitcher';
-export * from './components/VideoPlayer';
 export * from './utils';
-export * from '@tuwaio/nova-core';

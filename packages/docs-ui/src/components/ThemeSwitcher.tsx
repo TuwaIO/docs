@@ -4,11 +4,24 @@ import { MoonIcon, SunIcon } from '@heroicons/react/24/solid';
 import { cn } from '@tuwaio/nova-core';
 import { useEffect, useState } from 'react';
 
+/**
+ * Props of {@link ThemeSwitcher}.
+ */
 export interface ThemeSwitcherProps {
+  /** The resolved theme of the site; `'dark'` selects the moon, anything else the sun */
   theme: string;
+  /** Called when the switch is clicked; switch the theme of the site here (for example with `next-themes`) */
   onToggle: () => void;
 }
 
+/**
+ * A light/dark switch with a sliding indicator. It stores no theme itself: pass the resolved theme and a toggle. Until
+ * it is mounted on the client it renders an invisible placeholder of the same size, so the server output does not
+ * depend on the theme.
+ *
+ * @param props - See {@link ThemeSwitcherProps}.
+ * @returns The switch button.
+ */
 export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {

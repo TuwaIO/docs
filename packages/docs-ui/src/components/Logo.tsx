@@ -3,13 +3,25 @@ import React from 'react';
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg';
 
+/**
+ * Props of {@link RemoteLogo}: the SVG attributes are applied to the root `svg` element.
+ */
 export interface RemoteLogoProps extends React.SVGProps<SVGSVGElement> {
+  /** URL of the SVG (default: the TUWA logo on jsDelivr, `cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg`) */
   url?: string;
 }
 
 /**
- * Async Server Component that fetches a remote SVG and renders it
- * as native React elements using html-react-parser.
+ * Renders a remote SVG, by default the TUWA logo, as React elements, so the logo inherits `className` and CSS such as
+ * `currentColor`. It is an async React Server Component for the Next.js App Router: it fetches the SVG on the server
+ * (cached by Next.js for 24 hours), removes the XML declaration and doctype, and adds the `remote-logo` class and the
+ * props to the root element.
+ *
+ * Network: one request to `url` per revalidation. When the request fails, it logs the error and renders an empty
+ * `svg` with the props.
+ *
+ * @param props - See {@link RemoteLogoProps}.
+ * @returns The logo as an `svg` element.
  */
 export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }: RemoteLogoProps) {
   let rawSvg: string;

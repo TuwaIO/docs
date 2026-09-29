@@ -1,5 +1,10 @@
+/**
+ * The latest release tag of a repository, returned by {@link fetchLatestTag}.
+ */
 export interface RepoRelease {
+  /** The tag, for example `v1.2.3` */
   tag: string;
+  /** Link to the tree of the tag on GitHub */
   url: string;
 }
 

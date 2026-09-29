@@ -1,0 +1,533 @@
+---
+title: Track Transactions in React with Pulsar
+description: Add Pulsar to a React app step by step — a transaction store saved to localStorage, the EVM or Solana adapter, tracking that resumes after a reload, and a button that sends a tracked contract or program call.
+---
+
+import { Tabs } from 'nextra/components';
+
+# Track Transactions in React with Pulsar
+
+This guide adds [Pulsar](https://pulsar.docs.tuwa.io/) to a React app, step by step, for an EVM or a Solana wallet. At the end you have:
+
+- a transaction store from `@tuwaio/pulsar-core`, saved to `localStorage`;
+- the chain adapter from `@tuwaio/pulsar-evm` or `@tuwaio/pulsar-solana`, which tracks each transaction in the background;
+- `@tuwaio/pulsar-react` restarting the trackers after a page reload;
+- a button that sends a contract (EVM) or program (Solana) call and tracks it until its final status.
+
+The guide installs the Pulsar packages one by one. The **Next.js + Pulsar Packages** template on [Starter Templates](/guides/starter-templates) is a complete app built the same way.
+
+> [!TIP]
+>
+> Every step has an **EVM** and a **Solana** tab. The tabs are linked: pick your network once and every step follows it.
+
+---
+
+## Before You Start
+
+- **React 19.2 or newer.** The examples use the Next.js App Router: `'use client'` modules and the `@/` import alias for `src/`.
+- **A wallet connection.** This guide uses [Nova Connect](https://stories.tuwa.io/?path=/docs/packages-nova-connect-overview--docs) on Satellite Connect: follow its README to render `SatelliteConnectProvider`, the watcher of your network and `NovaConnectProvider`. Pulsar does not require Nova: the EVM adapter works with any `@wagmi/core` config, and the Solana adapter reads the connection that Satellite Connect saves.
+- **Your network configuration in one module**, which the code below imports:
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+    `wagmiConfig` (your `@wagmi/core` config) and `appChains` (its viem chains) exported from `@/configs/wagmiConfig`.
+  </Tabs.Tab>
+  <Tabs.Tab>
+    `solanaRPCUrls`, an RPC URL for each cluster (for example `{ devnet: 'https://api.devnet.solana.com' }`), exported from `@/configs/appConfig`.
+  </Tabs.Tab>
+</Tabs>
+
+Pulsar validates the metadata of every transaction before anything else runs: each `title` string must be 100 characters or less, each `description` string 300 characters or less, and the JSON of `payload` 10 KB or less, without executable-like strings. Invalid metadata makes `executeTxAction` throw `PulsarTransactionValidationError`.
+
+---
+
+## Step 1: Install the Packages
+
+Install the Pulsar packages of your network and their peer dependencies:
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```bash
+pnpm add @tuwaio/pulsar-core @tuwaio/pulsar-evm @tuwaio/pulsar-react \
+  @tuwaio/orbit-core @tuwaio/orbit-evm @wagmi/core viem zustand immer dayjs
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+`@solana/react` provides the transaction signer used in Step 6.
+
+```bash
+pnpm add @tuwaio/pulsar-core @tuwaio/pulsar-solana @tuwaio/pulsar-react \
+  @tuwaio/orbit-core @tuwaio/orbit-solana @solana/kit @solana/react \
+  @wallet-standard/app @wallet-standard/ui-core @wallet-standard/ui-registry zustand immer dayjs
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Step 2: Describe the Contract or Program
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+You need the address and the ABI (Application Binary Interface) of the contract you call. This guide uses a Counter contract deployed on Sepolia:
+
+```ts filename="src/abis/CounterAbi.ts"
+// A Counter contract deployed on Sepolia.
+export const COUNTER_ADDRESS = '0xAe7f46914De82028eCB7E2bF97Feb3D3dDCc2BAB';
+
+export const CounterAbi = [
+  {
+    inputs: [],
+    name: 'decrement',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'getCurrentNumber',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'increment',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+You need the IDL (Interface Definition Language file) of the program you call: it describes the instructions and accounts of the program, like an ABI on EVM. This guide uses a counter program named `solanatest` whose `increment` instruction takes the counter account:
+
+```json filename="src/targets/solanatest/idl/solanatest.json"
+{
+  "address": "<your program address>",
+  "version": "0.1.0",
+  "name": "solanatest",
+  "instructions": [
+    {
+      "name": "increment",
+      "accounts": [
+        {
+          "name": "solanatest",
+          "isMut": true,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    }
+  ]
+}
+```
+
+Generate typed instruction builders for `@solana/kit` from the IDL with the [Codama](https://github.com/codama-idl/codama) CLI:
+
+```bash
+pnpm add -D @codama/cli @codama/renderers-js
+```
+
+```json filename="codama.json"
+{
+  "idl": "src/targets/solanatest/idl/solanatest.json",
+  "scripts": {
+    "js": {
+      "from": "@codama/renderers-js",
+      "args": [
+        "src/programs/solanatest/generated",
+        {
+          "generatedFolder": "",
+          "syncPackageJson": false,
+          "deleteFolderBeforeRendering": true,
+          "kitImportStrategy": "rootOnly"
+        }
+      ]
+    }
+  }
+}
+```
+
+```bash
+pnpm exec codama run js
+```
+
+The command writes the builders to `src/programs/solanatest/generated`. Re-export them from `src/programs/index.ts` to import them as `@/programs`.
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Step 3: Create an Action
+
+An action is a function that asks the wallet to sign and submit the transaction and returns its key. Pulsar calls it inside `executeTxAction` and tracks the transaction under the returned key. Keep actions in their own files to reuse them from several components.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/transactions/actions/increment.ts"
+import { type Config, writeContract } from '@wagmi/core';
+import { sepolia } from 'viem/chains';
+
+import { COUNTER_ADDRESS, CounterAbi } from '@/abis/CounterAbi';
+
+// Returns the transaction hash, which Pulsar uses as the txKey.
+export function increment({ wagmiConfig }: { wagmiConfig: Config }) {
+  return writeContract(wagmiConfig, {
+    abi: CounterAbi,
+    address: COUNTER_ADDRESS,
+    functionName: 'increment',
+    chainId: sepolia.id,
+  });
+}
+```
+
+**Optional: the same call from an ERC-4337 smart account.** With `@tuwaio/orbit-evm` you can send the call as a UserOperation from a Solady smart account owned by the connected wallet. The action returns the `userOpHash`. Pulsar does not detect UserOperations on its own: Step 6 passes `tracker: TransactionTracker.ERC4337` and your `pimlicoApiKey`. Pulsar then tracks it in two stages: the bundler until the UserOperation is included, then the bundle transaction on-chain. The [ERC-4337 guide](/guides/erc-4337-sovereign-account-abstraction) explains the lifecycle.
+
+```ts filename="src/transactions/actions/incrementWithSmartAccount.ts"
+import { createPimlicoSmartAccountClient } from '@tuwaio/orbit-evm';
+import type { Config } from '@wagmi/core';
+import { encodeFunctionData } from 'viem';
+import { sepolia } from 'viem/chains';
+
+import { COUNTER_ADDRESS, CounterAbi } from '@/abis/CounterAbi';
+
+// Returns the userOpHash, which Pulsar uses as the txKey.
+export async function incrementWithSmartAccount({
+  wagmiConfig,
+  pimlicoApiKey,
+}: {
+  wagmiConfig: Config;
+  pimlicoApiKey?: string;
+}) {
+  // A Solady smart account owned by the connected wallet, sent through the Pimlico bundler.
+  // With an API key, gas is sponsored by the Pimlico paymaster by default.
+  const { account, bundlerClient } = await createPimlicoSmartAccountClient({
+    chain: sepolia,
+    wagmiConfig,
+    apiKey: pimlicoApiKey,
+  });
+
+  return bundlerClient.sendUserOperation({
+    account,
+    calls: [
+      {
+        to: COUNTER_ADDRESS,
+        data: encodeFunctionData({ abi: CounterAbi, functionName: 'increment' }),
+      },
+    ],
+  });
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+`signAndSendSolanaTx` builds a version 0 transaction from the generated instruction, with the signer as fee payer and the latest blockhash, and returns the signature:
+
+```ts filename="src/transactions/actions/increment.ts"
+import { address, type TransactionSendingSigner } from '@solana/kit';
+import type { SolanaClient } from '@tuwaio/orbit-solana';
+import { signAndSendSolanaTx } from '@tuwaio/pulsar-solana';
+
+import { getIncrementInstruction } from '@/programs';
+
+const PROGRAM_ADDRESS = address('<your program address>');
+const COUNTER_ACCOUNT = address('<your counter account>');
+
+// Returns the transaction signature, which Pulsar uses as the txKey.
+export function increment({ client, signer }: { client: SolanaClient; signer: TransactionSendingSigner }) {
+  return signAndSendSolanaTx({
+    client,
+    signer,
+    instruction: getIncrementInstruction({ solanatest: COUNTER_ACCOUNT }, { programAddress: PROGRAM_ADDRESS }),
+  });
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Step 4: Create the Transaction Store
+
+Create the store once, in a client module. `createPulsarStore` connects Pulsar to your network through its adapter and saves the transactions to `localStorage` under `name`. `createBoundedUseStore` turns the vanilla store into a React hook. `beforeTxProcess` is an optional check that runs before the wallet is asked to sign: throw to block the transaction.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/hooks/txTrackingHooks.ts"
+'use client';
+
+import { createBoundedUseStore, createPulsarStore, type EvmTransaction } from '@tuwaio/pulsar-core';
+import { pulsarEvmAdapter } from '@tuwaio/pulsar-evm';
+
+import { appChains, wagmiConfig } from '@/configs/wagmiConfig';
+
+// Typed transactions of your app
+type IncrementTx = EvmTransaction & {
+  type: 'increment';
+  payload: {
+    value: number;
+  };
+};
+
+export type TransactionUnion = IncrementTx;
+
+export const pulsarStore = createPulsarStore<TransactionUnion>({
+  name: 'transactions-tracking-storage', // localStorage key
+  adapter: pulsarEvmAdapter(wagmiConfig, appChains),
+  beforeTxProcess: () => {
+    if (!navigator.onLine) throw new Error('You are offline.');
+  },
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/hooks/txTrackingHooks.ts"
+'use client';
+
+import { createBoundedUseStore, createPulsarStore, type SolanaTransaction } from '@tuwaio/pulsar-core';
+import { pulsarSolanaAdapter } from '@tuwaio/pulsar-solana';
+
+import { solanaRPCUrls } from '@/configs/appConfig';
+
+// Typed transactions of your app
+type IncrementTx = SolanaTransaction & {
+  type: 'increment';
+  payload: {
+    value: number;
+  };
+};
+
+export type TransactionUnion = IncrementTx;
+
+export const pulsarStore = createPulsarStore<TransactionUnion>({
+  name: 'transactions-tracking-storage', // localStorage key
+  adapter: pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls }),
+  beforeTxProcess: () => {
+    if (!navigator.onLine) throw new Error('You are offline.');
+  },
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+An app with EVM and Solana wallets passes both adapters in an array: `adapter: [pulsarEvmAdapter(wagmiConfig, appChains), pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls })]`.
+
+---
+
+## Step 5: Resume Tracking After a Reload
+
+The store restores its transactions from `localStorage`, but their trackers are not running after a reload. `useInitializeTransactionsPool` from `@tuwaio/pulsar-react` starts them again for every pending transaction. Each call starts new trackers, so render this component only once, in a component that stays mounted (for example next to your providers in the root layout):
+
+```tsx filename="src/components/PulsarInitializer.tsx"
+'use client';
+
+import { useInitializeTransactionsPool } from '@tuwaio/pulsar-react';
+
+import { usePulsarStore } from '@/hooks/txTrackingHooks';
+
+export function PulsarInitializer() {
+  const initializeTransactionsPool = usePulsarStore((state) => state.initializeTransactionsPool);
+
+  // Restarts the trackers of transactions that were pending before a page reload.
+  useInitializeTransactionsPool({ initializeTransactionsPool });
+
+  return null;
+}
+```
+
+---
+
+## Step 6: Send and Track the Transaction
+
+Call `executeTxAction` with the action and the metadata of the transaction. Pulsar validates the title, description and payload, checks the network of the wallet, runs `beforeTxProcess`, calls the action, adds the transaction to the pool and starts its tracker. From then on the store updates the status on its own: components read it with selectors, so it stays correct after navigation or a reload. A `beforeTxProcess` passed to `executeTxAction` replaces the one of the store for that transaction.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+Pulsar asks the wallet to switch to `desiredChainID` when needed. For standard EVM transactions the promise of `executeTxAction` resolves only after tracking has finished, so render the status from the store rather than from the promise.
+
+```tsx filename="src/components/Increment.tsx"
+'use client';
+
+import { ConnectButton } from '@tuwaio/nova-connect/components';
+import { OrbitAdapter } from '@tuwaio/orbit-core';
+import { TransactionTracker } from '@tuwaio/pulsar-core';
+import { sepolia } from 'viem/chains';
+
+import { wagmiConfig } from '@/configs/wagmiConfig';
+import { usePulsarStore } from '@/hooks/txTrackingHooks';
+import { increment } from '@/transactions/actions/increment';
+import { incrementWithSmartAccount } from '@/transactions/actions/incrementWithSmartAccount';
+
+const pimlicoApiKey = process.env.NEXT_PUBLIC_PIMLICO_API_KEY;
+
+export const Increment = () => {
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const pendingCount = usePulsarStore(
+    (state) => Object.values(state.transactionsPool).filter((tx) => tx.pending).length,
+  );
+
+  const handleIncrement = async () => {
+    try {
+      await executeTxAction({
+        actionFunction: () => increment({ wagmiConfig }),
+        params: {
+          type: 'increment',
+          adapter: OrbitAdapter.EVM,
+          desiredChainID: sepolia.id, // the wallet is asked to switch to Sepolia if needed
+          title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],
+          description: 'Increment the counter by 1.',
+          payload: { value: 1 },
+          withTrackedModal: true, // opens the tracking modal of Nova Transactions
+        },
+        onSuccess: (tx) => console.log('Incremented in', tx.hash),
+      });
+    } catch (error) {
+      // Rejected signature, declined network switch, failed preflight... Also saved in `initialTx.error`.
+      console.error(error);
+    }
+  };
+
+  const handleIncrementWithSmartAccount = async () => {
+    try {
+      await executeTxAction({
+        actionFunction: () => incrementWithSmartAccount({ wagmiConfig, pimlicoApiKey }),
+        params: {
+          type: 'increment',
+          adapter: OrbitAdapter.EVM,
+          desiredChainID: sepolia.id,
+          title: 'Increment with a smart account',
+          payload: { value: 1 },
+          tracker: TransactionTracker.ERC4337, // required: UserOperations are not detected automatically
+          pimlicoApiKey, // saved with the transaction to resume tracking after a reload
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <ConnectButton />
+      <button type="button" onClick={handleIncrement}>
+        Increment
+      </button>
+      <button type="button" onClick={handleIncrementWithSmartAccount}>
+        Increment with a smart account
+      </button>
+      {pendingCount > 0 && <p>{pendingCount} pending transaction(s)</p>}
+    </div>
+  );
+};
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Pulsar checks that the wallet is on the cluster in `desiredChainID`; it does not switch clusters. The signer comes from `@solana/react`, for the Wallet Standard account of the Satellite Connect connection. Pass `rpcUrl`: it is saved with the transaction, so tracking resumes on the same RPC after a reload.
+
+```tsx filename="src/components/Increment.tsx"
+'use client';
+
+import { useWalletAccountTransactionSendingSigner } from '@solana/react';
+import { ConnectButton } from '@tuwaio/nova-connect/components';
+import { useSatelliteConnectStore } from '@tuwaio/nova-connect/satellite';
+import { OrbitAdapter } from '@tuwaio/orbit-core';
+import { createSolanaClientWithCache } from '@tuwaio/orbit-solana';
+import type { SolanaConnection } from '@tuwaio/satellite-solana';
+
+import { usePulsarStore } from '@/hooks/txTrackingHooks';
+import { increment } from '@/transactions/actions/increment';
+
+type WalletAccount = NonNullable<SolanaConnection['connectedAccount']>;
+
+function IncrementButton({ account, cluster, rpcUrl }: { account: WalletAccount; cluster: string; rpcUrl: string }) {
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const signer = useWalletAccountTransactionSendingSigner(account, `solana:${cluster}`);
+
+  const handleIncrement = async () => {
+    try {
+      await executeTxAction({
+        actionFunction: () => increment({ client: createSolanaClientWithCache({ rpcUrlOrMoniker: rpcUrl }), signer }),
+        params: {
+          type: 'increment',
+          adapter: OrbitAdapter.SOLANA,
+          desiredChainID: cluster, // the cluster moniker of the connection, e.g. 'devnet'
+          rpcUrl, // saved with the transaction, so tracking resumes on the same RPC after a reload
+          title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],
+          description: 'Increment the counter by 1.',
+          payload: { value: 1 },
+          withTrackedModal: true, // opens the tracking modal of Nova Transactions
+        },
+        onSuccess: (tx) => console.log('Finalized in slot', tx.slot),
+      });
+    } catch (error) {
+      // Rejected signature, wrong cluster, failed preflight... Also saved in `initialTx.error`.
+      console.error(error);
+    }
+  };
+
+  return (
+    <button type="button" onClick={handleIncrement}>
+      Increment
+    </button>
+  );
+}
+
+export const Increment = () => {
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection) as SolanaConnection | undefined;
+
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <ConnectButton />
+      {activeConnection?.isConnected && activeConnection.connectedAccount && (
+        <IncrementButton
+          account={activeConnection.connectedAccount}
+          cluster={String(activeConnection.chainId)}
+          rpcUrl={activeConnection.rpcURL}
+        />
+      )}
+    </div>
+  );
+};
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Next Steps
+
+- **Show the transactions.** `withTrackedModal: true` only has an effect with [Nova Transactions](https://stories.tuwa.io/?path=/docs/packages-nova-transactions-overview--docs): render `NovaTransactionsProvider` with the state of your Pulsar store to get the tracking modal, toasts and the transaction history.
+- **Track without the store**, in your own state or on a server: [EVM Trackers Standalone](https://pulsar.docs.tuwa.io/evmStandalone) and [Solana Trackers Standalone](https://pulsar.docs.tuwa.io/solanaStandalone).
+- **Look up an API** in the Pulsar package reference: [`pulsar-core`](https://pulsar.docs.tuwa.io/packages/pulsar-core), [`pulsar-evm`](https://pulsar.docs.tuwa.io/packages/pulsar-evm), [`pulsar-solana`](https://pulsar.docs.tuwa.io/packages/pulsar-solana), [`pulsar-react`](https://pulsar.docs.tuwa.io/packages/pulsar-react).
+- **Understand the failure modes** that Pulsar handles: [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken).

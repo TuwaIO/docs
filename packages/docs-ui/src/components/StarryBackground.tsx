@@ -32,6 +32,15 @@ const LINE_MAX_DISTANCE_SQ = LINE_MAX_DISTANCE * LINE_MAX_DISTANCE; // Pre-calcu
 const LINE_WIDTH = 0.75;
 const TWINKLE_SPEED = 0.001;
 
+/**
+ * A full-size canvas of slowly drifting, twinkling stars joined by lines, which move away from the mouse pointer.
+ * Place it behind the content of a page; it takes the size of the window and follows its resizes.
+ *
+ * Side effects: `mousemove` and `resize` listeners on `window` and a `requestAnimationFrame` loop, all removed on
+ * unmount.
+ *
+ * @returns The canvas.
+ */
 export default function StarryBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });

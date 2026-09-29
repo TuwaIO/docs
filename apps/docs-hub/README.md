@@ -11,9 +11,9 @@
 The app has two surfaces:
 
 - **Main screen (`/`)** — a hand-crafted React page: a gradient hero, a layered ecosystem timeline, doc cards linking out to each project, and a Cosmos Playground quick start.
-- **Guides (`/guides`)** — architecture deep dives written in MDX and rendered by **Nextra 4** with the docs theme, sidebar, and full-text search.
+- **Guides (`/guides`)** — MDX pages rendered by **Nextra 4** with the docs theme, sidebar, and full-text search: architecture deep dives, and step-by-step setups that combine several TUWA projects (for example the [React transaction tracking guide](https://docs.tuwa.io/guides/react-transaction-tracking) and the [Starter Templates](https://docs.tuwa.io/guides/starter-templates)).
 
-Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../../packages/docs-ui) and [`@tuwaio/nova-core`](https://www.npmjs.com/package/@tuwaio/nova-core), so the visual identity stays consistent with the rest of the ecosystem. Individual TUWA project docs (Orbit, Satellite, etc.) live in their own repositories on the same Nextra stack.
+Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../../packages/docs-ui) and [`@tuwaio/nova-core`](https://www.npmjs.com/package/@tuwaio/nova-core), so the visual identity stays consistent with the rest of the ecosystem. Individual TUWA project docs (Orbit, Satellite, etc.) live in their own repositories on the same Nextra stack: an Introduction, the package READMEs and a generated reference. Content that combines several projects lives here, content about one package lives on its site.
 
 ---
 
@@ -108,8 +108,12 @@ apps/docs-hub/
 │   │   ├── _meta.tsx                # Top-level Nextra navigation
 │   │   └── guides/
 │   │       ├── _meta.tsx            # Guides sidebar order and titles
-│   │       ├── index.mdx            # Guides overview page
-│   │       └── *.mdx                # One file per guide
+│   │       ├── index.mdx            # Guides overview page (a card per guide)
+│   │       ├── multi-chain-auth-siwx-caip122.mdx          # Deep dive: SIWX and CAIP-122
+│   │       ├── why-web3-transaction-state-is-broken.mdx   # Deep dive: transaction state (Pulsar)
+│   │       ├── erc-4337-sovereign-account-abstraction.mdx # Deep dive: ERC-4337 (Orbit EVM, Pulsar, Quasar)
+│   │       ├── react-transaction-tracking.mdx             # Setup: Pulsar in a React app, EVM and Solana tabs
+│   │       └── starter-templates.mdx                      # Setup: Cosmos Playground templates and CLI
 │   ├── lib/
 │   │   └── github.ts                # Latest release tag from the GitHub API
 │   └── mdx-components.ts            # MDX component map for Nextra
@@ -137,6 +141,13 @@ To show a project's latest `vX.Y.Z` tag, fetch it in `src/app/(home)/page.tsx` w
 3. Add a short card for it to `src/content/guides/index.mdx`.
 
 Guides support Mermaid code blocks (` ```mermaid `) and GitHub-style callouts (`> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]`).
+
+Rules for guides:
+
+- **One place per topic.** A guide here combines several TUWA projects. A scenario of one package belongs on the site of that package, and the reference of an API belongs to its package page: link to it (`https://<project>.docs.tuwa.io/packages/<package>`) instead of repeating it.
+- **Plain MDX.** Code examples are fenced code blocks with a `filename` (` ```ts filename="src/hooks/txTrackingHooks.ts" `), not strings inside React components. Variants of one step go into `<Tabs>` from `nextra/components`; give every `Tabs` group of a page the same `storageKey` (for example `tuwa-guide-network`), so one choice switches all steps.
+- **Examples compile.** Every TypeScript example must compile against the published packages it imports. Check a guide after writing it and after a release of a package it uses, for example by copying its code blocks into a project with those packages and running `tsc`.
+- **No redirects.** When a page moves or is removed, update every link to it in all TUWA repositories instead of adding a redirect.
 
 ### Design Tokens
 

@@ -1,0 +1,52 @@
+---
+title: Starter Templates
+description: Start a TUWA app from a Cosmos Playground template — Next.js and Vite apps with wallet connection, transaction tracking, SIWX sign-in and Quasar sync already wired together.
+---
+
+# Starter Templates
+
+The fastest way to try TUWA is a template from [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground): a complete app with wallet connection (Nova Connect on Satellite Connect), transaction tracking (Pulsar) and transaction modals and toasts (Nova Transactions) already wired together. Most templates use the `@tuwaio/sdk` packages, which re-export the TUWA projects; `nextjs-tuwa-not-sdk` installs the projects one by one, like the [React transaction tracking guide](/guides/react-transaction-tracking).
+
+---
+
+## 🚀 Templates
+
+| Template              | What it shows                                                                                                                                    | Stack                                           | Level        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- | ------------ |
+| `nextjs-tuwa`         | Multi-chain starter: EVM and Solana wallet connection and transaction tracking                                                                   | Next.js 16, `@tuwaio/sdk`, wagmi, `@solana/kit` | Beginner     |
+| `nextjs-evm`          | EVM chains only: wagmi wallet connection, transaction tracking and SIWX sign-in                                                                  | Next.js 16, `@tuwaio/sdk`, wagmi                | Beginner     |
+| `nextjs-solana`       | Solana only: Wallet Standard connection and signature tracking                                                                                   | Next.js 16, `@tuwaio/sdk`, `@solana/kit`        | Beginner     |
+| `vite-tuwa`           | The multi-chain starter as a Vite React app                                                                                                      | Vite, `@tuwaio/sdk`, wagmi, `@solana/kit`       | Beginner     |
+| `nextjs-tuwa-not-sdk` | The TUWA projects installed one by one instead of the SDK: `@tuwaio/pulsar-*`, Satellite Connect and Nova UI Kit                                 | Next.js 16, wagmi, `@solana/kit`                | Intermediate |
+| `custom-style`        | Nova Connect and Nova Transactions restyled with the `--tuwa-*` variables and `customization` props ([live demo](https://custom-style.tuwa.io/)) | Vite, `@tuwaio/sdk`                             | Intermediate |
+| `nextjs-tuwa-quasar`  | Full stack: SIWX sign-in, transactions synced to Quasar and the history loaded back, webhooks ([live demo](https://demo.tuwa.io/))               | Next.js 16, `@tuwaio/sdk`, `@tuwaio/quasar-sdk` | Advanced     |
+
+The source of each template is in [`cosmos-playground/examples`](https://github.com/TuwaIO/cosmos-playground/tree/main/examples), in the folder with the template name.
+
+---
+
+## 🛠️ Create a Project
+
+### 1. Run the CLI
+
+```bash
+npx @tuwaio/create-cosmos-playground
+```
+
+The CLI asks for a template and a project name, downloads the template from GitHub, and installs its dependencies with pnpm (or bun, yarn or npm when pnpm is not installed).
+
+### 2. Configure and Start
+
+Every template has a `.env.example` file that lists its environment variables, such as the WalletConnect project ID and optional RPC, Pimlico or Quasar keys. Copy it to `.env`, fill in the values, and start the dev server from the project folder:
+
+```bash
+pnpm dev
+```
+
+---
+
+## 📚 Next Steps
+
+- Follow the [React transaction tracking guide](/guides/react-transaction-tracking) to add Pulsar to an existing app.
+- Browse the components and their customization options in the [Nova UI Kit Storybook](https://stories.tuwa.io/).
+- Find the reference of every package from the [Main Screen](/).

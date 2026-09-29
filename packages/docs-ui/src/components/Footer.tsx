@@ -1,11 +1,18 @@
 import { cn } from '@tuwaio/nova-core';
 import { Footer as NextraFooter } from 'nextra-theme-docs';
-import { ReactNode } from 'react';
 
 import { baseFooterLinks } from '../utils';
 import { NavProps } from './NavBar';
 
-export function Footer({ links, logo }: NavProps & { logo?: ReactNode }) {
+/**
+ * The footer of a TUWA documentation site: the `Footer` of `nextra-theme-docs` with the logo, external links, the
+ * TUWA description, the license and the copyright line (the current year is read on render). Render it in the `footer`
+ * prop of the Nextra `Layout`.
+ *
+ * @param props - See {@link NavProps}.
+ * @returns The footer.
+ */
+export function Footer({ links, logo }: NavProps) {
   return (
     <NextraFooter>
       <div className="tuwadocs:flex tuwadocs:w-full tuwadocs:flex-col tuwadocs:items-center tuwadocs:sm:items-start tuwa-footer-border tuwadocs:pt-8">
