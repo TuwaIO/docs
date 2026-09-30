@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.39](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.38...docs-ui-v0.0.39) (2026-09-30)
+
+
+### Bug Fixes
+
+* added quasar docs ([caf2bde](https://github.com/TuwaIO/docs/commit/caf2bdea58e717cd7f7cf2d847d94ecc47c53c63))
+* updated docs ([ec5c30a](https://github.com/TuwaIO/docs/commit/ec5c30ac080222abc98499246bc4c017f9a2514c))
+
 ## [0.0.38](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.37...docs-ui-v0.0.38) (2026-09-26)
 
 
