@@ -1,0 +1,56 @@
+---
+title: Quasar
+description: Quasar is the TUWA backend that tracks the transactions of your app on the server, keeps their history and sends webhooks. Use Quasar Cloud or self-host the open-source Community Edition.
+---
+
+# Quasar
+
+**Quasar** is the backend of TUWA (Stage 3, "Backend & Sync"). Pulsar tracks a transaction in the browser while the tab is open; Quasar tracks the same transaction on a server until it reaches a final status, keeps the history of your app for every device, and notifies your backend with signed webhooks. Your server talks to it with [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk).
+
+---
+
+## 🔄 How Quasar Fits In
+
+```
+Browser (Pulsar store)                Your server                     Quasar API
+──────────────────────                ───────────                     ──────────
+executeTxAction
+  │ beforeTxProcess ──────────────────────────────────────────────▶  GET /v1/engine/monitoring/health
+  │ wallet signs, Pulsar starts tracking
+  │ onRemoteCreate(tx) ─────────────▶ Server Action / route
+                                        │ checks the SIWX session
+                                        │ quasar.pulsar.syncCreate ──▶ POST /v1/engine/pulsar/sync
+                                                                          │ tracks the transaction
+                                                                          │ (EVM, Safe, ERC-4337, Solana)
+Nova Transactions history ◀──────── quasar.pulsar.getHistory ◀─────  GET /v1/engine/pulsar/history
+                                    Your webhook endpoint ◀────────── POST, signed with HMAC-SHA256
+```
+
+- **Your server holds the key.** The browser never calls Quasar with the secret key: it calls your server, which checks that the user owns the wallet (with a SIWX session) and then calls Quasar. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) builds this flow.
+- **Tracking runs twice.** A fast phase follows the transaction until it is confirmed, and a later phase checks it again for reorganizations and lagging RPC nodes. Quasar tracks the transactions of the Pulsar trackers: EVM transactions, Safe multisig transactions, ERC-4337 user operations and Solana signatures.
+- **Webhooks** notify your backend when a transaction succeeds, fails or is replaced. See [Webhooks](/quasar/webhooks).
+
+---
+
+## ☁️ Quasar Cloud and Quasar Community
+
+Quasar comes in two editions with the same tracking engine and the same API, so `@tuwaio/quasar-sdk` works with both: only its `baseUrl` changes.
+
+|                          | Quasar Cloud                                                                                          | Quasar Community Edition                                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Hosting**              | Managed by TUWA: API at `https://api.tuwa.io`, dashboard at [quasar.tuwa.io](https://quasar.tuwa.io/) | Your servers, with Docker Compose ([TuwaIO/quasar-community](https://github.com/TuwaIO/quasar-community), Apache-2.0) |
+| **Tenants**              | Organizations with members, several apps each                                                         | Single-tenant: one administrator                                                                                      |
+| **Sign-in to the panel** | Accounts with SIWX wallet sign-in and passkeys                                                        | Email, password and TOTP two-factor authentication in the Payload admin (`/admin`)                                    |
+| **Quotas**               | Metered per organization ([Quotas & Limits](/quasar/quotas-and-limits))                               | Set so high that they do not limit a single node                                                                      |
+| **Emails, billing**      | Onboarding and low-quota emails, on-chain billing                                                     | None                                                                                                                  |
+
+The Community Edition has no SIWX sign-in, no passkeys, no transactional email, no billing and no customer portal. There is no export of the history from Quasar Cloud to a self-hosted node yet: moving an app means pointing `baseUrl` of `@tuwaio/quasar-sdk` at your node, and the history starts there. See [Self-Hosting](/quasar/self-hosting).
+
+---
+
+## 📚 Next Steps
+
+- Create an app and get its keys: [Apps & Keys](/quasar/apps-and-keys).
+- Sync the transactions of your React app: [Quasar transaction sync guide](/guides/quasar-transaction-sync), or the complete app in the [Full-Stack React guide](/guides/full-stack-react).
+- Receive webhooks, also on `localhost`: [Webhooks](/quasar/webhooks).
+- Browse the endpoints in the [API Reference](/quasar/api), and the client in the [`@tuwaio/quasar-sdk` reference](https://sdk.docs.tuwa.io/packages/quasar-sdk).

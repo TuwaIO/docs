@@ -141,7 +141,7 @@ const layers: EcosystemLayer[] = [
 
         gradientFrom: 'from-cyan-500',
         gradientTo: 'to-indigo-600',
-        docsUrl: 'https://sdk.docs.tuwa.io/quasar-cloud/overview',
+        docsUrl: '/quasar',
         githubUrl: 'https://github.com/TuwaIO/sdk/tree/main/packages/quasar-sdk',
         packages: [
           { name: '@tuwaio/quasar-sdk', layer: 'L5' },
@@ -157,10 +157,10 @@ const layers: EcosystemLayer[] = [
 
         gradientFrom: 'from-emerald-500',
         gradientTo: 'to-cyan-600',
-        docsUrl: 'https://github.com/TuwaIO/quasar-community/tree/main/docs',
+        docsUrl: '/quasar/self-hosting',
         githubUrl: 'https://github.com/TuwaIO/quasar-community',
         packages: [
-          { name: 'Self-Hosting Guide', url: 'https://tuwa.io/quasar#self-hosted' },
+          { name: 'Self-Hosting Guide', url: '/quasar/self-hosting' },
           { name: 'Live Showcase', url: 'https://github.com/TuwaIO/quasar-community#live-community-showcase' },
         ],
       },

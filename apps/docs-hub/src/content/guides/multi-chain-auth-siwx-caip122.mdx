@@ -264,29 +264,30 @@ import { EVMConnectorsWatcher } from '@tuwaio/evm-sdk/nova-connect';
 import { satelliteEVMAdapter } from '@tuwaio/evm-sdk/satellite';
 import { NovaConnectProvider } from '@tuwaio/sdk/nova-connect';
 import { SatelliteConnectProvider } from '@tuwaio/sdk/nova-connect/satellite';
-import { useSiwxSessionStore } from '@tuwaio/sdk/siwx';
 import { SolanaConnectorsWatcher } from '@tuwaio/solana-sdk/nova-connect';
 import { satelliteSolanaAdapter } from '@tuwaio/solana-sdk/satellite';
 
 import { appEVMChains, solanaRPCUrls, wagmiConfig } from '@/configs/appConfig';
 
 export function SatelliteConnectProviders({ children }: { children: React.ReactNode }) {
-  const siwxSession = useSiwxSessionStore((s) => s.session);
-
   return (
     <SatelliteConnectProvider
       adapter={[satelliteEVMAdapter(wagmiConfig, appEVMChains), satelliteSolanaAdapter({ rpcUrls: solanaRPCUrls })]}
       autoConnect={true}
     >
-      {/* Session Watchers track active account and chain alignment */}
-      <EVMConnectorsWatcher wagmiConfig={wagmiConfig} siwx={siwxSession ?? undefined} />
-      <SolanaConnectorsWatcher siwx={siwxSession ?? undefined} />
+      {/* The watchers follow account and network changes made in the wallet */}
+      <EVMConnectorsWatcher wagmiConfig={wagmiConfig} />
+      <SolanaConnectorsWatcher />
 
       <NovaConnectProvider
         appChains={appEVMChains}
         solanaRPCUrls={solanaRPCUrls}
         siwx={{
           expirationSeconds: 1800,
+          getNonce: async () => {
+            const res = await fetch('/api/siwx/nonce');
+            return ((await res.json()) as { nonce: string }).nonce;
+          },
           verifier: async (payload) => {
             const res = await fetch('/api/siwx/verify', {
               method: 'POST',
@@ -309,8 +310,8 @@ export function SatelliteConnectProviders({ children }: { children: React.ReactN
 
 > [!WARNING]
 >
-> **Mandatory Session Re-Signing on Account or Network Drift:**
-> CAIP-122 cryptographic proofs bind a session to an exact address and chain ID (`session.address` and `session.chainId`). Whenever a user switches accounts or changes the active network in their wallet extension, the existing session becomes stale. **A re-sign (`resign`) is strictly required; otherwise, the connection will be broken**, as subsequent backend operations and client-side guards will reject the mismatched credentials. Declarative watchers like `<EVMConnectorsWatcher />` and `<SolanaConnectorsWatcher />` continuously monitor these wallet transitions, automatically invalidating stale sessions and prompting the user to re-authenticate.
+> **One Session per Account and Chain:**
+> A CAIP-122 session is bound to one address and one chain ID (`session.address` and `session.chainId`). With `siwx` on `NovaConnectProvider`, Nova's `NovaSiwxWatcher` asks every newly connected account to sign in, disconnects the wallet when the user rejects it, and signs out when the wallet disconnects. Pass `siwx` to `NovaConnectProvider` only: the `siwx` prop of `EVMConnectorsWatcher` and `SolanaConnectorsWatcher` is for apps without Nova, and makes the watchers disconnect the wallet on an account change instead of asking the new account to sign in.
 
 ---
 

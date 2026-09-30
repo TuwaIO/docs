@@ -4,6 +4,7 @@ packages:
 allowBuilds:
   esbuild: true
   sharp: true
+  vue-demi: false
 minimumReleaseAgeExclude:
   - '@typescript-eslint/eslint-plugin@8.64.0'
   - '@typescript-eslint/parser@8.64.0'
@@ -22,3 +23,41 @@ minimumReleaseAgeExclude:
   - '@types/react-dom@19.3.0'
   - react-dom@19.3.0
   - scheduler@0.28.0
+  - '@next/env@16.3.7'
+  - '@next/swc-darwin-arm64@16.3.7'
+  - '@next/swc-darwin-x64@16.3.7'
+  - '@next/swc-linux-arm64-gnu@16.3.7'
+  - '@next/swc-linux-arm64-musl@16.3.7'
+  - '@next/swc-linux-x64-gnu@16.3.7'
+  - '@next/swc-linux-x64-musl@16.3.7'
+  - '@next/swc-win32-arm64-msvc@16.3.7'
+  - '@next/swc-win32-x64-msvc@16.3.7'
+  - '@scalar/agent-chat@0.12.38'
+  - '@scalar/api-client@3.21.2'
+  - '@scalar/api-reference-react@0.9.75'
+  - '@scalar/api-reference@1.72.2'
+  - '@scalar/asyncapi-upgrader@0.1.14'
+  - '@scalar/blocks@0.4.1'
+  - '@scalar/components@0.30.4'
+  - '@scalar/helpers@0.16.0'
+  - '@scalar/json-magic@0.15.3'
+  - '@scalar/localization@0.2.4'
+  - '@scalar/oas-utils@0.20.7'
+  - '@scalar/openapi-to-markdown@1.4.0'
+  - '@scalar/openapi-upgrader@0.4.1'
+  - '@scalar/schemas@0.12.2'
+  - '@scalar/sidebar@0.11.9'
+  - '@scalar/snippetz@0.10.3'
+  - '@scalar/themes@0.18.1'
+  - '@scalar/types@0.22.2'
+  - '@scalar/use-hooks@0.4.16'
+  - '@scalar/workspace-store@0.67.1'
+  - '@tuwaio/nova-core@0.7.1'
+  - next@16.3.7
+syncInjectedDepsAfterScripts:
+  - build
+overrides:
+  # nextra-theme-docs 4.6.1 validates its Layout props with zod; with zod 4.4 and newer the validation rejects them
+  # ("expected nonoptional ... at children"). Scalar needs zod >= 4.4, so keep 4.3 for Nextra only.
+  nextra>zod: 4.3.6
+  nextra-theme-docs>zod: 4.3.6

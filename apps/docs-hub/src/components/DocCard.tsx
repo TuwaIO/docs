@@ -72,8 +72,9 @@ export function DocCard({
         <div className="shrink-0 flex items-center gap-2">
           <a
             href={docsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            // The hub's own pages (such as `/quasar`) open in the same tab
+            target={docsUrl.startsWith('/') ? undefined : '_blank'}
+            rel={docsUrl.startsWith('/') ? undefined : 'noopener noreferrer'}
             title="Documentation"
             className="w-8 h-8 2xl:w-9 2xl:h-9 rounded-[var(--tuwa-rounded-corners)] flex items-center justify-center text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-accent)] hover:bg-[var(--tuwa-text-accent)]/10 transition-all duration-200"
           >
@@ -100,8 +101,8 @@ export function DocCard({
               <a
                 key={pkg.name}
                 href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={pkg.url?.startsWith('/') ? undefined : '_blank'}
+                rel={pkg.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
                 className="group/badge flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.015] px-3 py-2 2xl:px-4 2xl:py-2.5 text-xs border border-[var(--tuwa-border-primary)]/40 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-bg-primary)]/80"
               >
                 {/* Left: Layer badge & Package name */}

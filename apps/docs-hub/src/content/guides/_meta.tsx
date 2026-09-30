@@ -10,5 +10,7 @@ export default {
     type: 'separator',
   },
   'react-transaction-tracking': 'Transaction Tracking in React',
+  'full-stack-react': 'Full-Stack React App',
+  'quasar-transaction-sync': 'Sync Transactions to Quasar',
   'starter-templates': 'Starter Templates',
 };

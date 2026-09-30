@@ -1,0 +1,708 @@
+openapi: 3.1.0
+info:
+  title: Quasar API
+  version: 1.0.0
+  description: "The endpoints of the Quasar API that `@tuwaio/quasar-sdk` calls: syncing Pulsar transactions (EVM and
+    Solana), which Quasar then tracks on the server, and reading their history. Quasar Cloud serves it at
+    `https://api.tuwa.io`; a self-hosted Quasar server serves the same endpoints at its own URL."
+  contact:
+    name: TUWA Team
+    url: https://github.com/TuwaIO
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.tuwa.io
+    description: Quasar Cloud
+tags:
+  - name: Pulsar
+    description: Transaction sync and history.
+  - name: Monitoring
+    description: Health of the API.
+components:
+  securitySchemes:
+    SecretKey:
+      type: apiKey
+      in: header
+      name: x-tuwa-secret-key
+      description: Secret key of the Quasar app (`sk_live_...` for a live app, `sk_test_...` for a test app). Send it from
+        your server only.
+  schemas:
+    Transaction:
+      oneOf:
+        - $ref: "#/components/schemas/EvmTransaction"
+        - $ref: "#/components/schemas/SolanaTransaction"
+        - $ref: "#/components/schemas/StarknetTransaction"
+      discriminator:
+        propertyName: adapter
+        mapping:
+          evm: "#/components/schemas/EvmTransaction"
+          solana: "#/components/schemas/SolanaTransaction"
+          starknet: "#/components/schemas/StarknetTransaction"
+      description: A blockchain transaction tracked by Pulsar. Discriminated by `adapter` field.
+    EvmTransaction:
+      type: object
+      properties:
+        appName:
+          type: string
+        chainId:
+          anyOf:
+            - type: number
+            - type: string
+          description: EVM chain ID (1) or Solana cluster ("mainnet").
+        description:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing description. Single string or [pending, success, error, replaced].
+        error:
+          $ref: "#/components/schemas/TuwaErrorState"
+        finishedTimestamp:
+          type: number
+          description: On-chain timestamp (seconds) when finalized.
+        from:
+          type: string
+          description: Sender's wallet address.
+        isError:
+          type: boolean
+          description: Whether the transaction is in a failed state.
+        isTrackedModalOpen:
+          type: boolean
+        localTimestamp:
+          type: number
+          description: Local timestamp (seconds) when initiated by user.
+        payload:
+          type: object
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+          description: Arbitrary custom data associated with the transaction.
+        pending:
+          type: boolean
+          description: Whether the transaction is awaiting on-chain confirmation.
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        title:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing title. Single string or [pending, success, error, replaced].
+        tracker:
+          $ref: "#/components/schemas/TransactionTracker"
+        txKey:
+          type: string
+          description: Unique key of the transaction, set by Pulsar (for example the transaction hash).
+        type:
+          type: string
+          description: Application-specific transaction category (e.g. "SWAP", "APPROVE").
+        connectorType:
+          type: string
+          description: Connector type of the wallet, e.g. "evm:metamask".
+        requiredConfirmations:
+          type: number
+          description: Number of confirmations required.
+        confirmations:
+          anyOf:
+            - type: number
+            - type: string
+            - type: "null"
+          description: Number of confirmations or finality status.
+        rpcUrl:
+          type: string
+          description: RPC URL used for submission.
+        syncStatus:
+          type: string
+          enum:
+            - synced
+            - pending-sync
+          description: Status of cloud synchronization.
+        adapter:
+          type: string
+          enum:
+            - evm
+        hash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]*$
+          description: On-chain transaction hash (0x-prefixed).
+        input:
+          type: string
+          pattern: ^0x[a-fA-F0-9]*$
+          description: Contract interaction data payload (0x-prefixed).
+        maxFeePerGas:
+          type: string
+          description: EIP-1559 max fee per gas (wei).
+        maxPriorityFeePerGas:
+          type: string
+          description: EIP-1559 max priority fee per gas (wei).
+        nonce:
+          type: number
+          description: Transaction nonce.
+        replacedTxHash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]*$
+          description: Hash of the transaction this one replaced.
+        to:
+          type: string
+          pattern: ^0x[a-fA-F0-9]*$
+          description: Recipient's address or contract address.
+        value:
+          type: string
+          description: Native currency amount in wei.
+        bundlerUrl:
+          type: string
+          description: Custom bundler RPC URL for ERC-4337 UserOperation tracking.
+        pimlicoApiKey:
+          type: string
+          description: Pimlico API key for ERC-4337 UserOperation tracking.
+      required:
+        - chainId
+        - from
+        - localTimestamp
+        - pending
+        - tracker
+        - txKey
+        - type
+        - connectorType
+        - adapter
+    TuwaErrorState:
+      type: object
+      properties:
+        message:
+          type: string
+        raw:
+          type: object
+          additionalProperties: {}
+      required:
+        - message
+        - raw
+      description: Error details if the transaction failed.
+    TransactionStatus:
+      type: string
+      enum:
+        - Failed
+        - Success
+        - Replaced
+      description: Terminal status of a processed transaction.
+    TransactionTracker:
+      type: string
+      enum:
+        - ethereum
+        - safe
+        - gelato
+        - solana
+        - erc4337
+      description: The tracking strategy used for monitoring the transaction.
+    SolanaTransaction:
+      type: object
+      properties:
+        appName:
+          type: string
+        chainId:
+          anyOf:
+            - type: number
+            - type: string
+          description: EVM chain ID (1) or Solana cluster ("mainnet").
+        description:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing description. Single string or [pending, success, error, replaced].
+        error:
+          $ref: "#/components/schemas/TuwaErrorState"
+        finishedTimestamp:
+          type: number
+          description: On-chain timestamp (seconds) when finalized.
+        from:
+          type: string
+          description: Sender's wallet address.
+        isError:
+          type: boolean
+          description: Whether the transaction is in a failed state.
+        isTrackedModalOpen:
+          type: boolean
+        localTimestamp:
+          type: number
+          description: Local timestamp (seconds) when initiated by user.
+        payload:
+          type: object
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+          description: Arbitrary custom data associated with the transaction.
+        pending:
+          type: boolean
+          description: Whether the transaction is awaiting on-chain confirmation.
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        title:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing title. Single string or [pending, success, error, replaced].
+        tracker:
+          $ref: "#/components/schemas/TransactionTracker"
+        txKey:
+          type: string
+          description: Unique key of the transaction, set by Pulsar (for example the transaction hash).
+        type:
+          type: string
+          description: Application-specific transaction category (e.g. "SWAP", "APPROVE").
+        connectorType:
+          type: string
+          description: Connector type of the wallet, e.g. "evm:metamask".
+        requiredConfirmations:
+          type: number
+          description: Number of confirmations required.
+        confirmations:
+          anyOf:
+            - type: number
+            - type: string
+            - type: "null"
+          description: Number of confirmations or finality status.
+        rpcUrl:
+          type: string
+          description: RPC URL used for submission.
+        syncStatus:
+          type: string
+          enum:
+            - synced
+            - pending-sync
+          description: Status of cloud synchronization.
+        adapter:
+          type: string
+          enum:
+            - solana
+        fee:
+          type: number
+          description: Transaction fee in lamports.
+        instructions:
+          type: array
+          items: {}
+          description: Transaction instructions.
+        recentBlockhash:
+          type: string
+          description: Recent blockhash used.
+        slot:
+          type: number
+          description: Slot in which the transaction was processed.
+      required:
+        - chainId
+        - from
+        - localTimestamp
+        - pending
+        - tracker
+        - txKey
+        - type
+        - connectorType
+        - adapter
+    StarknetTransaction:
+      type: object
+      properties:
+        appName:
+          type: string
+        chainId:
+          anyOf:
+            - type: number
+            - type: string
+          description: EVM chain ID (1) or Solana cluster ("mainnet").
+        description:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing description. Single string or [pending, success, error, replaced].
+        error:
+          $ref: "#/components/schemas/TuwaErrorState"
+        finishedTimestamp:
+          type: number
+          description: On-chain timestamp (seconds) when finalized.
+        from:
+          type: string
+          description: Sender's wallet address.
+        isError:
+          type: boolean
+          description: Whether the transaction is in a failed state.
+        isTrackedModalOpen:
+          type: boolean
+        localTimestamp:
+          type: number
+          description: Local timestamp (seconds) when initiated by user.
+        payload:
+          type: object
+          additionalProperties:
+            anyOf:
+              - type: string
+              - type: number
+          description: Arbitrary custom data associated with the transaction.
+        pending:
+          type: boolean
+          description: Whether the transaction is awaiting on-chain confirmation.
+        status:
+          $ref: "#/components/schemas/TransactionStatus"
+        title:
+          anyOf:
+            - type: string
+            - type: array
+              prefixItems:
+                - type: string
+                - type: string
+                - type: string
+                - type: string
+          description: User-facing title. Single string or [pending, success, error, replaced].
+        tracker:
+          $ref: "#/components/schemas/TransactionTracker"
+        txKey:
+          type: string
+          description: Unique key of the transaction, set by Pulsar (for example the transaction hash).
+        type:
+          type: string
+          description: Application-specific transaction category (e.g. "SWAP", "APPROVE").
+        connectorType:
+          type: string
+          description: Connector type of the wallet, e.g. "evm:metamask".
+        requiredConfirmations:
+          type: number
+          description: Number of confirmations required.
+        confirmations:
+          anyOf:
+            - type: number
+            - type: string
+            - type: "null"
+          description: Number of confirmations or finality status.
+        rpcUrl:
+          type: string
+          description: RPC URL used for submission.
+        syncStatus:
+          type: string
+          enum:
+            - synced
+            - pending-sync
+          description: Status of cloud synchronization.
+        adapter:
+          type: string
+          enum:
+            - starknet
+        actualFee:
+          type: object
+          properties:
+            amount:
+              type: string
+            unit:
+              type: string
+          required:
+            - amount
+            - unit
+          description: Actual fee paid for the transaction.
+        contractAddress:
+          type: string
+          description: Contract address interacted with.
+      required:
+        - chainId
+        - from
+        - localTimestamp
+        - pending
+        - tracker
+        - txKey
+        - type
+        - connectorType
+        - adapter
+      description: Reserved by the Pulsar types for a Starknet adapter. Neither Pulsar nor Quasar tracks Starknet transactions.
+    CreateTransactionRequest:
+      oneOf:
+        - $ref: "#/components/schemas/EvmTransaction"
+        - $ref: "#/components/schemas/SolanaTransaction"
+        - $ref: "#/components/schemas/StarknetTransaction"
+      discriminator:
+        propertyName: adapter
+        mapping:
+          evm: "#/components/schemas/EvmTransaction"
+          solana: "#/components/schemas/SolanaTransaction"
+          starknet: "#/components/schemas/StarknetTransaction"
+      description: Request body for syncing a new pending transaction to the cloud.
+    SuccessCreateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        txKey:
+          type: string
+          description: Key of the synced transaction.
+        mode:
+          type: string
+          enum:
+            - fast
+            - lazy
+          description: "`fast`: tracking starts right away. `lazy`: queued, because the quota of the organization is used up."
+        duplicate:
+          type: boolean
+          enum:
+            - true
+          description: Quasar already had this `txKey`; no new record.
+      required:
+        - success
+        - txKey
+        - mode
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+          description: "`operational`, or `degraded_replica` when the read replica is down."
+        database:
+          type: string
+        readReplica:
+          type: string
+        redis:
+          type: string
+        workers:
+          type: string
+        workerBacklog:
+          type: number
+        latency:
+          type: string
+        timestamp:
+          type: string
+      required:
+        - success
+        - status
+        - database
+        - readReplica
+        - redis
+        - workers
+        - workerBacklog
+        - latency
+        - timestamp
+    PaginatedHistoryResponse:
+      type: object
+      properties:
+        docs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+          description: Array of transaction documents for the current page.
+        totalDocs:
+          type: number
+          description: Total matching documents across all pages.
+        totalPages:
+          type: number
+          description: Total number of pages.
+        page:
+          type: number
+          description: Current page number (1-indexed).
+        hasNextPage:
+          type: boolean
+          description: Whether a next page exists.
+        hasPrevPage:
+          type: boolean
+          description: Whether a previous page exists.
+      required:
+        - docs
+        - totalDocs
+        - totalPages
+        - page
+        - hasNextPage
+        - hasPrevPage
+      description: Paginated response containing transaction history.
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message.
+        message:
+          type: string
+          description: Error message (NestJS errors).
+  parameters: {}
+paths:
+  /v1/engine/pulsar/sync:
+    post:
+      summary: Sync a transaction
+      description: Sends a transaction created by Pulsar to Quasar, which tracks it on the server until it reaches a final
+        status and then sends the webhooks of the app. Used by `quasar.pulsar.syncCreate`.
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransactionRequest"
+      responses:
+        "200":
+          description: "Synced; tracking started (`mode: fast`)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessCreateResponse"
+        "202":
+          description: "Synced; tracking queued (`mode: lazy`)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessCreateResponse"
+        "400":
+          description: The body is not a valid transaction or exceeds the safety limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Public key (read-only), disabled app, or IP address or origin not allowed by the app settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many requests per second for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/pulsar/history:
+    get:
+      summary: Read the transaction history
+      description: Returns the transactions of the app, newest first, filtered by every given filter. Used by
+        `quasar.pulsar.getHistory`.
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      parameters:
+        - schema:
+            type:
+              - number
+              - "null"
+            default: 1
+            description: Page number (1-indexed).
+            example: 1
+          required: false
+          description: Page number (1-indexed).
+          name: page
+          in: query
+        - schema:
+            type:
+              - number
+              - "null"
+            default: 10
+            description: Transactions per page, at most 100.
+            example: 10
+          required: false
+          description: Transactions per page, at most 100.
+          name: limit
+          in: query
+        - schema:
+            type: string
+            description: Sender address, compared exactly as it was synced.
+          required: false
+          description: Sender address, compared exactly as it was synced.
+          name: walletAddress
+          in: query
+        - schema:
+            type: string
+            description: Chain of the transactions.
+            example: "1"
+          required: false
+          description: Chain of the transactions.
+          name: chainId
+          in: query
+        - schema:
+            type: string
+            description: "Final status: `Success`, `Failed` or `Replaced`."
+            example: Success
+          required: false
+          description: "Final status: `Success`, `Failed` or `Replaced`."
+          name: status
+          in: query
+        - schema:
+            type: string
+            description: Key of one transaction.
+          required: false
+          description: Key of one transaction.
+          name: txKey
+          in: query
+        - schema:
+            type: string
+            description: Application name passed when the transaction was synced.
+          required: false
+          description: Application name passed when the transaction was synced.
+          name: appName
+          in: query
+      responses:
+        "200":
+          description: Paginated transaction history.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedHistoryResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: The quota of the organization is used up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many requests per second for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/monitoring/health:
+    get:
+      summary: Check the health of the API
+      description: Public, without a key. Used by `preFlightTxCheck` from `@tuwaio/quasar-sdk/react`.
+      tags:
+        - Monitoring
+      responses:
+        "200":
+          description: The database and Redis respond.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+        "503":
+          description: The primary database or Redis does not respond.
+webhooks: {}

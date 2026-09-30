@@ -1,0 +1,115 @@
+---
+title: Webhooks
+description: Receive a signed HTTP request from Quasar when a tracked transaction succeeds, fails or is replaced, verify it, and test it on localhost with the quasar-sdk CLI.
+---
+
+# Webhooks
+
+When a transaction synced to Quasar reaches a final status, Quasar sends an HTTP `POST` to the webhook endpoints of the app, signed with the secret of each endpoint. Your backend can then update orders, balances or notifications without polling.
+
+---
+
+## 🛠️ Register an Endpoint
+
+In the dashboard, open **Webhooks** and add an endpoint to an app:
+
+| Field                       | Meaning                                                                                                        |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **URL**                     | Where Quasar posts. Must be `https://`, except a `localhost` URL for [local development](#-local-development). |
+| **Events**                  | `*` (all), `transaction:success`, `transaction:failed`, `transaction:replaced`                                 |
+| **Transaction type filter** | `*` for every transaction, or one exact `type` of your Pulsar transactions (for example `SWAP`)                |
+| **Active**                  | Inactive endpoints get no deliveries and no retries                                                            |
+
+Quasar generates a **signing secret** for the endpoint: `whsec_` followed by 64 hexadecimal characters (32 random bytes). It is stored encrypted; revealing it or rolling it asks for your password. An app can have up to 500 endpoints.
+
+---
+
+## 📨 The Request
+
+```http
+POST /api/webhooks/quasar HTTP/1.1
+Content-Type: application/json
+User-Agent: Quasar-Webhook-Worker/1.0 (TuwaIO)
+x-quasar-signature: 5f3c…  (hex HMAC-SHA256 of the body)
+x-quasar-event: Success
+```
+
+```json
+{
+  "txKey": "0x3a5f…",
+  "hash": "0x3a5f…",
+  "status": "Success",
+  "action": "Success",
+  "txType": "SWAP",
+  "chainId": "1",
+  "timestamp": 1790000000,
+  "metadata": { "tokenIn": "USDC", "tokenOut": "ETH", "amount": 100 }
+}
+```
+
+| Field              | Content                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| `txKey`, `hash`    | Key of the Pulsar transaction and its on-chain hash (when it has one)                     |
+| `status`, `action` | Final status: `Success`, `Failed` or `Replaced`; also sent in the `x-quasar-event` header |
+| `txType`           | The `type` of the Pulsar transaction                                                      |
+| `chainId`          | Chain of the transaction, as a string                                                     |
+| `timestamp`        | Unix time in seconds when the webhook was created                                         |
+| `metadata`         | The `payload` of the Pulsar transaction                                                   |
+
+---
+
+## 🔐 Verify the Signature
+
+`x-quasar-signature` is the HMAC-SHA256 of the raw request body, keyed with the signing secret, in hexadecimal. Compute it over the body exactly as received, before parsing it, and compare in constant time:
+
+```ts filename="src/app/api/webhooks/quasar/route.ts"
+import { createHmac, timingSafeEqual } from 'node:crypto';
+
+export async function POST(request: Request) {
+  const secret = process.env.QUASAR_WEBHOOK_SECRET;
+  const signature = request.headers.get('x-quasar-signature');
+  if (!secret || !signature) {
+    return Response.json({ error: 'Missing signature' }, { status: 401 });
+  }
+
+  const body = await request.text();
+  const expected = Buffer.from(createHmac('sha256', secret).update(body).digest('hex'), 'hex');
+  const received = Buffer.from(signature, 'hex');
+  if (received.length !== expected.length || !timingSafeEqual(received, expected)) {
+    return Response.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+
+  const event = JSON.parse(body) as { txKey: string; status: string; txType: string; metadata: unknown };
+  if (event.status === 'Success') {
+    // Fulfill the order, credit the balance, notify the user...
+  }
+
+  return Response.json({ received: true });
+}
+```
+
+Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at most 10 seconds for a response. Deliveries can repeat (retries, manual resends), so make the handler idempotent, for example by `txKey` and status.
+
+---
+
+## 🔁 Retries and Delivery Logs
+
+- A delivery that fails (network error, timeout or a non-`2xx` status) is retried, up to 5 attempts in total, with an exponential backoff that starts at one minute.
+- Every attempt is logged under **Webhook Deliveries** in the dashboard, with the status code and the response. Keys that look like secrets (`secret`, `token`, `password`, `key`, `privatekey`, `secretkey`, `apikey`, `signingsecret`, `credential`) are masked in the logs.
+- A failed delivery can be sent again from its log entry.
+- Each delivery costs 1 quota unit, charged for the first attempt only (see [Quotas & Limits](/quasar/quotas-and-limits)).
+
+**Destination checks:** Quasar resolves the host of the URL before every attempt and refuses private, loopback and link-local addresses (also when the connection is made), so a webhook URL cannot reach the internal network of Quasar.
+
+---
+
+## 💻 Local Development
+
+Quasar Cloud cannot reach `localhost`. For development, add one endpoint per organization with a `localhost` URL (for example `http://localhost:3000/api/webhooks/quasar`): Quasar then keeps its deliveries for the **local relay** of the `quasar-sdk` CLI, which receives them over a Server-Sent Events stream and posts them to your app with the same body and headers (plus `x-quasar-delivery-id`), so the signature check above works unchanged.
+
+```bash
+# .env.local: QUASAR_WEBHOOK_SECRET=whsec_... (the secret of the localhost endpoint)
+npx @tuwaio/quasar-sdk listen --forward-to http://localhost:3000/api/webhooks/quasar
+```
+
+The CLI sends the signing secret in a header, reconnects when the stream drops and stops on a wrong secret. Its flags are listed on the [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk) page. A self-hosted node can instead post to private and loopback addresses directly when it runs with `ALLOW_INTERNAL_WEBHOOKS=true`; use that on development nodes only.

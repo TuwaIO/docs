@@ -1,0 +1,58 @@
+---
+title: Apps & Keys
+description: Quasar apps, their live and test environments, the secret and public keys, and the app settings that restrict who may call the API.
+---
+
+# Apps & Keys
+
+Every integration with Quasar starts with an **app**: it owns the synced transactions, the webhook endpoints and the keys. In Quasar Cloud, an app belongs to an organization (up to 30 apps each); the Community Edition has one workspace.
+
+---
+
+## 🛠️ Create an App
+
+In the [Quasar dashboard](https://quasar.tuwa.io/) (or the `/admin` panel of your node), open **Apps** and create one. Choose its **environment**:
+
+- **Live** for production traffic. Its keys start with `sk_live_` and `pk_live_`.
+- **Test** for development and staging. Its keys start with `sk_test_` and `pk_test_`, and a synced transaction costs half the quota of a live one (see [Quotas & Limits](/quasar/quotas-and-limits)).
+
+Both environments track transactions the same way.
+
+---
+
+## 🔑 Secret Key and Public Key
+
+| Key        | Prefix                 | Sent in             | Allows                                                   |
+| ---------- | ---------------------- | ------------------- | -------------------------------------------------------- |
+| Secret key | `sk_live_`, `sk_test_` | `x-tuwa-secret-key` | Every endpoint: syncing transactions and reading history |
+| Public key | `pk_live_`, `pk_test_` | `x-tuwa-public-key` | Read-only requests (`GET`), such as the history          |
+
+- **Keep the secret key on your server** (environment variable, Server Action, route handler). Anyone with it can sync transactions to your app and spend its quota. `@tuwaio/quasar-sdk` sends it for you:
+
+  ```ts filename="src/lib/quasar.ts"
+  import { Quasar } from '@tuwaio/quasar-sdk';
+
+  export const quasar = new Quasar({ secretKey: process.env.QUASAR_SECRET_KEY ?? '' });
+  ```
+
+- **The public key is read-only**: a `POST` with it is rejected with `403`. It can read the whole history of the app, so check with your server which wallet a user may see before showing it, or restrict it with the domain allowlist below.
+- **Storage:** Quasar keeps the secret key encrypted and looks it up by its SHA-256 hash. Revealing a secret key in the dashboard asks for your password (and your 2FA code when it is enabled).
+- **Rolling:** rolling the secret key in the app settings (again with your password) creates a new key and stops the old one at once. Deploy the new key to your server right after.
+
+---
+
+## 🛡️ App Settings That Restrict Requests
+
+| Setting              | Effect                                                                                                                                                                                                                                                       |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Active**           | A disabled app answers every request with `403`.                                                                                                                                                                                                             |
+| **IP allowlist**     | When not empty, only requests from these IP addresses are accepted (`403` otherwise).                                                                                                                                                                        |
+| **Domain allowlist** | When not empty, every request must carry an `Origin` or `Referer` header with one of these domains (`403` otherwise). Requests from a server, such as those of `@tuwaio/quasar-sdk`, carry no such header: leave the list empty for apps used from a server. |
+
+The app settings also hold your own RPC endpoints and provider keys (Alchemy, QuickNode, Pimlico, Gelato) for the trackers; Quasar stores them encrypted and refuses private and loopback RPC hosts.
+
+---
+
+## 🏢 Isolation Between Apps
+
+Quasar resolves the app from the key of every request, and reads and writes only the transactions of that app: the history of one app never contains transactions of another, even in the same organization. Webhook deliveries are checked against the organization and app of the endpoint before they are sent.

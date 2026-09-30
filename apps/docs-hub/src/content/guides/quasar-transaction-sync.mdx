@@ -1,0 +1,425 @@
+---
+title: Sync Transactions to Quasar
+description: Sync the Pulsar transactions of a React app to Quasar through your server, check the SIWX session before every call, and show the history of every device in Nova Connect and Nova Transactions.
+---
+
+import { Tabs } from 'nextra/components';
+
+# Sync Transactions to Quasar
+
+This guide continues the [Full-Stack React guide](/guides/full-stack-react): every transaction a user sends is also sent to [Quasar](/quasar) through your server. Quasar tracks it on the server until its final status (so the result is known even when the tab is closed), sends your [webhooks](/quasar/webhooks), and returns the history of the wallet on any device. At the end you have:
+
+- two Server Actions that call Quasar with the secret key, after checking that the signed-in wallet is the one the request is about;
+- a Pulsar store that checks the sign-in before each transaction and syncs each new transaction;
+- the history of the wallet, loaded from Quasar page by page, in the Nova Connect and Nova Transactions modals.
+
+The **`nextjs-tuwa-quasar`** [starter template](/guides/starter-templates) is a complete app built the same way.
+
+> [!TIP]
+>
+> The step that differs by network has an **EVM** and a **Solana** tab, linked to the other guides.
+
+---
+
+## Before You Start
+
+- **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `sessionStore` of Step 3. The browser never sees the Quasar key: it calls your Server Actions, and they check the SIWX session cookie.
+- **A Quasar app and its secret key** ([Apps & Keys](/quasar/apps-and-keys)), in `QUASAR_SECRET_KEY` on the server. For a [self-hosted node](/quasar/self-hosting), put the URL of its API in `NEXT_PUBLIC_QUASAR_BASE_URL`; without it, the code uses Quasar Cloud.
+
+---
+
+## Step 1: Install the Quasar Client
+
+```bash
+pnpm add @tuwaio/quasar-sdk
+```
+
+Its peer dependency `@tuwaio/pulsar-core` comes with `@tuwaio/sdk`.
+
+---
+
+## Step 2: Add the Server Actions
+
+Both actions read the SIWX session from the cookie and refuse to act for another wallet: without this check, any visitor could spend the quota of your app or read the history of any address.
+
+```ts filename="src/app/quasarActions.ts"
+'use server';
+
+import { Quasar, QuasarSDKError, type Transaction } from '@tuwaio/quasar-sdk';
+import { getSiwxServerSession, isSessionMatchingTarget } from '@tuwaio/sdk/siwx/server';
+import { cookies } from 'next/headers';
+
+import { sessionStore } from '@/lib/authStores';
+
+const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL,
+});
+
+const APP_NAME = 'my-app';
+
+async function getSession() {
+  return getSiwxServerSession({ cookieSource: await cookies(), sessionStore });
+}
+
+export async function syncTransaction(tx: Transaction): Promise<{ success: boolean; error?: string }> {
+  const session = await getSession();
+  if (!session || !isSessionMatchingTarget(session, tx.from, tx.chainId)) {
+    return { success: false, error: 'The signed-in wallet did not send this transaction.' };
+  }
+
+  try {
+    await quasar.pulsar.syncCreate(tx, APP_NAME);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof QuasarSDKError ? error.message : 'Quasar is unavailable.' };
+  }
+}
+
+export async function getHistory(params: { walletAddress: string; page?: number }) {
+  const session = await getSession();
+  if (!session || !isSessionMatchingTarget(session, params.walletAddress)) {
+    return null;
+  }
+
+  return quasar.pulsar.getHistory({
+    walletAddress: params.walletAddress,
+    page: params.page,
+    limit: 10,
+    appName: APP_NAME,
+  });
+}
+```
+
+`isSessionMatchingTarget` compares EVM addresses case-insensitively and Solana addresses exactly. `appName` keeps the history of this app apart when several apps share one Quasar app.
+
+---
+
+## Step 3: Sync From the Transaction Store
+
+Replace the store of the full-stack guide. `beforeTxProcess` runs `preFlightTxCheck` before the wallet is asked to sign: it stops the transaction when the user is not signed in or Quasar does not respond. `onRemoteCreate` sends each new transaction to the Server Action; throw when the action fails, so Pulsar keeps the transaction marked as unsynced and sends it again later (`reconcileUnsyncedTransactions`). The history store keeps the pages loaded from Quasar together with the local transactions.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/hooks/pulsarStore.ts"
+import { pulsarEvmAdapter } from '@tuwaio/evm-sdk/pulsar';
+import { preFlightTxCheck } from '@tuwaio/quasar-sdk/react';
+import { createBoundedUseStore, createPulsarStore, createTxInMemoryStore, type Transaction } from '@tuwaio/sdk/pulsar';
+
+import { getHistory, syncTransaction } from '@/app/quasarActions';
+import { appChains, wagmiConfig } from '@/configs/appConfig';
+
+export const pulsarStore = createPulsarStore<Transaction>({
+  name: 'my-app-transactions',
+  adapter: [pulsarEvmAdapter(wagmiConfig, appChains)],
+  beforeTxProcess: () => preFlightTxCheck(process.env.NEXT_PUBLIC_QUASAR_BASE_URL),
+  onRemoteCreate: async (tx) => {
+    const result = await syncTransaction(tx);
+    if (!result.success) throw new Error(result.error);
+  },
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+
+export const historyStore = createTxInMemoryStore<Transaction>({
+  localTransactionsPool: pulsarStore.getState().transactionsPool,
+  reconcileUnsyncedTransactions: pulsarStore.getState().reconcileUnsyncedTransactions,
+  getHistory: ({ page, walletAddress }) => getHistory({ walletAddress, page }),
+  // Pending transactions sent from another device continue to be tracked here.
+  onHistoryFetched: (remoteTxs) => pulsarStore.getState().injectExternalPendingTxs(remoteTxs),
+});
+
+pulsarStore.subscribe((state) => historyStore.getState().syncWithLocalPool(state.transactionsPool));
+
+export const useHistoryStore = createBoundedUseStore(historyStore);
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/hooks/pulsarStore.ts"
+import { preFlightTxCheck } from '@tuwaio/quasar-sdk/react';
+import { createBoundedUseStore, createPulsarStore, createTxInMemoryStore, type Transaction } from '@tuwaio/sdk/pulsar';
+import { pulsarSolanaAdapter } from '@tuwaio/solana-sdk/pulsar';
+
+import { getHistory, syncTransaction } from '@/app/quasarActions';
+import { solanaRPCUrls } from '@/configs/appConfig';
+
+export const pulsarStore = createPulsarStore<Transaction>({
+  name: 'my-app-transactions',
+  adapter: [pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls })],
+  beforeTxProcess: () => preFlightTxCheck(process.env.NEXT_PUBLIC_QUASAR_BASE_URL),
+  onRemoteCreate: async (tx) => {
+    const result = await syncTransaction(tx);
+    if (!result.success) throw new Error(result.error);
+  },
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+
+export const historyStore = createTxInMemoryStore<Transaction>({
+  localTransactionsPool: pulsarStore.getState().transactionsPool,
+  reconcileUnsyncedTransactions: pulsarStore.getState().reconcileUnsyncedTransactions,
+  getHistory: ({ page, walletAddress }) => getHistory({ walletAddress, page }),
+  // Pending transactions sent from another device continue to be tracked here.
+  onHistoryFetched: (remoteTxs) => pulsarStore.getState().injectExternalPendingTxs(remoteTxs),
+});
+
+pulsarStore.subscribe((state) => historyStore.getState().syncWithLocalPool(state.transactionsPool));
+
+export const useHistoryStore = createBoundedUseStore(historyStore);
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+`preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
+
+---
+
+## Step 4: Show the History
+
+Feed Nova from the history store instead of the local pool, pass its pagination, and load the first page once the connected wallet is signed in. Only the parts that change from Step 5 of the full-stack guide are new: `HistoryLoader`, `pagination` and `useHistoryStore`.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```tsx filename="src/providers/Providers.tsx"
+'use client';
+
+import { EVMConnectorsWatcher } from '@tuwaio/evm-sdk/nova-connect';
+import { satelliteEVMAdapter } from '@tuwaio/evm-sdk/satellite';
+import { NovaConnectProvider, type NovaConnectProviderProps } from '@tuwaio/sdk/nova-connect';
+import { NovaTransactionsProvider } from '@tuwaio/sdk/nova-transactions/providers';
+import { getAdapterFromConnectorType } from '@tuwaio/sdk/orbit';
+import { type TxInMemoryPagination, useInitializeTransactionsPool } from '@tuwaio/sdk/pulsar';
+import { SatelliteConnectProvider, useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
+import { isSessionMatchingTarget, useSiwxSessionStore } from '@tuwaio/sdk/siwx';
+import { type ReactNode, useEffect } from 'react';
+
+import { appChains, wagmiConfig } from '@/configs/appConfig';
+import { useHistoryStore, usePulsarStore } from '@/hooks/pulsarStore';
+
+const satelliteAdapter = satelliteEVMAdapter(wagmiConfig, appChains);
+
+const siwx: NovaConnectProviderProps['siwx'] = {
+  getNonce: async () => {
+    const res = await fetch('/api/siwx/nonce');
+    return ((await res.json()) as { nonce: string }).nonce;
+  },
+  verifier: async (payload) => {
+    const res = await fetch('/api/siwx/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? res.json() : null;
+  },
+  destroyer: async () => {
+    await fetch('/api/siwx/logout', { method: 'POST' });
+  },
+};
+
+// Loads the first page of the history when the connected wallet is signed in.
+function HistoryLoader() {
+  const address = useSatelliteConnectStore((state) => state.activeConnection?.address);
+  const session = useSiwxSessionStore((state) => state.session);
+  const fetchInitial = useHistoryStore((state) => state.fetchInitial);
+  const isSignedIn = Boolean(session && address && isSessionMatchingTarget(session, address));
+
+  useEffect(() => {
+    if (isSignedIn && address) void fetchInitial(address);
+  }, [isSignedIn, address, fetchInitial]);
+
+  return null;
+}
+
+function useHistoryPagination(): TxInMemoryPagination {
+  const isLoading = useHistoryStore((state) => state.isLoading);
+  const isError = useHistoryStore((state) => state.isError);
+  const currentPage = useHistoryStore((state) => state.currentPage);
+  const hasMore = useHistoryStore((state) => state.hasMore);
+  const fetchNextPage = useHistoryStore((state) => state.fetchNextPage);
+  return { isLoading, isError, currentPage, hasMore, fetchNextPage };
+}
+
+function TransactionsUI() {
+  const transactionsPool = useHistoryStore((state) => state.transactionsPool);
+  const pagination = useHistoryPagination();
+  const initialTx = usePulsarStore((state) => state.initialTx);
+  const closeTxTrackedModal = usePulsarStore((state) => state.closeTxTrackedModal);
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const initializeTransactionsPool = usePulsarStore((state) => state.initializeTransactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
+
+  useInitializeTransactionsPool({ initializeTransactionsPool });
+
+  return (
+    <NovaTransactionsProvider
+      transactionsPool={transactionsPool}
+      pagination={pagination}
+      initialTx={initialTx}
+      closeTxTrackedModal={closeTxTrackedModal}
+      executeTxAction={executeTxAction}
+      connectedWalletAddress={activeConnection?.isConnected ? activeConnection.address : undefined}
+      connectedAdapterType={getAdapterFromConnectorType(activeConnection?.connectorType ?? 'evm:')}
+      adapter={getAdapter()}
+    />
+  );
+}
+
+export function Providers({ children }: { children: ReactNode }) {
+  const transactionsPool = useHistoryStore((state) => state.transactionsPool);
+  const pagination = useHistoryPagination();
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+
+  return (
+    <SatelliteConnectProvider adapter={satelliteAdapter} autoConnect>
+      <EVMConnectorsWatcher wagmiConfig={wagmiConfig} />
+      <HistoryLoader />
+      <TransactionsUI />
+      <NovaConnectProvider
+        appChains={appChains}
+        transactionPool={transactionsPool}
+        pagination={pagination}
+        pulsarAdapter={getAdapter()}
+        siwx={siwx}
+        withBalance
+        withChain
+      >
+        {children}
+      </NovaConnectProvider>
+    </SatelliteConnectProvider>
+  );
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```tsx filename="src/providers/Providers.tsx"
+'use client';
+
+import { NovaConnectProvider, type NovaConnectProviderProps } from '@tuwaio/sdk/nova-connect';
+import { NovaTransactionsProvider } from '@tuwaio/sdk/nova-transactions/providers';
+import { getAdapterFromConnectorType } from '@tuwaio/sdk/orbit';
+import { type TxInMemoryPagination, useInitializeTransactionsPool } from '@tuwaio/sdk/pulsar';
+import { SatelliteConnectProvider, useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
+import { isSessionMatchingTarget, useSiwxSessionStore } from '@tuwaio/sdk/siwx';
+import { SolanaConnectorsWatcher } from '@tuwaio/solana-sdk/nova-connect';
+import { satelliteSolanaAdapter } from '@tuwaio/solana-sdk/satellite';
+import { type ReactNode, useEffect } from 'react';
+
+import { solanaRPCUrls } from '@/configs/appConfig';
+import { useHistoryStore, usePulsarStore } from '@/hooks/pulsarStore';
+
+const satelliteAdapter = satelliteSolanaAdapter({ rpcUrls: solanaRPCUrls });
+
+const siwx: NovaConnectProviderProps['siwx'] = {
+  getNonce: async () => {
+    const res = await fetch('/api/siwx/nonce');
+    return ((await res.json()) as { nonce: string }).nonce;
+  },
+  verifier: async (payload) => {
+    const res = await fetch('/api/siwx/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? res.json() : null;
+  },
+  destroyer: async () => {
+    await fetch('/api/siwx/logout', { method: 'POST' });
+  },
+};
+
+// Loads the first page of the history when the connected wallet is signed in.
+function HistoryLoader() {
+  const address = useSatelliteConnectStore((state) => state.activeConnection?.address);
+  const session = useSiwxSessionStore((state) => state.session);
+  const fetchInitial = useHistoryStore((state) => state.fetchInitial);
+  const isSignedIn = Boolean(session && address && isSessionMatchingTarget(session, address));
+
+  useEffect(() => {
+    if (isSignedIn && address) void fetchInitial(address);
+  }, [isSignedIn, address, fetchInitial]);
+
+  return null;
+}
+
+function useHistoryPagination(): TxInMemoryPagination {
+  const isLoading = useHistoryStore((state) => state.isLoading);
+  const isError = useHistoryStore((state) => state.isError);
+  const currentPage = useHistoryStore((state) => state.currentPage);
+  const hasMore = useHistoryStore((state) => state.hasMore);
+  const fetchNextPage = useHistoryStore((state) => state.fetchNextPage);
+  return { isLoading, isError, currentPage, hasMore, fetchNextPage };
+}
+
+function TransactionsUI() {
+  const transactionsPool = useHistoryStore((state) => state.transactionsPool);
+  const pagination = useHistoryPagination();
+  const initialTx = usePulsarStore((state) => state.initialTx);
+  const closeTxTrackedModal = usePulsarStore((state) => state.closeTxTrackedModal);
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const initializeTransactionsPool = usePulsarStore((state) => state.initializeTransactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
+
+  useInitializeTransactionsPool({ initializeTransactionsPool });
+
+  return (
+    <NovaTransactionsProvider
+      transactionsPool={transactionsPool}
+      pagination={pagination}
+      initialTx={initialTx}
+      closeTxTrackedModal={closeTxTrackedModal}
+      executeTxAction={executeTxAction}
+      connectedWalletAddress={activeConnection?.isConnected ? activeConnection.address : undefined}
+      connectedAdapterType={getAdapterFromConnectorType(activeConnection?.connectorType ?? 'solana:')}
+      adapter={getAdapter()}
+    />
+  );
+}
+
+export function Providers({ children }: { children: ReactNode }) {
+  const transactionsPool = useHistoryStore((state) => state.transactionsPool);
+  const pagination = useHistoryPagination();
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+
+  return (
+    <SatelliteConnectProvider adapter={satelliteAdapter} autoConnect>
+      <SolanaConnectorsWatcher />
+      <HistoryLoader />
+      <TransactionsUI />
+      <NovaConnectProvider
+        solanaRPCUrls={solanaRPCUrls}
+        transactionPool={transactionsPool}
+        pagination={pagination}
+        pulsarAdapter={getAdapter()}
+        siwx={siwx}
+        withBalance
+        withChain
+      >
+        {children}
+      </NovaConnectProvider>
+    </SatelliteConnectProvider>
+  );
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+Send a transaction, open the app in another browser with the same wallet, and sign in: the transaction is in the history there too. It also appears in the Quasar dashboard under the app.
+
+---
+
+## 📚 Next Steps
+
+- Receive a signed request on your backend when a transaction succeeds, fails or is replaced — also on `localhost`: [Webhooks](/quasar/webhooks).
+- Understand what the syncs cost and what happens when the quota is used up: [Quotas & Limits](/quasar/quotas-and-limits).
+- Run Quasar on your own servers: [Self-Hosting](/quasar/self-hosting).
+- Look up every export of the client: [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk), and the endpoints in the [API Reference](/quasar/api).

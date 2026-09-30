@@ -10,4 +10,8 @@ export default {
     type: 'page',
     title: 'Guides',
   },
+  quasar: {
+    type: 'page',
+    title: 'Quasar',
+  },
 };

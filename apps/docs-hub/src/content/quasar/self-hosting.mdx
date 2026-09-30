@@ -1,0 +1,39 @@
+---
+title: Self-Hosting
+description: Run Quasar Community Edition, the open-source, single-tenant Quasar, on your own servers, and point @tuwaio/quasar-sdk at it.
+---
+
+# Self-Hosting
+
+**Quasar Community Edition** is Quasar under the Apache-2.0 license, published at [TuwaIO/quasar-community](https://github.com/TuwaIO/quasar-community) with Docker images on GHCR. It runs the same tracking engine and the same API as Quasar Cloud, for one operator: see [Quasar Cloud and Quasar Community](/quasar#-quasar-cloud-and-quasar-community) for what it leaves out.
+
+The setup is documented in the repository; this page only links to it:
+
+| Guide                                                                                                   | Covers                                                                                                |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| [README](https://github.com/TuwaIO/quasar-community#readme)                                             | What the edition includes, the repository layout, a five-minute quick start and the workspace limits  |
+| [Local quick start](https://github.com/TuwaIO/quasar-community/blob/main/docs/QUICKSTART_LOCAL.md)      | Environment variables, the single-node Docker Compose profile, seeding and the first login            |
+| [Production deployment](https://github.com/TuwaIO/quasar-community/blob/main/docs/PRODUCTION_DEPLOY.md) | The high-availability profile: Postgres primary and standby, Redis cluster, PgBouncer, WAL-G, Traefik |
+| [CI/CD setup](https://github.com/TuwaIO/quasar-community/blob/main/docs/CICD_SETUP.md)                  | Deploying your fork with the included GitHub Actions workflow                                         |
+| [Seeding](https://github.com/TuwaIO/quasar-community/blob/main/docs/SEEDING.md)                         | What the seed creates and how to run it again                                                         |
+
+A public preview built from the same tree runs at [community-stg.tuwa.io](https://community-stg.tuwa.io); it follows development and is not a service to rely on.
+
+---
+
+## 🔌 Point the SDK at Your Node
+
+Everything else stays the same: create an app in the `/admin` panel of your node, copy its secret key, and pass the URL of your API:
+
+```ts filename="src/lib/quasar.ts"
+import { Quasar } from '@tuwaio/quasar-sdk';
+
+export const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.QUASAR_BASE_URL ?? 'https://api.tuwa.io',
+});
+```
+
+Pass the same URL to `preFlightTxCheck(url)` from `@tuwaio/quasar-sdk/react` in the browser, and to the webhook relay with `npx @tuwaio/quasar-sdk listen --api-url <url>` (or `QUASAR_BASE_URL` in `.env`).
+
+There is no export of the history from Quasar Cloud to a self-hosted node yet: after the switch, the history of the app starts on your node.

@@ -1,0 +1,482 @@
+---
+title: Build a Full-Stack React App with the TUWA SDK
+description: Set up a Next.js app with the TUWA SDK step by step — wallet connection with Nova Connect, SIWX sign-in with server sessions, and transaction tracking with Pulsar and Nova Transactions, for EVM or Solana.
+---
+
+import { Tabs } from 'nextra/components';
+
+# Build a Full-Stack React App with the TUWA SDK
+
+This guide builds a Next.js app on the [TUWA SDK](https://sdk.docs.tuwa.io/), step by step. At the end you have:
+
+- wallet connection with the Nova Connect modals, on Satellite Connect;
+- SIWX sign-in: the connected wallet signs a CAIP-122 message and your server keeps the session in an `HttpOnly` cookie;
+- a Pulsar transaction store, with the Nova Transactions modals and toasts;
+- a Server Action that knows which wallet is signed in.
+
+Everything is imported from `@tuwaio/sdk` and its chain add-on. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) continues from here and syncs the transactions to Quasar. The **`nextjs-tuwa`** and **`nextjs-tuwa-quasar`** [starter templates](/guides/starter-templates) are complete apps built the same way.
+
+> [!TIP]
+>
+> The steps that differ by network have an **EVM** and a **Solana** tab. The tabs are linked: pick your network once and every step follows it. To support both networks, see [EVM and Solana Together](#-evm-and-solana-together).
+
+---
+
+## Before You Start
+
+- **Next.js 16 with the App Router and React 19.2 or newer.** The examples use `'use client'` modules and the `@/` import alias for `src/`.
+- **The URL of your app** in `NEXT_PUBLIC_APP_URL` (for example `http://localhost:3000`): the server accepts sign-in messages for this domain only.
+
+---
+
+## Step 1: Install the Packages
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```bash
+pnpm add @tuwaio/sdk @tuwaio/evm-sdk @wagmi/core viem
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```bash
+pnpm add @tuwaio/sdk @tuwaio/solana-sdk @solana/kit @wallet-standard/react \
+  @wallet-standard/app @wallet-standard/base @wallet-standard/features @wallet-standard/ui @wallet-standard/ui-registry
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+`@tuwaio/sdk` brings the TUWA packages and the libraries they share; the add-on brings the packages of your network. Import the Nova stylesheets once, in the global CSS file of the app:
+
+```css filename="src/app/globals.css"
+@import '@tuwaio/sdk/styles/all.css';
+```
+
+---
+
+## Step 2: Configure the Network
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+Create the `@wagmi/core` config once, outside your components. `createDefaultTransports` uses the public, rate-limited RPC URLs of the viem chains; pass your own transports in production. `impersonated` is a development connector that lets you view the app as any address.
+
+```ts filename="src/configs/appConfig.ts"
+import { createDefaultTransports, impersonated } from '@tuwaio/evm-sdk/satellite';
+import { createConfig, injected } from '@wagmi/core';
+import { mainnet, sepolia } from 'viem/chains';
+
+export const appChains = [sepolia, mainnet] as const;
+
+export const wagmiConfig = createConfig({
+  chains: appChains,
+  connectors: [injected(), impersonated({})],
+  transports: createDefaultTransports(appChains),
+  ssr: true,
+});
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+List an RPC URL for each cluster your app uses, by cluster name (`mainnet`, `devnet`, `testnet`). The public `api.*.solana.com` endpoints are rate-limited; use your own in production.
+
+```ts filename="src/configs/appConfig.ts"
+export const solanaRPCUrls = {
+  devnet: 'https://api.devnet.solana.com',
+};
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Step 3: Add the SIWX Routes
+
+The server issues the nonces, verifies the signed messages and keeps the sessions. For development, keep them in memory:
+
+```ts filename="src/lib/authStores.ts"
+import { MemorySiwxNonceStore, MemorySiwxSessionStore } from '@tuwaio/sdk/siwx/server';
+
+// In memory, for one server process. They refuse to run with NODE_ENV=production: use a shared store such as Redis
+// there (see the @tuwaio/siwx-server page).
+export const sessionStore = new MemorySiwxSessionStore();
+export const nonceStore = new MemorySiwxNonceStore();
+```
+
+One route handler serves `/api/siwx/nonce`, `/api/siwx/verify`, `/api/siwx/session` and `/api/siwx/logout`:
+
+```ts filename="src/app/api/siwx/[...siwx]/route.ts"
+import { createSiwxApiHandler } from '@tuwaio/sdk/siwx/server-next';
+
+import { nonceStore, sessionStore } from '@/lib/authStores';
+
+const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+
+export const { GET, POST, DELETE } = createSiwxApiHandler({
+  sessionStore,
+  nonceStore,
+  policy: {
+    expectedDomain: appUrl.host,
+    expectedUri: appUrl.origin,
+    requireExpirationTime: true,
+    maxIssuedAtAgeSeconds: 300,
+  },
+});
+```
+
+For production stores, `allowedChainIds` and the session lifetime, see [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server). How the sign-in works is explained in the [Multi-Chain Authentication guide](/guides/multi-chain-auth-siwx-caip122).
+
+---
+
+## Step 4: Create the Transaction Store
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/hooks/pulsarStore.ts"
+import { pulsarEvmAdapter } from '@tuwaio/evm-sdk/pulsar';
+import { createBoundedUseStore, createPulsarStore, type Transaction } from '@tuwaio/sdk/pulsar';
+
+import { appChains, wagmiConfig } from '@/configs/appConfig';
+
+export const pulsarStore = createPulsarStore<Transaction>({
+  name: 'my-app-transactions', // the localStorage key
+  adapter: [pulsarEvmAdapter(wagmiConfig, appChains)],
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/hooks/pulsarStore.ts"
+import { createBoundedUseStore, createPulsarStore, type Transaction } from '@tuwaio/sdk/pulsar';
+import { pulsarSolanaAdapter } from '@tuwaio/solana-sdk/pulsar';
+
+import { solanaRPCUrls } from '@/configs/appConfig';
+
+export const pulsarStore = createPulsarStore<Transaction>({
+  name: 'my-app-transactions', // the localStorage key
+  adapter: [pulsarSolanaAdapter({ rpcUrls: solanaRPCUrls })],
+});
+
+export const usePulsarStore = createBoundedUseStore(pulsarStore);
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+The store saves the transactions to `localStorage` and tracks each one in the background until its final status. Use your own transaction type instead of `Transaction` to type `type` and `payload`, as in the [React transaction tracking guide](/guides/react-transaction-tracking#step-4-create-the-transaction-store).
+
+---
+
+## Step 5: Render the Providers
+
+Create the Satellite adapter and the SIWX options outside the component, so they are created once. `NovaConnectProvider` receives `siwx`: it asks every connected wallet to sign in, disconnects a wallet that refuses, and signs out when the wallet disconnects. Do not pass `siwx` to the watcher as well.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```tsx filename="src/providers/Providers.tsx"
+'use client';
+
+import { EVMConnectorsWatcher } from '@tuwaio/evm-sdk/nova-connect';
+import { satelliteEVMAdapter } from '@tuwaio/evm-sdk/satellite';
+import { NovaConnectProvider, type NovaConnectProviderProps } from '@tuwaio/sdk/nova-connect';
+import { NovaTransactionsProvider } from '@tuwaio/sdk/nova-transactions/providers';
+import { getAdapterFromConnectorType } from '@tuwaio/sdk/orbit';
+import { useInitializeTransactionsPool } from '@tuwaio/sdk/pulsar';
+import { SatelliteConnectProvider, useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
+import type { ReactNode } from 'react';
+
+import { appChains, wagmiConfig } from '@/configs/appConfig';
+import { usePulsarStore } from '@/hooks/pulsarStore';
+
+const satelliteAdapter = satelliteEVMAdapter(wagmiConfig, appChains);
+
+const siwx: NovaConnectProviderProps['siwx'] = {
+  getNonce: async () => {
+    const res = await fetch('/api/siwx/nonce');
+    return ((await res.json()) as { nonce: string }).nonce;
+  },
+  verifier: async (payload) => {
+    const res = await fetch('/api/siwx/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? res.json() : null;
+  },
+  destroyer: async () => {
+    await fetch('/api/siwx/logout', { method: 'POST' });
+  },
+};
+
+// The modals and toasts of Nova Transactions, fed by the Pulsar store.
+function TransactionsUI() {
+  const transactionsPool = usePulsarStore((state) => state.transactionsPool);
+  const initialTx = usePulsarStore((state) => state.initialTx);
+  const closeTxTrackedModal = usePulsarStore((state) => state.closeTxTrackedModal);
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const initializeTransactionsPool = usePulsarStore((state) => state.initializeTransactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
+
+  // Restarts the trackers of pending transactions after a page reload.
+  useInitializeTransactionsPool({ initializeTransactionsPool });
+
+  return (
+    <NovaTransactionsProvider
+      transactionsPool={transactionsPool}
+      initialTx={initialTx}
+      closeTxTrackedModal={closeTxTrackedModal}
+      executeTxAction={executeTxAction}
+      connectedWalletAddress={activeConnection?.isConnected ? activeConnection.address : undefined}
+      connectedAdapterType={getAdapterFromConnectorType(activeConnection?.connectorType ?? 'evm:')}
+      adapter={getAdapter()}
+    />
+  );
+}
+
+export function Providers({ children }: { children: ReactNode }) {
+  const transactionsPool = usePulsarStore((state) => state.transactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+
+  return (
+    <SatelliteConnectProvider adapter={satelliteAdapter} autoConnect>
+      <EVMConnectorsWatcher wagmiConfig={wagmiConfig} />
+      <TransactionsUI />
+      <NovaConnectProvider
+        appChains={appChains}
+        transactionPool={transactionsPool}
+        pulsarAdapter={getAdapter()}
+        siwx={siwx}
+        withBalance
+        withChain
+      >
+        {children}
+      </NovaConnectProvider>
+    </SatelliteConnectProvider>
+  );
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```tsx filename="src/providers/Providers.tsx"
+'use client';
+
+import { NovaConnectProvider, type NovaConnectProviderProps } from '@tuwaio/sdk/nova-connect';
+import { NovaTransactionsProvider } from '@tuwaio/sdk/nova-transactions/providers';
+import { getAdapterFromConnectorType } from '@tuwaio/sdk/orbit';
+import { useInitializeTransactionsPool } from '@tuwaio/sdk/pulsar';
+import { SatelliteConnectProvider, useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
+import { SolanaConnectorsWatcher } from '@tuwaio/solana-sdk/nova-connect';
+import { satelliteSolanaAdapter } from '@tuwaio/solana-sdk/satellite';
+import type { ReactNode } from 'react';
+
+import { solanaRPCUrls } from '@/configs/appConfig';
+import { usePulsarStore } from '@/hooks/pulsarStore';
+
+const satelliteAdapter = satelliteSolanaAdapter({ rpcUrls: solanaRPCUrls });
+
+const siwx: NovaConnectProviderProps['siwx'] = {
+  getNonce: async () => {
+    const res = await fetch('/api/siwx/nonce');
+    return ((await res.json()) as { nonce: string }).nonce;
+  },
+  verifier: async (payload) => {
+    const res = await fetch('/api/siwx/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.ok ? res.json() : null;
+  },
+  destroyer: async () => {
+    await fetch('/api/siwx/logout', { method: 'POST' });
+  },
+};
+
+// The modals and toasts of Nova Transactions, fed by the Pulsar store.
+function TransactionsUI() {
+  const transactionsPool = usePulsarStore((state) => state.transactionsPool);
+  const initialTx = usePulsarStore((state) => state.initialTx);
+  const closeTxTrackedModal = usePulsarStore((state) => state.closeTxTrackedModal);
+  const executeTxAction = usePulsarStore((state) => state.executeTxAction);
+  const initializeTransactionsPool = usePulsarStore((state) => state.initializeTransactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
+
+  // Restarts the trackers of pending transactions after a page reload.
+  useInitializeTransactionsPool({ initializeTransactionsPool });
+
+  return (
+    <NovaTransactionsProvider
+      transactionsPool={transactionsPool}
+      initialTx={initialTx}
+      closeTxTrackedModal={closeTxTrackedModal}
+      executeTxAction={executeTxAction}
+      connectedWalletAddress={activeConnection?.isConnected ? activeConnection.address : undefined}
+      connectedAdapterType={getAdapterFromConnectorType(activeConnection?.connectorType ?? 'solana:')}
+      adapter={getAdapter()}
+    />
+  );
+}
+
+export function Providers({ children }: { children: ReactNode }) {
+  const transactionsPool = usePulsarStore((state) => state.transactionsPool);
+  const getAdapter = usePulsarStore((state) => state.getAdapter);
+
+  return (
+    <SatelliteConnectProvider adapter={satelliteAdapter} autoConnect>
+      <SolanaConnectorsWatcher />
+      <TransactionsUI />
+      <NovaConnectProvider
+        solanaRPCUrls={solanaRPCUrls}
+        transactionPool={transactionsPool}
+        pulsarAdapter={getAdapter()}
+        siwx={siwx}
+        withBalance
+        withChain
+      >
+        {children}
+      </NovaConnectProvider>
+    </SatelliteConnectProvider>
+  );
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+Render the providers in the root layout and the connect button anywhere inside them:
+
+```tsx filename="src/app/layout.tsx"
+import './globals.css';
+
+import type { ReactNode } from 'react';
+
+import { Providers } from '@/providers/Providers';
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+```tsx filename="src/app/page.tsx"
+'use client';
+
+import { ConnectButton } from '@tuwaio/sdk/nova-connect/components';
+
+export default function HomePage() {
+  return (
+    <main>
+      <ConnectButton />
+    </main>
+  );
+}
+```
+
+Open the app, connect a wallet and sign the message: the connect button shows the wallet, and the server has a session for it.
+
+---
+
+## Step 6: Send a Tracked Transaction
+
+Sending a transaction is the same as without the SDK: build the contract (EVM) or program (Solana) call and pass it to `executeTxAction` of the store. Follow Steps 2, 3 and 6 of the [React transaction tracking guide](/guides/react-transaction-tracking#step-2-describe-the-contract-or-program) (for Solana, also install `@solana/react`, which provides the transaction signer) and change the import paths:
+
+| In the guide                      | With the SDK                          |
+| --------------------------------- | ------------------------------------- |
+| `@tuwaio/pulsar-core`             | `@tuwaio/sdk/pulsar`                  |
+| `@tuwaio/pulsar-react`            | `@tuwaio/sdk/pulsar`                  |
+| `@tuwaio/orbit-core`              | `@tuwaio/sdk/orbit`                   |
+| `@tuwaio/nova-connect/components` | `@tuwaio/sdk/nova-connect/components` |
+| `@tuwaio/nova-connect/satellite`  | `@tuwaio/sdk/nova-connect/satellite`  |
+| `@tuwaio/pulsar-evm`              | `@tuwaio/evm-sdk/pulsar`              |
+| `@tuwaio/orbit-evm`               | `@tuwaio/evm-sdk/orbit`               |
+| `@tuwaio/pulsar-solana`           | `@tuwaio/solana-sdk/pulsar`           |
+| `@tuwaio/orbit-solana`            | `@tuwaio/solana-sdk/orbit`            |
+| `@tuwaio/satellite-solana`        | `@tuwaio/solana-sdk/satellite`        |
+
+The transaction appears in the Nova toasts and in the connected wallet modal, and survives a page reload.
+
+---
+
+## Step 7: Read the Session on the Server
+
+A Server Action or route handler can check who is signed in before it acts for a wallet. `isSessionMatchingTarget` compares the address of the session with the address the request is about:
+
+```ts filename="src/app/actions.ts"
+'use server';
+
+import { getSiwxServerSession, isSessionMatchingTarget } from '@tuwaio/sdk/siwx/server';
+import { cookies } from 'next/headers';
+
+import { sessionStore } from '@/lib/authStores';
+
+export async function saveProfile(walletAddress: string, nickname: string) {
+  const session = await getSiwxServerSession({ cookieSource: await cookies(), sessionStore });
+  if (!session || !isSessionMatchingTarget(session, walletAddress)) {
+    throw new Error('Unauthorized');
+  }
+
+  // The request comes from the owner of `walletAddress`: save `nickname`.
+  return { walletAddress, nickname };
+}
+```
+
+Never trust a session object sent by the browser: the SIWX state of `@tuwaio/sdk/siwx` is UI state, and only the cookie read on the server proves the sign-in.
+
+---
+
+## 🌐 EVM and Solana Together
+
+An app with both networks installs both add-ons and combines the two tabs: both configs in `appConfig.ts`, both Pulsar adapters in the `adapter` array of the store, and in `Providers.tsx` both Satellite adapters, both watchers, and both `appChains` and `solanaRPCUrls`:
+
+```tsx
+<SatelliteConnectProvider
+  adapter={[satelliteEVMAdapter(wagmiConfig, appChains), satelliteSolanaAdapter({ rpcUrls: solanaRPCUrls })]}
+  autoConnect
+>
+  <EVMConnectorsWatcher wagmiConfig={wagmiConfig} />
+  <SolanaConnectorsWatcher />
+  <TransactionsUI />
+  <NovaConnectProvider
+    appChains={appChains}
+    solanaRPCUrls={solanaRPCUrls}
+    transactionPool={transactionsPool}
+    pulsarAdapter={getAdapter()}
+    siwx={siwx}
+    withBalance
+    withChain
+  >
+    {children}
+  </NovaConnectProvider>
+</SatelliteConnectProvider>
+```
+
+Create the adapter array outside the component, like the single adapter above.
+
+The `nextjs-tuwa` [starter template](/guides/starter-templates) is this setup.
+
+---
+
+## 📚 Next Steps
+
+- Sync the transactions to Quasar and show the history of every device: [Quasar transaction sync guide](/guides/quasar-transaction-sync).
+- Restyle the modals and toasts, or change their texts: [Nova UI Kit Storybook](https://stories.tuwa.io/).
+- Look up the subpaths of the SDK and the packages behind them: [`@tuwaio/sdk`](https://sdk.docs.tuwa.io/packages/sdk), [`@tuwaio/evm-sdk`](https://sdk.docs.tuwa.io/packages/evm-sdk), [`@tuwaio/solana-sdk`](https://sdk.docs.tuwa.io/packages/solana-sdk).

@@ -14,10 +14,11 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@scalar/api-reference-react": "^0.9.75",
     "@tuwaio/docs-ui": "workspace:*",
-    "@tuwaio/nova-core": "^0.6.0",
+    "@tuwaio/nova-core": "^0.7.1",
     "clsx": "^2.1.1",
-    "next": "^16.3.4",
+    "next": "^16.3.7",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
     "nextra": "^4.6.1",
@@ -25,11 +26,16 @@
     "pagefind": "^1.5.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.7.0"
+  },
+  "dependenciesMeta": {
+    "@tuwaio/docs-ui": {
+      "injected": true
+    }
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.2.0",
+    "@types/node": "^26.6.3",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.28",

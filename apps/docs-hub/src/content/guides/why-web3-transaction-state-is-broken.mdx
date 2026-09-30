@@ -233,7 +233,7 @@ Instantiate the headless store with multi-chain adapters and local-first persist
 'use client';
 
 import { pulsarEvmAdapter } from '@tuwaio/evm-sdk/pulsar';
-import { preFlightTxCheck } from '@tuwaio/quasar-sdk';
+import { preFlightTxCheck } from '@tuwaio/quasar-sdk/react';
 import { createBoundedUseStore, createPulsarStore } from '@tuwaio/sdk/pulsar';
 import { pulsarSolanaAdapter } from '@tuwaio/solana-sdk/pulsar';
 
@@ -251,13 +251,10 @@ const initialStore = createPulsarStore<TransactionUnion>({
   },
   // Background sync: delegate to a Server Action that verifies SIWX session
   // server-side and forwards the transaction to Quasar Engine via Secret Key
+  // Throw on failure: Pulsar then keeps the transaction marked as unsynced and sends it again later
   onRemoteCreate: async (tx) => {
-    try {
-      await syncTransaction(tx);
-    } catch (err) {
-      console.error('[Pulsar] Remote sync failed:', err);
-      throw err;
-    }
+    const result = await syncTransaction(tx);
+    if (!result.success) throw new Error(result.reason ?? 'Remote sync failed');
   },
 });
 
@@ -271,8 +268,7 @@ The `syncTransaction` Server Action handles SIWX session verification and Quasar
 'use server';
 
 import { Quasar, Transaction } from '@tuwaio/quasar-sdk';
-import { isSessionMatchingTarget } from '@tuwaio/sdk/siwx';
-import { getSiwxServerSession } from '@tuwaio/sdk/siwx/server';
+import { getSiwxServerSession, isSessionMatchingTarget } from '@tuwaio/sdk/siwx/server';
 import { cookies } from 'next/headers';
 
 import { QUASAR_BASE_URL } from '@/constants';
