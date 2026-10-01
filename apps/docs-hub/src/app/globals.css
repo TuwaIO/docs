@@ -57,3 +57,29 @@ html.dark svg[aria-roledescription='sequence'] line.messageLine0,
 html.dark svg[aria-roledescription='sequence'] line.messageLine1 {
   stroke: #94a3b8 !important;
 }
+
+/* Code of the Stack Configurator, highlighted by Shiki with the GitHub light and dark themes (defaultColor: false) */
+.tuwa-code pre {
+  margin: 0;
+  overflow-x: auto;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  background: #f6f8fa;
+  color: #24292e;
+  scrollbar-width: thin;
+}
+
+.tuwa-code pre span {
+  color: var(--shiki-light);
+}
+
+.dark .tuwa-code pre {
+  background: #0d1117;
+  color: #e1e4e8;
+}
+
+.dark .tuwa-code pre span {
+  color: var(--shiki-dark);
+}

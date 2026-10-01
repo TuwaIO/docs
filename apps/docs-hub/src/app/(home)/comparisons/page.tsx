@@ -80,7 +80,7 @@ export default function ComparisonsPage() {
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-16 sm:gap-20">
           {/* Hero */}
           <header className="text-center max-w-3xl mx-auto">
-            <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-4 py-1.5 text-[11px] font-mono text-[var(--tuwa-text-secondary)] mb-6">
+            <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-4 py-1.5 text-[11px] font-mono text-[var(--tuwa-text-secondary)] mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               Verified {verified}
               <span className="text-[var(--tuwa-text-tertiary)]">·</span>

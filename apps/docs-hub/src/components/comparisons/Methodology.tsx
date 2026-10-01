@@ -99,7 +99,7 @@ export function Methodology() {
         >
           Sources
         </h3>
-        <ol className="flex flex-col gap-1.5 text-xs max-h-[560px] overflow-y-auto pr-2 [scrollbar-width:thin]">
+        <ol className="flex flex-col gap-1.5 text-xs lg:max-h-[560px] lg:overflow-y-auto lg:pr-2 [scrollbar-width:thin]">
           {sources.map(([url, index]) => {
             const { hostname, pathname } = new URL(url);
             return (
@@ -113,10 +113,21 @@ export function Methodology() {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-w-0 break-all text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-accent)] transition-colors"
+                  className="min-w-0 [overflow-wrap:anywhere] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-accent)] transition-colors"
                 >
                   <span className="text-[var(--tuwa-text-primary)]">{hostname.replace(/^www\./, '')}</span>
-                  {pathname === '/' ? '' : pathname}
+                  {/* A break opportunity after each slash, so long paths wrap between segments */}
+                  {pathname === '/'
+                    ? ''
+                    : pathname
+                        .split('/')
+                        .slice(1)
+                        .map((segment, segmentIndex) => (
+                          <span key={segmentIndex}>
+                            /<wbr />
+                            {segment}
+                          </span>
+                        ))}
                 </a>
               </li>
             );

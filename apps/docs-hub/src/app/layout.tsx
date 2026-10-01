@@ -2,6 +2,7 @@ import './globals.css';
 
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
 
 import { SITE_URL, X_HANDLE } from '../lib/site';
@@ -80,6 +81,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
+          The background colors are those of the body below. */}
+      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }} />
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
       >

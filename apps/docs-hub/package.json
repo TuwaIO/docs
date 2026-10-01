@@ -26,6 +26,7 @@
     "pagefind": "^1.5.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "shiki": "^3.21.0",
     "tailwind-merge": "^3.7.0"
   },
   "dependenciesMeta": {

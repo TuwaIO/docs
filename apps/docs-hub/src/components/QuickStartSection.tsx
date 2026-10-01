@@ -10,6 +10,8 @@ import {
 import { useCopyToClipboard } from '@tuwaio/nova-core';
 import Link from 'next/link';
 
+import { CompactConfigurator } from './configurator/CompactConfigurator';
+
 export function QuickStartSection() {
   const { isCopied, copy } = useCopyToClipboard(2000);
   const command = 'npx @tuwaio/create-cosmos-playground';
@@ -161,6 +163,11 @@ export function QuickStartSection() {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* For an existing app: the install command and the setup files of the picked stack */}
+        <div className="mt-8">
+          <CompactConfigurator />
         </div>
       </div>
     </section>

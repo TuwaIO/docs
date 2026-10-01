@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  ArrowTopRightOnSquareIcon,
-  BookOpenIcon,
-  CheckIcon,
-  ClipboardDocumentIcon,
-  CommandLineIcon,
-  InformationCircleIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowTopRightOnSquareIcon, BookOpenIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   CloseIcon,
   cn,
@@ -17,11 +10,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  useCopyToClipboard,
 } from '@tuwaio/nova-core';
-import { Fragment, type ReactNode, useState } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
+import { installCommand, usePackageManager } from '../lib/packageManager';
 import type { PackageDependency, PackageDetails } from '../lib/packages';
+import { CommandLine, PackageManagerSwitch } from './CommandLine';
 
 export interface PackageDialogProps {
   /** Whether the dialog is open */
@@ -34,28 +28,6 @@ export interface PackageDialogProps {
   onSelect: (name: string) => void;
   /** Called when the dialog closes (close button, Escape or a click outside) */
   onClose: () => void;
-}
-
-// The install command of each package manager
-const PACKAGE_MANAGERS = [
-  { id: 'pnpm', command: 'pnpm add' },
-  { id: 'npm', command: 'npm install' },
-  { id: 'yarn', command: 'yarn add' },
-  { id: 'bun', command: 'bun add' },
-] as const;
-
-type PackageManager = (typeof PACKAGE_MANAGERS)[number]['id'];
-
-// Remembers the chosen package manager in this browser
-const PACKAGE_MANAGER_KEY = 'tuwa-docs-hub:package-manager';
-
-function readPackageManager(): PackageManager {
-  try {
-    const saved = typeof window === 'undefined' ? null : window.localStorage.getItem(PACKAGE_MANAGER_KEY);
-    return PACKAGE_MANAGERS.find(({ id }) => id === saved)?.id ?? 'pnpm';
-  } catch {
-    return 'pnpm';
-  }
 }
 
 function Section({ title, aside, children }: { title: string; aside?: ReactNode; children: ReactNode }) {
@@ -85,18 +57,8 @@ const chipClass =
  * @param props - See {@link PackageDialogProps}.
  */
 export function PackageDialog({ open, name, packages, onSelect, onClose }: PackageDialogProps) {
-  const { isCopied, copy } = useCopyToClipboard(2000);
-  const [packageManager, setPackageManager] = useState<PackageManager>(readPackageManager);
+  const [packageManager, choosePackageManager] = usePackageManager();
   const details = name ? packages[name] : undefined;
-
-  const choosePackageManager = (id: PackageManager) => {
-    setPackageManager(id);
-    try {
-      window.localStorage.setItem(PACKAGE_MANAGER_KEY, id);
-    } catch {
-      // Storage is blocked: the choice lasts until the page is closed
-    }
-  };
 
   const packageChip = (packageName: string, label: string = packageName, optional = false) => (
     <button
@@ -146,9 +108,7 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
   const required = details?.peers.filter((peer) => !peer.optional) ?? [];
   const optional = details?.peers.filter((peer) => peer.optional) ?? [];
   const install = details?.install;
-  const command = install
-    ? `${PACKAGE_MANAGERS.find(({ id }) => id === packageManager)!.command} ${install.packages.join(' ')}`
-    : '';
+  const command = install ? installCommand(packageManager, install.packages) : '';
   const peerCount = install ? install.packages.length - 1 : 0;
 
   return (
@@ -212,51 +172,9 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                     <h3 className="text-[11px] 2xl:text-xs font-semibold uppercase tracking-wider text-[var(--tuwa-text-secondary)]">
                       Install
                     </h3>
-                    <div
-                      role="group"
-                      aria-label="Package manager"
-                      className="flex rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 p-0.5"
-                    >
-                      {PACKAGE_MANAGERS.map(({ id }) => (
-                        <button
-                          key={id}
-                          type="button"
-                          aria-pressed={packageManager === id}
-                          onClick={() => choosePackageManager(id)}
-                          className={cn(
-                            'cursor-pointer rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-0.5 font-mono text-[11px] transition-colors',
-                            packageManager === id
-                              ? 'bg-[var(--tuwa-text-accent)]/15 text-[var(--tuwa-text-primary)]'
-                              : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]',
-                          )}
-                        >
-                          {id}
-                        </button>
-                      ))}
-                    </div>
+                    <PackageManagerSwitch value={packageManager} onChange={choosePackageManager} />
                   </div>
-                  <div className="flex items-center gap-3 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.02] pl-3 pr-2 font-mono text-xs sm:text-sm text-[var(--tuwa-text-primary)]">
-                    <CommandLineIcon className="w-4 h-4 shrink-0 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
-                    {/* One line that scrolls sideways, so a long list of peers keeps the dialog compact; the faded
-                    right edge shows that it goes on, and the padding lets its end scroll out of the fade */}
-                    <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap py-2.5 pr-8 select-all [scrollbar-width:thin] [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]">
-                      {command}
-                    </code>
-                    <button
-                      type="button"
-                      onClick={() => copy(command)}
-                      disabled={isCopied}
-                      title="Copy the install command"
-                      className="shrink-0 inline-flex items-center gap-1 text-xs font-sans cursor-pointer text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] disabled:cursor-default"
-                    >
-                      {isCopied ? (
-                        <CheckIcon className="w-4 h-4 text-emerald-500" />
-                      ) : (
-                        <ClipboardDocumentIcon className="w-4 h-4" />
-                      )}
-                      {isCopied ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
+                  <CommandLine command={command} copyTitle="Copy the install command" />
                   {(peerCount > 0 || install.frameworkPeers.length > 0) && (
                     <p className="text-[11px] 2xl:text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
                       {peerCount > 0 &&

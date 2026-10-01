@@ -117,6 +117,7 @@ This is the index of the ${SITE_NAME} (${SITE_URL}): guides that combine several
 ## Start here
 
 - [TUWA_AGENTS.md](${TUWA_AGENTS_URL}): Stack, install commands, setup code and rules for AI coding agents that build apps with TUWA
+- [Stack Configurator](${SITE_URL}/configurator): Install command and setup files for Next.js, Vite or Vanilla TS, EVM and/or Solana, Nova UI or headless, SIWX and Quasar; each stack is type-checked against the published packages
 - [Full text of the hub](${SITE_URL}/llms-full.txt): Every page of the hub and the README of every package, in one file
 ${pages
   .filter((page) => page.route === '/guides/starter-templates' || page.route === '/guides/full-stack-react')

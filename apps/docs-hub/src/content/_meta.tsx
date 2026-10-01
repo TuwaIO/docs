@@ -19,4 +19,9 @@ export default {
     title: 'Comparisons',
     href: '/comparisons',
   },
+  configurator: {
+    type: 'page',
+    title: 'Configurator',
+    href: '/configurator',
+  },
 };

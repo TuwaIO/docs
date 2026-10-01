@@ -1,0 +1,12 @@
+minimumReleaseAgeExclude:
+  - '@tuwaio/evm-sdk@0.2.1'
+  - '@tuwaio/nova-connect@0.7.3'
+  - '@tuwaio/nova-core@0.7.2'
+  - '@tuwaio/nova-transactions@0.7.3'
+  - '@tuwaio/satellite-evm@0.6.2'
+  - '@tuwaio/satellite-react@0.6.3'
+  - '@tuwaio/sdk@0.2.1'
+  - '@tuwaio/siwx-server@0.4.2'
+  - '@web3icons/common@0.11.52'
+  - '@web3icons/react@4.1.23'
+  - viem@2.57.2
