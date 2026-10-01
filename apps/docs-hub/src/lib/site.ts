@@ -5,6 +5,9 @@ export const SITE_URL = 'https://docs.tuwa.io';
 
 export const SITE_NAME = 'TUWA Docs Hub';
 
+/** The X account of TUWA, for the `twitter:site` card tag */
+export const X_HANDLE = '@tuwa_io';
+
 /** One-paragraph summary of TUWA, shared by the structured data and llms.txt */
 export const TUWA_SUMMARY =
   'TUWA is an open-source (Apache-2.0), headless TypeScript toolkit for self-custodial Web3 apps on EVM and Solana: multi-chain sign-in (SIWX, CAIP-122), wallet connection state (Satellite Connect), transaction tracking (Pulsar), React components (Nova UI Kit) and server-side transaction tracking with history and webhooks (Quasar, managed or self-hosted).';
@@ -25,7 +28,12 @@ export const ORGANIZATION = {
   name: 'TUWA',
   url: 'https://tuwa.io',
   logo: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/web-app-manifest-512x512.png',
-  sameAs: ['https://github.com/TuwaIO', 'https://x.com/TUWA1025123', 'https://www.npmjs.com/org/tuwaio'],
+  sameAs: [
+    'https://github.com/TuwaIO',
+    'https://x.com/tuwa_io',
+    'https://www.reddit.com/user/tuwa_io/',
+    'https://www.npmjs.com/org/tuwaio',
+  ],
 };
 
 /** `@id` of the hub website in the structured data */
@@ -54,6 +62,6 @@ export function withPageMetadata(metadata: Metadata, route: string): Metadata {
       description,
       images: [OG_IMAGE],
     },
-    twitter: { card: 'summary_large_image', title, description, images: [OG_IMAGE.url] },
+    twitter: { card: 'summary_large_image', site: X_HANDLE, title, description, images: [OG_IMAGE.url] },
   };
 }

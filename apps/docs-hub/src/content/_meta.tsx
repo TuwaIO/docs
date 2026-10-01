@@ -14,4 +14,9 @@ export default {
     type: 'page',
     title: 'Quasar',
   },
+  comparisons: {
+    type: 'page',
+    title: 'Comparisons',
+    href: '/comparisons',
+  },
 };

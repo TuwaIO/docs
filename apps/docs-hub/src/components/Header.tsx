@@ -33,6 +33,12 @@ export function Header({ logo }: { logo: ReactNode }) {
             >
               Guides
             </Link>
+            <Link
+              href="/comparisons"
+              className="text-xs sm:text-sm font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] transition-colors duration-200"
+            >
+              Comparisons
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-3">

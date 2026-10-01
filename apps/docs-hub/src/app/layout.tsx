@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
-import { SITE_URL } from '../lib/site';
+import { SITE_URL, X_HANDLE } from '../lib/site';
 import { Providers } from './providers';
 
 const geistSans = Geist({
@@ -70,6 +70,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    site: X_HANDLE,
     title: 'TUWA Docs Hub',
     description: 'Central documentation gateway for the TUWA Web3 ecosystem.',
     images: ['https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/preview-logo.png'],

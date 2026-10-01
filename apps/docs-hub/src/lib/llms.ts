@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import packageReadmes from '../generated/package-readmes.json';
+import { AXES, axisScore, COMPETITORS, CRITERIA, PRODUCTS, SEGMENTS, verifiedAsOf } from './comparisons';
 import { layers } from './ecosystem';
 import { getHubPages, type HubPage, readPageSource } from './hubPages';
 import { getPackageDetails, type PackageDetails } from './packages';
@@ -30,6 +31,50 @@ function sectionLists(pages: HubPage[]): string {
   return [...sections]
     .map(([title, sectionPages]) => `## ${title}\n\n${sectionPages.map(pageLine).join('\n')}`)
     .join('\n\n');
+}
+
+const MARK_TEXT = { yes: 'Yes', partial: 'Partial', no: 'No' } as const;
+
+/**
+ * `/comparisons` as Markdown, from the same data as the page: the scores of every product on every axis, then each
+ * product with its pricing, when to choose it and every fact with its source.
+ */
+function comparisonsMarkdown(): string {
+  const header = `| Axis | ${PRODUCTS.map((product) => product.name).join(' | ')} |`;
+  const divider = `| --- | ${PRODUCTS.map(() => '---').join(' | ')} |`;
+  const rows = AXES.map(
+    (axis) => `| ${axis.label} | ${PRODUCTS.map((product) => axisScore(product, axis.id)).join(' | ')} |`,
+  );
+
+  const products = PRODUCTS.map((product) => {
+    const segment = SEGMENTS.find((item) => item.id === product.segment);
+    const facts = CRITERIA.map((criterion) => {
+      const item = product.facts[criterion.id];
+      return `- ${criterion.label}: ${MARK_TEXT[item.mark]}. ${item.note} (${item.sourceUrl})`;
+    });
+    return [
+      `### ${product.name}`,
+      '',
+      `${product.summary} License: ${product.license}. Pricing: ${product.pricing.text} (${product.pricing.sourceUrl})`,
+      ...(segment ? ['', `Segment: ${segment.label}. TUWA counterpart: ${segment.counterpart}.`] : []),
+      ...(product.chooseWhen ? ['', `Choose ${product.name} when: ${product.chooseWhen}`] : []),
+      ...(product.tuwaDifference ? ['', `How TUWA differs: ${product.tuwaDifference}`] : []),
+      '',
+      ...facts,
+    ].join('\n');
+  });
+
+  return `# Why TUWA: Comparisons & Ecosystem Radar
+
+TUWA compared with ${COMPETITORS.map((product) => product.name).join(', ')}, verified on ${verifiedAsOf()} against vendor documentation, licenses and pricing pages. TUWA is a set of packages, not a wallet provider: each product faces the TUWA projects that do the same job. Each axis has ${CRITERIA.length / AXES.length} criteria; a score is (met + 0.5 × partial) ÷ ${CRITERIA.length / AXES.length} × 100. Onboarding and Chain Coverage favor hosted platforms by design.
+
+## Scores
+
+${[header, divider, ...rows].join('\n')}
+
+## Products
+
+${products.join('\n\n')}`;
 }
 
 /**
@@ -79,6 +124,10 @@ ${pages
   .join('\n')}
 
 ${sectionLists(pages)}
+
+## Comparisons
+
+- [Why TUWA: Comparisons & Ecosystem Radar](${SITE_URL}/comparisons): TUWA against ${COMPETITORS.map((product) => product.name).join(', ')} on self-custody, openness, cost at scale, transaction lifecycle, onboarding and chain coverage, with a source for every fact
 
 ## Packages
 
@@ -195,8 +244,8 @@ export async function getLlmsFull(): Promise<string> {
 
 > ${TUWA_SUMMARY}
 
-This file holds every page of ${SITE_URL} (guides and the Quasar documentation), then the README of every TUWA package at its latest npm version. The index is ${SITE_URL}/llms.txt. Coding agents that build apps with TUWA should also read ${TUWA_AGENTS_URL}.
+This file holds every page of ${SITE_URL} (guides, the Quasar documentation and the comparisons), then the README of every TUWA package at its latest npm version. The index is ${SITE_URL}/llms.txt. Coding agents that build apps with TUWA should also read ${TUWA_AGENTS_URL}.
 
-${[...pageDocuments, ...packageDocuments].map((document) => `---\n\n${document}`).join('\n\n')}
+${[...pageDocuments, `Source: ${SITE_URL}/comparisons\n\n${comparisonsMarkdown()}`, ...packageDocuments].map((document) => `---\n\n${document}`).join('\n\n')}
 `;
 }
