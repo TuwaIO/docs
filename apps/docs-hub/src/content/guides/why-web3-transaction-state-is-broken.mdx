@@ -275,7 +275,7 @@ import { QUASAR_BASE_URL } from '@/constants';
 
 const quasar = new Quasar({
   baseUrl: QUASAR_BASE_URL,
-  secretKey: process.env.QUASAR_SDK_SK ?? '',
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
 });
 
 export async function syncTransaction(tx: Transaction) {

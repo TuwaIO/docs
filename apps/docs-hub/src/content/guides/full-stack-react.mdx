@@ -14,7 +14,7 @@ This guide builds a Next.js app on the [TUWA SDK](https://sdk.docs.tuwa.io/), st
 - a Pulsar transaction store, with the Nova Transactions modals and toasts;
 - a Server Action that knows which wallet is signed in.
 
-Everything is imported from `@tuwaio/sdk` and its chain add-on. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) continues from here and syncs the transactions to Quasar. The **`nextjs-tuwa`** and **`nextjs-tuwa-quasar`** [starter templates](/guides/starter-templates) are complete apps built the same way.
+Everything is imported from `@tuwaio/sdk` and its chain add-on. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) continues from here and syncs the transactions to Quasar. Complete apps built the same way are the **`nextjs-evm`** (EVM with SIWX) and **`nextjs-tuwa-quasar`** (both networks with SIWX and Quasar) [starter templates](/guides/starter-templates).
 
 > [!TIP]
 >
@@ -62,10 +62,10 @@ pnpm add @tuwaio/sdk @tuwaio/solana-sdk @solana/kit @wallet-standard/react \
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
 
-Create the `@wagmi/core` config once, outside your components. `createDefaultTransports` uses the public, rate-limited RPC URLs of the viem chains; pass your own transports in production. `impersonated` is a development connector that lets you view the app as any address.
+Create the `@wagmi/core` config once, outside your components. `createDefaultTransports` uses the public, rate-limited RPC URLs of the viem chains; pass your own transports in production. With `ssr: true`, wagmi waits for the browser to restore its state and add the installed wallets (MetaMask, Rabby…); `EVMConnectorsWatcher` from Step 5 does it, so no `WagmiProvider` from `wagmi` is needed.
 
 ```ts filename="src/configs/appConfig.ts"
-import { createDefaultTransports, impersonated } from '@tuwaio/evm-sdk/satellite';
+import { createDefaultTransports } from '@tuwaio/evm-sdk/satellite';
 import { createConfig, injected } from '@wagmi/core';
 import { mainnet, sepolia } from 'viem/chains';
 
@@ -73,11 +73,13 @@ export const appChains = [sepolia, mainnet] as const;
 
 export const wagmiConfig = createConfig({
   chains: appChains,
-  connectors: [injected(), impersonated({})],
+  connectors: [injected()],
   transports: createDefaultTransports(appChains),
   ssr: true,
 });
 ```
+
+Leave out the `impersonated` development connector in an app with SIWX: an impersonated wallet cannot sign the sign-in message, so Nova Connect disconnects it.
 
   </Tabs.Tab>
   <Tabs.Tab>
@@ -471,7 +473,7 @@ An app with both networks installs both add-ons and combines the two tabs: both 
 
 Create the adapter array outside the component, like the single adapter above.
 
-The `nextjs-tuwa` [starter template](/guides/starter-templates) is this setup.
+The `nextjs-tuwa-quasar` [starter template](/guides/starter-templates) is this setup, with the Quasar sync on top.
 
 ---
 

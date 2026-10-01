@@ -557,7 +557,7 @@ import { sepolia } from 'viem/chains';
 const quasar = new Quasar({
   // Quasar Cloud by default; set to your Community Edition node, e.g. https://api.your-domain.com
   baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL || 'https://api.tuwa.io',
-  secretKey: process.env.QUASAR_SDK_SK ?? '',
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
 });
 
 /**
