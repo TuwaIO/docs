@@ -32,6 +32,7 @@ export const ORGANIZATION = {
     'https://github.com/TuwaIO',
     'https://x.com/tuwa_io',
     'https://www.reddit.com/user/tuwa_io/',
+    'https://t.me/tuwa_io',
     'https://www.npmjs.com/org/tuwaio',
   ],
 };
