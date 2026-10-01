@@ -97,7 +97,7 @@ sequenceDiagram
 > [!WARNING]
 >
 > **Critical Rule: Mandatory Re-Sign on Account or Network Changes**
-> CAIP-122 cryptographic proofs tightly bind the session to an exact wallet address and chain identifier (`session.address` and `session.chainId`). Whenever a user switches their active account or changes network in their wallet extension (e.g., MetaMask, Rabby, or Phantom), **a re-sign (`resign`) is strictly required**. Without performing a re-sign, the cryptographic session becomes invalid and the connection will be broken (`isSessionMatchingTarget` and `isSessionMatchingConnection` will immediately reject subsequent requests).
+> CAIP-122 cryptographic proofs tightly bind the session to an exact wallet address and chain identifier (`session.address` and `session.chainId`). Whenever a user switches their active account or changes network in their wallet extension (e.g., MetaMask, Rabby, or Phantom), **the new account or chain must sign in again**. Until it does, the session no longer matches the wallet: `isSessionMatchingConnection` returns `false` in the browser and `isSessionMatchingTarget` rejects the request on your server.
 
 ---
 
@@ -139,42 +139,71 @@ The table below contrasts how SIWX adapters unify divergent blockchain cryptogra
 | **Smart Contract Accounts** | Supported via EIP-1271 (`isValidSignature`) (deployed contracts)            | Not supported (Keypairs only; PDAs are off-curve & keyless)       |
 | **Verification Engine**     | Viem `recoverAddress` (EIP-191) + RPC `readContract` (EIP-1271)             | Native Web Crypto API `crypto.subtle.verify` (Ed25519, Zero Deps) |
 
+> [!NOTE]
+>
+> Satellite Connect names Solana clusters (`mainnet`, `devnet`, `testnet`), so `getSatelliteSiwxFields` builds Solana chain IDs from the cluster name: `solana:mainnet`, `solana:devnet`. List the same IDs in `allowedChainIds` when your verification policy restricts chains.
+
 ---
 
 ## 5. End-to-End Implementation in the TUWA Ecosystem
 
-### Step 1: Client-Side Multi-Chain Signers
+### Step 1: Client-Side Multi-Chain Sign-In
 
-Developers can implement multi-chain authentication declaratively via Nova UIKit watchers, or programmatically via the `useSiwx` hook.
+With Nova UI Kit, sign-in is declarative: pass `siwx` to `NovaConnectProvider` and it asks every connected account to sign in (see the watcher pattern below). Without Nova, call `useSiwx().signIn` for the active Satellite Connect connection.
 
-#### Programmatic Multi-Chain Signer Button
+#### Programmatic Sign-In Button with Satellite Connect
 
-Below is an implementation featuring simultaneous support for EVM (`viem` / Wagmi) and Solana (`@solana/kit` / Wallet Standard):
+The button below signs in the active wallet, EVM or Solana. `getSatelliteSiwxFields` turns the connection into the CAIP-2 chain ID and the CAIP-10 address. EVM wallets sign through the wagmi config with `createEvmSiwxSigner`, so the app needs neither `wagmi` React hooks nor `WagmiProvider`; Solana wallets sign with the `signMessage` of their Wallet Standard connection.
 
 ```tsx
-// src/components/MultiChainAuth.tsx
+// src/components/SignInButton.tsx
 'use client';
 
-import { useSiwx } from '@tuwaio/siwx-react';
-import { createEvmSiwxSigner } from '@tuwaio/siwx-evm';
-import { createSolanaSiwxSigner } from '@tuwaio/siwx-solana';
-import { useAccount, useConfig } from 'wagmi';
+import { createEvmSiwxSigner } from '@tuwaio/evm-sdk/siwx';
+import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
+import {
+  createSatelliteSiwxSigner,
+  getSatelliteSiwxFields,
+  isSessionMatchingConnection,
+  useSiwx,
+  useSiwxSession,
+} from '@tuwaio/sdk/siwx';
+import type { SolanaConnection } from '@tuwaio/solana-sdk/satellite';
 
-export function MultiChainAuth({ solanaWallet }: { solanaWallet?: any }) {
+import { wagmiConfig } from '@/configs/appConfig';
+
+export function SignInButton() {
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
   const { signIn, signOut } = useSiwx();
-  const { address: evmAddress, chainId: evmChainId } = useAccount();
-  const wagmiConfig = useConfig();
+  const { session, status } = useSiwxSession();
 
-  // 1. Authenticate EVM Wallet (EOA or ERC-4337 Smart Account)
-  const handleEvmSignIn = async () => {
-    if (!evmAddress || !evmChainId) return;
+  if (!activeConnection?.isConnected) return null;
+  // The SIWX helpers read the account and the chain of the connection
+  const account = { address: activeConnection.address, chainId: activeConnection.chainId };
 
-    await signIn({
-      signer: createEvmSiwxSigner(wagmiConfig),
+  // The session was issued for this account and chain: an account or network switch shows "Sign in" again
+  if (isSessionMatchingConnection(session, account)) {
+    return (
+      <button
+        onClick={async () => {
+          await fetch('/api/siwx/logout', { method: 'POST' });
+          signOut();
+        }}
+      >
+        Sign out
+      </button>
+    );
+  }
+
+  const handleSignIn = async () =>
+    signIn({
+      // EVM wallets sign through wagmi; a Solana connection carries the signMessage of its Wallet Standard wallet
+      signer: activeConnection.connectorType.startsWith('evm:')
+        ? createEvmSiwxSigner(wagmiConfig)
+        : await createSatelliteSiwxSigner(activeConnection as SolanaConnection),
       getNonce: async () => {
         const res = await fetch('/api/siwx/nonce');
-        const data = await res.json();
-        return data.nonce;
+        return ((await res.json()) as { nonce: string }).nonce;
       },
       verifier: async (payload) => {
         const res = await fetch('/api/siwx/verify', {
@@ -184,66 +213,15 @@ export function MultiChainAuth({ solanaWallet }: { solanaWallet?: any }) {
         });
         return res.ok ? res.json() : null;
       },
-      fields: {
-        domain: window.location.host,
-        address: `eip155:${evmChainId}:${evmAddress}`,
-        uri: window.location.origin,
-        chainId: `eip155:${evmChainId}`,
-        statement: 'Sign in to access TUWA sovereign services.',
-      },
-      onSuccess: (session) => {
-        console.log('[SIWX] EVM Authenticated:', session.address);
-      },
+      // eip155:11155111:0x… for an EVM wallet, solana:devnet:… for a Solana one
+      fields: getSatelliteSiwxFields(account, { statement: 'Sign in to access TUWA sovereign services.' }),
+      onSuccess: (session) => console.log('[SIWX] Signed in:', session.address),
     });
-  };
-
-  // 2. Authenticate Solana Wallet (Wallet Standard / @solana/kit)
-  const handleSolanaSignIn = async () => {
-    if (!solanaWallet?.account) return;
-
-    const solanaGenesis = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp'; // Mainnet genesis hash
-    const solanaAddress = solanaWallet.account.address;
-
-    await signIn({
-      signer: createSolanaSiwxSigner({
-        wallet: solanaWallet,
-        account: solanaWallet.account,
-      }),
-      getNonce: async () => {
-        const res = await fetch('/api/siwx/nonce');
-        const data = await res.json();
-        return data.nonce;
-      },
-      verifier: async (payload) => {
-        const res = await fetch('/api/siwx/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        return res.ok ? res.json() : null;
-      },
-      fields: {
-        domain: window.location.host,
-        address: `solana:${solanaGenesis}:${solanaAddress}`,
-        uri: window.location.origin,
-        chainId: `solana:${solanaGenesis}`,
-        statement: 'Sign in to access TUWA sovereign services on Solana.',
-      },
-      onSuccess: (session) => {
-        console.log('[SIWX] Solana Authenticated:', session.address);
-      },
-    });
-  };
 
   return (
-    <div className="flex gap-4">
-      <button onClick={handleEvmSignIn} className="btn-primary">
-        Sign In with EVM
-      </button>
-      <button onClick={handleSolanaSignIn} className="btn-secondary">
-        Sign In with Solana
-      </button>
-    </div>
+    <button onClick={handleSignIn} disabled={status !== 'idle' && status !== 'error'}>
+      Sign in
+    </button>
   );
 }
 ```
@@ -317,14 +295,15 @@ export function SatelliteConnectProviders({ children }: { children: React.ReactN
 
 ### Step 2: Server-Side Cryptographic Verification
 
-While the reference implementations below demonstrate **Next.js App Router** route handlers via `@tuwaio/siwx-server/next`, the core `@tuwaio/siwx-server` package is **completely framework- and backend-agnostic**. You can run `@tuwaio/siwx-server` across **Express, Fastify, NestJS, Cloudflare Workers, Hono, Elysia, Bun, or any custom Node.js HTTP server** by invoking `verifySiwxPayload()` directly with your preferred session and nonce storage adapters.
+While the reference implementations below demonstrate **Next.js App Router** route handlers via `@tuwaio/siwx-server/next` (`@tuwaio/sdk/siwx/server-next` in the SDK), the core `@tuwaio/siwx-server` package is **completely framework- and backend-agnostic**. You can run `@tuwaio/siwx-server` across **Express, Fastify, NestJS, Cloudflare Workers, Hono, Elysia, Bun, or any custom Node.js HTTP server** by invoking `verifySiwxPayload()` directly with your preferred session and nonce storage adapters.
 
 #### Production Route Handler (Atomic Redis Nonce & Session Store)
 
 ```typescript
 // src/app/api/siwx/[...siwx]/route.ts
-import { createSiwxApiHandler } from '@tuwaio/siwx-server/next';
-import type { SiwxSession, SiwxSessionRecord, SiwxSessionStore } from '@tuwaio/siwx-server';
+import type { SiwxNonceStore, SiwxSession, SiwxSessionRecord, SiwxSessionStore } from '@tuwaio/sdk/siwx/server';
+import { createSiwxApiHandler } from '@tuwaio/sdk/siwx/server-next';
+
 import { redisClient } from '@/lib/redis';
 
 // Atomic Redis session store conforming to SiwxSessionStore
@@ -341,13 +320,21 @@ const sessionStore: SiwxSessionStore = {
     await redisClient.set(`siwx:sess:${id}`, JSON.stringify(record), 'EX', ttlSeconds);
     return record;
   },
+  // Links the wallet session to your own user record after sign-in; SIWX itself never calls it
+  async bindSubject(id: string, subjectId: string): Promise<boolean> {
+    const data = await redisClient.get(`siwx:sess:${id}`);
+    if (!data) return false;
+    const record = { ...(JSON.parse(data) as SiwxSessionRecord), subjectId };
+    await redisClient.set(`siwx:sess:${id}`, JSON.stringify(record), 'KEEPTTL');
+    return true;
+  },
   async revoke(id: string): Promise<void> {
     await redisClient.del(`siwx:sess:${id}`);
   },
 };
 
 // Atomic Redis nonce store preventing replay attacks
-const nonceStore = {
+const nonceStore: SiwxNonceStore = {
   async issue({ nonce, ttlSeconds }: { nonce: string; ttlSeconds: number }) {
     await redisClient.set(`siwx:nonce:${nonce}`, '1', 'EX', ttlSeconds);
   },
@@ -382,7 +369,7 @@ For prototypes or benchmark templates without a running Redis instance, use `cre
 
 ```typescript
 // src/app/api/siwx/[...siwx]/route.ts
-import { createStatelessDemoSiwxHandler } from '@tuwaio/siwx-server/next';
+import { createStatelessDemoSiwxHandler } from '@tuwaio/sdk/siwx/server-next';
 
 const handler = createStatelessDemoSiwxHandler({
   signingSecret: process.env.SIWX_SIGNING_SECRET!, // Minimum 32 characters
@@ -410,8 +397,9 @@ Before executing sensitive state changes, invoking RPC actions, or syncing data 
 // src/app/actions/transaction.ts
 'use server';
 
-import { getSiwxServerSession, isSessionMatchingTarget } from '@tuwaio/siwx-server';
+import { getSiwxServerSession, isSessionMatchingTarget } from '@tuwaio/sdk/siwx/server';
 import { cookies } from 'next/headers';
+
 import { sessionStore } from '@/lib/authStores';
 
 export async function submitProtectedOperation({
