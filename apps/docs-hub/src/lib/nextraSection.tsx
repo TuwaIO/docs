@@ -7,7 +7,9 @@ import { generateStaticParamsFor, importPage } from 'nextra/pages';
 import { Layout } from 'nextra-theme-docs';
 import type { ReactNode } from 'react';
 
+import { JsonLd } from '../components/JsonLd';
 import { useMDXComponents as getMDXComponents } from '../mdx-components';
+import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
 const LOGO_URL = 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg';
 
@@ -38,13 +40,16 @@ function isAssetOrInternal(mdxPath?: string[]): boolean {
 
 /**
  * Creates the `[[...mdxPath]]` route of a section of MDX pages in `src/content/<section>` (`guides`, `quasar`): the
- * static params, the metadata and the page component. Re-export them from the `page.tsx` of the section.
+ * static params, the metadata (with the canonical URL, Open Graph and Twitter card of the page) and the page component,
+ * which adds `TechArticle` and `BreadcrumbList` structured data. Re-export them from the `page.tsx` of the section.
  *
  * @param section - Name of the content folder, which is also the first URL segment.
+ * @param sectionTitle - Title of the section in the breadcrumbs, as in the navbar.
  * @returns `generateStaticParams`, `generateMetadata` and `Page`.
  */
-export function createSectionPage(section: string) {
+export function createSectionPage(section: string, sectionTitle: string) {
   const Wrapper = getMDXComponents().wrapper;
+  const routeOf = (mdxPath?: string[]) => `/${[section, ...(mdxPath ?? [])].join('/')}`;
 
   async function generateStaticParams() {
     const getStaticParams = generateStaticParamsFor('mdxPath');
@@ -57,7 +62,7 @@ export function createSectionPage(section: string) {
     if (isAssetOrInternal(mdxPath)) return {};
     try {
       const { metadata } = await importPage([section, ...(mdxPath || [])]);
-      return metadata;
+      return withPageMetadata(metadata, routeOf(mdxPath));
     } catch {
       return {};
     }
@@ -75,10 +80,47 @@ export function createSectionPage(section: string) {
     }
 
     const { default: MDXContent, toc, metadata, sourceCode } = result;
+    const route = routeOf(params.mdxPath);
+    const breadcrumbs = [
+      { name: 'Docs Hub', url: SITE_URL },
+      { name: sectionTitle, url: `${SITE_URL}/${section}` },
+      ...(params.mdxPath?.length ? [{ name: metadata.title, url: `${SITE_URL}${route}` }] : []),
+    ];
     return (
-      <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
-        <MDXContent {...props} params={params} />
-      </Wrapper>
+      <>
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'TechArticle',
+                headline: metadata.title,
+                description: metadata.description,
+                url: `${SITE_URL}${route}`,
+                inLanguage: 'en',
+                isPartOf: { '@id': WEBSITE_ID },
+                author: ORGANIZATION,
+                publisher: ORGANIZATION,
+                ...(typeof metadata.timestamp === 'number' && {
+                  dateModified: new Date(metadata.timestamp).toISOString(),
+                }),
+              },
+              {
+                '@type': 'BreadcrumbList',
+                itemListElement: breadcrumbs.map((crumb, index) => ({
+                  '@type': 'ListItem',
+                  position: index + 1,
+                  name: crumb.name,
+                  item: crumb.url,
+                })),
+              },
+            ],
+          }}
+        />
+        <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
+          <MDXContent {...props} params={params} />
+        </Wrapper>
+      </>
     );
   }
 

@@ -48,12 +48,11 @@ This installs dependencies for every workspace package, builds `packages/docs-ui
 
 ### 2. Environment Variables
 
-Copy `.env.example` to `.env.local`. Both variables are optional:
+Copy `.env.example` to `.env.local`. The variable is optional:
 
-| Variable                           | Purpose                                                                                                                                                     |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_QUASAR_DASHBOARD_URL` | Link to the Quasar Cloud dashboard. Defaults to `https://quasar.tuwa.io/`.                                                                                  |
-| `GITHUB_TOKEN`                     | Server-only. Raises the GitHub API rate limit for the Quasar Community release badge. Without it, the badge still works within 60 requests per hour per IP. |
+| Variable                           | Purpose                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_QUASAR_DASHBOARD_URL` | Link to the Quasar Cloud dashboard. Defaults to `https://quasar.tuwa.io/`. |
 
 ### 3. Running the Dev Server
 
@@ -74,7 +73,37 @@ pnpm build:hub
 pnpm start:hub
 ```
 
-`build` runs `next build`, then `postbuild` indexes the rendered pages with Pagefind into `public/_pagefind`. That folder is generated and git-ignored, so run a production build at least once to get search in `/guides` locally.
+`build` first runs `scripts/build-data.mjs` (see [Build-Time Data](#build-time-data)), then `next build`, then `postbuild` indexes the rendered pages with Pagefind into `public/_pagefind`. That folder is generated and git-ignored, so run a production build at least once to get search in `/guides` locally.
+
+Keep `next` at 16.3.7: with the Vercel build adapter, 16.3.8 writes the prerendered pages outside `.next/server/app`, and Pagefind then finds no HTML and fails the deployment.
+
+### Package Details
+
+Hovering an npm package of the timeline (or focusing it with the keyboard) shows `PackagePreview` over the rows around it after a short delay: version, description, required peers and the packages that use it. A click opens `PackageDialog`:
+
+- version and description, and the SDK packages that include it (`@tuwaio/sdk`, `evm-sdk`, `solana-sdk`): apps on the SDK import it from there;
+- the install command for pnpm, npm, yarn or bun (the choice is saved to `localStorage`), with the required peers the app needs: the package's own and those of its TUWA peers, without what an installed SDK package already brings, and without `react`/`react-dom`, which the dialog names below the command. Ranges become arguments that need no shell quoting (`5.x.x` → `zustand@5`, `>=0.3` → the bare name);
+- required and optional peers, the TUWA packages it includes and the ones that use it (TUWA packages open in the same dialog);
+- up to three hub pages that mention the package, and links to its reference, npm and source.
+
+### Build-Time Data
+
+`scripts/build-data.mjs` runs before `pnpm dev` and `pnpm build` and saves to `src/generated/` (git-ignored), so the pages make no requests and the data is as fresh as the last deployment:
+
+| File                   | Content                                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `npm-packages.json`    | The latest npm manifests of the `@tuwaio/` packages listed in `src/lib/ecosystem.ts`                                           |
+| `package-readmes.json` | The README of each of these versions, from jsDelivr (for `llms-full.txt`)                                                      |
+| `releases.json`        | The latest `vX.Y.Z` tag of each repository in `RELEASES` of the script, listed with `git ls-remote` (no GitHub API rate limit) |
+| `package-guides.json`  | The pages of `src/content/guides` and `src/content/quasar` that mention each package, most mentions first                      |
+
+A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last saved file, or saves an empty one: the rows then link to npm and the release badge is hidden. The main page is still revalidated once a day, because `RemoteLogo` of `@tuwaio/docs-ui` caches the logo for 24 hours; the data does not change between builds.
+
+### Search Engines and LLMs
+
+- Every MDX page gets its canonical URL, Open Graph and Twitter card (`withPageMetadata` in `src/lib/site.ts`) and `TechArticle` and `BreadcrumbList` structured data; the main page has `WebSite` and `Organization` data. Keep the front matter `description` under about 160 characters: it is the search snippet.
+- `/sitemap.xml` lists the main page and every MDX page, `/robots.txt` allows everything and points to the sitemap.
+- `/llms.txt` ([llmstxt.org](https://llmstxt.org)) lists every page with its description, every package by stage with its version, reference and install command, and the documentation sites. `/llms-full.txt` holds every page as Markdown (tabs labeled, the API reference as the OpenAPI document) and the README of every package. Both are built at build time from the page map of Nextra, the MDX sources and the build-time data (`src/lib/llms.ts`).
 
 ---
 
@@ -99,15 +128,22 @@ apps/docs-hub/
 │   │   ├── quasar/                  # Same for src/content/quasar
 │   │   │   ├── [[...mdxPath]]/page.tsx
 │   │   │   └── layout.tsx
+│   │   ├── llms.txt/route.ts        # llms.txt, built at build time
+│   │   ├── llms-full.txt/route.ts   # llms-full.txt, built at build time
+│   │   ├── sitemap.ts               # /sitemap.xml
+│   │   ├── robots.ts                # /robots.txt
 │   │   ├── globals.css              # Tailwind, Nextra and design-token imports
-│   │   ├── layout.tsx               # Root layout, <Metadata>, fonts, Providers
+│   │   ├── layout.tsx               # Root layout, <Metadata> (metadataBase), fonts, Providers
 │   │   └── providers.tsx            # next-themes ThemeProvider
 │   ├── components/
 │   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
 │   │   ├── Footer.tsx               # Footer of the main screen
 │   │   ├── Header.tsx               # Fixed glassmorphic header + theme switcher
 │   │   ├── HeroSection.tsx          # Gradient title + subtitle
+│   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
+│   │   ├── PackageDialog.tsx        # Details of an npm package (Dialog of @tuwaio/nova-core)
+│   │   ├── PackagePreview.tsx       # Hover preview of an npm package
 │   │   ├── QuickStartSection.tsx    # Cosmos Playground CLI quick start
 │   │   ├── QuasarApiReference.tsx   # Scalar reference of the Quasar API (client only, not in the barrel)
 │   │   └── index.ts                 # Barrel export
@@ -131,10 +167,17 @@ apps/docs-hub/
 │   │       ├── webhooks.mdx
 │   │       ├── self-hosting.mdx     # Links to the guides of TuwaIO/quasar-community
 │   │       └── api.mdx              # API reference (QuasarApiReference)
+│   ├── generated/                   # GENERATED by scripts/build-data.mjs (git-ignored)
 │   ├── lib/
-│   │   ├── github.ts                # Latest release tag from the GitHub API
-│   │   └── nextraSection.tsx        # Route and layout of an MDX section (guides, quasar)
+│   │   ├── ecosystem.ts             # Stages, projects and packages of the main page
+│   │   ├── github.ts                # Saved release tags
+│   │   ├── hubPages.ts              # MDX pages in sidebar order (sitemap, llms.txt)
+│   │   ├── llms.ts                  # Text of llms.txt and llms-full.txt
+│   │   ├── packages.ts              # Package details and install commands from the saved npm data
+│   │   ├── site.ts                  # Site URL, page metadata, structured data ids
+│   │   └── nextraSection.tsx        # Route, metadata and layout of an MDX section (guides, quasar)
 │   └── mdx-components.ts            # MDX component map for Nextra
+├── scripts/build-data.mjs           # Saves npm data, READMEs, release tags and guide mentions before dev and build
 ├── next.config.ts                   # Nextra plugin setup
 ├── postcss.config.mjs
 ├── tsconfig.json
@@ -143,18 +186,18 @@ apps/docs-hub/
 
 ### Adding or Updating an Ecosystem Entry
 
-The timeline of TUWA projects is defined inline in `src/components/LayerTimeline.tsx` as a `layers` array. Each entry describes one layer of the ecosystem (label, subtitle, accent color, dot gradient, and the `DocCard` items nested under it). To add a new project:
+The timeline of TUWA projects is defined in `src/lib/ecosystem.ts` as a `layers` array, outside the client components, so `llms.txt` reads the same data. Each entry describes one layer of the ecosystem (label, subtitle, accent color, dot gradient, and the `DocCard` items nested under it). To add a new project:
 
-1. Open `src/components/LayerTimeline.tsx`.
+1. Open `src/lib/ecosystem.ts`.
 2. Add a new object to the appropriate layer (or introduce a new layer) with the correct `name`, `tagline`, `icon`, gradient classes, and links (`docsUrl`, `githubUrl`).
 3. If the icon is not yet imported, add it from `@heroicons/react/24/outline`.
 4. The desktop orb is picked by `id`. If the project has no orb of its own in `@tuwaio/docs-ui`, set `orb` to an existing one (the Quasar Community card uses `orb: 'quasar'`).
 
-To show a project's latest `vX.Y.Z` tag, fetch it in `src/app/(home)/page.tsx` with `fetchLatestTag('<owner>/<repo>')` and pass it to `<LayerTimeline releases={{ '<entry id>': release }} />`. The page is revalidated once per hour, and the badge is hidden if the GitHub API is unavailable.
+An `@tuwaio/` package added to `packages` gets its details, preview and `llms.txt` entry on the next build. To show a project's latest `vX.Y.Z` tag, add its entry id and repository to `RELEASES` in `scripts/build-data.mjs`.
 
 ### Writing a Guide
 
-1. Create `src/content/guides/<slug>.mdx` with `title` and `description` in the frontmatter — they become the page's `<title>` and meta description.
+1. Create `src/content/guides/<slug>.mdx` with `title` and `description` in the frontmatter — they become the page's `<title>`, meta description (keep it under about 160 characters) and its line in `llms.txt`.
 2. Register the page in `src/content/guides/_meta.tsx`. The key is the slug, the value is the sidebar title. Order in the object is order in the sidebar.
 3. Add a short card for it to `src/content/guides/index.mdx`.
 

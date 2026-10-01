@@ -2,27 +2,60 @@
 
 import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { Orb, PackageType } from '@tuwaio/docs-ui';
-import React from 'react';
+import React, { type FocusEvent, type MouseEvent, type ReactNode, useRef, useState } from 'react';
 
-export interface PackageBadge {
-  name: string;
-  layer?: string;
-  url?: string;
-  isDeprecated?: boolean;
+import type { DocEntry } from '../lib/ecosystem';
+import type { PackageDetails } from '../lib/packages';
+import { PackagePreview } from './PackagePreview';
+
+export interface DocCardProps extends DocEntry {
+  /** Details of the npm packages; a package with details opens them on click and previews them on hover */
+  packageDetails?: Record<string, PackageDetails>;
+  /** Opens the details of an npm package in the dialog */
+  onOpenPackage?: (name: string) => void;
 }
 
-export interface DocCardProps {
-  name: string;
-  tagline: string;
-  id: string;
-  /** Orb style to render; defaults to `id`. Lets an entry without its own orb reuse another's. */
-  orb?: PackageType;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  gradientFrom: string;
-  gradientTo: string;
-  docsUrl: string;
-  githubUrl: string;
-  packages?: PackageBadge[];
+// Height of the fixed site header: a preview opened above a row must not slide under it
+const HEADER_HEIGHT = 80;
+
+/**
+ * A package row that opens the package dialog, with the floating {@link PackagePreview} of the package. The preview
+ * opens below the row, or above it when it does not fit below.
+ */
+function PackageRow({
+  details,
+  className,
+  onOpen,
+  children,
+}: {
+  details: PackageDetails;
+  className: string;
+  onOpen: () => void;
+  children: ReactNode;
+}) {
+  const [placement, setPlacement] = useState<'top' | 'bottom'>('bottom');
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const place = (event: MouseEvent<HTMLDivElement> | FocusEvent<HTMLDivElement>) => {
+    const row = event.currentTarget.getBoundingClientRect();
+    const height = (previewRef.current?.offsetHeight ?? 0) + 8;
+    const fitsBelow = row.bottom + height <= window.innerHeight;
+    setPlacement(!fitsBelow && row.top - height >= HEADER_HEIGHT ? 'top' : 'bottom');
+  };
+
+  return (
+    <div className="group/row relative" onMouseEnter={place} onFocus={place}>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        onClick={onOpen}
+        className={`${className} w-full text-left cursor-pointer`}
+      >
+        {children}
+      </button>
+      <PackagePreview ref={previewRef} details={details} placement={placement} />
+    </div>
+  );
 }
 
 /**
@@ -39,13 +72,18 @@ export function DocCard({
   docsUrl,
   githubUrl,
   packages,
+  packageDetails,
+  onOpenPackage,
 }: DocCardProps) {
   return (
-    <div className="group relative overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
-      {/* Top accent line */}
-      <div
-        className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${gradientFrom} ${gradientTo} opacity-40 group-hover:opacity-80 transition-opacity duration-300`}
-      />
+    // No `overflow-hidden`: the package previews float out of the card. A hovered card is raised over the next ones.
+    <div className="group relative hover:z-20 focus-within:z-20 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
+      {/* Top accent line, clipped to the rounded corners */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+        <div
+          className={`absolute top-0 left-0 right-0 h-px bg-gradient-to-r ${gradientFrom} ${gradientTo} opacity-40 group-hover:opacity-80 transition-opacity duration-300`}
+        />
+      </div>
 
       <div className="flex items-center gap-4 p-4 sm:p-5 2xl:p-6">
         {/* Mobile fallback badge */}
@@ -94,17 +132,13 @@ export function DocCard({
 
       {/* Packages section */}
       {packages && packages.length > 0 && (
-        <div className="border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 2xl:px-6 2xl:py-4 flex flex-col gap-2 2xl:gap-2.5">
+        <div className="rounded-b-[inherit] border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 2xl:px-6 2xl:py-4 flex flex-col gap-2 2xl:gap-2.5">
           {packages.map((pkg) => {
             const isNpmPkg = pkg.name.startsWith('@tuwaio/');
-            return (
-              <a
-                key={pkg.name}
-                href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
-                target={pkg.url?.startsWith('/') ? undefined : '_blank'}
-                rel={pkg.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
-                className="group/badge flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.015] px-3 py-2 2xl:px-4 2xl:py-2.5 text-xs border border-[var(--tuwa-border-primary)]/40 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-bg-primary)]/80"
-              >
+            const rowClass =
+              'group/badge flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.015] px-3 py-2 2xl:px-4 2xl:py-2.5 text-xs border border-[var(--tuwa-border-primary)]/40 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-bg-primary)]/80';
+            const content = (
+              <>
                 {/* Left: Layer badge & Package name */}
                 <div className="flex items-center gap-2 min-w-0">
                   {pkg.layer && (
@@ -146,6 +180,24 @@ export function DocCard({
                     />
                   </div>
                 )}
+              </>
+            );
+
+            // An npm package with details opens them in a dialog; the other rows are links
+            const details = isNpmPkg ? packageDetails?.[pkg.name] : undefined;
+            return details && onOpenPackage ? (
+              <PackageRow key={pkg.name} details={details} className={rowClass} onOpen={() => onOpenPackage(pkg.name)}>
+                {content}
+              </PackageRow>
+            ) : (
+              <a
+                key={pkg.name}
+                href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
+                target={pkg.url?.startsWith('/') ? undefined : '_blank'}
+                rel={pkg.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
+                className={rowClass}
+              >
+                {content}
               </a>
             );
           })}

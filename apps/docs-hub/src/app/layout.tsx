@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 
+import { SITE_URL } from '../lib/site';
 import { Providers } from './providers';
 
 const geistSans = Geist({
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',
   description:
     'Central documentation gateway for the TUWA Web3 ecosystem. Explore SIWX, Orbit, Satellite, Pulsar, Nova, Quasar (managed cloud or self-hosted Community Edition), and the TUWA SDK.',

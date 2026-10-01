@@ -6,8 +6,8 @@
   "license": "Apache-2.0",
   "description": "Central documentation hub and gateway portal for the TUWA Web3 ecosystem.",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build && pnpm postbuild",
+    "dev": "node scripts/build-data.mjs && next dev --turbopack",
+    "build": "node scripts/build-data.mjs && next build && pnpm postbuild",
     "postbuild": "pagefind --site .next/server/app --output-path public/_pagefind",
     "start": "next start",
     "lint": "next lint"

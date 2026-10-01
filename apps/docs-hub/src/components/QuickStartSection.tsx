@@ -98,6 +98,17 @@ export function QuickStartSection() {
               <span className="truncate">TuwaIO/cosmos-playground</span>
               <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
             </a>
+            <a
+              href="https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Integration guide for AI coding agents"
+              className="inline-flex items-center gap-1.5 px-3 py-1 2xl:px-3.5 2xl:py-1.5 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 text-[11px] 2xl:text-xs font-mono text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 transition-all duration-200"
+            >
+              <span className="font-bold text-[var(--tuwa-text-accent)]">AI agents</span>
+              <span className="truncate">TUWA_AGENTS.md</span>
+              <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
+            </a>
           </div>
         </div>
 

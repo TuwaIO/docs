@@ -161,3 +161,6 @@ dist
 
 *storybook.log
 storybook-static
+
+# Build-time data of the hub (npm, READMEs, release tags), saved by apps/docs-hub/scripts/build-data.mjs before dev and build
+apps/docs-hub/src/generated/
