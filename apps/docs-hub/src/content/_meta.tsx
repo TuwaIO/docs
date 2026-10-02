@@ -24,4 +24,9 @@ export default {
     title: 'Configurator',
     href: '/configurator',
   },
+  playground: {
+    type: 'page',
+    title: 'Playground',
+    href: '/playground',
+  },
 };

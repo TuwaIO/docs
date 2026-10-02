@@ -1,12 +1,22 @@
 minimumReleaseAgeExclude:
-  - '@tuwaio/evm-sdk@0.2.1'
+  - '@tuwaio/evm-sdk@0.2.1 || 0.2.2'
   - '@tuwaio/nova-connect@0.7.3'
-  - '@tuwaio/nova-core@0.7.2'
-  - '@tuwaio/nova-transactions@0.7.3'
+  - '@tuwaio/nova-core@0.7.2 || 0.7.3'
+  - '@tuwaio/nova-transactions@0.7.3 || 0.7.4'
   - '@tuwaio/satellite-evm@0.6.2'
   - '@tuwaio/satellite-react@0.6.3'
-  - '@tuwaio/sdk@0.2.1'
-  - '@tuwaio/siwx-server@0.4.2'
+  - '@tuwaio/sdk@0.2.1 || 0.2.2'
+  - '@tuwaio/siwx-server@0.4.2 || 0.4.3'
   - '@web3icons/common@0.11.52'
   - '@web3icons/react@4.1.23'
   - viem@2.57.2
+  - '@tuwaio/pulsar-core@0.8.3'
+  - '@tuwaio/quasar-sdk@0.2.1'
+  - '@tuwaio/siwx-core@0.4.1'
+  - '@tuwaio/siwx-evm@0.4.2'
+  - '@tuwaio/siwx-react@0.4.1'
+  - '@tuwaio/siwx-solana@0.4.2'
+  - '@tuwaio/solana-sdk@0.2.1'
+  - '@types/node@26.6.4'
+  - framer-motion@13.5.1
+  - motion-dom@13.5.1

@@ -118,6 +118,7 @@ This is the index of the ${SITE_NAME} (${SITE_URL}): guides that combine several
 
 - [TUWA_AGENTS.md](${TUWA_AGENTS_URL}): Stack, install commands, setup code and rules for AI coding agents that build apps with TUWA
 - [Stack Configurator](${SITE_URL}/configurator): Install command and setup files for Next.js, Vite or Vanilla TS, EVM and/or Solana, Nova UI or headless, SIWX and Quasar; each stack is type-checked against the published packages
+- [Interactive Web3 Playground](${SITE_URL}/playground): The TUWA stores and Nova UI Kit on simulated wallets and a simulated chain: connect, sign in with SIWX, send transactions that succeed, revert or get replaced, sync them to Quasar, customize Nova (theme, class names, components, texts, options); nothing is signed or sent
 - [Full text of the hub](${SITE_URL}/llms-full.txt): Every page of the hub and the README of every package, in one file
 ${pages
   .filter((page) => page.route === '/guides/starter-templates' || page.route === '/guides/full-stack-react')
@@ -154,7 +155,8 @@ ${sites.join('\n')}
 /**
  * Turns the MDX source of a hub page into plain Markdown: no front matter and imports, the tabs of `<Tabs>` labeled
  * (`**EVM:**`) and their text unindented (indented text would be a code block in Markdown), the API reference
- * component replaced by the OpenAPI document, and links to the hub made absolute. Code blocks are kept as they are.
+ * component replaced by the OpenAPI document, custom heading ids (`## Title [#id]`) removed and links to the hub made
+ * absolute. Code blocks are kept as they are.
  */
 function mdxToMarkdown(source: string, openapi: string): string {
   const output: string[] = [];
@@ -190,7 +192,9 @@ function mdxToMarkdown(source: string, openapi: string): string {
     } else if (trimmed === '<QuasarApiReference />') {
       output.push(`OpenAPI document (${OPENAPI_URL}):`, '', '```yaml', openapi.trim(), '```');
     } else {
-      output.push((tabs ? trimmed : line).replace(/\]\(\//g, `](${SITE_URL}/`));
+      output.push(
+        (tabs ? trimmed : line).replace(/^(#{1,6} .*?) \[#[\w-]+\]$/, '$1').replace(/\]\(\//g, `](${SITE_URL}/`),
+      );
     }
   }
 

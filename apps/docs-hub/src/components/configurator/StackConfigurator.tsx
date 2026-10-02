@@ -4,13 +4,12 @@ import {
   ArrowTopRightOnSquareIcon,
   CheckIcon,
   CpuChipIcon,
-  DocumentTextIcon,
   LinkIcon,
   RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
 import Link from 'next/link';
-import { type ReactNode, useMemo, useState, useSyncExternalStore } from 'react';
+import { type ReactNode, useMemo } from 'react';
 
 import {
   agentPrompt,
@@ -21,29 +20,14 @@ import {
   stackQuery,
 } from '@/lib/configurator/generate';
 import { installCommand, usePackageManager } from '@/lib/packageManager';
+import { replaceQuery, useQueryString } from '@/lib/queryState';
 
 import { CommandLine, PackageManagerSwitch } from '../CommandLine';
-import { CodeBlock } from './CodeBlock';
+import { FileTabs } from './FileTabs';
 import { StackOptionsForm } from './StackOptionsForm';
 
 // The options live in the query string of the page, so a configured stack can be shared as a link
-const queryListeners = new Set<() => void>();
-
-function subscribeToQuery(listener: () => void) {
-  queryListeners.add(listener);
-  window.addEventListener('popstate', listener);
-  return () => {
-    queryListeners.delete(listener);
-    window.removeEventListener('popstate', listener);
-  };
-}
-
-const readQuery = () => window.location.search;
-
-function writeQuery(options: StackOptions) {
-  window.history.replaceState(window.history.state, '', `?${stackQuery(options)}`);
-  queryListeners.forEach((listener) => listener());
-}
+const writeQuery = (options: StackOptions) => replaceQuery(stackQuery(options));
 
 function Step({
   index,
@@ -107,13 +91,11 @@ const cardClass =
  */
 export function StackConfigurator() {
   // '' while server rendering: the page is static, the query is applied in the browser
-  const query = useSyncExternalStore(subscribeToQuery, readQuery, () => '');
+  const query = useQueryString();
   const options = useMemo(() => parseStackOptions(new URLSearchParams(query)), [query]);
   const stack = useMemo(() => generateStack(options), [options]);
   const [packageManager, choosePackageManager] = usePackageManager();
-  const [openFile, setOpenFile] = useState<string | null>(null);
 
-  const file = stack.files.find(({ path }) => path === openFile) ?? stack.files[0];
   const install = installCommand(packageManager, stack.packages);
   const installDev = installCommand(packageManager, stack.devPackages, true);
   const fullInstall = [install, installDev].filter(Boolean).join(' && ');
@@ -197,33 +179,7 @@ export function StackConfigurator() {
 
           <Step index={3} title={`Add the files (${stack.files.length})`}>
             <div className={cn(cardClass, 'overflow-hidden')}>
-              <div
-                role="tablist"
-                aria-label="Setup files"
-                className="flex gap-1 overflow-x-auto border-b border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06] p-2 [scrollbar-width:thin]"
-              >
-                {stack.files.map(({ path }) => (
-                  <button
-                    key={path}
-                    type="button"
-                    role="tab"
-                    aria-selected={path === file.path}
-                    onClick={() => setOpenFile(path)}
-                    className={cn(
-                      'shrink-0 inline-flex items-center gap-1.5 rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2.5 py-1.5 font-mono text-xs whitespace-nowrap transition-colors cursor-pointer',
-                      path === file.path
-                        ? 'bg-[var(--tuwa-text-accent)]/10 text-[var(--tuwa-text-primary)]'
-                        : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:bg-[var(--tuwa-bg-secondary)]/60',
-                    )}
-                  >
-                    <DocumentTextIcon className="w-3.5 h-3.5 shrink-0 opacity-70" aria-hidden="true" />
-                    {path}
-                  </button>
-                ))}
-              </div>
-              <div role="tabpanel" aria-label={file.path}>
-                <CodeBlock code={file.code} language={file.language} label={file.path} />
-              </div>
+              <FileTabs files={stack.files} label="Setup files" />
             </div>
           </Step>
 

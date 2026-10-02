@@ -1,9 +1,11 @@
-// Saves the data of the main page and of llms.txt to src/generated/ before `next dev` and `next build`, so the pages
-// make no requests and the data is as fresh as the last deployment:
+// Saves the data of the main page, of llms.txt and of the Playground to src/generated/ before `next dev` and
+// `next build`, so the pages make no requests and the data is as fresh as the last deployment:
 // - npm-packages.json: the latest npm manifests of the @tuwaio packages listed in src/lib/ecosystem.ts;
 // - package-readmes.json: the README of each of these versions (from jsDelivr), for llms-full.txt;
 // - releases.json: the latest vX.Y.Z tag of the repositories in RELEASES (git ls-remote, no GitHub API limit);
-// - package-guides.json: the hub pages that mention each package, most mentions first.
+// - package-guides.json: the hub pages that mention each package, most mentions first;
+// - playground-sources.json: the Nova customization files of the Playground (components/playground/nova), shown by
+//   its Code tab as they run on the stage.
 // A step that fails keeps its last saved file (or saves an empty one), so an outage never fails the build.
 import { execFile } from 'node:child_process';
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
@@ -12,6 +14,7 @@ import { promisify } from 'node:util';
 const GENERATED = new URL('../src/generated/', import.meta.url);
 const ECOSYSTEM = new URL('../src/lib/ecosystem.ts', import.meta.url);
 const CONTENT = new URL('../src/content/', import.meta.url);
+const PLAYGROUND_NOVA = new URL('../src/components/playground/nova/', import.meta.url);
 const FIELDS = ['version', 'description', 'deprecated', 'dependencies', 'peerDependencies', 'peerDependenciesMeta'];
 
 // Entry id in src/lib/ecosystem.ts → GitHub repository whose latest tag the card shows
@@ -125,6 +128,14 @@ async function findGuides(names) {
   return { guides };
 }
 
+// The copyable Nova customization files of the Playground, by file name
+async function readPlaygroundSources() {
+  const names = (await readdir(PLAYGROUND_NOVA)).filter((name) => /\.tsx?$/.test(name)).sort();
+  const files = {};
+  for (const name of names) files[name] = await readFile(new URL(name, PLAYGROUND_NOVA), 'utf8');
+  return { files };
+}
+
 async function save(file, label, produce, empty) {
   const target = new URL(file, GENERATED);
   try {
@@ -149,4 +160,5 @@ await Promise.all([
   save('package-readmes.json', 'READMEs', () => fetchReadmes(packages), { readmes: {} }),
   save('releases.json', 'release tags', fetchReleases, { releases: {} }),
   save('package-guides.json', 'guide mentions', () => findGuides(names), { guides: {} }),
+  save('playground-sources.json', 'Playground sources', readPlaygroundSources, { files: {} }),
 ]);

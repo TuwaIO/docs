@@ -116,10 +116,23 @@ A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last save
 ```bash
 cd ../../tools/configurator-check
 pnpm install --ignore-workspace   # once, and after bumping the versions in its package.json
-pnpm check                        # type-checks the 45 stacks, their install commands and their formatting
+pnpm check                        # type-checks the 45 stacks, their install commands and their formatting,
+                                  # and the 2048 variants of the Playground customization
 ```
 
 The generator has no runtime imports and uses only erasable TypeScript, because the check runs it with Node's type stripping.
+
+### Playground
+
+`/playground` runs the TUWA stores (`@tuwaio/sdk`) and Nova UI Kit on simulated adapters from `src/lib/playground/`: fictional wallets, an in-memory chain that ends each transaction as the Scenario panel says, and the SIWX and Quasar backends in the browser. Nothing is signed or sent, and no RPC is contacted. The page loads the packages in the browser only (`PlaygroundLoader`, `ssr: false`). The settings use the query parameters of the Stack Configurator plus `theme`. The simulation and the copyable Nova files have unit tests:
+
+```bash
+pnpm --filter @tuwaio/docs-hub test
+```
+
+The Customize tab goes through the layers of Nova customization: theme variables, class names (the TUWA Mono kit), replaced components, texts and provider options. The Code tab shows the same objects as `customization.tsx` (`customizationCode` in `src/lib/playground/customization.ts`) with the copyable files of `src/components/playground/nova/`; `scripts/build-data.mjs` saves their text to `src/generated/playground-sources.json`, so restart `next dev` after editing them. Those files import only `@tuwaio/sdk` and `react`, and `tools/configurator-check` compiles every variant of `customization.tsx` (`node check.mjs customization`).
+
+`@tuwaio/satellite-react` is a direct dependency only for the `AllConnectors` augmentation in `src/lib/playground/types.ts`. Keep it on the version `@tuwaio/sdk` depends on: one copy of every TUWA package in `node_modules/.pnpm`.
 
 ---
 
@@ -138,7 +151,8 @@ apps/docs-hub/
 │   │   │   ├── layout.tsx           # Header + Footer shell of the main screen
 │   │   │   ├── page.tsx             # Main screen: hero, timeline, quick start
 │   │   │   ├── comparisons/page.tsx # TUWA against eight products, with the radar
-│   │   │   └── configurator/page.tsx # Stack Configurator
+│   │   │   ├── configurator/page.tsx # Stack Configurator
+│   │   │   └── playground/page.tsx  # Interactive Web3 Playground
 │   │   ├── guides/
 │   │   │   ├── [[...mdxPath]]/
 │   │   │   │   └── page.tsx         # Renders MDX pages from src/content/guides
@@ -156,7 +170,7 @@ apps/docs-hub/
 │   ├── components/
 │   │   ├── CommandLine.tsx          # Terminal command with copy, package manager switch
 │   │   ├── comparisons/             # Radar, criteria matrix, methodology of /comparisons
-│   │   ├── configurator/            # Options, code blocks (Shiki), full and compact Stack Configurator
+│   │   ├── configurator/            # Options, code blocks (Shiki), file tabs, full and compact Stack Configurator
 │   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
 │   │   ├── Footer.tsx               # Footer of the main screen
 │   │   ├── Header.tsx               # Fixed glassmorphic header + theme switcher
@@ -165,6 +179,7 @@ apps/docs-hub/
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
 │   │   ├── PackageDialog.tsx        # Details of an npm package (Dialog of @tuwaio/nova-core)
 │   │   ├── PackagePreview.tsx       # Hover preview of an npm package
+│   │   ├── playground/              # Studio: controls, stage, inspector; nova/: copyable Nova customization
 │   │   ├── QuickStartSection.tsx    # Cosmos Playground CLI quick start, compact Stack Configurator
 │   │   ├── QuasarApiReference.tsx   # Scalar reference of the Quasar API (client only, not in the barrel)
 │   │   └── index.ts                 # Barrel export
@@ -198,10 +213,12 @@ apps/docs-hub/
 │   │   ├── llms.ts                  # Text of llms.txt and llms-full.txt
 │   │   ├── packages.ts              # Package details and install commands from the saved npm data
 │   │   ├── packageManager.ts        # The package manager of the install commands (saved in localStorage)
+│   │   ├── playground/              # Simulated wallets, chain, adapters, SIWX and Quasar; settings, themes, Nova customization
+│   │   ├── queryState.ts            # Query-string state of the hub tools
 │   │   ├── site.ts                  # Site URL, page metadata, structured data ids
 │   │   └── nextraSection.tsx        # Route, metadata and layout of an MDX section (guides, quasar)
 │   └── mdx-components.ts            # MDX component map for Nextra
-├── scripts/build-data.mjs           # Saves npm data, READMEs, release tags and guide mentions before dev and build
+├── scripts/build-data.mjs           # Saves npm data, READMEs, release tags, guide mentions and Playground sources before dev and build
 ├── next.config.ts                   # Nextra plugin setup
 ├── postcss.config.mjs
 ├── tsconfig.json

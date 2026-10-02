@@ -1,9 +1,11 @@
 // Type-checks every stack of the Stack Configurator (apps/docs-hub/src/lib/configurator/generate.ts) against the
 // published TUWA packages installed here, and checks its install command: every imported package is installed, and
-// every required peer of a TUWA package is installed or brought by another installed package.
+// every required peer of a TUWA package is installed or brought by another installed package. Then it type-checks
+// every variant of the Nova customization of the Playground (apps/docs-hub/src/lib/playground/customization.ts).
 //
 //   pnpm install --ignore-workspace   (once, in this folder)
-//   node check.mjs [filter]           (a filter keeps the stacks whose key contains it, for example `vite-evm`)
+//   node check.mjs [filter]           (a filter keeps the stacks whose key contains it, for example `vite-evm`;
+//                                     `customization` checks only the Playground customization)
 //
 // Node runs the generator with its built-in type stripping (Node 22.18 or newer).
 
@@ -15,6 +17,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { allStackOptions, generateStack, stackKey } from '../../apps/docs-hub/src/lib/configurator/generate.ts';
+import {
+  allCustomizations,
+  CUSTOMIZATION_SOURCES,
+  customizationCode,
+} from '../../apps/docs-hub/src/lib/playground/customization.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.join(here, '.out');
@@ -153,11 +160,52 @@ function typeCheck(dir) {
   });
 }
 
-const stacks = allStackOptions()
+// The copyable Nova customization files of the Playground, shown in its Code tab
+const novaDir = path.join(here, '../../apps/docs-hub/src/components/playground/nova');
+
+/**
+ * Writes every variant of `customization.tsx` next to the copyable files it imports, then checks that the variants
+ * are formatted and that all files compile without unused imports. Resolves with whether the check passed.
+ */
+async function checkCustomizations() {
+  const dir = path.join(outDir, 'playground-customization');
+  await rm(dir, { recursive: true, force: true });
+  await mkdir(dir, { recursive: true });
+  for (const file of CUSTOMIZATION_SOURCES) {
+    await writeFile(path.join(dir, file), await readFile(path.join(novaDir, file), 'utf8'));
+  }
+  const variants = allCustomizations();
+  await Promise.all(
+    variants.map((variant, index) => writeFile(path.join(dir, `variant-${index}.tsx`), customizationCode(variant))),
+  );
+  await writeFile(
+    path.join(dir, 'tsconfig.json'),
+    JSON.stringify(
+      { compilerOptions: { ...compilerOptions, noUnusedLocals: true }, include: ['*.ts', '*.tsx'] },
+      null,
+      2,
+    ),
+  );
+  const format = await run(prettier, ['--list-different', '--ignore-path', 'no-ignore-file', `${dir}/variant-*.tsx`]);
+  const types = await typeCheck(dir);
+  const problems = [
+    format.ok ? '' : `Not formatted:\n${format.output.trim()}`,
+    types.ok ? '' : types.output.trim(),
+  ].filter(Boolean);
+  console.log(
+    problems.length > 0
+      ? `✗ Playground customization\n${problems.join('\n')}\n`
+      : `✓ Playground customization: ${variants.length} variants compile`,
+  );
+  return problems.length === 0;
+}
+
+const onlyCustomization = filter === 'customization';
+const stacks = (onlyCustomization ? [] : allStackOptions())
   .filter((options) => !filter || stackKey(options).includes(filter))
   .map((options) => generateStack(options));
 
-console.log(`Checking ${stacks.length} stacks…`);
+if (!onlyCustomization) console.log(`Checking ${stacks.length} stacks…`);
 let failed = 0;
 const queue = [...stacks];
 
@@ -178,5 +226,8 @@ async function worker() {
 }
 
 await Promise.all(Array.from({ length: Math.max(1, availableParallelism() - 1) }, worker));
-console.log(failed ? `${failed} of ${stacks.length} stacks failed` : `All ${stacks.length} stacks compile`);
-process.exitCode = failed ? 1 : 0;
+if (!onlyCustomization) {
+  console.log(failed ? `${failed} of ${stacks.length} stacks failed` : `All ${stacks.length} stacks compile`);
+}
+const customizationsPass = !filter || onlyCustomization ? await checkCustomizations() : true;
+process.exitCode = failed || !customizationsPass ? 1 : 0;

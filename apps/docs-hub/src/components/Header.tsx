@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/quasar', label: 'Quasar' },
   { href: '/comparisons', label: 'Comparisons' },
   { href: '/configurator', label: 'Configurator' },
+  { href: '/playground', label: 'Playground' },
 ];
 
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);

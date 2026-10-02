@@ -64,7 +64,7 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
         onClick={() => copy(code)}
         disabled={isCopied}
         title="Copy the code"
-        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/90 dark:bg-[#0d1117]/90 px-2 py-1 text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer disabled:cursor-default transition-colors"
+        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)] dark:bg-[#0d1117] px-2 py-1 text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer disabled:cursor-default transition-colors"
       >
         {isCopied ? (
           <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />

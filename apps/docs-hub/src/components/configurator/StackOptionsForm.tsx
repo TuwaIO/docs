@@ -11,7 +11,14 @@ const FRAMEWORKS: { id: Framework; label: string; hint: string }[] = [
   { id: 'vanilla', label: 'Vanilla TS', hint: 'No React: the TUWA stores and your own DOM code' },
 ];
 
-function Choice({
+/**
+ * A toggle button of an option. Shared with the Playground controls.
+ * @param props.pressed - Whether the option is on.
+ * @param props.disabled - Whether it cannot be changed now.
+ * @param props.onClick - Toggles or selects the option.
+ * @param props.compact - The small variant.
+ */
+export function Choice({
   pressed,
   disabled,
   onClick,
@@ -45,7 +52,13 @@ function Choice({
   );
 }
 
-function Group({
+/**
+ * A labelled group of {@link Choice} buttons. Shared with the Playground controls.
+ * @param props.label - The legend.
+ * @param props.hint - A line under the buttons, hidden in the compact variant.
+ * @param props.compact - The small variant.
+ */
+export function Group({
   label,
   hint,
   children,
