@@ -141,7 +141,7 @@ The table below contrasts how SIWX adapters unify divergent blockchain cryptogra
 
 > [!NOTE]
 >
-> Satellite Connect names Solana clusters (`mainnet`, `devnet`, `testnet`), so `getSatelliteSiwxFields` builds Solana chain IDs from the cluster name: `solana:mainnet`, `solana:devnet`. List the same IDs in `allowedChainIds` when your verification policy restricts chains.
+> Satellite Connect names Solana clusters (`mainnet`, `devnet`, `testnet`); `getSatelliteSiwxFields` turns the cluster into its CAIP-2 chain ID with the genesis hash, as CAIP-30 requires: `solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp` for mainnet, `solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1` for devnet. List these IDs in `allowedChainIds` when your verification policy restricts chains (`SOLANA_CHAIN_IDS` of `@tuwaio/orbit-core` holds them). Sessions signed for `solana:mainnet` or `solana:devnet` by earlier versions still match them: SIWX treats a cluster name and its genesis-hash ID as the same chain.
 
 ---
 
@@ -213,7 +213,7 @@ export function SignInButton() {
         });
         return res.ok ? res.json() : null;
       },
-      // eip155:11155111:0x… for an EVM wallet, solana:devnet:… for a Solana one
+      // eip155:11155111:0x… for an EVM wallet, solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1:… for a Solana devnet one
       fields: getSatelliteSiwxFields(account, { statement: 'Sign in to access TUWA sovereign services.' }),
       onSuccess: (session) => console.log('[SIWX] Signed in:', session.address),
     });
@@ -443,7 +443,7 @@ export async function submitProtectedOperation({
 
 > [!IMPORTANT]
 >
-> `isSessionMatchingTarget` provides cross-chain address equivalence. It normalizes raw EVM hex strings (`0x1234...`), checksummed representations, Solana Base58 strings, and fully qualified CAIP-10 strings (`eip155:1:0x1234...` or `solana:5eykt4Us...`). If an account or network switch occurred in the user's wallet without a subsequent re-sign (`resign`), this validation will reject the request, ensuring unauthenticated or drifted connections never execute protected state transitions.
+> `isSessionMatchingTarget` provides cross-chain address equivalence. It normalizes raw EVM hex strings (`0x1234...`), checksummed representations, Solana Base58 strings, and fully qualified CAIP-10 strings (`eip155:1:0x1234...` or `solana:5eykt4Us...`). If an account or network switch occurred in the user's wallet without a subsequent re-sign (`resign`), this validation will reject the request, ensuring unauthenticated or drifted connections never execute protected state transitions. A Solana chain matches under its cluster name and its genesis-hash chain ID, so `tx.chainId` of Pulsar 0.9 (`solana:EtWTRABZ…`) matches a session signed for `solana:devnet`.
 
 ---
 

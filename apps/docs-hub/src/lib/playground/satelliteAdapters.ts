@@ -1,4 +1,4 @@
-import { OrbitAdapter } from '@tuwaio/sdk/orbit';
+import { getSolanaCluster, OrbitAdapter } from '@tuwaio/sdk/orbit';
 import type { SatelliteAdapter } from '@tuwaio/sdk/satellite';
 
 import { logEvent } from './eventLog';
@@ -25,9 +25,10 @@ const BALANCES: Record<SimulatedFamily, { value: string; symbol: string }> = {
   [OrbitAdapter.SOLANA]: { value: '12.75', symbol: 'SOL' },
 };
 
-// EVM chains are numbers; Solana clusters are monikers, sometimes with the `solana:` prefix
+// EVM chains are numbers; a Solana connection keeps the cluster moniker, as `satelliteSolanaAdapter` does, whether it is
+// asked for `devnet`, `solana:devnet` or the genesis-hash chain ID that Nova Connect passes
 function toWalletChain(family: SimulatedFamily, chainId: number | string): number | string {
-  return family === OrbitAdapter.EVM ? Number(chainId) : String(chainId).replace(/^solana:/, '');
+  return family === OrbitAdapter.EVM ? Number(chainId) : (getSolanaCluster(chainId) ?? String(chainId));
 }
 
 /**
@@ -82,7 +83,8 @@ export function createSimulatedSatelliteAdapter(family: SimulatedFamily): Satell
     },
 
     checkAndSwitchNetwork: async (chainId, currentChainId, updateActiveConnector) => {
-      if (String(chainId) === String(currentChainId)) return;
+      if (currentChainId !== undefined && toWalletChain(family, chainId) === toWalletChain(family, currentChainId))
+        return;
       const session = currentSession(family);
       if (!session) throw new Error('Connect a wallet first.');
       logEvent('Satellite', `switch network to ${chainId}`);

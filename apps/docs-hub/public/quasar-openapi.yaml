@@ -49,7 +49,9 @@ components:
           anyOf:
             - type: number
             - type: string
-          description: EVM chain ID (1) or Solana cluster ("mainnet").
+          description: EVM chain ID (1), or for Solana the CAIP-2 chain ID with the genesis hash
+            ("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", Pulsar 0.9 and later); transactions synced by older Pulsar
+            versions carry "solana:mainnet".
         description:
           anyOf:
             - type: string
@@ -212,7 +214,9 @@ components:
           anyOf:
             - type: number
             - type: string
-          description: EVM chain ID (1) or Solana cluster ("mainnet").
+          description: EVM chain ID (1), or for Solana the CAIP-2 chain ID with the genesis hash
+            ("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", Pulsar 0.9 and later); transactions synced by older Pulsar
+            versions carry "solana:mainnet".
         description:
           anyOf:
             - type: string
@@ -326,7 +330,9 @@ components:
           anyOf:
             - type: number
             - type: string
-          description: EVM chain ID (1) or Solana cluster ("mainnet").
+          description: EVM chain ID (1), or for Solana the CAIP-2 chain ID with the genesis hash
+            ("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp", Pulsar 0.9 and later); transactions synced by older Pulsar
+            versions carry "solana:mainnet".
         description:
           anyOf:
             - type: string
@@ -630,17 +636,19 @@ paths:
           in: query
         - schema:
             type: string
-            description: Sender address, compared exactly as it was synced.
+            description: Sender address. EVM addresses match in any letter case, Solana addresses exactly.
           required: false
-          description: Sender address, compared exactly as it was synced.
+          description: Sender address. EVM addresses match in any letter case, Solana addresses exactly.
           name: walletAddress
           in: query
         - schema:
             type: string
-            description: Chain of the transactions.
+            description: 'Chain of the transactions: an EVM chain ID, or a Solana chain ID in either form
+              ("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" or "solana:mainnet"), which match the same cluster.'
             example: "1"
           required: false
-          description: Chain of the transactions.
+          description: 'Chain of the transactions: an EVM chain ID, or a Solana chain ID in either form
+            ("solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp" or "solana:mainnet"), which match the same cluster.'
           name: chainId
           in: query
         - schema:

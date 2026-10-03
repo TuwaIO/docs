@@ -452,7 +452,7 @@ export const Increment = () => {
   </Tabs.Tab>
   <Tabs.Tab>
 
-Pulsar checks that the wallet is on the cluster in `desiredChainID`; it does not switch clusters. The signer comes from `@solana/react`, for the Wallet Standard account of the Satellite Connect connection. Pass `rpcUrl`: it is saved with the transaction, so tracking resumes on the same RPC after a reload.
+Pulsar checks that the wallet is on the cluster in `desiredChainID`; it does not switch clusters. The signer comes from `@solana/react`, for the Wallet Standard account of the Satellite Connect connection. Pass `rpcUrl`: it is saved with the transaction, so tracking resumes on the same RPC after a reload. The signer takes the Wallet Standard chain (`solana:devnet`), built from the cluster moniker that Satellite Connect keeps as `chainId`; Pulsar saves the transaction under the CAIP-2 chain ID with the genesis hash (`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`), so compare Solana chains with `getSolanaCluster` from `@tuwaio/orbit-core` rather than as strings.
 
 ```tsx filename="src/components/Increment.tsx"
 'use client';

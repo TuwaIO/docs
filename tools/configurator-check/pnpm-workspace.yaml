@@ -20,3 +20,27 @@ minimumReleaseAgeExclude:
   - '@types/node@26.6.4'
   - framer-motion@13.5.1
   - motion-dom@13.5.1
+  - '@tuwaio/orbit-core@0.4.0'
+  - '@tuwaio/orbit-solana@0.4.0'
+  - '@tuwaio/pulsar-core@0.9.0'
+  - '@tuwaio/pulsar-evm@0.8.0'
+  - '@tuwaio/pulsar-solana@0.9.0'
+  - '@tuwaio/satellite-core@0.7.0'
+  - '@tuwaio/satellite-evm@0.7.0'
+  - '@tuwaio/satellite-react@0.7.0'
+  - '@tuwaio/satellite-solana@0.7.0'
+  - '@tuwaio/nova-core@0.8.0'
+  - '@tuwaio/nova-connect@0.8.0'
+  - '@tuwaio/nova-transactions@0.8.0'
+  - '@tuwaio/sdk@0.3.0'
+  - '@tuwaio/evm-sdk@0.3.0'
+  - '@tuwaio/solana-sdk@0.3.0'
+  - '@tuwaio/quasar-sdk@0.3.0'
+  - '@tuwaio/siwx-core@0.5.0'
+  - '@tuwaio/siwx-evm@0.4.3'
+  - '@tuwaio/siwx-react@0.5.1'
+  - '@tuwaio/siwx-server@0.5.1'
+  - '@tuwaio/siwx-solana@0.4.3'
+  - framer-motion@14.0.0
+  - motion-dom@14.0.0
+  - motion-utils@14.0.0

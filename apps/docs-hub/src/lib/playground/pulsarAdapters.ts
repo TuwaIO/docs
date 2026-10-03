@@ -1,4 +1,4 @@
-import { normalizeError, OrbitAdapter } from '@tuwaio/sdk/orbit';
+import { getSolanaCluster, normalizeError, OrbitAdapter } from '@tuwaio/sdk/orbit';
 import {
   TransactionStatus,
   TransactionTracker,
@@ -106,7 +106,10 @@ export function createSimulatedPulsarAdapter(
 
     checkChainForTx: async (chainId) => {
       const session = currentSession(family);
-      if (String(session?.chainId) !== String(chainId).replace(/^solana:/, '')) {
+      // `devnet`, `solana:devnet` and the genesis-hash chain ID name the same Solana cluster
+      const required =
+        family === OrbitAdapter.SOLANA ? (getSolanaCluster(chainId) ?? String(chainId)) : String(chainId);
+      if (String(session?.chainId) !== required) {
         throw new Error(`Switch the wallet to ${chainId} first.`);
       }
     },

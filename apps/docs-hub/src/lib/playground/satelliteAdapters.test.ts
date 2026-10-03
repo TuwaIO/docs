@@ -75,6 +75,31 @@ describe('simulated Satellite adapter', () => {
     expect((await connecting).chainId).toBe('devnet');
   });
 
+  it('keeps the cluster moniker when Nova passes the genesis-hash chain ID', async () => {
+    const adapter = createSimulatedSatelliteAdapter(OrbitAdapter.SOLANA);
+    const connecting = adapter.connect({
+      connectorType: connectorTypeOf(comet),
+      chainId: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+    });
+    await vi.advanceTimersByTimeAsync(700);
+    expect((await connecting).chainId).toBe('devnet');
+
+    const updateActiveConnector = vi.fn();
+    // The cluster the wallet is on already: nothing to switch
+    await adapter.checkAndSwitchNetwork('solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1', 'devnet', updateActiveConnector);
+    expect(updateActiveConnector).not.toHaveBeenCalled();
+
+    const switching = adapter.checkAndSwitchNetwork(
+      'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+      'devnet',
+      updateActiveConnector,
+    );
+    await vi.advanceTimersByTimeAsync(500);
+    await switching;
+    expect(updateActiveConnector).toHaveBeenCalledWith({ chainId: 'mainnet' });
+    expect(currentSession(OrbitAdapter.SOLANA)?.chainId).toBe('mainnet');
+  });
+
   it('rejects a wallet of another chain family', async () => {
     const adapter = createSimulatedSatelliteAdapter(OrbitAdapter.SOLANA);
     await expect(adapter.connect({ connectorType: connectorTypeOf(orbit), chainId: 1 })).rejects.toThrow(

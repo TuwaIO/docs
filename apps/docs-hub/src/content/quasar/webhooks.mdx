@@ -47,14 +47,14 @@ x-quasar-event: Success
 }
 ```
 
-| Field              | Content                                                                                   |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| `txKey`, `hash`    | Key of the Pulsar transaction and its on-chain hash (when it has one)                     |
-| `status`, `action` | Final status: `Success`, `Failed` or `Replaced`; also sent in the `x-quasar-event` header |
-| `txType`           | The `type` of the Pulsar transaction                                                      |
-| `chainId`          | Chain of the transaction, as a string                                                     |
-| `timestamp`        | Unix time in seconds when the webhook was created                                         |
-| `metadata`         | The `payload` of the Pulsar transaction                                                   |
+| Field              | Content                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `txKey`, `hash`    | Key of the Pulsar transaction and its on-chain hash (when it has one)                                                                                                                                                                                                                                                                                                                 |
+| `status`, `action` | Final status: `Success`, `Failed` or `Replaced`; also sent in the `x-quasar-event` header                                                                                                                                                                                                                                                                                             |
+| `txType`           | The `type` of the Pulsar transaction                                                                                                                                                                                                                                                                                                                                                  |
+| `chainId`          | Chain of the transaction, as a string: the EVM chain ID (`"1"`), or for Solana the CAIP-2 chain ID with the genesis hash (`"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"` for mainnet, `"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"` for devnet). Deliveries sent before October 2026 used the cluster name (`solana:mainnet`); `getSolanaCluster` of `@tuwaio/orbit-core` reads both forms |
+| `timestamp`        | Unix time in seconds when the webhook was created                                                                                                                                                                                                                                                                                                                                     |
+| `metadata`         | The `payload` of the Pulsar transaction                                                                                                                                                                                                                                                                                                                                               |
 
 ---
 

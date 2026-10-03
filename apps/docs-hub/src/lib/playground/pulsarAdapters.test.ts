@@ -71,6 +71,20 @@ describe('simulated Pulsar adapter', () => {
     await expect(adapter.checkChainForTx(8453)).rejects.toThrow('Switch the wallet to 8453 first.');
   });
 
+  it('accepts every form of the Solana cluster the wallet is on', async () => {
+    connectWallet(
+      SIMULATED_WALLETS.find((wallet) => wallet.family === OrbitAdapter.SOLANA)!,
+      'devnet',
+    );
+    const adapter = createSimulatedPulsarAdapter(OrbitAdapter.SOLANA, new Set());
+    await expect(adapter.checkChainForTx('devnet')).resolves.toBeUndefined();
+    await expect(adapter.checkChainForTx('solana:devnet')).resolves.toBeUndefined();
+    await expect(adapter.checkChainForTx('solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1')).resolves.toBeUndefined();
+    await expect(adapter.checkChainForTx('solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp')).rejects.toThrow(
+      'Switch the wallet to',
+    );
+  });
+
   it('fills the mempool details, then marks the transaction successful', async () => {
     const { updates, onSuccess } = startTracking(evmTx(submitTransaction(OrbitAdapter.EVM, 'success')));
     await vi.advanceTimersByTimeAsync(4000);
