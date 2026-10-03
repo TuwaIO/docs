@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.39...docs-ui-v0.1.0) (2026-10-03)
+
+
+### Features
+
+* genesis-hash Solana chain IDs across the hub ([05ce4b7](https://github.com/TuwaIO/docs/commit/05ce4b75286047c6c7430158199ccafb120cfc71))
+
 ## [0.0.39](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.38...docs-ui-v0.0.39) (2026-09-30)
 
 
