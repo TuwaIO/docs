@@ -103,3 +103,4 @@ docs/
   - Do **NOT** document calling Quasar with the secret key from the browser: guides call it from Server Actions after checking the SIWX session.
   - Do **NOT** remove `injected` from `@tuwaio/docs-ui` in the hub or the `zod` overrides without a green `pnpm build:hub`: a second copy of `nextra-theme-docs` fails the build with `Missing ConfigContext.Provider`, and zod 4.4+ with `expected nonoptional ... at children`.
   - Do **NOT** edit `CHANGELOG.md` files (release-please writes them).
+  - Do **NOT** include external URLs, http(s) links, or markdown links when generating Reddit content or replies: Reddit automated anti-spam heuristic filters immediately flag and ban new/branded accounts for external custom domain links. Use plain text names (`@tuwaio/pulsar-core`, `TuwaIO on GitHub`) instead.
