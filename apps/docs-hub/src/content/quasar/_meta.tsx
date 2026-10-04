@@ -4,6 +4,7 @@ export default {
   'quotas-and-limits': 'Quotas & Limits',
   webhooks: 'Webhooks',
   'self-hosting': 'Self-Hosting',
+  'migrate-to-community': 'Move from Cloud',
   '--': {
     type: 'separator',
   },

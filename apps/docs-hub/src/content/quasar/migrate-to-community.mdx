@@ -1,0 +1,65 @@
+---
+title: Move from Quasar Cloud to Community
+description: Move an organization from Quasar Cloud to your Quasar Community Edition node with its apps, API keys, webhook secrets and transaction history.
+---
+
+# Move from Quasar Cloud to Community
+
+An organization moves from Quasar Cloud to your [Community Edition node](/quasar/self-hosting) in one encrypted file. Its apps keep their API keys and its webhook endpoints keep their signing secrets, so your apps change only the Quasar URL and your webhook receivers change nothing.
+
+| Moves to your node                                                                              | Stays in Quasar Cloud                                    |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| The organization (with your node's limits; the node admin becomes its owner)                    | Members and their sign-in methods (a node has one admin) |
+| Apps: API keys, IP and domain allow-lists, RPC overrides, Alchemy/QuickNode/Gelato/Pimlico keys | Billing, quota balance and usage history                 |
+| Webhook endpoints with their signing secrets                                                    | System webhooks of Quasar Cloud                          |
+| All transactions, with their AML results                                                        |                                                          |
+| Webhook deliveries of the last 30 days                                                          |                                                          |
+| Payments App records: accepted payments and invoices                                            |                                                          |
+
+---
+
+## 📦 Export the Organization
+
+Only an **owner** can export. On the organization page of the [Quasar Dashboard](https://quasar.tuwa.io), choose **Export Organization** and confirm with your password and, if it is on, your 2FA code.
+
+The dashboard then shows the **import key** (`QEX1-…`) once. It is not stored anywhere: copy it before you download. The download link works once, for 10 minutes, and an organization can be exported once every 10 minutes. Every owner of the organization gets an email about the export.
+
+The `.qex` file is encrypted with the key (AES-256-GCM), because it holds every secret of the organization. Keep the file and the key apart.
+
+---
+
+## 📥 Import It into Your Node
+
+You need Community Edition **0.2** or later. In the `/admin` panel of your node, choose **Import data from Quasar Cloud** on the dashboard:
+
+1. Select the `.qex` file and enter the import key. Letter case and spaces do not matter.
+2. **Analyze.** The node reads the whole file and lists what it will create, what is already there, and what it leaves out, before it writes anything.
+3. Confirm with your password and start the import. The page shows the progress and then a report.
+
+The node encrypts the secrets again with its own `ENCRYPTION_KEY`. Transactions that were still pending in Quasar Cloud go to your node's trackers, so give your node an RPC provider for their chains (an app's own Alchemy or QuickNode key moves with it).
+
+What the node leaves out, and lists:
+
+- **RPC URLs your node's outbound policy refuses**, such as private addresses.
+- **Webhook endpoints your node does not accept:** plain HTTP in production, or a second `localhost` endpoint in the organization. Deliveries of these endpoints are left out too.
+
+---
+
+## 🔁 Switch Over
+
+1. Import the organization into your node.
+2. Point your apps at the node: set `baseUrl` of `@tuwaio/quasar-sdk`, the URL of `preFlightTxCheck`, and `--api-url` of the webhook relay (see [Self-Hosting](/quasar/self-hosting)). The secret keys stay the same.
+3. **Export and import again.** The second import adds the transactions created since the first one and updates those whose status changed in Quasar Cloud. It leaves alone the settings you changed on your node. Importing the same file twice changes nothing, and an import that stopped half way finishes when you run it again.
+4. Deactivate the apps in Quasar Cloud, or delete the organization there. Until then both sides may deliver a webhook for the same transaction: make receivers idempotent on `txKey` and `action`.
+
+---
+
+## 🧯 When the Import Stops
+
+| Message                                                         | What to do                                                                                              |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| The import key does not match this export                       | Use the key shown with this export. A key works only for its own file.                                  |
+| The export is damaged or incomplete                             | Download a new export: the file changed or did not download fully.                                      |
+| This export uses a newer format version                         | Update your Community Edition, then import again.                                                       |
+| The export collides with data on this node                      | An app, key or endpoint of the export belongs to another organization of the node. Nothing was written. |
+| The file is larger than the proxy in front of this node accepts | Raise the request body limit of your reverse proxy (Cloudflare's free plan allows 100 MB).              |
