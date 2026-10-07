@@ -12,5 +12,6 @@ export default {
   'react-transaction-tracking': 'Transaction Tracking in React',
   'full-stack-react': 'Full-Stack React App',
   'quasar-transaction-sync': 'Sync Transactions to Quasar',
+  'siwx-jwt-external-auth': 'External Auth with SIWX JWT',
   'starter-templates': 'Starter Templates',
 };

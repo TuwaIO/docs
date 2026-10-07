@@ -131,7 +131,7 @@ export const { GET, POST, DELETE } = createSiwxApiHandler({
 });
 ```
 
-For production stores, `allowedChainIds` and the session lifetime, see [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server). How the sign-in works is explained in the [Multi-Chain Authentication guide](/guides/multi-chain-auth-siwx-caip122).
+For production stores, `allowedChainIds` and the session lifetime, see [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server). How the sign-in works is explained in the [Multi-Chain Authentication guide](/guides/multi-chain-auth-siwx-caip122). On EVM, smart contract wallets (Safe, Coinbase Smart Wallet) also need a client per chain in `verifyOptions.publicClient`; the [External Auth guide](/guides/siwx-jwt-external-auth) shows it together with the JWT routes that hand the sign-in to providers like Coinbase CDP.
 
 ---
 
@@ -480,5 +480,6 @@ The `nextjs-tuwa-quasar` [starter template](/guides/starter-templates) is this s
 ## 📚 Next Steps
 
 - Sync the transactions to Quasar and show the history of every device: [Quasar transaction sync guide](/guides/quasar-transaction-sync).
+- Hand the sign-in to Coinbase CDP or your own services as a JWT: [External Auth with SIWX JWT](/guides/siwx-jwt-external-auth).
 - Restyle the modals and toasts, or change their texts: [Nova UI Kit Storybook](https://stories.tuwa.io/).
 - Look up the subpaths of the SDK and the packages behind them: [`@tuwaio/sdk`](https://sdk.docs.tuwa.io/packages/sdk), [`@tuwaio/evm-sdk`](https://sdk.docs.tuwa.io/packages/evm-sdk), [`@tuwaio/solana-sdk`](https://sdk.docs.tuwa.io/packages/solana-sdk).

@@ -1,0 +1,261 @@
+---
+title: Hand a SIWX Sign-In to External Auth with JWT and JWKS
+description: Issue a short-lived JWT for the wallet signed in with SIWX and publish its public keys as a JWKS, so embedded wallet providers like Coinbase CDP and your own services can trust the sign-in.
+---
+
+import { Tabs } from 'nextra/components';
+
+# Hand a SIWX Sign-In to External Auth with JWT and JWKS
+
+A SIWX session is an `HttpOnly` cookie: only your server can read it. Some services accept a sign-in only as a JWT they can verify with your public keys — embedded wallet providers with custom authentication (for example [Coinbase CDP](https://docs.cdp.coinbase.com/embedded-wallets/custom-authentication)), identity platforms and your own services that do not share the cookie. This guide connects them to the same SIWX sign-in. At the end you have:
+
+- `GET /api/siwx/token`, which returns a short-lived JWT for the signed-in wallet;
+- `GET /api/siwx/jwks`, which publishes the public keys that verify it;
+- Coinbase CDP custom authentication that creates an embedded wallet for the signed-in user;
+- a service of your own that trusts the token.
+
+The user signs in once with their own wallet; the provider only receives a token it can check, never a key or the session cookie.
+
+> [!TIP]
+>
+> The route step has an **EVM** and a **Solana** tab, linked to the other guides.
+
+---
+
+## How It Works
+
+```text
+Wallet ──signs CAIP-122──▶ POST /api/siwx/verify ──▶ session cookie
+Browser ──cookie──▶ GET /api/siwx/token ──▶ JWT (ES256, 10 minutes)
+Provider ──▶ GET /api/siwx/jwks ──▶ public keys ──▶ checks the JWT signature, iss, aud, exp
+Provider ──▶ finds or creates the user of `sub`
+```
+
+## Before You Start
+
+- **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `src/lib/authStores.ts` of Step 3.
+- **A public HTTPS URL** for the app: the provider downloads your JWKS from it (see [Local Development](#local-development)).
+
+---
+
+## Step 1: Create a Signing Key
+
+Run this once and keep the private JWK as a secret of your deployment. ES256 (P-256) is the default: short keys and signatures, accepted by Coinbase CDP; pass `'RS256'` for services that only accept RSA.
+
+```js filename="scripts/generate-siwx-jwt-key.mjs"
+import { generateSiwxJwtKey } from '@tuwaio/sdk/siwx/server';
+
+const { privateJwk, kid } = await generateSiwxJwtKey('ES256');
+console.log(`kid: ${kid}`);
+console.log(`SIWX_JWT_PRIVATE_KEY='${JSON.stringify(privateJwk)}'`);
+```
+
+```bash
+node scripts/generate-siwx-jwt-key.mjs
+```
+
+Put the printed `SIWX_JWT_PRIVATE_KEY` into your environment (`.env.local` and the settings of your host). `importSiwxJwtKey` also reads a PKCS#8 PEM, with real or escaped (`\n`) line breaks.
+
+---
+
+## Step 2: Enable JWT in the Route Handler
+
+The `jwt` option adds the `/token` and `/jwks` routes to the handler of the Full-Stack React guide. `issuer` is the URL of your app; `audience` is the value the provider expects in `aud`.
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+Give the handler a client for each chain of the app as well: smart contract wallets (Safe, Coinbase Smart Wallet / Base Account, other ERC-4337 accounts) are checked on the chain they signed on, deployed ones with EIP-1271 and not yet deployed ones with ERC-6492. EOA wallets need no client.
+
+```ts filename="src/app/api/siwx/[...siwx]/route.ts"
+import type { EvmVerifyClient } from '@tuwaio/evm-sdk/siwx';
+import { importSiwxJwtKey } from '@tuwaio/sdk/siwx/server';
+import { createSiwxApiHandler } from '@tuwaio/sdk/siwx/server-next';
+import { createPublicClient, http } from 'viem';
+
+import { appChains } from '@/configs/appConfig';
+import { nonceStore, sessionStore } from '@/lib/authStores';
+
+const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+
+const clients = new Map<number, EvmVerifyClient>(
+  appChains.map((chain) => [chain.id, createPublicClient({ chain, transport: http() })]),
+);
+
+export const { GET, POST, DELETE } = createSiwxApiHandler({
+  sessionStore,
+  nonceStore,
+  policy: {
+    expectedDomain: appUrl.host,
+    expectedUri: appUrl.origin,
+    requireExpirationTime: true,
+    maxIssuedAtAgeSeconds: 300,
+  },
+  verifyOptions: { publicClient: (chainId) => clients.get(chainId) },
+  jwt: {
+    signingKey: importSiwxJwtKey({ privateKey: process.env.SIWX_JWT_PRIVATE_KEY ?? '' }),
+    issuer: appUrl.origin,
+    audience: 'my-app',
+  },
+});
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/app/api/siwx/[...siwx]/route.ts"
+import { importSiwxJwtKey } from '@tuwaio/sdk/siwx/server';
+import { createSiwxApiHandler } from '@tuwaio/sdk/siwx/server-next';
+
+import { nonceStore, sessionStore } from '@/lib/authStores';
+
+const appUrl = new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+
+export const { GET, POST, DELETE } = createSiwxApiHandler({
+  sessionStore,
+  nonceStore,
+  policy: {
+    expectedDomain: appUrl.host,
+    expectedUri: appUrl.origin,
+    requireExpirationTime: true,
+    maxIssuedAtAgeSeconds: 300,
+  },
+  jwt: {
+    signingKey: importSiwxJwtKey({ privateKey: process.env.SIWX_JWT_PRIVATE_KEY ?? '' }),
+    issuer: appUrl.origin,
+    audience: 'my-app',
+  },
+});
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+- `GET /api/siwx/token` returns `{ token, expiresAt }` for the session cookie with `Cache-Control: no-store`, or `401` without a session. The token lives 10 minutes by default (`ttlSeconds`, at most 7 days) and never outlives the session.
+- `GET /api/siwx/jwks` returns the public keys with `Cache-Control: public, max-age=300`.
+
+---
+
+## Step 3: Connect Coinbase CDP Custom Authentication
+
+In the [CDP Portal](https://portal.cdp.coinbase.com/), open the custom authentication settings of your project and enter:
+
+| Setting                   | Value                                                    |
+| :------------------------ | :------------------------------------------------------- |
+| **JWKS endpoint URL**     | `https://<your app>/api/siwx/jwks`                       |
+| **Issuer (`iss`)**        | The `issuer` of Step 2, for example `https://<your app>` |
+| **Audience (`aud`)**      | The `audience` of Step 2 (`my-app`)                      |
+| **User identifier claim** | Leave empty: CDP then uses `sub`                         |
+
+CDP asks for a fresh token whenever it needs one and stores none, so `getJwt` fetches `/api/siwx/token` every time. It returns `undefined` while no wallet is signed in with SIWX.
+
+```ts filename="src/lib/siwxJwt.ts"
+export async function getSiwxJwt(): Promise<string | undefined> {
+  const res = await fetch('/api/siwx/token', { cache: 'no-store' });
+  if (!res.ok) return undefined;
+  const { token } = (await res.json()) as { token: string; expiresAt: number };
+  return token;
+}
+```
+
+Wrap the app in the CDP provider and sign in to CDP once the SIWX session exists:
+
+```tsx filename="src/providers/CdpProvider.tsx"
+'use client';
+
+import { CDPHooksProvider, useAuthenticateWithJWT, useIsSignedIn } from '@coinbase/cdp-hooks';
+import { useSiwxSession } from '@tuwaio/sdk/siwx';
+import { type ReactNode, useEffect } from 'react';
+
+import { getSiwxJwt } from '@/lib/siwxJwt';
+
+function CdpSignIn() {
+  const { isAuthenticated } = useSiwxSession();
+  const { isSignedIn } = useIsSignedIn();
+  const { authenticateWithJWT } = useAuthenticateWithJWT();
+
+  useEffect(() => {
+    if (isAuthenticated && !isSignedIn) void authenticateWithJWT();
+  }, [isAuthenticated, isSignedIn, authenticateWithJWT]);
+
+  return null;
+}
+
+export function CdpProvider({ children }: { children: ReactNode }) {
+  return (
+    <CDPHooksProvider
+      config={{
+        projectId: process.env.NEXT_PUBLIC_CDP_PROJECT_ID ?? '',
+        customAuth: { getJwt: getSiwxJwt },
+        ethereum: { createOnLogin: 'eoa' },
+      }}
+    >
+      <CdpSignIn />
+      {children}
+    </CDPHooksProvider>
+  );
+}
+```
+
+Render `CdpProvider` inside the providers of Step 5 of the Full-Stack React guide. Without React, pass the same `customAuth` to `initialize` of `@coinbase/cdp-core` and call its `authenticateWithJWT` after the SIWX sign-in.
+
+---
+
+## Step 4: Trust the Token in Your Own Services
+
+Any service that can fetch your JWKS can check the token. `verifySiwxJwt` returns the claims of a valid token and `null` for anything else (wrong signature, issuer or audience, expired, unknown key):
+
+```ts filename="services/orders/src/auth.ts"
+import { type SiwxJwks, verifySiwxJwt } from '@tuwaio/sdk/siwx/server';
+
+const APP_URL = 'https://app.example.com';
+
+export async function walletOf(request: Request): Promise<string | null> {
+  const token = request.headers.get('authorization')?.replace(/^Bearer /, '');
+  if (!token) return null;
+  const jwks = (await (await fetch(`${APP_URL}/api/siwx/jwks`)).json()) as SiwxJwks;
+  const claims = await verifySiwxJwt(token, { jwks, issuer: APP_URL, audience: 'my-app' });
+  return claims?.sub ?? null;
+}
+```
+
+Cache the JWKS for a few minutes in a real service, as the `Cache-Control` header of `/jwks` allows. A service outside JavaScript can use any JWT library with ES256 and a JWKS: the token is a standard compact JWT with a `kid` header.
+
+---
+
+## What Ends Up in the Token
+
+| Claim        | Value                                                                                                  |
+| :----------- | :----------------------------------------------------------------------------------------------------- |
+| `iss`        | The `issuer` of Step 2                                                                                 |
+| `aud`        | The `audience` of Step 2, when set                                                                     |
+| `sub`        | The user: the ID you bound with `bindSubject`, otherwise the account without its chain                 |
+| `iat`, `exp` | Issue and expiry time, in seconds; `exp` is at most the session expiry                                 |
+| `jti`        | A random ID of the token                                                                               |
+| `caip10`     | The account as it signed in, for example `eip155:8453:0xAb58…` (Solana with the genesis-hash chain ID) |
+| `chain_id`   | The CAIP-2 chain ID of the sign-in                                                                     |
+
+`sub` leaves out the chain on purpose: `eip155:0x…` (lowercase) for an EVM wallet on any network, `solana:<address>` for a Solana wallet under either form of its chain ID. Signing in on Base instead of Ethereum does not create a second user at the provider. To use your own user IDs, bind them to the session with `sessionStore.bindSubject(id, userId)` after sign-in, or return them from `jwt.subject`. Extra claims come from `jwt.claims`; the claims in the table are reserved.
+
+---
+
+## Security and Key Rotation
+
+- **Keep tokens short.** The default 10 minutes is enough: CDP asks again when it needs a token. Do not store tokens in `localStorage`; fetch them from `/token` when needed.
+- **Keep the key on the server.** `SIWX_JWT_PRIVATE_KEY` is a secret of your deployment; the browser only ever sees signed tokens.
+- **Rotate without downtime.** Generate a new key, make it `signingKey` and move the old public key to `jwt.previousKeys` (`previousKeys: [oldKey.publicJwk]`): `/jwks` publishes both, so tokens signed before the switch stay valid until they expire. Remove it after the longest token lifetime has passed.
+- **If a key leaks,** replace it and do not keep it in `previousKeys`. Its tokens stop verifying once the providers refresh your JWKS (within the 5-minute cache).
+
+---
+
+## Local Development
+
+The provider downloads your JWKS from the internet, so `http://localhost:3000/api/siwx/jwks` is out of its reach. Test the CDP flow on a preview deployment, or expose the local server through a tunnel and use the tunnel URL as `NEXT_PUBLIC_APP_URL`, `issuer` and JWKS URL. `verifySiwxJwt` in your own services works locally as it is.
+
+---
+
+## 📚 Next Steps
+
+- Every option of the handler, the stores and the JWT functions: [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server).
+- How the CAIP-122 sign-in itself works on EVM and Solana: [Multi-Chain Authentication guide](/guides/multi-chain-auth-siwx-caip122).
+- The app this guide builds on: [Full-Stack React guide](/guides/full-stack-react).
