@@ -13,5 +13,6 @@ export default {
   'full-stack-react': 'Full-Stack React App',
   'quasar-transaction-sync': 'Sync Transactions to Quasar',
   'siwx-jwt-external-auth': 'External Auth with SIWX JWT',
+  'siwx-supabase': 'Supabase RLS with SIWX',
   'starter-templates': 'Starter Templates',
 };

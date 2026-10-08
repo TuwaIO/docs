@@ -1,6 +1,6 @@
 ---
 title: Engineering Deep Dives & Architectural Blueprints
-description: 'Deep dives and step-by-step setups for TUWA on EVM and Solana: transaction state, multi-chain sign-in with CAIP-122, account abstraction, Quasar sync and external auth with JWT.'
+description: 'Deep dives and step-by-step setups for TUWA on EVM and Solana: transaction state, multi-chain sign-in with CAIP-122, account abstraction, Quasar sync, external auth with JWT and Supabase RLS.'
 ---
 
 # Architecture Blueprints & Deep Dives
@@ -72,6 +72,12 @@ Continues the full-stack app: Server Actions that call Quasar after checking the
 Continues the full-stack app: a short-lived JWT for the wallet signed in with SIWX and the public keys that verify it, so Coinbase CDP custom authentication, other embedded wallet providers and your own services trust the same sign-in.
 
 - **Packages:** `@tuwaio/sdk` (`/siwx/server`, `/siwx/server-next`), `@coinbase/cdp-hooks` for the CDP example.
+
+### 🗄️ [Use a SIWX Sign-In with Supabase Row Level Security](/guides/siwx-supabase)
+
+Continues the external auth setup: Supabase trusts the SIWX token as third-party auth, Row Level Security policies on the wallet address give each wallet only its own rows, and supabase-js sends the token from the browser and from Server Actions.
+
+- **Packages:** `@tuwaio/sdk` (`/siwx`, `/siwx/server`, `/siwx/server-next`), `@supabase/supabase-js`.
 
 ### 🚀 [Starter Templates](/guides/starter-templates)
 
