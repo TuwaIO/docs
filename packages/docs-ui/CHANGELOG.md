@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.1.0...docs-ui-v0.1.1) (2026-10-08)
+
+
+### Bug Fixes
+
+* texts ([440238f](https://github.com/TuwaIO/docs/commit/440238f52a450a9eca8e1314e8b64107959f35ee))
+
 ## [0.1.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.0.39...docs-ui-v0.1.0) (2026-10-03)
 
 
