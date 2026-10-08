@@ -342,13 +342,13 @@ export async function getOrbitSmartAccountClient(wagmiConfig: Config) {
 }
 ```
 
-#### Step 2: Reactive Two-Stage Tracking with Pulsar Engine
+#### Step 2: Reactive Two-Stage Tracking with Pulsar
 
 > [!NOTE]
 >
 > **Partial Setup Notice & Central Architecture:**
 > The code below demonstrates a **partial configuration focused specifically on transaction execution and action dispatching**.
-> For complete application setup—including centralized store initialization (`createPulsarStore`), cross-chain adapters, persistence, and pre-flight validation hooks—refer to the comprehensive [Pulsar Engine Documentation](https://pulsar.docs.tuwa.io/).
+> For complete application setup—including centralized store initialization (`createPulsarStore`), cross-chain adapters, persistence, and pre-flight validation hooks—refer to the [Pulsar documentation](https://pulsar.docs.tuwa.io/).
 
 In standard UI code, managing transitions between `userOpHash` and `txHash` across page reloads requires dozens of lines of local storage glue code. `@tuwaio/pulsar-evm` provides a native **Two-Stage Tracking Pipeline**.
 
@@ -670,7 +670,7 @@ Account Abstraction represents a major leap forward for Web3 UX, but building ro
 ## Next Steps
 
 - **Orbit EVM Documentation:** Explore Solady smart account utilities, EntryPoint v0.7 configurations, and Pimlico RPC helpers on the [@tuwaio/orbit Documentation Space](https://orbit.docs.tuwa.io/).
-- **Transaction Lifecycle Engine:** Read [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken) and explore how [Pulsar Engine](https://pulsar.docs.tuwa.io/) orchestrates Two-Stage UserOperation state machines.
+- **Transaction Lifecycle Engine:** Read [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken) and explore how [Pulsar](https://pulsar.docs.tuwa.io/) orchestrates Two-Stage UserOperation state machines.
 - **Multi-Chain Authentication:** Learn how CAIP-122 unifies sovereign session authentication across EVM (EIP-191/1271) and Solana (ed25519) in [Multi-Chain Auth with SIWX](/guides/multi-chain-auth-siwx-caip122).
 - **Self-Hosted Quasar:** Run the Apache-2.0 [Quasar Community Edition](https://github.com/TuwaIO/quasar-community) on your own servers, or explore its [live showcase](https://github.com/TuwaIO/quasar-community#live-community-showcase) first.
 - **Reference Examples & Starters:** Inspect production-ready account abstraction templates in the [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground).

@@ -195,7 +195,7 @@ A production-grade Web3 transaction architecture enforces four non-negotiable ru
 
 ## 4. Implementation in the TUWA Ecosystem
 
-The TUWA stack implements this architecture via **Pulsar Engine** (`@tuwaio/pulsar-core`, `@tuwaio/pulsar-evm`, `@tuwaio/pulsar-solana`).
+The TUWA stack implements this architecture via **Pulsar** (`@tuwaio/pulsar-core`, `@tuwaio/pulsar-evm`, `@tuwaio/pulsar-solana`).
 
 ### Step 1: Define Strongly-Typed Transaction Unions
 
@@ -464,9 +464,9 @@ export function PendingTransactionsBadge() {
 
 ---
 
-## 5. Architectural Comparison: `useState` vs. Pulsar Engine
+## 5. Architectural Comparison: `useState` vs. Pulsar
 
-| Scenario                     | Naive `useState` Pattern                                | TUWA Pulsar Engine                                                                                |
+| Scenario                     | Naive `useState` Pattern                                | TUWA Pulsar                                                                                       |
 | :--------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
 | **Route Navigation**         | ❌ Component unmounts; tracking promise destroyed.      | ✅ Outlives DOM; updates persist in central store.                                                |
 | **User Speeds Up / Cancels** | ❌ Naive promise rejects or desyncs from replaced hash. | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback. |
@@ -486,5 +486,5 @@ By decoupling execution from the React component tree, enforcing local-first per
 ### Next Steps
 
 - Inspect the [Complete Integration Standard](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md) for full architectural guidelines.
-- Explore [Pulsar Engine Package Documentation](https://pulsar.docs.tuwa.io/) for low-level tracker APIs.
+- Explore the [Pulsar documentation](https://pulsar.docs.tuwa.io/) for low-level tracker APIs.
 - Learn about the [Nova Transactions UI Kit](https://stories.tuwa.io/) to render automated toasts and modal sheets.

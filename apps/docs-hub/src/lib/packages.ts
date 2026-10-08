@@ -126,7 +126,7 @@ function installSpec(name: string, range: string): string {
  * The install arguments of a package: the package, its required peers and, for TUWA peers, their required peers in
  * turn (an app must provide the peers of its peers). Packages that an installed package brings as a regular
  * dependency (the SDK brings the TUWA projects and their libraries) are left out, so the result matches the guides,
- * e.g. `@tuwaio/evm-sdk @tuwaio/sdk@^0.2.1 @wagmi/core@3 viem@2`. `react` and `react-dom` are left out too.
+ * e.g. `@tuwaio/evm-sdk @tuwaio/sdk@^0.4.0 @wagmi/core@3 viem@2`. `react` and `react-dom` are left out too.
  *
  * @param name - npm name of the package.
  * @param manifests - npm manifests of the TUWA packages by name.

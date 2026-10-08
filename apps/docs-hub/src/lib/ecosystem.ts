@@ -108,7 +108,7 @@ export const layers: EcosystemLayer[] = [
       {
         id: 'satellite',
         name: 'Satellite Connect',
-        tagline: 'Headless wallet connection state machine',
+        tagline: 'Headless wallet connection store for EVM & Solana',
         icon: CpuChipIcon,
         gradientFrom: 'from-indigo-500',
         gradientTo: 'to-blue-600',
@@ -124,8 +124,8 @@ export const layers: EcosystemLayer[] = [
       },
       {
         id: 'pulsar',
-        name: 'Pulsar Engine',
-        tagline: 'Transaction lifecycle indexing & polling',
+        name: 'Pulsar',
+        tagline: 'Transaction tracking that survives reloads',
         icon: BoltIcon,
         gradientFrom: 'from-amber-500',
         gradientTo: 'to-orange-600',
@@ -208,7 +208,7 @@ export const layers: EcosystemLayer[] = [
     entries: [
       {
         id: 'sdk',
-        name: 'TUWA Client SDKs',
+        name: 'TUWA SDK',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
         icon: CodeBracketSquareIcon,
         gradientFrom: 'from-blue-500',

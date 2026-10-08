@@ -110,15 +110,15 @@ In the TUWA ecosystem, multi-chain authentication is partitioned into modular, h
 │                   TUWA SIWX Modular Architecture                       │
 ├────────────────────────────────────────────────────────────────────────┤
 │ L1: Pure Core Engine                                                   │
-│   • @tuwaio/siwx-core         CAIP-122 Builder & Parser (Zero Deps)    │
+│   • @tuwaio/siwx-core         CAIP-122 Builder & Parser (+orbit-core)  │
 ├────────────────────────────────────────────────────────────────────────┤
 │ L2: Network Adapters (Multi-Chain Primitives)                          │
-│   • @tuwaio/siwx-evm          EVM: Viem / Wagmi / EIP-191 / EIP-1271   │
+│   • @tuwaio/siwx-evm          EVM: EIP-191 / EIP-1271 / ERC-6492       │
 │   • @tuwaio/siwx-solana       Solana: @solana/kit / SubtleCrypto       │
 ├────────────────────────────────────────────────────────────────────────┤
 │ L2: Presentation & Bindings                                            │
 │   • @tuwaio/siwx-react        React Hooks & Zustand Session Store      │
-│   • @tuwaio/siwx-server       Backend Verifier & Next.js Handlers      │
+│   • @tuwaio/siwx-server       Verifier, Next.js Handlers, JWT + JWKS   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -453,13 +453,14 @@ export async function submitProtectedOperation({
 
 | Architectural Dimension     | EIP-4361 (SIWE)                          | CAIP-122 (@tuwaio/siwx)                                             |
 | :-------------------------- | :--------------------------------------- | :------------------------------------------------------------------ |
-| **Network Scope**           | Ethereum & EVM Rollups only              | Multi-Chain (EVM & Solana production-ready; extensible via CAIP-2)  |
+| **Network Scope**           | Ethereum & EVM Rollups only              | Multi-Chain (EVM & Solana; extensible via CAIP-2)                   |
 | **Chain Identification**    | Integer Chain ID (`1`, `137`, `8453`)    | CAIP-2 Standard (`eip155:1`, `solana:5eykt4...`)                    |
 | **Address Encoding**        | Strict Hex format (`0x[a-fA-F0-9]{40}`)  | Multi-format: Hex (EVM) and Base58 (Solana) via CAIP-10             |
-| **Signature Schemes**       | `secp256k1` (`personal_sign` / EIP-1271) | `secp256k1` (EIP-191 / EIP-1271) and `ed25519` (Edwards curve)      |
+| **Signature Schemes**       | `secp256k1` (`personal_sign` / EIP-1271) | `secp256k1` (EIP-191 / EIP-1271 / ERC-6492) and `ed25519`           |
 | **Session Model**           | EVM-bound isolated cookies               | Unified, chain-agnostic session schema (`SiwxSession`)              |
 | **Verification Primitives** | Viem / ethers `verifyMessage`            | Deterministic multi-runtime routing (`verifySiwxPayload`)           |
 | **Anti-Replay Mechanism**   | Ad-hoc server string check               | Built-in atomic single-use nonce lifecycle store (`SiwxNonceStore`) |
+| **External Auth**           | Not covered by the standard              | JWT + JWKS for external auth providers (`@tuwaio/siwx-server`)      |
 
 ---
 

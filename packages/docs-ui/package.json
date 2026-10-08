@@ -4,7 +4,7 @@
   "private": false,
   "author": "Oleksandr Tkach",
   "license": "Apache-2.0",
-  "description": "Unified documentation package for the TUWA Ecosystem.",
+  "description": "Shared UI of the TUWA documentation sites: Nextra navbar and footer, remote logo, theme switcher, background effects and styles.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
