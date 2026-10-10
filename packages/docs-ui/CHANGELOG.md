@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.1.1...docs-ui-v0.2.0) (2026-10-10)
+
+
+### Features
+
+* sign Solana transactions with the orbit signer and show the confirmed Solana status ([4aa43dc](https://github.com/TuwaIO/docs/commit/4aa43dc189f0378cb68c4bfbfd893aa3b8bab756))
+
 ## [0.1.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.1.0...docs-ui-v0.1.1) (2026-10-08)
 
 
