@@ -21,13 +21,13 @@ executeTxAction
                                         │ checks the SIWX session
                                         │ quasar.pulsar.syncCreate ──▶ POST /v1/engine/pulsar/sync
                                                                           │ tracks the transaction
-                                                                          │ (EVM, Safe, ERC-4337, Solana)
+                                                                          │ (EVM, Safe, ERC-4337, EIP-5792, Solana)
 Nova Transactions history ◀──────── quasar.pulsar.getHistory ◀─────  GET /v1/engine/pulsar/history
                                     Your webhook endpoint ◀────────── POST, signed with HMAC-SHA256
 ```
 
 - **Your server holds the key.** The browser never calls Quasar with the secret key: it calls your server, which checks that the user owns the wallet (with a SIWX session) and then calls Quasar. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) builds this flow.
-- **Tracking runs twice.** A fast phase follows the transaction until it is confirmed, and a later phase checks it again for reorganizations and lagging RPC nodes. Quasar tracks the transactions of the Pulsar trackers: EVM transactions, Safe multisig transactions, ERC-4337 user operations and Solana signatures.
+- **Tracking runs twice.** A fast phase follows the transaction until it is confirmed, and a later phase checks it again for reorganizations and lagging RPC nodes. Quasar tracks the transactions of the Pulsar trackers: EVM transactions, Safe multisig transactions, ERC-4337 user operations, EIP-5792 batches of calls (by the hash of their transaction, which your app sends) and Solana signatures.
 - **Webhooks** notify your backend when a transaction succeeds, fails or is replaced. See [Webhooks](/quasar/webhooks).
 
 ---

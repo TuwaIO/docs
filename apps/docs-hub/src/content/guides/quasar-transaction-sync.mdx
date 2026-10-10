@@ -176,6 +176,42 @@ export const useHistoryStore = createBoundedUseStore(historyStore);
 
 `preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
 
+### Batches of Calls (EIP-5792)
+
+A batch sent with `wallet_sendCalls` (`tracker: TransactionTracker.EIP5792`) is synced by its batch ID, which only the wallet can resolve. Once Pulsar learns the hash of the transaction that executed the batch, send it to Quasar: Quasar then tracks the batch on-chain and sends its webhook. Without a hash, Quasar marks the batch `Failed` one hour after it was synced. This needs `@tuwaio/quasar-sdk` 0.6 or later.
+
+Add a third Server Action. It reads the batch from Quasar to check that the signed-in wallet sent it:
+
+```ts filename="src/app/quasarActions.ts"
+export async function syncBatchHash(txKey: string, hash: `0x${string}`): Promise<{ success: boolean; error?: string }> {
+  const session = await getSession();
+  const [batch] = session ? (await quasar.pulsar.getHistory({ txKey, appName: APP_NAME, limit: 1 })).docs : [];
+  if (!session || !batch || !isSessionMatchingTarget(session, batch.from, batch.chainId)) {
+    return { success: false, error: 'The signed-in wallet did not send this batch.' };
+  }
+
+  try {
+    await quasar.pulsar.syncHash(txKey, hash);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof QuasarSDKError ? error.message : 'Quasar is unavailable.' };
+  }
+}
+```
+
+Then watch the store for batch hashes, next to the store of the EVM tab. `watchBatchHashes` reports each batch once, after it is synced; when the action fails, it tries again on the next change of the store:
+
+```ts filename="src/hooks/pulsarStore.ts"
+import { watchBatchHashes } from '@tuwaio/quasar-sdk';
+
+import { syncBatchHash } from '@/app/quasarActions';
+
+watchBatchHashes(pulsarStore, async (tx) => {
+  const result = await syncBatchHash(tx.txKey, tx.hash);
+  if (!result.success) throw new Error(result.error);
+});
+```
+
 ---
 
 ## Step 4: Show the History

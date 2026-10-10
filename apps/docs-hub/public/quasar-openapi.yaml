@@ -3,8 +3,10 @@ info:
   title: Quasar API
   version: 1.0.0
   description: "The endpoints of the Quasar API that `@tuwaio/quasar-sdk` calls: syncing Pulsar transactions (EVM and
-    Solana), which Quasar then tracks on the server, and reading their history. Quasar Cloud serves it at
-    `https://api.tuwa.io`; a self-hosted Quasar server serves the same endpoints at its own URL."
+    Solana), which Quasar then tracks on the server, and reading their history; and, for a Payments app, invoices,
+    refunds and subscriptions paid in crypto straight to your wallets, with the checkout that the buyer's browser calls
+    with a checkout token. Quasar Cloud serves it at `https://api.tuwa.io`; a self-hosted Quasar server serves the same
+    endpoints at its own URL (Payments where it runs with `PAYMENTS_ENABLED=true`)."
   contact:
     name: TUWA Team
     url: https://github.com/TuwaIO
@@ -17,6 +19,16 @@ servers:
 tags:
   - name: Pulsar
     description: Transaction sync and history.
+  - name: Invoices
+    description: "Invoices of a Payments app: issue, read, cancel, release, correct, documents, quotes and methods."
+  - name: Refunds
+    description: Refunds sent from your wallet, verified by Quasar, with credit notes.
+  - name: Subscriptions
+    description: Plans billed every period as one invoice.
+  - name: Checkout
+    description: The buyer's browser, with the checkout token of an invoice (no key).
+  - name: Webhooks
+    description: Payment events (`payments.v1`) sent to your endpoints.
   - name: Monitoring
     description: Health of the API.
 components:
@@ -28,6 +40,866 @@ components:
       description: Secret key of the Quasar app (`sk_live_...` for a live app, `sk_test_...` for a test app). Send it from
         your server only.
   schemas:
+    PaymentWebhookEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: "The ledger event: the same for every delivery; deduplicate by it."
+        object:
+          type: string
+          enum:
+            - event
+        apiVersion:
+          type: string
+          enum:
+            - payments.v1
+        type:
+          type: string
+          enum:
+            - invoice.issued
+            - invoice.processing
+            - invoice.paid
+            - invoice.underpaid
+            - invoice.held
+            - invoice.released
+            - invoice.expired
+            - invoice.cancelled
+            - invoice.refunded
+            - invoice.partially_refunded
+            - invoice.replaced
+            - refund.confirmed
+            - refund.failed
+            - payment.reverted
+            - subscription.created
+            - subscription.renewed
+            - subscription.past_due
+            - subscription.paused
+            - subscription.resumed
+            - subscription.cancel_scheduled
+            - subscription.cancel_unscheduled
+            - subscription.canceled
+            - subscription.ended
+            - subscription.permission_granted
+            - subscription.charge_failed
+            - subscription.permission_revoked
+        createdAt:
+          type: string
+        sentAt:
+          type: string
+          description: When this delivery was sent; signed with the body.
+        environment:
+          $ref: "#/components/schemas/PaymentsEnvironment"
+        data:
+          type: object
+          properties:
+            invoice:
+              $ref: "#/components/schemas/Invoice"
+            settlement:
+              type: object
+              properties:
+                chainId:
+                  type:
+                    - string
+                    - "null"
+                txHash:
+                  type: string
+                blockRef:
+                  type:
+                    - string
+                    - "null"
+                amountPaid:
+                  type:
+                    - string
+                    - "null"
+                originWallet:
+                  type:
+                    - string
+                    - "null"
+                paidAt:
+                  type:
+                    - string
+                    - "null"
+                overpaid:
+                  type: string
+              required:
+                - chainId
+                - txHash
+                - blockRef
+                - amountPaid
+                - originWallet
+                - paidAt
+                - overpaid
+            refund:
+              $ref: "#/components/schemas/Refund"
+            aml:
+              type: object
+              properties:
+                decision:
+                  type: string
+                  enum:
+                    - block
+                reasons:
+                  type: array
+                  items: {}
+              required:
+                - decision
+                - reasons
+            subscription:
+              $ref: "#/components/schemas/Subscription"
+      required:
+        - id
+        - object
+        - apiVersion
+        - type
+        - createdAt
+        - sentAt
+        - environment
+        - data
+    PaymentsEnvironment:
+      type: string
+      enum:
+        - live
+        - test
+      description: "Live or test: the key that issued it decides. Test invoices are paid on test networks."
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+            - invoice
+        number:
+          type:
+            - string
+            - "null"
+          description: Series number; `TEST-` for test invoices.
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        environment:
+          allOf:
+            - $ref: "#/components/schemas/PaymentsEnvironment"
+            - type:
+                - string
+                - "null"
+        currency:
+          $ref: "#/components/schemas/PaymentsCurrency"
+        locale:
+          $ref: "#/components/schemas/InvoiceLocale"
+        issuedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When it was issued.
+        supplyDate:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Date of supply (BT-72).
+        dueAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: When it stops being payable.
+        seller:
+          type:
+            - object
+            - "null"
+          additionalProperties: {}
+          description: The seller as printed.
+        buyer:
+          allOf:
+            - $ref: "#/components/schemas/Buyer"
+            - type:
+                - object
+                - "null"
+              properties:
+                companyInvoice:
+                  type: boolean
+          description: The buyer (EN 16931 BT-44 to BT-55). An e-invoice is issued only when the fields it needs are there;
+            otherwise the invoice is a plain PDF and `eInvoiceSkipped` names what was missing.
+        expectedPayer:
+          type:
+            - string
+            - "null"
+        buyerReference:
+          type:
+            - string
+            - "null"
+        orderReference:
+          type:
+            - string
+            - "null"
+        lineItems:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              quantity:
+                type: string
+              unitPrice:
+                type: string
+              taxCategory:
+                $ref: "#/components/schemas/TaxCategory"
+              taxRate:
+                type: string
+              net:
+                type: string
+              unitCode:
+                type: string
+            required:
+              - name
+              - quantity
+              - unitPrice
+              - taxCategory
+              - taxRate
+              - net
+        pricesIncludeTax:
+          type:
+            - boolean
+            - "null"
+        subtotal:
+          type: string
+          description: Total without VAT.
+          example: "49.00"
+        taxTotal:
+          type: string
+          description: VAT.
+          example: "49.00"
+        rounding:
+          type: string
+          description: Rounding.
+          example: "49.00"
+        total:
+          type: string
+          description: Total to pay.
+          example: "49.00"
+        taxBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              taxCategory:
+                $ref: "#/components/schemas/TaxCategory"
+              taxRate:
+                type: string
+              taxable:
+                type: string
+              tax:
+                type: string
+            required:
+              - taxCategory
+              - taxRate
+              - taxable
+              - tax
+        notes:
+          type:
+            - string
+            - "null"
+        reverseCharge:
+          type:
+            - boolean
+            - "null"
+        taxExemptionReason:
+          type:
+            - string
+            - "null"
+        metadata:
+          type:
+            - object
+            - "null"
+          additionalProperties: {}
+        successUrl:
+          type:
+            - string
+            - "null"
+        cancelUrl:
+          type:
+            - string
+            - "null"
+        checkoutToken:
+          type:
+            - string
+            - "null"
+          description: The checkout token while the invoice can be paid (`open`, `processing`, `underpaid`).
+        payUrl:
+          type:
+            - string
+            - "null"
+          description: "The payment page while it can be paid: the link its emails carry."
+        quote:
+          type:
+            - object
+            - "null"
+          properties:
+            methodId:
+              type:
+                - string
+                - "null"
+            payer:
+              type: string
+            cryptoAmountExpected:
+              type:
+                - string
+                - "null"
+            amountToSend:
+              type:
+                - string
+                - "null"
+            lockedAt:
+              type:
+                - string
+                - "null"
+            expiresAt:
+              type:
+                - string
+                - "null"
+            rate: {}
+            reference:
+              type:
+                - string
+                - "null"
+          required:
+            - methodId
+            - payer
+            - cryptoAmountExpected
+            - amountToSend
+            - lockedAt
+            - expiresAt
+            - reference
+          description: The locked quote, once a buyer chose how to pay. Token amounts in base units.
+        settlement:
+          type:
+            - object
+            - "null"
+          properties:
+            chainId:
+              type:
+                - string
+                - "null"
+            txHash:
+              type: string
+            blockRef:
+              type:
+                - string
+                - "null"
+            amountPaid:
+              type:
+                - string
+                - "null"
+            originWallet:
+              type:
+                - string
+                - "null"
+            paidAt:
+              type:
+                - string
+                - "null"
+            overpaid:
+              type: string
+          required:
+            - chainId
+            - txHash
+            - blockRef
+            - amountPaid
+            - originWallet
+            - paidAt
+            - overpaid
+          description: The payment, once there is one.
+        reviewReason:
+          type:
+            - string
+            - "null"
+        aml:
+          type:
+            - object
+            - "null"
+          properties:
+            status:
+              type: string
+            reasons:
+              type: array
+              items:
+                type: string
+            coverage:
+              type:
+                - string
+                - "null"
+          required:
+            - status
+            - reasons
+            - coverage
+        receiptNumber:
+          type:
+            - string
+            - "null"
+        eInvoiceSkipped:
+          type:
+            - array
+            - "null"
+          items:
+            type: string
+          description: What the e-invoice lacked when the invoice was issued as a plain PDF, for example `buyer.country`.
+        refundedTotal:
+          type: string
+          description: Refunded so far.
+          example: "49.00"
+        replaces:
+          type:
+            - string
+            - "null"
+        replacedBy:
+          type:
+            - string
+            - "null"
+        subscriptionId:
+          type:
+            - string
+            - "null"
+        period:
+          type:
+            - number
+            - "null"
+        createdAt:
+          type: string
+          format: date-time
+          description: When it was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: When it last changed.
+      required:
+        - id
+        - object
+        - number
+        - status
+        - environment
+        - currency
+        - locale
+        - issuedAt
+        - supplyDate
+        - dueAt
+        - seller
+        - buyer
+        - expectedPayer
+        - buyerReference
+        - orderReference
+        - lineItems
+        - pricesIncludeTax
+        - subtotal
+        - taxTotal
+        - rounding
+        - total
+        - taxBreakdown
+        - notes
+        - reverseCharge
+        - taxExemptionReason
+        - metadata
+        - successUrl
+        - cancelUrl
+        - checkoutToken
+        - payUrl
+        - quote
+        - settlement
+        - reviewReason
+        - aml
+        - receiptNumber
+        - eInvoiceSkipped
+        - refundedTotal
+        - replaces
+        - replacedBy
+        - subscriptionId
+        - period
+        - createdAt
+        - updatedAt
+      description: An invoice. Fiat amounts are decimal strings in the invoice currency; token amounts are in base units.
+    InvoiceStatus:
+      type: string
+      enum:
+        - open
+        - processing
+        - paid
+        - underpaid
+        - held
+        - partially_refunded
+        - refunded
+        - expired
+        - cancelled
+      description: "`open` until paid; `processing` while a payment is confirmed; `paid`, `underpaid` (the buyer may top it
+        up), `held` (released or refunded by the merchant), `partially_refunded`, `refunded`; `expired` or `cancelled`
+        without a payment."
+    PaymentsCurrency:
+      type: string
+      enum:
+        - USD
+        - EUR
+      description: Fiat currency.
+    InvoiceLocale:
+      type:
+        - string
+        - "null"
+      enum:
+        - en
+        - zh-CN
+        - es
+        - ru
+        - uk
+        - it
+        - null
+      description: Language of the invoice, its documents and emails.
+    Buyer:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          description: Quasar Cloud sends the invoice, receipt and credit notes to it.
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        postalCode:
+          type: string
+        city:
+          type: string
+        region:
+          type: string
+        country:
+          type: string
+          description: ISO 3166-1 alpha-2, for example `DE`.
+        registrationNumber:
+          type: string
+        taxId:
+          type: string
+          description: Needed for a reverse-charge invoice.
+        externalId:
+          type: string
+          description: Your ID of the buyer; filter invoices by it.
+      description: The buyer (EN 16931 BT-44 to BT-55). An e-invoice is issued only when the fields it needs are there;
+        otherwise the invoice is a plain PDF and `eInvoiceSkipped` names what was missing.
+    TaxCategory:
+      type: string
+      enum:
+        - S
+        - Z
+        - E
+        - AE
+        - K
+        - G
+        - O
+      description: "VAT category (EN 16931 UNCL5305): `S` standard, `Z` zero rated, `E` exempt (needs `taxExemptionReason`),
+        `AE` reverse charge, `K` intra-community, `G` export, `O` outside the scope of VAT."
+    Refund:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+            - refund
+        invoiceId:
+          type: string
+        status:
+          type: string
+          enum:
+            - requested
+            - submitted
+            - confirmed
+            - failed
+        amount:
+          type: string
+        currency:
+          type: string
+        mode:
+          type: string
+          enum:
+            - fiat_value
+            - exact_received
+        cryptoAmount:
+          type: string
+        assetId:
+          type: string
+        chainId:
+          type: string
+        to:
+          type: string
+          description: "The payer: refunds go back to the address that paid."
+        txHash:
+          type:
+            - string
+            - "null"
+        from:
+          type:
+            - string
+            - "null"
+        reason:
+          type:
+            - string
+            - "null"
+        failureReason:
+          type:
+            - string
+            - "null"
+        creditNoteNumber:
+          type:
+            - string
+            - "null"
+        createdAt:
+          type: string
+        confirmedAt:
+          type:
+            - string
+            - "null"
+      required:
+        - id
+        - object
+        - invoiceId
+        - status
+        - amount
+        - currency
+        - mode
+        - cryptoAmount
+        - assetId
+        - chainId
+        - to
+        - txHash
+        - from
+        - reason
+        - failureReason
+        - creditNoteNumber
+        - createdAt
+        - confirmedAt
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+            - subscription
+        status:
+          $ref: "#/components/schemas/SubscriptionStatus"
+        environment:
+          $ref: "#/components/schemas/PaymentsEnvironment"
+        buyer:
+          allOf:
+            - $ref: "#/components/schemas/Buyer"
+            - type:
+                - object
+                - "null"
+        expectedPayer:
+          type:
+            - string
+            - "null"
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineInput"
+        currency:
+          $ref: "#/components/schemas/PaymentsCurrency"
+        interval:
+          type: string
+          enum:
+            - day
+            - week
+            - month
+            - year
+        intervalCount:
+          type: number
+        trialDays:
+          type: number
+        collection:
+          type: string
+          enum:
+            - send_invoice
+            - auto_charge
+        preferredMethodId:
+          type:
+            - string
+            - "null"
+        permission:
+          type:
+            - object
+            - "null"
+          properties:
+            status:
+              type: string
+              enum:
+                - active
+                - revoked
+                - expired
+            chainId:
+              type:
+                - string
+                - "null"
+            methodId:
+              type:
+                - string
+                - "null"
+            payer:
+              type:
+                - string
+                - "null"
+            tokenAddress:
+              type:
+                - string
+                - "null"
+            periodAmount:
+              type:
+                - string
+                - "null"
+            periodSeconds:
+              type: number
+            startsAt:
+              type:
+                - string
+                - "null"
+            expiresAt:
+              type:
+                - string
+                - "null"
+            grantedAt:
+              type:
+                - string
+                - "null"
+            revokedAt:
+              type:
+                - string
+                - "null"
+          required:
+            - status
+            - chainId
+            - methodId
+            - payer
+            - tokenAddress
+            - periodAmount
+            - periodSeconds
+            - startsAt
+            - expiresAt
+            - grantedAt
+            - revokedAt
+          description: The ERC-7715 permission of `auto_charge`, without its context.
+        graceDays:
+          type: number
+        currentPeriod:
+          type: number
+        currentPeriodStart:
+          type:
+            - string
+            - "null"
+        currentPeriodEnd:
+          type:
+            - string
+            - "null"
+        cycles:
+          type:
+            - number
+            - "null"
+        endsAt:
+          type:
+            - string
+            - "null"
+        cancelAtPeriodEnd:
+          type: boolean
+        canceledAt:
+          type:
+            - string
+            - "null"
+        cancellationReason:
+          type:
+            - string
+            - "null"
+        pausedAt:
+          type:
+            - string
+            - "null"
+        endedAt:
+          type:
+            - string
+            - "null"
+        metadata:
+          type:
+            - object
+            - "null"
+          additionalProperties: {}
+        createdAt:
+          type: string
+      required:
+        - id
+        - object
+        - status
+        - environment
+        - buyer
+        - expectedPayer
+        - lineItems
+        - currency
+        - interval
+        - intervalCount
+        - trialDays
+        - collection
+        - preferredMethodId
+        - permission
+        - graceDays
+        - currentPeriod
+        - currentPeriodStart
+        - currentPeriodEnd
+        - cycles
+        - endsAt
+        - cancelAtPeriodEnd
+        - canceledAt
+        - cancellationReason
+        - pausedAt
+        - endedAt
+        - metadata
+        - createdAt
+      description: "A subscription: each period is one invoice."
+    SubscriptionStatus:
+      type: string
+      enum:
+        - trialing
+        - incomplete
+        - active
+        - past_due
+        - paused
+        - canceled
+        - ended
+    InvoiceLineInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: string
+          description: Defaults to `1`.
+        unitPrice:
+          type: string
+          description: Price of one unit in the invoice currency.
+          example: "49.00"
+        taxCategory:
+          $ref: "#/components/schemas/TaxCategory"
+        taxRate:
+          type: string
+          description: VAT rate in percent, for example `21`.
+        unitCode:
+          type: string
+          description: UN/ECE Recommendation 20 unit code (`C62`, `HUR`).
+      required:
+        - name
+        - unitPrice
     Transaction:
       oneOf:
         - $ref: "#/components/schemas/EvmTransaction"
@@ -204,7 +1076,10 @@ components:
         - gelato
         - solana
         - erc4337
-      description: The tracking strategy used for monitoring the transaction.
+        - eip5792
+      description: "The tracking strategy used for monitoring the transaction. `eip5792`: a batch of calls sent with
+        `wallet_sendCalls`, synced by its batch ID and tracked on-chain once the app sends the hash of its transaction
+        (`POST /v1/engine/pulsar/sync/{txKey}/hash`)."
     SolanaTransaction:
       type: object
       properties:
@@ -311,6 +1186,19 @@ components:
         slot:
           type: number
           description: Slot in which the transaction was processed.
+        confirmationStatus:
+          type: string
+          enum:
+            - processed
+            - confirmed
+            - finalized
+          description: Commitment the transaction reached. Quasar records `confirmed` once a supermajority voted on it and
+            `finalized` when it marks it `Success`.
+        lastValidBlockHeight:
+          type: integer
+          description: Last block height at which the blockhash of the transaction is valid (saved by `signAndSendSolanaTx` of
+            `@tuwaio/pulsar-solana`). When the chain passes it and the signature is still unknown, Quasar marks the
+            transaction `Failed` as expired; without it, after one hour.
       required:
         - chainId
         - from
@@ -476,6 +1364,38 @@ components:
         - success
         - txKey
         - mode
+    BatchHashRequest:
+      type: object
+      properties:
+        hash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{64}$
+          description: Hash of the transaction that executed the batch.
+          example: "0xabababababababababababababababababababababababababababababababab"
+      required:
+        - hash
+    BatchHashResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        txKey:
+          type: string
+          description: The batch ID.
+        hash:
+          type: string
+          description: The hash Quasar tracks the batch by.
+        duplicate:
+          type: boolean
+          enum:
+            - true
+          description: Quasar already had this hash.
+      required:
+        - success
+        - txKey
+        - hash
     HealthResponse:
       type: object
       properties:
@@ -548,6 +1468,1164 @@ components:
         message:
           type: string
           description: Error message (NestJS errors).
+    PaymentsError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Stable code, for example `invoice_not_found`.
+            message:
+              type: string
+            issues:
+              type: array
+              items:
+                type: object
+                properties:
+                  path:
+                    type: string
+                  message:
+                    type: string
+                required:
+                  - path
+                  - message
+              description: The fields at fault of an `invalid_request`, for example `buyer.country`.
+          required:
+            - code
+            - message
+          additionalProperties: {}
+      required:
+        - error
+      description: "A refused Payments call: `{ error: { code, message, issues?, … } }` with its HTTP status."
+    InvoiceWithCheckout:
+      type: object
+      properties:
+        invoice:
+          $ref: "#/components/schemas/Invoice"
+        checkoutToken:
+          type:
+            - string
+            - "null"
+        payUrl:
+          type:
+            - string
+            - "null"
+      required:
+        - invoice
+        - checkoutToken
+        - payUrl
+    CreateInvoiceRequest:
+      type: object
+      properties:
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineInput"
+          description: The lines, 1 to 100; or give `amount`.
+        amount:
+          type: string
+          description: A total as one line; or give `lineItems`.
+          example: "49.00"
+        description:
+          type: string
+          description: Name of the `amount` line.
+        currency:
+          $ref: "#/components/schemas/PaymentsCurrency"
+        locale:
+          $ref: "#/components/schemas/InvoiceLocale"
+        buyer:
+          $ref: "#/components/schemas/Buyer"
+        expectedPayer:
+          type: string
+          description: CAIP-10 account you expect to pay.
+        buyerReference:
+          type: string
+          description: BT-10.
+        orderReference:
+          type: string
+          description: BT-13.
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Your data, at most 8 KiB as JSON.
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+        notes:
+          type: string
+        pricesIncludeTax:
+          type: boolean
+        reverseCharge:
+          type: boolean
+        taxExemptionReason:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          description: When it stops being payable; or give `expiresInMinutes`.
+        expiresInMinutes:
+          type: integer
+          description: From 5 minutes to 90 days.
+        supplyDate:
+          type: string
+          format: date-time
+          description: Date of supply. Defaults to the issue date.
+    InvoiceList:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - list
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invoice"
+        nextCursor:
+          type:
+            - string
+            - "null"
+      required:
+        - object
+        - data
+        - nextCursor
+      description: A page, newest first; pass `nextCursor` as `cursor` for the next.
+    InvoiceDetails:
+      allOf:
+        - $ref: "#/components/schemas/Invoice"
+        - type: object
+          properties:
+            refunds:
+              type: array
+              items:
+                $ref: "#/components/schemas/Refund"
+            creditNotes:
+              type: array
+              items:
+                type: object
+                properties:
+                  number:
+                    type: string
+                  refundId:
+                    type:
+                      - string
+                      - "null"
+                  issuedAt:
+                    type: string
+                required:
+                  - number
+                  - refundId
+                  - issuedAt
+          required:
+            - refunds
+            - creditNotes
+      description: An invoice. Fiat amounts are decimal strings in the invoice currency; token amounts are in base units.
+    InvoiceCorrection:
+      allOf:
+        - $ref: "#/components/schemas/InvoiceWithCheckout"
+        - type: object
+          properties:
+            replaced:
+              $ref: "#/components/schemas/Invoice"
+          required:
+            - replaced
+    InvoiceLedger:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - list
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              seq:
+                type: number
+              type:
+                type: string
+              data: {}
+              actor:
+                type: string
+              chainId:
+                type:
+                  - string
+                  - "null"
+              txHash:
+                type:
+                  - string
+                  - "null"
+              createdAt:
+                type: string
+              prevHash:
+                type:
+                  - string
+                  - "null"
+              hash:
+                type: string
+            required:
+              - id
+              - seq
+              - type
+              - actor
+              - chainId
+              - txHash
+              - createdAt
+              - prevHash
+              - hash
+        verification:
+          anyOf:
+            - type: object
+              properties:
+                valid:
+                  type: boolean
+                  enum:
+                    - true
+                events:
+                  type: number
+              required:
+                - valid
+                - events
+            - type: object
+              properties:
+                valid:
+                  type: boolean
+                  enum:
+                    - false
+                seq:
+                  type: number
+                reason:
+                  type: string
+                  enum:
+                    - sequence
+                    - link
+                    - hash
+                    - head
+              required:
+                - valid
+                - seq
+                - reason
+      required:
+        - object
+        - data
+      description: "The ledger, oldest first: each step hashes itself with `prevHash`. `verification` with `?verify=true`."
+    RefundStart:
+      type: object
+      properties:
+        refund:
+          $ref: "#/components/schemas/Refund"
+        instructions:
+          type: object
+          properties:
+            chainId:
+              type: string
+            assetId:
+              type: string
+            to:
+              type:
+                - string
+                - "null"
+            amount:
+              type: string
+            decimals:
+              type: number
+            symbol:
+              type: string
+          required:
+            - chainId
+            - assetId
+            - to
+            - amount
+            - decimals
+            - symbol
+      required:
+        - refund
+        - instructions
+      description: The refund and the transfer to make from your wallet.
+    PaymentQuote:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - quote
+        methodId:
+          type: string
+        symbol:
+          type: string
+        chainId:
+          type: string
+        amount:
+          type: string
+        currency:
+          $ref: "#/components/schemas/PaymentsCurrency"
+        cryptoAmount:
+          type: string
+        amountToSend:
+          type: string
+        transferFee:
+          type:
+            - object
+            - "null"
+          properties:
+            bps:
+              type: number
+            maxFee:
+              type:
+                - string
+                - "null"
+            source:
+              type: string
+              enum:
+                - contract
+                - method
+          required:
+            - bps
+            - maxFee
+            - source
+        decimals:
+          type: number
+        markupBps:
+          type: number
+        discountBps:
+          type: number
+        rates: {}
+        quotedAt:
+          type: string
+      required:
+        - object
+        - methodId
+        - symbol
+        - chainId
+        - amount
+        - currency
+        - cryptoAmount
+        - amountToSend
+        - transferFee
+        - decimals
+        - markupBps
+        - discountBps
+        - quotedAt
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+        object:
+          type: string
+          enum:
+            - payment_method
+        name:
+          type: string
+        symbol:
+          type: string
+        chainId:
+          type: string
+          description: CAIP-2 chain ID.
+        assetId:
+          type:
+            - string
+            - "null"
+          description: CAIP-19 asset ID.
+        decimals:
+          type: number
+        recipient:
+          type: string
+        minAmount:
+          anyOf:
+            - type: string
+            - type: number
+            - type: "null"
+        maxAmount:
+          anyOf:
+            - type: string
+            - type: number
+            - type: "null"
+        markup:
+          anyOf:
+            - type: string
+            - type: number
+            - type: "null"
+        discount:
+          anyOf:
+            - type: string
+            - type: number
+            - type: "null"
+        finality:
+          type:
+            - string
+            - "null"
+        gasless:
+          type:
+            - string
+            - "null"
+      required:
+        - id
+        - object
+        - name
+        - symbol
+        - chainId
+        - assetId
+        - decimals
+        - recipient
+        - minAmount
+        - maxAmount
+        - markup
+        - discount
+        - finality
+        - gasless
+    SubscriptionStart:
+      type: object
+      properties:
+        subscription:
+          $ref: "#/components/schemas/Subscription"
+        invoice:
+          allOf:
+            - $ref: "#/components/schemas/Invoice"
+            - type:
+                - object
+                - "null"
+        checkoutToken:
+          type:
+            - string
+            - "null"
+        payUrl:
+          type:
+            - string
+            - "null"
+      required:
+        - subscription
+        - invoice
+        - checkoutToken
+        - payUrl
+      description: The subscription and the invoice of its first (or resumed) period; `null` during a trial.
+    CreateSubscriptionRequest:
+      type: object
+      properties:
+        lineItems:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvoiceLineInput"
+          description: The lines, 1 to 100; or give `amount`.
+        amount:
+          type: string
+          description: A total as one line; or give `lineItems`.
+          example: "49.00"
+        description:
+          type: string
+          description: Name of the `amount` line.
+        currency:
+          $ref: "#/components/schemas/PaymentsCurrency"
+        locale:
+          $ref: "#/components/schemas/InvoiceLocale"
+        buyer:
+          $ref: "#/components/schemas/Buyer"
+        expectedPayer:
+          type: string
+          description: CAIP-10 account you expect to pay.
+        buyerReference:
+          type: string
+          description: BT-10.
+        orderReference:
+          type: string
+          description: BT-13.
+        metadata:
+          type: object
+          additionalProperties: {}
+          description: Your data, at most 8 KiB as JSON.
+        successUrl:
+          type: string
+        cancelUrl:
+          type: string
+        notes:
+          type: string
+        pricesIncludeTax:
+          type: boolean
+        reverseCharge:
+          type: boolean
+        taxExemptionReason:
+          type: string
+        interval:
+          type: string
+          enum:
+            - day
+            - week
+            - month
+            - year
+        intervalCount:
+          type: integer
+          description: A period is at most one year.
+        trialDays:
+          type: integer
+        cycles:
+          type: integer
+        endsAt:
+          type: string
+        collection:
+          type: string
+          enum:
+            - send_invoice
+            - auto_charge
+        preferredMethodId:
+          type: string
+        graceDays:
+          type: integer
+      required:
+        - interval
+    SubscriptionList:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - list
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Subscription"
+        nextCursor:
+          type:
+            - string
+            - "null"
+      required:
+        - object
+        - data
+        - nextCursor
+      description: A page, newest first; pass `nextCursor` as `cursor` for the next.
+    SubscriptionDetails:
+      allOf:
+        - $ref: "#/components/schemas/Subscription"
+        - type: object
+          properties:
+            invoices:
+              type: array
+              items:
+                $ref: "#/components/schemas/Invoice"
+            charges:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  object:
+                    type: string
+                    enum:
+                      - subscription_charge
+                  invoiceId:
+                    type: string
+                  period:
+                    type:
+                      - number
+                      - "null"
+                  status:
+                    type: string
+                    enum:
+                      - pending
+                      - sending
+                      - submitted
+                      - failed
+                      - canceled
+                  reason:
+                    type:
+                      - string
+                      - "null"
+                  attempts:
+                    type: number
+                  amount:
+                    type:
+                      - string
+                      - "null"
+                  chainId:
+                    type:
+                      - string
+                      - "null"
+                  userOpHash:
+                    type:
+                      - string
+                      - "null"
+                  txHash:
+                    type:
+                      - string
+                      - "null"
+                  notBefore:
+                    type:
+                      - string
+                      - "null"
+                  finishedAt:
+                    type:
+                      - string
+                      - "null"
+                  createdAt:
+                    type: string
+                required:
+                  - id
+                  - object
+                  - invoiceId
+                  - period
+                  - status
+                  - reason
+                  - attempts
+                  - amount
+                  - chainId
+                  - userOpHash
+                  - txHash
+                  - notBefore
+                  - finishedAt
+                  - createdAt
+          required:
+            - invoices
+            - charges
+      description: "A subscription: each period is one invoice."
+    CheckoutView:
+      type: object
+      properties:
+        object:
+          type: string
+          enum:
+            - checkout
+        merchant:
+          type: object
+          properties:
+            name:
+              type: string
+            website:
+              type:
+                - string
+                - "null"
+            supportEmail:
+              type:
+                - string
+                - "null"
+          required:
+            - name
+            - website
+            - supportEmail
+        invoice:
+          type: object
+          properties:
+            id:
+              type: string
+            number:
+              type:
+                - string
+                - "null"
+            status:
+              $ref: "#/components/schemas/InvoiceStatus"
+            environment:
+              allOf:
+                - $ref: "#/components/schemas/PaymentsEnvironment"
+                - type:
+                    - string
+                    - "null"
+            currency:
+              $ref: "#/components/schemas/PaymentsCurrency"
+            total:
+              anyOf:
+                - type: string
+                - type: number
+            totalMinor:
+              type:
+                - string
+                - "null"
+            lineItems:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  description:
+                    type: string
+                  quantity:
+                    type: string
+                  unitPrice:
+                    type: string
+                  taxCategory:
+                    $ref: "#/components/schemas/TaxCategory"
+                  taxRate:
+                    type: string
+                  netMinor:
+                    type: string
+                required:
+                  - name
+                  - quantity
+                  - unitPrice
+                  - taxCategory
+                  - taxRate
+                  - netMinor
+            locale:
+              $ref: "#/components/schemas/InvoiceLocale"
+            dueAt:
+              type:
+                - string
+                - "null"
+            successUrl:
+              type:
+                - string
+                - "null"
+            cancelUrl:
+              type:
+                - string
+                - "null"
+          required:
+            - id
+            - number
+            - status
+            - environment
+            - currency
+            - total
+            - totalMinor
+            - lineItems
+            - locale
+            - dueAt
+            - successUrl
+            - cancelUrl
+        buyer:
+          type: object
+          properties:
+            collect:
+              type: string
+              enum:
+                - off
+                - email
+                - full
+            required:
+              type: boolean
+            companyInvoice:
+              type: boolean
+          required:
+            - collect
+            - required
+            - companyInvoice
+        methods:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              symbol:
+                type: string
+              chainId:
+                type: string
+              assetId:
+                type:
+                  - string
+                  - "null"
+              decimals:
+                type: number
+              gasless:
+                type:
+                  - string
+                  - "null"
+            required:
+              - id
+              - name
+              - symbol
+              - chainId
+              - assetId
+              - decimals
+              - gasless
+        quote:
+          $ref: "#/components/schemas/CheckoutQuote"
+        autoCharge:
+          oneOf:
+            - type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - available
+                methodId:
+                  type: string
+                request:
+                  type: object
+                  properties:
+                    chainId:
+                      type: string
+                    to:
+                      type: string
+                    permission:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                            - erc20-token-periodic
+                        isAdjustmentAllowed:
+                          type: boolean
+                        data:
+                          type: object
+                          properties:
+                            tokenAddress:
+                              type: string
+                            periodAmount:
+                              type: string
+                            periodDuration:
+                              type: number
+                            startTime:
+                              type: number
+                            justification:
+                              type: string
+                          required:
+                            - tokenAddress
+                            - periodAmount
+                            - periodDuration
+                            - startTime
+                            - justification
+                      required:
+                        - type
+                        - isAdjustmentAllowed
+                        - data
+                    rules:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          data: {}
+                        required:
+                          - type
+                  required:
+                    - chainId
+                    - to
+                    - permission
+                    - rules
+              required:
+                - status
+                - methodId
+                - request
+            - type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - active
+                permission:
+                  type:
+                    - object
+                    - "null"
+                  properties:
+                    status:
+                      type: string
+                      enum:
+                        - active
+                        - revoked
+                        - expired
+                    chainId:
+                      type:
+                        - string
+                        - "null"
+                    methodId:
+                      type:
+                        - string
+                        - "null"
+                    payer:
+                      type:
+                        - string
+                        - "null"
+                    tokenAddress:
+                      type:
+                        - string
+                        - "null"
+                    periodAmount:
+                      type:
+                        - string
+                        - "null"
+                    periodSeconds:
+                      type: number
+                    startsAt:
+                      type:
+                        - string
+                        - "null"
+                    expiresAt:
+                      type:
+                        - string
+                        - "null"
+                    grantedAt:
+                      type:
+                        - string
+                        - "null"
+                    revokedAt:
+                      type:
+                        - string
+                        - "null"
+                  required:
+                    - status
+                    - chainId
+                    - methodId
+                    - payer
+                    - tokenAddress
+                    - periodAmount
+                    - periodSeconds
+                    - startsAt
+                    - expiresAt
+                    - grantedAt
+                    - revokedAt
+                  description: The ERC-7715 permission of `auto_charge`, without its context.
+              required:
+                - status
+                - permission
+            - type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - unavailable
+                reason:
+                  type: string
+              required:
+                - status
+                - reason
+            - type: "null"
+          description: "For a subscription with automatic charges: the ERC-7715 request to show the wallet."
+      required:
+        - object
+        - merchant
+        - invoice
+        - buyer
+        - methods
+        - quote
+        - autoCharge
+      description: What a checkout token opens.
+    CheckoutQuote:
+      type:
+        - object
+        - "null"
+      properties:
+        object:
+          type: string
+          enum:
+            - checkout_quote
+        methodId:
+          type: string
+        payer:
+          type:
+            - string
+            - "null"
+        cryptoAmountExpected:
+          type: string
+        amountToSend:
+          type: string
+        transferFee:
+          type:
+            - object
+            - "null"
+          properties:
+            bps:
+              type: number
+            maxFee:
+              type:
+                - string
+                - "null"
+            source:
+              type: string
+              enum:
+                - contract
+                - method
+          required:
+            - bps
+            - maxFee
+            - source
+        decimals:
+          type: number
+        symbol:
+          type: string
+        lockedAt:
+          type:
+            - string
+            - "null"
+        expiresAt:
+          type:
+            - string
+            - "null"
+        reference:
+          type:
+            - string
+            - "null"
+        rates: {}
+        markupBps:
+          type: number
+        discountBps:
+          type: number
+        instructions:
+          $ref: "#/components/schemas/PaymentInstructions"
+        gasless:
+          type:
+            - object
+            - "null"
+          properties:
+            relay:
+              type: object
+              properties:
+                typedData:
+                  type: object
+                  properties:
+                    domain:
+                      type: object
+                      additionalProperties: {}
+                    types:
+                      type: object
+                      additionalProperties:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                            type:
+                              type: string
+                          required:
+                            - name
+                            - type
+                    primaryType:
+                      type: string
+                    message:
+                      type: object
+                      additionalProperties:
+                        type: string
+                  required:
+                    - domain
+                    - types
+                    - primaryType
+                    - message
+              required:
+                - typedData
+            paymaster:
+              type: object
+              properties:
+                calls:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      to:
+                        type: string
+                      value:
+                        type: string
+                      data:
+                        type: string
+                    required:
+                      - to
+                      - value
+                      - data
+              required:
+                - calls
+          description: "What the merchant sponsors: sign `relay.typedData` (EIP-3009) and post it to `relay`, or send
+            `paymaster.calls` with the `paymaster` route as the ERC-7677 paymaster service."
+      required:
+        - object
+        - methodId
+        - payer
+        - cryptoAmountExpected
+        - amountToSend
+        - transferFee
+        - decimals
+        - symbol
+        - lockedAt
+        - expiresAt
+        - reference
+        - markupBps
+        - discountBps
+        - instructions
+        - gasless
+      description: A quote locked to the payer until `expiresAt`.
+    PaymentInstructions:
+      oneOf:
+        - type: object
+          properties:
+            family:
+              type: string
+              enum:
+                - eip155
+            chainId:
+              type: number
+            to:
+              type: string
+            token:
+              type: string
+            amount:
+              type: string
+            decimals:
+              type: number
+            symbol:
+              type: string
+          required:
+            - family
+            - chainId
+            - to
+            - token
+            - amount
+            - decimals
+            - symbol
+        - type: object
+          properties:
+            family:
+              type: string
+              enum:
+                - solana
+            chainId:
+              type: string
+            to:
+              type: string
+            token:
+              type: string
+            amount:
+              type: string
+            decimals:
+              type: number
+            symbol:
+              type: string
+            reference:
+              type: string
+            solanaPayUrl:
+              type: string
+          required:
+            - family
+            - chainId
+            - to
+            - token
+            - amount
+            - decimals
+            - symbol
+            - reference
+            - solanaPayUrl
+      description: "What the wallet sends: the exact amount in base units to `to`; Solana transfers carry `reference`."
+    CheckoutStatusEvent:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/InvoiceStatus"
+        ledgerSeq:
+          type: number
+        txHash:
+          type:
+            - string
+            - "null"
+        amountPaid:
+          type:
+            - string
+            - "null"
+        quoteExpiresAt:
+          type:
+            - string
+            - "null"
+      required:
+        - status
+        - ledgerSeq
+        - txHash
+        - amountPaid
+        - quoteExpiresAt
   parameters: {}
 paths:
   /v1/engine/pulsar/sync:
@@ -598,6 +2676,62 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Too many requests per second for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/pulsar/sync/{txKey}/hash:
+    post:
+      summary: Send the hash of an EIP-5792 batch
+      description: "Sends the hash of the transaction that executed an EIP-5792 batch (`tracker: eip5792`), which was synced
+        by its batch ID. Quasar then tracks the batch on-chain by the hash, like an Ethereum transaction; the record
+        keeps the batch ID as `txKey`. A batch whose hash never arrives is marked `Failed` an hour after it was synced.
+        Used by `quasar.pulsar.syncHash`."
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      parameters:
+        - schema:
+            type: string
+            description: The batch ID, the `txKey` of the transaction.
+          required: true
+          description: The batch ID, the `txKey` of the transaction.
+          name: txKey
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchHashRequest"
+      responses:
+        "200":
+          description: "The hash is recorded and on-chain tracking started, or Quasar already had it (`duplicate: true`)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchHashResponse"
+        "400":
+          description: The hash is malformed, or the transaction is not an EIP-5792 batch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The app has no transaction with this `txKey`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The batch has another hash, or it is already final.
           content:
             application/json:
               schema:
@@ -713,4 +2847,1772 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
         "503":
           description: The primary database or Redis does not respond.
-webhooks: {}
+  /v1/payments/invoices:
+    post:
+      tags:
+        - Invoices
+      summary: Issue an invoice
+      description: Issues a numbered invoice with its PDF (and e-invoice, when on and the buyer details allow) and sends
+        `invoice.issued`. Used by `quasar.payments.createInvoice`.
+      security: &a1
+        - SecretKey: []
+      parameters:
+        - schema:
+            type: string
+            description: "1–255 characters: a retry with the same key returns what the first call created, with the same link."
+          required: false
+          description: "1–255 characters: a retry with the same key returns what the first call created, with the same link."
+          name: Idempotency-Key
+          in: header
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvoiceRequest"
+      responses:
+        "201":
+          description: The invoice, its checkout token and payment page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithCheckout"
+        "400":
+          description: "`invalid_request` with `issues`, `seller_details_missing`, `buyer_reference_required`,
+            `invalid_idempotency_key`…"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+    get:
+      tags:
+        - Invoices
+      summary: List invoices
+      description: Newest first. Used by `quasar.payments.listInvoices`.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: One status or several, comma-separated.
+          required: false
+          description: One status or several, comma-separated.
+          name: status
+          in: query
+        - schema:
+            $ref: "#/components/schemas/PaymentsEnvironment"
+          required: false
+          description: "Live or test: the key that issued it decides. Test invoices are paid on test networks."
+          name: environment
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: externalId
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: createdAfter
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: createdBefore
+          in: query
+        - schema:
+            type: integer
+            description: 1 to 100. Defaults to 20.
+          required: false
+          description: 1 to 100. Defaults to 20.
+          name: limit
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: cursor
+          in: query
+      responses:
+        "200":
+          description: A page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceList"
+        "400":
+          description: "`invalid_request`, `invalid_cursor`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}:
+    get:
+      tags:
+        - Invoices
+      summary: Read an invoice
+      description: With its refunds and credit notes. Used by `quasar.payments.getInvoice`.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceDetails"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/cancel:
+    post:
+      tags:
+        - Invoices
+      summary: Cancel an invoice
+      description: An open invoice stops being payable; its number stays taken.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: The invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: The invoice is not in a state for it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/release:
+    post:
+      tags:
+        - Invoices
+      summary: Release a held payment
+      description: The invoice becomes paid and the buyer gets a receipt.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+              required:
+                - reason
+      responses:
+        "200":
+          description: The invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invoice"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: The invoice is not in a state for it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/correct:
+    post:
+      tags:
+        - Invoices
+      summary: Correct the buyer details
+      description: A credit note for the invoice and a new invoice with the corrected buyer; a paid invoice's payment carries over.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyer:
+                  $ref: "#/components/schemas/Buyer"
+                reason:
+                  type: string
+      responses:
+        "201":
+          description: The new invoice (with its checkout while open) and the replaced one.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceCorrection"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: The invoice cannot be corrected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/checkout:
+    post:
+      tags:
+        - Invoices
+      summary: Replace the payment link
+      description: A new checkout token and payment page; the earlier link stops working, also in emails already sent. The
+        current link is in the invoice (`payUrl`).
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The invoice with its new token and page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceWithCheckout"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`invoice_not_open`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/events:
+    get:
+      tags:
+        - Invoices
+      summary: Read the ledger
+      description: Every step of the invoice, chained by hashes.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+        - schema:
+            type: string
+            enum:
+              - "true"
+              - "false"
+            description: "`true` checks the hash chain."
+          required: false
+          description: "`true` checks the hash chain."
+          name: verify
+          in: query
+      responses:
+        "200":
+          description: The ledger.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvoiceLedger"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/documents/{kind}:
+    get:
+      tags:
+        - Invoices
+      summary: Download a document
+      description: The stored invoice or receipt, byte for byte as issued.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+          required: true
+          name: id
+          in: path
+        - schema:
+            type: string
+            enum:
+              - invoice
+              - receipt
+              - invoice.xml
+            description: "`invoice.xml` is the UBL e-invoice."
+          required: true
+          description: "`invoice.xml` is the UBL e-invoice."
+          name: kind
+          in: path
+      responses:
+        "200":
+          description: The file.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`, `document_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/documents/credit-note/{ref}:
+    get:
+      tags:
+        - Refunds
+      summary: Download a credit note
+      description: By the refund it credits or its number; add `.xml` for the UBL.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+          required: true
+          name: id
+          in: path
+        - schema:
+            type: string
+          required: true
+          name: ref
+          in: path
+      responses:
+        "200":
+          description: The file.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`document_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/invoices/{id}/refunds:
+    post:
+      tags:
+        - Refunds
+      summary: Ask for a refund
+      description: Prices the refund; send the amount from your wallet to the payer, then submit the transaction.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Invoice ID.
+          required: true
+          description: Invoice ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: string
+                  description: In the invoice currency; everything left when omitted.
+                mode:
+                  type: string
+                  enum:
+                    - fiat_value
+                    - exact_received
+                reason:
+                  type: string
+      responses:
+        "201":
+          description: The refund and what to send where.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundStart"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`invoice_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: Nothing to refund, or more than is left.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/refunds/{id}:
+    get:
+      tags:
+        - Refunds
+      summary: Read a refund
+      description: Used by `quasar.payments.getRefund`.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Refund ID.
+          required: true
+          description: Refund ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The refund.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Refund"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`refund_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/refunds/{id}/submit:
+    post:
+      tags:
+        - Refunds
+      summary: Submit the refund transaction
+      description: Once final, the refund is confirmed, its credit note issued and `refund.confirmed` sent.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Refund ID.
+          required: true
+          description: Refund ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                txHash:
+                  type: string
+                from:
+                  type: string
+              required:
+                - txHash
+                - from
+      responses:
+        "202":
+          description: The refund, `submitted`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Refund"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`refund_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`refund_not_submittable`, `transaction_already_used`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/quotes:
+    post:
+      tags:
+        - Invoices
+      summary: Price an amount
+      description: The price of an amount in a payment method now; nothing is locked.
+      security: *a1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: string
+                currency:
+                  $ref: "#/components/schemas/PaymentsCurrency"
+                methodId:
+                  type: string
+              required:
+                - amount
+                - methodId
+      responses:
+        "200":
+          description: The price.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentQuote"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`method_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+        "503":
+          description: No fresh price now.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/methods:
+    get:
+      tags:
+        - Invoices
+      summary: List payment methods
+      description: The active methods of the app, in their order.
+      security: *a1
+      responses:
+        "200":
+          description: The methods.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    enum:
+                      - list
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentMethod"
+                required:
+                  - object
+                  - data
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions:
+    post:
+      tags:
+        - Subscriptions
+      summary: Start a subscription
+      description: Each period is one invoice, paid like any invoice (`send_invoice`) or charged with the buyer's ERC-7715
+        permission (`auto_charge`).
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: "1–255 characters: a retry with the same key returns what the first call created, with the same link."
+          required: false
+          description: "1–255 characters: a retry with the same key returns what the first call created, with the same link."
+          name: Idempotency-Key
+          in: header
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionRequest"
+      responses:
+        "201":
+          description: The subscription and its first invoice.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionStart"
+        "400":
+          description: "`invalid_request`, `auto_charge_unavailable` (with `reason`)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+    get:
+      tags:
+        - Subscriptions
+      summary: List subscriptions
+      description: Newest first.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: One status or several, comma-separated.
+          required: false
+          description: One status or several, comma-separated.
+          name: status
+          in: query
+        - schema:
+            type: integer
+          required: false
+          name: limit
+          in: query
+        - schema:
+            type: string
+          required: false
+          name: cursor
+          in: query
+      responses:
+        "200":
+          description: A page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionList"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}:
+    get:
+      tags:
+        - Subscriptions
+      summary: Read a subscription
+      description: With the invoices of its periods and its automatic charges.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionDetails"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}/cancel:
+    post:
+      tags:
+        - Subscriptions
+      summary: Cancel a subscription
+      description: Now (its open invoices are cancelled) or, with `atPeriodEnd`, when the running period ends.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                atPeriodEnd:
+                  type: boolean
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: Not possible in its state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}/cancel/undo:
+    post:
+      tags:
+        - Subscriptions
+      summary: Take back a scheduled cancellation
+      description: The subscription renews again (`subscription.cancel_unscheduled`); a next-period invoice the cancellation
+        cancelled is issued anew.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: Not possible in its state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}/pause:
+    post:
+      tags:
+        - Subscriptions
+      summary: Pause a subscription
+      description: Its open invoices are cancelled and no period is billed until it resumes.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: Not possible in its state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}/resume:
+    post:
+      tags:
+        - Subscriptions
+      summary: Resume a subscription
+      description: A new period starts now and is invoiced at once.
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionStart"
+        "401":
+          description: Missing or invalid key.
+        "403":
+          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: Not possible in its state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
+  /v1/payments/checkout/{token}:
+    get:
+      tags:
+        - Checkout
+      summary: Open a checkout
+      description: "The invoice, its methods, the locked quote and, for a subscription, the automatic-charge offer. Used by
+        `createCheckoutStore`. No key: the token opens this invoice only; a browser may call from the app's domains
+        (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      responses:
+        "200":
+          description: The checkout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutView"
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/quote:
+    post:
+      tags:
+        - Checkout
+      summary: Lock a quote
+      description: "Screens the payer (AML) and locks the price for the method; a new quote replaces the open one. A Solana
+        Pay QR quote has no payer. No key: the token opens this invoice only; a browser may call from the app's domains
+        (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                methodId:
+                  type: string
+                payer:
+                  type: string
+                  description: CAIP-10 account.
+              required:
+                - methodId
+      responses:
+        "200":
+          description: The quote and its payment instructions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutQuote"
+        "400":
+          description: "`payer_required`, `payer_chain_mismatch`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "403":
+          description: "`payer_blocked` (AML), `payer_not_expected`, `origin_not_allowed`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`buyer_required`, `invoice_expired`, `invoice_processing`, `amount_out_of_range`…"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "503":
+          description: "`screening_unavailable`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/buyer:
+    post:
+      tags:
+        - Checkout
+      summary: Send the buyer details
+      description: "Issues the invoice document that waited for them; `company: true` asks for an invoice for a company. No
+        key: the token opens this invoice only; a browser may call from the app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                buyer:
+                  $ref: "#/components/schemas/Buyer"
+                company:
+                  type: boolean
+              required:
+                - buyer
+      responses:
+        "200":
+          description: The checkout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutView"
+        "400":
+          description: "`buyer_incomplete`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`buyer_not_requested`, `invoice_not_payable`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/submit:
+    post:
+      tags:
+        - Checkout
+      summary: Submit the payment transaction
+      description: "Quasar tracks it; the invoice is settled when it is final. For an EIP-5792 batch, send the hash of its
+        transaction. No key: the token opens this invoice only; a browser may call from the app's domains (any, when it
+        lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                txKey:
+                  type: string
+                  description: Transaction hash or Solana signature.
+                from:
+                  type: string
+                  description: The sender, for a Solana Pay quote without a payer.
+                connectorType:
+                  type: string
+              required:
+                - txKey
+      responses:
+        "202":
+          description: Taken.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  txKey:
+                    type: string
+                  status:
+                    type: string
+                required:
+                  - txKey
+                  - status
+        "400":
+          description: "`invalid_transaction`, `sender_required`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`quote_required`, `invoice_not_payable`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/relay:
+    post:
+      tags:
+        - Checkout
+      summary: Pay without gas (EIP-3009)
+      description: "The signature of `quote.gasless.relay.typedData`: the app relayer sends the transfer and the merchant pays
+        the gas. No key: the token opens this invoice only; a browser may call from the app's domains (any, when it
+        lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                signature:
+                  type: string
+                  description: 65-byte EIP-712 signature.
+              required:
+                - signature
+      responses:
+        "200":
+          description: "`submitted` with the transaction, or `sending` while the receipt is slow."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - submitted
+                      - sending
+                  userOpHash:
+                    type: string
+                  txHash:
+                    type: string
+                required:
+                  - status
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`gasless_unavailable`, `already_relayed`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "502":
+          description: "`relay_failed`: pay with a normal transfer or ask for a new quote."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/paymaster:
+    post:
+      tags:
+        - Checkout
+      summary: ERC-7677 paymaster
+      description: "JSON-RPC `pm_getPaymasterStubData` and `pm_getPaymasterData` for the buyer's smart wallet, sponsored when
+        the user operation is exactly the quoted transfer. Any origin may call it (the wallet calls from its own site).
+        No key: the token opens this invoice only; a browser may call from the app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                jsonrpc:
+                  type: string
+                  enum:
+                    - "2.0"
+                id: {}
+                method:
+                  type: string
+                params:
+                  type: array
+                  items: {}
+              required:
+                - jsonrpc
+                - method
+                - params
+      responses:
+        "200":
+          description: The JSON-RPC answer.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/permission:
+    post:
+      tags:
+        - Checkout
+      summary: Grant automatic charges
+      description: "The wallet's answer to `wallet_grantPermissions` for a subscription with `auto_charge`, checked by its
+        context and screened like a payer. No key: the token opens this invoice only; a browser may call from the app's
+        domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                payer:
+                  type: string
+                context:
+                  type: string
+                delegationManager:
+                  type: string
+                dependencies:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      factory:
+                        type: string
+                      factoryData:
+                        type: string
+                    required:
+                      - factory
+                      - factoryData
+              required:
+                - payer
+                - context
+                - delegationManager
+      responses:
+        "200":
+          description: The permission.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permission:
+                    type:
+                      - object
+                      - "null"
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - active
+                          - revoked
+                          - expired
+                      chainId:
+                        type:
+                          - string
+                          - "null"
+                      methodId:
+                        type:
+                          - string
+                          - "null"
+                      payer:
+                        type:
+                          - string
+                          - "null"
+                      tokenAddress:
+                        type:
+                          - string
+                          - "null"
+                      periodAmount:
+                        type:
+                          - string
+                          - "null"
+                      periodSeconds:
+                        type: number
+                      startsAt:
+                        type:
+                          - string
+                          - "null"
+                      expiresAt:
+                        type:
+                          - string
+                          - "null"
+                      grantedAt:
+                        type:
+                          - string
+                          - "null"
+                      revokedAt:
+                        type:
+                          - string
+                          - "null"
+                    required:
+                      - status
+                      - chainId
+                      - methodId
+                      - payer
+                      - tokenAddress
+                      - periodAmount
+                      - periodSeconds
+                      - startsAt
+                      - expiresAt
+                      - grantedAt
+                      - revokedAt
+                    description: The ERC-7715 permission of `auto_charge`, without its context.
+                required:
+                  - permission
+        "400":
+          description: "`payer_chain_mismatch`, a context that does not grant the requested terms."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`subscription_not_active`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/receipt:
+    get:
+      tags:
+        - Checkout
+      summary: Download the receipt
+      description: "The receipt PDF of a paid invoice. No key: the token opens this invoice only; a browser may call from the
+        app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      responses:
+        "200":
+          description: The PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/xml:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`receipt_not_issued`, `checkout_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/events:
+    get:
+      tags:
+        - Checkout
+      summary: Follow the invoice
+      description: "Server-sent events: one `status` event at once and on every change (data: `CheckoutStatusEvent`), a `ping`
+        every 15 seconds; the stream ends on a final state or after 10 minutes. No key: the token opens this invoice
+        only; a browser may call from the app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      responses:
+        "200":
+          description: The event stream.
+          content:
+            text/event-stream:
+              schema:
+                $ref: "#/components/schemas/CheckoutStatusEvent"
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/locale:
+    post:
+      tags:
+        - Checkout
+      summary: Change the language
+      description: "Of the page and the documents still to be issued. No key: the token opens this invoice only; a browser may
+        call from the app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                locale:
+                  $ref: "#/components/schemas/InvoiceLocale"
+              required:
+                - locale
+      responses:
+        "200":
+          description: The language.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locale:
+                    $ref: "#/components/schemas/InvoiceLocale"
+                required:
+                  - locale
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`checkout_not_found`: a wrong or replaced token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+webhooks:
+  payment-event:
+    post:
+      summary: Payment event (payments.v1)
+      description: Sent to the webhook endpoints subscribed to `invoice:*`, `refund:*`, `subscription:*` or the event itself.
+        `x-quasar-signature` is the hex HMAC-SHA256 of the raw body keyed with the endpoint's signing secret; check it,
+        and `sentAt`, with `verifyWebhook` of `@tuwaio/quasar-sdk`. `data.invoice` is the invoice when the delivery was
+        sent.
+      tags:
+        - Webhooks
+      parameters:
+        - schema:
+            type: string
+          required: true
+          name: x-quasar-signature
+          in: header
+        - schema:
+            type: string
+            description: The event type.
+          required: true
+          description: The event type.
+          name: x-quasar-event
+          in: header
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentWebhookEvent"
+      responses:
+        "200":
+          description: Answer with a `2xx` within 10 seconds; do slow work afterwards.

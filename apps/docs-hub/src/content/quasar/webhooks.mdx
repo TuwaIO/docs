@@ -49,7 +49,7 @@ x-quasar-event: Success
 
 | Field              | Content                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `txKey`, `hash`    | Key of the Pulsar transaction and its on-chain hash (when it has one)                                                                                                                                                                                                                                                                                                                 |
+| `txKey`, `hash`    | Key of the Pulsar transaction and its on-chain hash (when it has one). For an EIP-5792 batch, `txKey` is the batch ID and `hash` the transaction that executed it                                                                                                                                                                                                                     |
 | `status`, `action` | Final status: `Success`, `Failed` or `Replaced`; also sent in the `x-quasar-event` header                                                                                                                                                                                                                                                                                             |
 | `txType`           | The `type` of the Pulsar transaction                                                                                                                                                                                                                                                                                                                                                  |
 | `chainId`          | Chain of the transaction, as a string: the EVM chain ID (`"1"`), or for Solana the CAIP-2 chain ID with the genesis hash (`"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"` for mainnet, `"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"` for devnet). Deliveries sent before October 2026 used the cluster name (`solana:mainnet`); `getSolanaCluster` of `@tuwaio/orbit-core` reads both forms |
@@ -87,6 +87,11 @@ export async function POST(request: Request) {
   return Response.json({ received: true });
 }
 ```
+
+When a transaction fails:
+
+- **Solana**: a transaction with an on-chain error fails as soon as it is confirmed, without waiting for finalization. A signature that never lands fails once the chain passes its `lastValidBlockHeight` (Pulsar saves it for transactions sent with `signAndSendSolanaTx`; the error says the blockhash expired), otherwise one hour after it was synced.
+- **EIP-5792 batches** fail one hour after they were synced when your app never sent the hash of their transaction ([sync guide](/guides/quasar-transaction-sync#batches-of-calls-eip-5792)).
 
 Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at most 10 seconds for a response. Deliveries can repeat (retries, manual resends), so make the handler idempotent, for example by `txKey` and status.
 

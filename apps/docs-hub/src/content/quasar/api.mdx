@@ -1,6 +1,6 @@
 ---
 title: API Reference
-description: The endpoints of the Quasar API that @tuwaio/quasar-sdk calls — transaction sync, history and health — with their requests and responses.
+description: The endpoints of the Quasar API that @tuwaio/quasar-sdk calls — transaction sync, history, Payments, the checkout, payment webhooks and health — with their requests and responses.
 ---
 
 import { QuasarApiReference } from '@/components/QuasarApiReference';
@@ -8,5 +8,7 @@ import { QuasarApiReference } from '@/components/QuasarApiReference';
 # API Reference
 
 The endpoints of the Quasar API that [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk) calls. Quasar Cloud serves them at `https://api.tuwa.io`, a self-hosted node at its own URL. Authenticate with the secret key of your app in the `x-tuwa-secret-key` header, from your server only (see [Apps & Keys](/quasar/apps-and-keys)).
+
+The Payments endpoints (invoices, refunds, subscriptions) take the secret key of a Payments app. The checkout endpoints take no key: the checkout token of an invoice opens that invoice only, and the buyer's browser calls them. Payment webhooks (`payments.v1`) are listed under **Webhooks**; verify them with `verifyWebhook`.
 
 <QuasarApiReference />
