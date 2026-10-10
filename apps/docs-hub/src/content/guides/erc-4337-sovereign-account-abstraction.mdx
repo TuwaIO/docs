@@ -170,7 +170,7 @@ This implementation relies exclusively on standard `viem` packages with zero add
 
 ```typescript
 // src/services/canonicalSmartAccount.ts
-import { http, createPublicClient, encodeFunctionData, parseUnits, erc20Abi, pad, type Hex } from 'viem';
+import { http, createPublicClient, encodeFunctionData, parseUnits, erc20Abi, pad, hexToBigInt, type Hex } from 'viem';
 import { sepolia } from 'viem/chains';
 import {
   createBundlerClient,
@@ -241,6 +241,19 @@ export async function initializeCanonicalAccount(walletClient: WalletClient) {
     paymaster: paymasterClient,
     paymasterContext: {
       sponsorshipPolicyId: 'sp_my_policy_id', // ERC-7677 / Pimlico sponsorship policy
+    },
+    // Pimlico refuses UserOps priced at the chain's fees ("maxFeePerGas must be at least …"): price them at its own
+    // gas price
+    userOperation: {
+      estimateFeesPerGas: async ({ bundlerClient }) => {
+        const { fast } = (await bundlerClient.request({ method: 'pimlico_getUserOperationGasPrice' } as never)) as {
+          fast: { maxFeePerGas: Hex; maxPriorityFeePerGas: Hex };
+        };
+        return {
+          maxFeePerGas: hexToBigInt(fast.maxFeePerGas),
+          maxPriorityFeePerGas: hexToBigInt(fast.maxPriorityFeePerGas),
+        };
+      },
     },
   });
 
@@ -320,7 +333,7 @@ TUWA's core libraries are **100% open-source (MIT/Apache-2)** modular packages d
 
 #### Step 1: Orchestrating the Smart Account with Orbit EVM
 
-`@tuwaio/orbit-evm` automatically calculates Solady-compliant salt padding (`pad(ownerAddress, { dir: 'right', size: 32 })`) and caches Bundler and Paymaster instances in memory:
+`@tuwaio/orbit-evm` automatically calculates Solady-compliant salt padding (`pad(ownerAddress, { dir: 'right', size: 32 })`), prices UserOps at Pimlico's own gas price (`pimlico_getUserOperationGasPrice`, version 0.3.4 and later) and caches Bundler and Paymaster instances in memory:
 
 ```typescript
 // src/services/orbitSmartAccount.ts
