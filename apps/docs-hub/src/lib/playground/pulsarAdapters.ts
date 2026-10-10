@@ -25,7 +25,8 @@ function finalFields(tx: PlaygroundTransaction, update: FinalUpdate): UpdatableT
       error: normalizeError(new Error(update.error)),
     }),
     ...(update.replacedTxHash && { replacedTxHash: update.replacedTxHash }),
-    ...(tx.adapter === OrbitAdapter.SOLANA && update.status === TransactionStatus.Success && { confirmations: 'MAX' }),
+    ...(tx.adapter === OrbitAdapter.SOLANA &&
+      update.status === TransactionStatus.Success && { confirmations: 'MAX', confirmationStatus: 'finalized' }),
   };
 }
 
@@ -53,7 +54,11 @@ function track(params: TrackerParams, onSettled: () => void): () => void {
         maxPriorityFeePerGas: update.maxPriorityFeePerGas,
       });
     } else if (update.type === 'confirmations') {
-      updateTxParams(tx.txKey, { confirmations: update.confirmations, slot: update.slot });
+      updateTxParams(tx.txKey, {
+        confirmations: update.confirmations,
+        slot: update.slot,
+        confirmationStatus: update.confirmationStatus,
+      });
     } else {
       settle(params, update);
       onSettled();

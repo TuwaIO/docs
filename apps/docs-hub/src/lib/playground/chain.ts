@@ -31,10 +31,11 @@ export type ChainUpdate =
       maxPriorityFeePerGas: string;
     }
   | {
-      /** Solana: the transaction got more confirmations. */
+      /** Solana: the transaction got more confirmations; it is confirmed and waits for finality. */
       type: 'confirmations';
       confirmations: number;
       slot: number;
+      confirmationStatus: 'confirmed';
     }
   | FinalUpdate;
 
@@ -127,18 +128,20 @@ async function runSolana(signature: string, tx: ChainTransaction) {
     });
     return;
   }
+  if (tx.outcome === 'revert') {
+    // A failed transaction lands with its error: Pulsar fails it at once, without waiting for finality
+    await wait(800);
+    finish(signature, tx, { status: TransactionStatus.Failed, error: 'Program failed: custom program error 0x1.' });
+    return;
+  }
   for (let step = 1; step <= 4; step++) {
     await wait(800);
     if (isForgotten(signature, tx)) return;
     currentSlot += 2;
-    emit(tx, { type: 'confirmations', confirmations: step * 8, slot: currentSlot });
+    emit(tx, { type: 'confirmations', confirmations: step * 8, slot: currentSlot, confirmationStatus: 'confirmed' });
   }
   await wait(800);
-  if (tx.outcome === 'revert') {
-    finish(signature, tx, { status: TransactionStatus.Failed, error: 'Program failed: custom program error 0x1.' });
-  } else {
-    finish(signature, tx, { status: TransactionStatus.Success });
-  }
+  finish(signature, tx, { status: TransactionStatus.Success });
 }
 
 /**

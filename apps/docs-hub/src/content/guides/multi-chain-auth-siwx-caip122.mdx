@@ -153,7 +153,7 @@ With Nova UI Kit, sign-in is declarative: pass `siwx` to `NovaConnectProvider` a
 
 #### Programmatic Sign-In Button with Satellite Connect
 
-The button below signs in the active wallet, EVM or Solana. `getSatelliteSiwxFields` turns the connection into the CAIP-2 chain ID and the CAIP-10 address. EVM wallets sign through the wagmi config with `createEvmSiwxSigner`, so the app needs neither `wagmi` React hooks nor `WagmiProvider`; Solana wallets sign with the `signMessage` of their Wallet Standard connection.
+The button below signs in the active wallet, EVM or Solana. `getSatelliteSiwxFields` turns the connection into the CAIP-2 chain ID and the CAIP-10 address. EVM wallets sign through the wagmi config with `createEvmSiwxSigner`, so the app needs neither `wagmi` React hooks nor `WagmiProvider`; Solana wallets sign with the `signMessage` of their Wallet Standard connection: the message itself, or a Solana off-chain message (version 1) for accounts that can only sign those, as hardware wallet accounts may. The SIWX server verifies both.
 
 ```tsx
 // src/components/SignInButton.tsx

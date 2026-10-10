@@ -56,11 +56,9 @@ pnpm add @tuwaio/pulsar-core @tuwaio/pulsar-evm @tuwaio/pulsar-react \
   </Tabs.Tab>
   <Tabs.Tab>
 
-`@solana/react` provides the transaction signer used in Step 6.
-
 ```bash
 pnpm add @tuwaio/pulsar-core @tuwaio/pulsar-solana @tuwaio/pulsar-react \
-  @tuwaio/orbit-core @tuwaio/orbit-solana @solana/kit @solana/react \
+  @tuwaio/orbit-core @tuwaio/orbit-solana @solana/kit \
   @wallet-standard/app @wallet-standard/ui-core @wallet-standard/ui-registry zustand immer dayjs
 ```
 
@@ -452,35 +450,42 @@ export const Increment = () => {
   </Tabs.Tab>
   <Tabs.Tab>
 
-Pulsar checks that the wallet is on the cluster in `desiredChainID`; it does not switch clusters. The signer comes from `@solana/react`, for the Wallet Standard account of the Satellite Connect connection. Pass `rpcUrl`: it is saved with the transaction, so tracking resumes on the same RPC after a reload. The signer takes the Wallet Standard chain (`solana:devnet`), built from the cluster moniker that Satellite Connect keeps as `chainId`; Pulsar saves the transaction under the CAIP-2 chain ID with the genesis hash (`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`), so compare Solana chains with `getSolanaCluster` from `@tuwaio/orbit-core` rather than as strings.
+Pulsar checks that the wallet is on the cluster in `desiredChainID`; it does not switch clusters. The signer is `createSolanaTransactionSendingSigner` from `@tuwaio/orbit-solana`: it asks the wallet of the Wallet Standard account of the Satellite Connect connection to sign and send the transaction. Create it inside `actionFunction`, which runs after the cluster check. Pass `rpcUrl`: it is saved with the transaction, so tracking resumes on the same RPC after a reload. The signer takes the cluster moniker that Satellite Connect keeps as `chainId` (`devnet`); Pulsar saves the transaction under the CAIP-2 chain ID with the genesis hash (`solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1`), so compare Solana chains with `getSolanaCluster` from `@tuwaio/orbit-core` rather than as strings.
+
+The transaction stays pending until it is finalized. Before that, `tx.confirmationStatus` changes from `processed` to `confirmed`, usually a second or two after sending, and the tracking modal of Nova Transactions shows the confirmed step. A transaction that fails on chain is marked failed within about a second; one that never lands fails when its blockhash expires (about a minute). The reason is in `tx.error`.
 
 ```tsx filename="src/components/Increment.tsx"
 'use client';
 
-import { useWalletAccountTransactionSendingSigner } from '@solana/react';
 import { ConnectButton } from '@tuwaio/nova-connect/components';
 import { useSatelliteConnectStore } from '@tuwaio/nova-connect/satellite';
 import { OrbitAdapter } from '@tuwaio/orbit-core';
-import { createSolanaClientWithCache } from '@tuwaio/orbit-solana';
+import { createSolanaClientWithCache, createSolanaTransactionSendingSigner } from '@tuwaio/orbit-solana';
 import type { SolanaConnection } from '@tuwaio/satellite-solana';
 
 import { usePulsarStore } from '@/hooks/txTrackingHooks';
 import { increment } from '@/transactions/actions/increment';
 
-type WalletAccount = NonNullable<SolanaConnection['connectedAccount']>;
-
-function IncrementButton({ account, cluster, rpcUrl }: { account: WalletAccount; cluster: string; rpcUrl: string }) {
+export const Increment = () => {
+  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection) as SolanaConnection | undefined;
   const executeTxAction = usePulsarStore((state) => state.executeTxAction);
-  const signer = useWalletAccountTransactionSendingSigner(account, `solana:${cluster}`);
+  const account = activeConnection?.connectedAccount;
 
   const handleIncrement = async () => {
+    if (!activeConnection || !account) return;
+    const cluster = String(activeConnection.chainId); // the cluster moniker of the connection, e.g. 'devnet'
+    const rpcUrl = activeConnection.rpcURL;
     try {
       await executeTxAction({
-        actionFunction: () => increment({ client: createSolanaClientWithCache({ rpcUrlOrMoniker: rpcUrl }), signer }),
+        actionFunction: () =>
+          increment({
+            client: createSolanaClientWithCache({ rpcUrlOrMoniker: rpcUrl }),
+            signer: createSolanaTransactionSendingSigner(account, cluster),
+          }),
         params: {
           type: 'increment',
           adapter: OrbitAdapter.SOLANA,
-          desiredChainID: cluster, // the cluster moniker of the connection, e.g. 'devnet'
+          desiredChainID: cluster,
           rpcUrl, // saved with the transaction, so tracking resumes on the same RPC after a reload
           title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],
           description: 'Increment the counter by 1.',
@@ -496,24 +501,12 @@ function IncrementButton({ account, cluster, rpcUrl }: { account: WalletAccount;
   };
 
   return (
-    <button type="button" onClick={handleIncrement}>
-      Increment
-    </button>
-  );
-}
-
-export const Increment = () => {
-  const activeConnection = useSatelliteConnectStore((state) => state.activeConnection) as SolanaConnection | undefined;
-
-  return (
     <div className="flex flex-col items-start gap-4">
       <ConnectButton />
-      {activeConnection?.isConnected && activeConnection.connectedAccount && (
-        <IncrementButton
-          account={activeConnection.connectedAccount}
-          cluster={String(activeConnection.chainId)}
-          rpcUrl={activeConnection.rpcURL}
-        />
+      {activeConnection?.isConnected && account && (
+        <button type="button" onClick={handleIncrement}>
+          Increment
+        </button>
       )}
     </div>
   );

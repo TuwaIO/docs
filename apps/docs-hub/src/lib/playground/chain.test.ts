@@ -74,6 +74,20 @@ describe('simulated chain', () => {
     expect(updates.at(-1)).toEqual(expect.objectContaining({ status: TransactionStatus.Success }));
   });
 
+  it('reports a Solana transaction as confirmed while it waits for finality', async () => {
+    const { updates } = follow(submitTransaction(OrbitAdapter.SOLANA, 'success'));
+    await vi.advanceTimersByTimeAsync(800);
+    expect(updates).toEqual([expect.objectContaining({ type: 'confirmations', confirmationStatus: 'confirmed' })]);
+  });
+
+  it('fails a Solana transaction as soon as it lands with a program error, without waiting for finality', async () => {
+    const { updates } = follow(submitTransaction(OrbitAdapter.SOLANA, 'revert'));
+    await vi.advanceTimersByTimeAsync(800);
+    expect(updates).toEqual([
+      expect.objectContaining({ status: TransactionStatus.Failed, error: expect.stringContaining('Program failed') }),
+    ]);
+  });
+
   it('expires a Solana transaction for the replaced outcome, without confirmations', async () => {
     const { updates } = follow(submitTransaction(OrbitAdapter.SOLANA, 'replaced'));
     await vi.advanceTimersByTimeAsync(3200);

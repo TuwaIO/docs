@@ -28,7 +28,7 @@ const OUTCOMES: { id: TxOutcome; label: string }[] = [
 ];
 
 const OUTCOME_HINTS: Record<TxOutcome, string> = {
-  success: 'Mined on EVM, finalized on Solana.',
+  success: 'Mined on EVM. On Solana, confirmed in a second, then finalized.',
   revert: 'The contract (EVM) or the program (Solana) fails the transaction.',
   replaced: 'EVM: another transaction with the same nonce is mined. Solana: the blockhash expires.',
   rejected: 'The user rejects the transaction in the wallet.',

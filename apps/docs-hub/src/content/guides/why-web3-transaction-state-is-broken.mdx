@@ -466,14 +466,16 @@ export function PendingTransactionsBadge() {
 
 ## 5. Architectural Comparison: `useState` vs. Pulsar
 
-| Scenario                     | Naive `useState` Pattern                                | TUWA Pulsar                                                                                       |
-| :--------------------------- | :------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
-| **Route Navigation**         | ❌ Component unmounts; tracking promise destroyed.      | ✅ Outlives DOM; updates persist in central store.                                                |
-| **User Speeds Up / Cancels** | ❌ Naive promise rejects or desyncs from replaced hash. | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback. |
-| **Browser Refresh**          | ❌ In-flight state obliterated; reset to idle.          | ✅ Resumes tracking pending pool automatically upon mount.                                        |
-| **Multi-Tab Consistency**    | ❌ Tabs are completely desynchronized.                  | ✅ Storage event synchronization reflects states across tabs.                                     |
-| **Multi-Chain Support**      | ❌ Ad-hoc Viem/Solana hook spaghetti.                   | ✅ Unified interface across EVM and Solana clusters.                                              |
-| **Re-Org & Revert Handling** | ❌ Throws raw unformatted error into component.         | ✅ Structured `TransactionStatus` with normalized error objects.                                  |
+| Scenario                         | Naive `useState` Pattern                                             | TUWA Pulsar                                                                                              |
+| :------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Route Navigation**             | ❌ Component unmounts; tracking promise destroyed.                   | ✅ Outlives DOM; updates persist in central store.                                                       |
+| **User Speeds Up / Cancels**     | ❌ Naive promise rejects or desyncs from replaced hash.              | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback.        |
+| **Browser Refresh**              | ❌ In-flight state obliterated; reset to idle.                       | ✅ Resumes tracking pending pool automatically upon mount.                                               |
+| **Multi-Tab Consistency**        | ❌ Tabs are completely desynchronized.                               | ✅ Storage event synchronization reflects states across tabs.                                            |
+| **Multi-Chain Support**          | ❌ Ad-hoc Viem/Solana hook spaghetti.                                | ✅ Unified interface across EVM and Solana clusters.                                                     |
+| **Re-Org & Revert Handling**     | ❌ Throws raw unformatted error into component.                      | ✅ Structured `TransactionStatus` with normalized error objects.                                         |
+| **Soft Confirmations (Solana)**  | ❌ One boolean: done at `confirmed`, or a long wait for `finalized`. | ✅ `confirmationStatus` shows `confirmed` while the transaction stays pending; `Success` at `finalized`. |
+| **Dropped Transaction (Solana)** | ❌ Pending until an arbitrary timeout.                               | ✅ Fails when the blockhash expires (`lastValidBlockHeight`), with the reason in `error`.                |
 
 ---
 

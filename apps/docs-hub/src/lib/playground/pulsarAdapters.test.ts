@@ -24,9 +24,26 @@ function evmTx(txKey: string): PlaygroundTransaction {
   };
 }
 
+function solanaTx(txKey: string): PlaygroundTransaction {
+  return {
+    adapter: OrbitAdapter.SOLANA,
+    txKey,
+    type: 'MINT',
+    chainId: 'solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
+    from: orbit.address,
+    connectorType: 'solana:orbitwallet',
+    tracker: TransactionTracker.Solana,
+    localTimestamp: 1,
+    pending: true,
+  };
+}
+
 function startTracking(tx: PlaygroundTransaction) {
   const trackers = new Set<() => void>();
-  const adapter = createSimulatedPulsarAdapter(OrbitAdapter.EVM, trackers);
+  const adapter = createSimulatedPulsarAdapter(
+    tx.adapter === OrbitAdapter.SOLANA ? OrbitAdapter.SOLANA : OrbitAdapter.EVM,
+    trackers,
+  );
   const updates: UpdatableTransactionFields[] = [];
   const onSuccess = vi.fn();
   const onError = vi.fn();
@@ -95,6 +112,23 @@ describe('simulated Pulsar adapter', () => {
         pending: false,
         status: TransactionStatus.Success,
         finishedTimestamp: expect.any(Number),
+      }),
+    );
+    expect(onSuccess).toHaveBeenCalledOnce();
+  });
+
+  it('marks a Solana transaction confirmed while it is pending, then finalized', async () => {
+    const { updates, onSuccess } = startTracking(solanaTx(submitTransaction(OrbitAdapter.SOLANA, 'success')));
+    await vi.advanceTimersByTimeAsync(800);
+    expect(updates).toEqual([{ confirmations: 8, slot: expect.any(Number), confirmationStatus: 'confirmed' }]);
+
+    await vi.advanceTimersByTimeAsync(3200);
+    expect(updates.at(-1)).toEqual(
+      expect.objectContaining({
+        pending: false,
+        status: TransactionStatus.Success,
+        confirmations: 'MAX',
+        confirmationStatus: 'finalized',
       }),
     );
     expect(onSuccess).toHaveBeenCalledOnce();

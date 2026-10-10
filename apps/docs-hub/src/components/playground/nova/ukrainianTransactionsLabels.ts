@@ -19,6 +19,7 @@ export const ukrainianTransactionsLabels: NovaTransactionsLabels = {
   },
   statuses: {
     pending: 'В обробці',
+    confirmed: 'Підтверджено',
     success: 'Успішно',
     failed: 'Помилка',
     reverted: 'Скасовано мережею',
