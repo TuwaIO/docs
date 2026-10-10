@@ -165,7 +165,7 @@ Supabase stores the keys and checks the URL for changes periodically, so a new k
 
 ## Step 3: Create a Table with Row Level Security
 
-The `sub` claim of the token is the wallet: `solana:<address>` for Solana and `eip155:0x…` (lowercase) for EVM, the same on every network. Keep it in a `wallet` column that the database fills in from the token, and compare it in every policy. Apply the migration with the Supabase CLI or paste it into the SQL Editor:
+The `sub` claim of the token is the wallet: `solana:<address>` for Solana and `eip155:0x…` (lowercase) for an EVM wallet that signs with its own key, the same on every network. A smart contract wallet keeps its chain (`eip155:8453:0x…`), because its owners are set on each chain separately. Keep it in a `wallet` column that the database fills in from the token, and compare it in every policy. Apply the migration with the Supabase CLI or paste it into the SQL Editor:
 
 ```sql filename="supabase/migrations/20261009000000_wallet_notes.sql"
 create table public.notes (
@@ -367,13 +367,13 @@ export async function countMyNotes(): Promise<number> {
 
 ## What Supabase Reads from the Token
 
-| Claim      | Used for                                                                       |
-| :--------- | :----------------------------------------------------------------------------- |
-| `role`     | The Postgres role of the request: `authenticated`                              |
-| `sub`      | The wallet in your policies: `auth.jwt() ->> 'sub'`                            |
-| `caip10`   | The account with its chain, as it signed in, for example `eip155:8453:0xAb58…` |
-| `chain_id` | The CAIP-2 chain of the sign-in, for policies that allow only some networks    |
-| `exp`      | The expiry: Supabase rejects expired tokens                                    |
+| Claim      | Used for                                                                                        |
+| :--------- | :---------------------------------------------------------------------------------------------- |
+| `role`     | The Postgres role of the request: `authenticated`                                               |
+| `sub`      | The wallet in your policies: `auth.jwt() ->> 'sub'` (with its chain for smart contract wallets) |
+| `caip10`   | The account with its chain, as it signed in, for example `eip155:8453:0xAb58…`                  |
+| `chain_id` | The CAIP-2 chain of the sign-in, for policies that allow only some networks                     |
+| `exp`      | The expiry: Supabase rejects expired tokens                                                     |
 
 Every claim is available in SQL through `auth.jwt()`. All claims of the token are listed in the [External Auth guide](/guides/siwx-jwt-external-auth#what-ends-up-in-the-token).
 

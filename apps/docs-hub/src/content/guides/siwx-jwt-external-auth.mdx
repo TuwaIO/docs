@@ -225,17 +225,17 @@ Cache the JWKS for a few minutes in a real service, as the `Cache-Control` heade
 
 ## What Ends Up in the Token
 
-| Claim        | Value                                                                                                  |
-| :----------- | :----------------------------------------------------------------------------------------------------- |
-| `iss`        | The `issuer` of Step 2                                                                                 |
-| `aud`        | The `audience` of Step 2, when set                                                                     |
-| `sub`        | The user: the ID you bound with `bindSubject`, otherwise the account without its chain                 |
-| `iat`, `exp` | Issue and expiry time, in seconds; `exp` is at most the session expiry                                 |
-| `jti`        | A random ID of the token                                                                               |
-| `caip10`     | The account as it signed in, for example `eip155:8453:0xAb58…` (Solana with the genesis-hash chain ID) |
-| `chain_id`   | The CAIP-2 chain ID of the sign-in                                                                     |
+| Claim        | Value                                                                                                            |
+| :----------- | :--------------------------------------------------------------------------------------------------------------- |
+| `iss`        | The `issuer` of Step 2                                                                                           |
+| `aud`        | The `audience` of Step 2, when set                                                                               |
+| `sub`        | The user: the ID you bound with `bindSubject`, otherwise the account (with its chain for smart contract wallets) |
+| `iat`, `exp` | Issue and expiry time, in seconds; `exp` is at most the session expiry                                           |
+| `jti`        | A random ID of the token                                                                                         |
+| `caip10`     | The account as it signed in, for example `eip155:8453:0xAb58…` (Solana with the genesis-hash chain ID)           |
+| `chain_id`   | The CAIP-2 chain ID of the sign-in                                                                               |
 
-`sub` leaves out the chain on purpose: `eip155:0x…` (lowercase) for an EVM wallet on any network, `solana:<address>` for a Solana wallet under either form of its chain ID. Signing in on Base instead of Ethereum does not create a second user at the provider. To use your own user IDs, bind them to the session with `sessionStore.bindSubject(id, userId)` after sign-in, or return them from `jwt.subject`. Extra claims come from `jwt.claims`; the claims in the table are reserved.
+`sub` leaves out the chain for a wallet that signs with its own key: `eip155:0x…` (lowercase) for an EVM wallet on any network, `solana:<address>` for a Solana wallet under either form of its chain ID. Signing in on Base instead of Ethereum does not create a second user at the provider. A smart contract wallet (Safe, Coinbase Smart Wallet / Base Account, other ERC-4337 accounts) keeps its chain, `eip155:8453:0x…`: its owners are set on each chain separately, so the same address on another network can belong to someone else, and the provider must not treat it as the same user. When your app links several wallets or networks to one account, bind its user ID to the session with `sessionStore.bindSubject(id, userId)` after sign-in, or return it from `jwt.subject`. Extra claims come from `jwt.claims`; the claims in the table are reserved.
 
 ---
 
