@@ -1774,7 +1774,7 @@ function templateFor(o: StackOptions): StackTemplate {
     return { name: 'nextjs-evm', note: 'EVM only, with SIWX sign-in.' };
   }
   if (o.solana && !o.evm) {
-    return { name: 'nextjs-solana', note: 'Solana only, with a Codama program.' };
+    return { name: 'nextjs-solana', note: 'Solana only, with SIWX sign-in and a Codama program.' };
   }
   return {
     name: 'nextjs-tuwa',
