@@ -2411,6 +2411,12 @@ components:
                   - "null"
               featured:
                 type: boolean
+              markupBps:
+                type: number
+                description: Costs this much more than the total, in basis points.
+              discountBps:
+                type: number
+                description: Costs this much less than the total, in basis points.
             required:
               - id
               - name
@@ -2420,6 +2426,11 @@ components:
               - decimals
               - gasless
               - featured
+              - markupBps
+              - discountBps
+        quoteTtlSeconds:
+          type: number
+          description: How long a locked quote holds, in seconds.
         quote:
           $ref: "#/components/schemas/CheckoutQuote"
         autoCharge:
@@ -2581,6 +2592,7 @@ components:
         - invoice
         - buyer
         - methods
+        - quoteTtlSeconds
         - quote
         - autoCharge
       description: What a checkout token opens.
