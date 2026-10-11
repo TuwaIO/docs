@@ -1865,6 +1865,9 @@ components:
           type:
             - string
             - "null"
+        featured:
+          type: boolean
+          description: Marked "Popular" in the checkout.
       required:
         - id
         - object
@@ -1880,6 +1883,7 @@ components:
         - discount
         - finality
         - gasless
+        - featured
     SubscriptionStart:
       type: object
       properties:
@@ -2099,14 +2103,103 @@ components:
               type:
                 - string
                 - "null"
+              description: http(s) link.
             supportEmail:
               type:
                 - string
                 - "null"
+            logo:
+              type: boolean
+              description: Whether `GET /v1/payments/checkout/{token}/logo` serves a logo.
+            seller:
+              type:
+                - object
+                - "null"
+              properties:
+                legalName:
+                  type:
+                    - string
+                    - "null"
+                tradingName:
+                  type:
+                    - string
+                    - "null"
+                address:
+                  type:
+                    - string
+                    - "null"
+                country:
+                  type:
+                    - string
+                    - "null"
+                registrationNumber:
+                  type:
+                    - string
+                    - "null"
+                taxId:
+                  type:
+                    - string
+                    - "null"
+              required:
+                - legalName
+                - tradingName
+                - address
+                - country
+                - registrationNumber
+                - taxId
+              description: The seller as the invoice document names them.
+            links:
+              type: object
+              properties:
+                terms:
+                  type:
+                    - string
+                    - "null"
+                refundPolicy:
+                  type:
+                    - string
+                    - "null"
+                privacy:
+                  type:
+                    - string
+                    - "null"
+              required:
+                - terms
+                - refundPolicy
+                - privacy
+              description: The merchant's policies; http(s) links only.
+            fundingUrl:
+              type:
+                - string
+                - "null"
+              description: A page where buyers get the token, for a wallet with too little.
           required:
             - name
             - website
             - supportEmail
+            - logo
+            - seller
+            - links
+            - fundingUrl
+          description: Who is paid and on what terms.
+        theme:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum:
+                - system
+                - light
+                - dark
+            accentColor:
+              type:
+                - string
+                - "null"
+              description: "`#rrggbb`; `null` for the default."
+          required:
+            - mode
+            - accentColor
+          description: The look the merchant chose; `system` follows the buyer device.
         invoice:
           type: object
           properties:
@@ -2174,6 +2267,90 @@ components:
               type:
                 - string
                 - "null"
+            amountPaid:
+              type:
+                - string
+                - "null"
+              description: Base units of the quoted asset received so far.
+            review:
+              type:
+                - object
+                - "null"
+              properties:
+                reason:
+                  type: string
+                  enum:
+                    - screening
+                    - late
+                    - overpaid
+              required:
+                - reason
+              description: Why a payment waits for, or was flagged to, the seller.
+            refundedTotalMinor:
+              type:
+                - string
+                - "null"
+              description: Refunded, in minor units (cents).
+            replacedBy:
+              type:
+                - object
+                - "null"
+              properties:
+                number:
+                  type:
+                    - string
+                    - "null"
+                checkoutToken:
+                  type:
+                    - string
+                    - "null"
+              required:
+                - number
+                - checkoutToken
+              description: The invoice that replaced this one after a correction; its checkout token while payable.
+            subscription:
+              type:
+                - object
+                - "null"
+              properties:
+                status:
+                  $ref: "#/components/schemas/SubscriptionStatus"
+                interval:
+                  type: string
+                  enum:
+                    - day
+                    - week
+                    - month
+                    - year
+                intervalCount:
+                  type: number
+                period:
+                  type: number
+                periodStart:
+                  type: string
+                periodEnd:
+                  type: string
+                cycles:
+                  type:
+                    - number
+                    - "null"
+                endsAt:
+                  type:
+                    - string
+                    - "null"
+                cancelAtPeriodEnd:
+                  type: boolean
+              required:
+                - status
+                - interval
+                - intervalCount
+                - period
+                - periodStart
+                - periodEnd
+                - cycles
+                - endsAt
+                - cancelAtPeriodEnd
+              description: The subscription period this invoice bills.
           required:
             - id
             - number
@@ -2187,6 +2364,11 @@ components:
             - dueAt
             - successUrl
             - cancelUrl
+            - amountPaid
+            - review
+            - refundedTotalMinor
+            - replacedBy
+            - subscription
         buyer:
           type: object
           properties:
@@ -2227,6 +2409,8 @@ components:
                 type:
                   - string
                   - "null"
+              featured:
+                type: boolean
             required:
               - id
               - name
@@ -2235,6 +2419,7 @@ components:
               - assetId
               - decimals
               - gasless
+              - featured
         quote:
           $ref: "#/components/schemas/CheckoutQuote"
         autoCharge:
@@ -2392,6 +2577,7 @@ components:
       required:
         - object
         - merchant
+        - theme
         - invoice
         - buyer
         - methods
@@ -4479,6 +4665,51 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "404":
           description: "`receipt_not_issued`, `checkout_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: "`rate_limited`: 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+  /v1/payments/checkout/{token}/logo:
+    get:
+      tags:
+        - Checkout
+      summary: Get the merchant's logo
+      description: "The merchant's PNG or JPEG logo; any site may show it. No key: the token opens this invoice only; a
+        browser may call from the app's domains (any, when it lists none)."
+      parameters:
+        - schema:
+            type: string
+            description: The checkout token of the invoice.
+          required: true
+          description: The checkout token of the invoice.
+          name: token
+          in: path
+      responses:
+        "200":
+          description: The image, cacheable for five minutes.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: "`origin_not_allowed`, `payments_disabled`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "404":
+          description: "`logo_not_set`, `checkout_not_found`."
           content:
             application/json:
               schema:
