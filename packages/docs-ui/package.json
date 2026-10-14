@@ -15,6 +15,11 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
+    "./policies": {
+      "types": "./dist/policies.d.ts",
+      "import": "./dist/policies.js",
+      "require": "./dist/policies.cjs"
+    },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
   },
@@ -24,6 +29,9 @@
   "files": [
     "dist",
     "socket.json"
+  ],
+  "sideEffects": [
+    "*.css"
   ],
   "scripts": {
     "build": "tsup && pnpm exec postcss src/styles/general.css -o ./dist/index.css"
@@ -52,7 +60,7 @@
     }
   ],
   "dependencies": {
-    "@tuwaio/nova-core": "^0.9.0",
+    "@tuwaio/nova-core": "^0.9.1",
     "clsx": "^2.1.1",
     "html-react-parser": "^6.1.8",
     "tailwind-merge": "^3.7.0"

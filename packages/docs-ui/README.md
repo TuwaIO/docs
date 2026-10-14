@@ -13,7 +13,7 @@
 - **Logo:** `RemoteLogo` is an async React Server Component that fetches an SVG (by default the TUWA logo) and renders it as React elements, so it takes `className` and `currentColor`.
 - **Theme switch:** `ThemeSwitcher` is a light/dark switch for any theme state (for example `next-themes`).
 - **Decoration:** `Orb` (an animated sphere in the brand color of a TUWA project), `StarryBackground` (an animated star field on a canvas) and `NoSSR` (renders its children only on the client).
-- **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy, and `PolicyDocument` renders it with the date of the version, a Download PDF button, anchored sections and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs).
+- **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy, and `PolicyDocument` renders it with the date of the version, a Download PDF button, anchored sections and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs). Code that needs only the list or `loadPolicy` (footers, sitemaps, route handlers) imports them from `@tuwaio/docs-ui/policies`, which has no React, Next.js or Nextra imports.
 - **Stylesheet:** `dist/index.css` contains the `--tuwa-*` theme variables of [`@tuwaio/nova-core`](https://stories.tuwa.io/?path=/docs/packages-nova-core-overview--docs) (light and `.dark`), the styles of the Nextra parts and the Tailwind CSS v4 utilities used by the components, prefixed with `tuwadocs:`.
 
 ---
@@ -95,10 +95,10 @@ export default async function RefundPage() {
 }
 ```
 
-Footers list the policies in force:
+Footers list the policies in force (`@tuwaio/docs-ui/policies` has only the policy data, so a footer does not pull in the Nextra parts):
 
 ```tsx
-import { footerPolicies } from '@tuwaio/docs-ui';
+import { footerPolicies } from '@tuwaio/docs-ui/policies';
 
 export function PolicyLinks() {
   return (

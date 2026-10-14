@@ -52,7 +52,7 @@ minimumReleaseAgeExclude:
   - '@scalar/types@0.22.2 || 0.22.4'
   - '@scalar/use-hooks@0.4.16 || 0.4.17'
   - '@scalar/workspace-store@0.67.1 || 0.68.0'
-  - '@tuwaio/nova-core@0.7.1 || 0.7.3 || 0.8.0 || 0.8.1 || 0.9.0'
+  - '@tuwaio/nova-core@0.7.1 || 0.7.3 || 0.8.0 || 0.8.1 || 0.9.0 || 0.9.1'
   - next@16.3.7
   - globals@17.13.0
   - '@scalar/code-highlight@0.4.8'
