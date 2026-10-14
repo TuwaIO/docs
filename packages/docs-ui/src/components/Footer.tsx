@@ -1,4 +1,4 @@
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { Footer as NextraFooter } from 'nextra-theme-docs';
 
 import { footerPolicies, getPolicyPageUrl, POLICIES_INDEX_URL } from '../policies';

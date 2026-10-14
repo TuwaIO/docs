@@ -1,4 +1,4 @@
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { Navbar as NextraNavbar } from 'nextra-theme-docs';
 import { ReactNode } from 'react';
 

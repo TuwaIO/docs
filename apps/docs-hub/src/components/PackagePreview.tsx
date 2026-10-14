@@ -1,7 +1,7 @@
 'use client';
 
 import { CursorArrowRaysIcon } from '@heroicons/react/24/outline';
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import type { Ref } from 'react';
 
 import type { PackageDetails } from '../lib/packages';

@@ -7,7 +7,7 @@ import type {
   ConnectCardCustomization,
   ConnectedModalCustomization,
 } from '@tuwaio/sdk/nova-connect/components';
-import { cn } from '@tuwaio/sdk/nova-core';
+import { cn } from '@tuwaio/sdk/nova-core/utils';
 import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';
 import type { NovaTransactionsProviderProps } from '@tuwaio/sdk/nova-transactions/providers';
 import type { Transaction } from '@tuwaio/sdk/pulsar';

@@ -1,7 +1,7 @@
 'use client';
 
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { useState } from 'react';
 
 import type { GeneratedFile } from '@/lib/configurator/generate';

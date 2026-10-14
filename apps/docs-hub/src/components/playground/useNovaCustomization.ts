@@ -3,7 +3,7 @@
 import type { NovaConnectProviderCustomization } from '@tuwaio/sdk/nova-connect';
 import type { ConnectButtonCustomization, WalletIconCustomization } from '@tuwaio/sdk/nova-connect/components';
 import { ukrainianLabels } from '@tuwaio/sdk/nova-connect/i18n';
-import { deepMerge } from '@tuwaio/sdk/nova-core';
+import { deepMerge } from '@tuwaio/sdk/nova-core/utils';
 import {
   defaultLabels as englishTransactionsLabels,
   type TransactionsHistoryCustomization,

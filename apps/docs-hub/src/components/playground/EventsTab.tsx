@@ -1,6 +1,6 @@
 'use client';
 
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { useState } from 'react';
 import { useStore } from 'zustand';
 

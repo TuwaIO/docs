@@ -236,7 +236,7 @@ export function customizationCode(customization: NovaCustomization): string {
     "import type { NovaConnectProviderPropsWithCustomization } from '@tuwaio/sdk/nova-connect';",
     "import type { ConnectButtonCustomization } from '@tuwaio/sdk/nova-connect/components';",
     uk && "import { ukrainianLabels } from '@tuwaio/sdk/nova-connect/i18n';",
-    usesDeepMerge && "import { deepMerge } from '@tuwaio/sdk/nova-core';",
+    usesDeepMerge && "import { deepMerge } from '@tuwaio/sdk/nova-core/utils';",
     "import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';",
     "import type { NovaTransactionsProviderProps } from '@tuwaio/sdk/nova-transactions/providers';",
     "import type { Transaction } from '@tuwaio/sdk/pulsar';",

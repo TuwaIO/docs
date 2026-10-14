@@ -1,5 +1,5 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import parse, { type DOMNode, Element } from 'html-react-parser';
 
 import { getPolicyFileUrl, POLICY_SOURCE, type PolicyContent, type PolicySlug } from '../policies';

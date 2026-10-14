@@ -6,7 +6,7 @@ import {
   ChevronDownIcon,
   DevicePhoneMobileIcon,
 } from '@heroicons/react/24/outline';
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { useState } from 'react';
 import { useStore } from 'zustand';
