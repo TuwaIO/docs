@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.1...docs-ui-v0.3.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* updated docs-ui build ([a186841](https://github.com/TuwaIO/docs/commit/a186841b961a16b1fb68b2ede36de2850270c849))
+
 ## [0.3.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.0...docs-ui-v0.3.1) (2026-10-14)
 
 
