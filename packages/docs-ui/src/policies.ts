@@ -94,7 +94,6 @@ export const policies: readonly Policy[] = [
     description: 'How we process the personal data of your app users on your behalf when you use Quasar Cloud.',
     href: '/dpa',
     published: true,
-    footer: false,
   },
 ];
 
