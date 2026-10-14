@@ -159,27 +159,6 @@ export function DocCard({
                     </span>
                   )}
                 </div>
-
-                {/* Right: Clean, aligned badges (Socket, Downloads, Size) */}
-                {isNpmPkg && (
-                  <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
-                    <img
-                      src={`https://socket.dev/api/badge/npm/package/${pkg.name}`}
-                      alt={`${pkg.name} Socket security score`}
-                      className="h-4 2xl:h-4.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
-                    />
-                    <img
-                      src={`https://img.shields.io/npm/dm/${pkg.name}.svg?style=flat-square&colorB=5e6ad2`}
-                      alt={`${pkg.name} monthly downloads`}
-                      className="h-4 2xl:h-4.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
-                    />
-                    <img
-                      src={`https://img.shields.io/npm/unpacked-size/${pkg.name}?style=flat-square&colorB=3b82f6&label=size`}
-                      alt={`${pkg.name} size`}
-                      className="h-4 2xl:h-4.5 opacity-80 group-hover/badge:opacity-100 transition-opacity rounded-[2px]"
-                    />
-                  </div>
-                )}
               </>
             );
 

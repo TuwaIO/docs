@@ -24,7 +24,7 @@ The **`nextjs-tuwa-quasar`** [starter template](/guides/starter-templates) is a 
 ## Before You Start
 
 - **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `sessionStore` of Step 3. The browser never sees the Quasar key: it calls your Server Actions, and they check the SIWX session cookie.
-- **A Quasar app and its secret key** ([Apps & Keys](/quasar/apps-and-keys)), in `QUASAR_SECRET_KEY` on the server. For a [self-hosted node](/quasar/self-hosting), put the URL of its API in `NEXT_PUBLIC_QUASAR_BASE_URL`; without it, the code uses Quasar Cloud.
+- **A Quasar app and its secret key** ([Apps & Keys](/quasar/apps-and-keys)), in `QUASAR_SECRET_KEY` on the server. In Quasar Cloud, also add your RPC provider to the app: Quasar Cloud tracks transactions only through it. For a [self-hosted node](/quasar/self-hosting), put the URL of its API in `NEXT_PUBLIC_QUASAR_BASE_URL`; without it, the code uses Quasar Cloud.
 
 ---
 
@@ -175,6 +175,26 @@ export const useHistoryStore = createBoundedUseStore(historyStore);
 </Tabs>
 
 `preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
+
+### EIP-5792 batches
+
+If your app sends batches of calls with `wallet_sendCalls` and tracks them with `TransactionTracker.EIP5792`, Pulsar syncs each batch by its batch ID, and only the wallet knows the hash of the transaction that executed it. Send that hash to Quasar, which then tracks the batch on-chain; a batch whose hash never arrives is marked `Failed` an hour after the sync. Add an action next to the others, with the same session check:
+
+```ts filename="src/app/quasarActions.ts"
+export async function syncBatchHash(tx: Transaction & { hash: `0x${string}` }) {
+  const session = await getSession();
+  if (!session || !isSessionMatchingTarget(session, tx.from, tx.chainId)) return;
+  await quasar.pulsar.syncHash(tx.txKey, tx.hash);
+}
+```
+
+Then watch the store in the browser, once, next to where you create it (`@tuwaio/quasar-sdk` 0.6 or later):
+
+```ts
+import { watchBatchHashes } from '@tuwaio/quasar-sdk';
+
+watchBatchHashes(pulsarStore, (tx) => syncBatchHash(tx));
+```
 
 ---
 

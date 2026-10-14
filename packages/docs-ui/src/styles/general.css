@@ -283,6 +283,112 @@ article .nextra-border a:hover {
   color: var(--tuwa-secondary) !important;
 }
 
+/* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security */
+.tuwadocs-policy-title {
+  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.tuwadocs-policy {
+  color: var(--tuwa-text-secondary);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.tuwadocs-policy > * + * {
+  margin-top: 1rem;
+}
+
+.tuwadocs-policy h2,
+.tuwadocs-policy h3 {
+  color: var(--tuwa-text-primary);
+  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  scroll-margin-top: 6rem;
+}
+
+.tuwadocs-policy h2 {
+  margin-top: 2.5rem;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.tuwadocs-policy h3 {
+  margin-top: 1.75rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.tuwadocs-policy ul,
+.tuwadocs-policy ol {
+  padding-left: 1.25rem;
+}
+
+.tuwadocs-policy ul {
+  list-style: disc;
+}
+
+.tuwadocs-policy ol {
+  list-style: decimal;
+}
+
+.tuwadocs-policy li + li {
+  margin-top: 0.5rem;
+}
+
+.tuwadocs-policy strong {
+  color: var(--tuwa-text-primary);
+  font-weight: 600;
+}
+
+.tuwadocs-policy a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+
+.tuwadocs-policy table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.tuwadocs-policy th,
+.tuwadocs-policy td {
+  border: 1px solid var(--tuwa-border-primary);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tuwadocs-policy th {
+  background: var(--tuwa-bg-muted);
+  color: var(--tuwa-text-primary);
+  font-weight: 600;
+}
+
+.tuwadocs-policy blockquote {
+  border-left: 3px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-muted);
+  padding: 0.75rem 1rem;
+}
+
+.tuwadocs-policy blockquote > * + * {
+  margin-top: 0.5rem;
+}
+
+.tuwadocs-policy code {
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-muted);
+  padding: 0.1em 0.35em;
+  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+}
+
 .tuwa-button {
   @apply tuwadocs:inline-flex tuwadocs:items-center tuwadocs:px-4 tuwadocs:py-2 tuwadocs:border tuwadocs:border-transparent tuwadocs:text-sm tuwadocs:font-medium tuwadocs:rounded-[var(--tuwa-rounded-corners)];
   background: var(--tuwa-gradient);

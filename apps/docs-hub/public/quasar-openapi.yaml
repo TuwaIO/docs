@@ -204,7 +204,10 @@ components:
         - gelato
         - solana
         - erc4337
-      description: The tracking strategy used for monitoring the transaction.
+        - eip5792
+      description: "The tracking strategy used for monitoring the transaction. `eip5792`: a batch of calls sent with
+        `wallet_sendCalls`, synced by its batch ID and tracked on-chain once the app sends the hash of its transaction
+        (`POST /v1/engine/pulsar/sync/{txKey}/hash`)."
     SolanaTransaction:
       type: object
       properties:
@@ -311,6 +314,19 @@ components:
         slot:
           type: number
           description: Slot in which the transaction was processed.
+        confirmationStatus:
+          type: string
+          enum:
+            - processed
+            - confirmed
+            - finalized
+          description: Commitment the transaction reached. Quasar records `confirmed` once a supermajority voted on it and
+            `finalized` when it marks it `Success`.
+        lastValidBlockHeight:
+          type: integer
+          description: Last block height at which the blockhash of the transaction is valid (saved by `signAndSendSolanaTx` of
+            `@tuwaio/pulsar-solana`). When the chain passes it and the signature is still unknown, Quasar marks the
+            transaction `Failed` as expired; without it, after one hour.
       required:
         - chainId
         - from
@@ -476,6 +492,38 @@ components:
         - success
         - txKey
         - mode
+    BatchHashRequest:
+      type: object
+      properties:
+        hash:
+          type: string
+          pattern: ^0x[a-fA-F0-9]{64}$
+          description: Hash of the transaction that executed the batch.
+          example: "0xabababababababababababababababababababababababababababababababab"
+      required:
+        - hash
+    BatchHashResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          enum:
+            - true
+        txKey:
+          type: string
+          description: The batch ID.
+        hash:
+          type: string
+          description: The hash Quasar tracks the batch by.
+        duplicate:
+          type: boolean
+          enum:
+            - true
+          description: Quasar already had this hash.
+      required:
+        - success
+        - txKey
+        - hash
     HealthResponse:
       type: object
       properties:
@@ -592,6 +640,82 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
           description: Public key (read-only), disabled app, or IP address or origin not allowed by the app settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: The app has no provider to track this transaction, such as an RPC endpoint, an Alchemy key or a QuickNode
+            key for its chain; nothing is stored. Quasar Cloud tracks transactions only through the providers of the
+            app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Too many requests per second for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/pulsar/sync/{txKey}/hash:
+    post:
+      summary: Send the hash of an EIP-5792 batch
+      description: "Sends the hash of the transaction that executed an EIP-5792 batch (`tracker: eip5792`), which was synced
+        by its batch ID. Quasar then tracks the batch on-chain by the hash, like an Ethereum transaction; the record
+        keeps the batch ID as `txKey`. A batch whose hash never arrives is marked `Failed` an hour after it was synced.
+        Used by `quasar.pulsar.syncHash`; `watchBatchHashes` reads the hashes from a Pulsar store."
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      parameters:
+        - schema:
+            type: string
+            description: The batch ID, the `txKey` of the transaction.
+          required: true
+          description: The batch ID, the `txKey` of the transaction.
+          name: txKey
+          in: path
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchHashRequest"
+      responses:
+        "200":
+          description: "The hash is recorded and on-chain tracking started, or Quasar already had it (`duplicate: true`)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BatchHashResponse"
+        "400":
+          description: The hash is malformed, or the transaction is not an EIP-5792 batch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Public key (read-only), disabled app, or IP address or origin not allowed by the app settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The app has no transaction with this `txKey`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: The batch has another hash, or it is already final.
           content:
             application/json:
               schema:

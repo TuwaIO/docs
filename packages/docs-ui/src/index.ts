@@ -3,6 +3,8 @@ export * from './components/Logo';
 export * from './components/NavBar';
 export { default as NoSSR } from './components/NoSSR';
 export * from './components/Orb';
+export * from './components/PolicyDocument';
 export { default as StarryBackground } from './components/StarryBackground';
 export * from './components/ThemeSwitcher';
+export * from './policies';
 export * from './utils';

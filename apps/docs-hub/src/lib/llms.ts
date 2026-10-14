@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { getPolicyPageUrl, publishedPolicies } from '@tuwaio/docs-ui';
+
 import packageReadmes from '../generated/package-readmes.json';
 import { AXES, axisScore, COMPETITORS, CRITERIA, PRODUCTS, SEGMENTS, verifiedAsOf } from './comparisons';
 import { layers } from './ecosystem';
@@ -130,6 +132,11 @@ ${sectionLists(pages)}
 ## Comparisons
 
 - [Why TUWA: Comparisons & Ecosystem Radar](${SITE_URL}/comparisons): TUWA against ${COMPETITORS.map((product) => product.name).join(', ')} on self-custody, openness, cost at scale, transaction lifecycle, onboarding and chain coverage, with a source for every fact
+
+## Policies
+
+- [All policies](${SITE_URL}/policies): The TUWA policies in force, with their PDFs
+${publishedPolicies.map((policy) => `- [${policy.title}](${getPolicyPageUrl(policy.slug)}): ${policy.description}`).join('\n')}
 
 ## Packages
 

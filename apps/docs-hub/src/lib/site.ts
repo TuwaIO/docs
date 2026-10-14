@@ -16,7 +16,7 @@ export const TUWA_SUMMARY =
 export const TUWA_AGENTS_URL = 'https://raw.githubusercontent.com/TuwaIO/workflows/main/TUWA_AGENTS.md';
 
 export const OG_IMAGE = {
-  url: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/preview-logo.png',
+  url: 'https://tuwa.io/brand/preview-logo.png',
   width: 1200,
   height: 630,
 };
@@ -27,7 +27,7 @@ export const ORGANIZATION = {
   '@id': 'https://tuwa.io/#organization',
   name: 'TUWA',
   url: 'https://tuwa.io',
-  logo: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/web-app-manifest-512x512.png',
+  logo: 'https://tuwa.io/brand/web-app-manifest-512x512.png',
   sameAs: [
     'https://github.com/TuwaIO',
     'https://x.com/tuwa_io',

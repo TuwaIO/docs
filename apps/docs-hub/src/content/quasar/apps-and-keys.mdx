@@ -51,6 +51,8 @@ Both environments track transactions the same way.
 
 The app settings also hold your own RPC endpoints and provider keys (Alchemy, QuickNode, Pimlico, Gelato) for the trackers; Quasar stores them encrypted and refuses private and loopback RPC hosts.
 
+**In Quasar Cloud, add your RPC provider before you sync transactions**: an RPC endpoint for each chain, an Alchemy key or a QuickNode key. Quasar Cloud reads transactions only through the providers of the app, and it tracks ERC-4337 user operations with your Pimlico key or bundler URL and Gelato tasks with your Gelato key. A transaction the app has no provider for is refused with `422 Unprocessable Entity` and an explanation, and nothing is stored; so are Safe multisig transactions, which Quasar Cloud does not track for now. A Community Edition node can also fall back to keys and public endpoints set by its operator, and tracks Safe transactions through the public Safe Transaction Service.
+
 ---
 
 ## 🏢 Isolation Between Apps
