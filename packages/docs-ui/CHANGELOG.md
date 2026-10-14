@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.2...docs-ui-v0.3.3) (2026-10-14)
+
+
+### Bug Fixes
+
+* helpers of Nova Core from @tuwaio/nova-core/utils in docs-ui and the hub ([56e630c](https://github.com/TuwaIO/docs/commit/56e630c17130e5c5519cf5d1af4c1264ced680bd))
+
 ## [0.3.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.1...docs-ui-v0.3.2) (2026-10-14)
 
 
