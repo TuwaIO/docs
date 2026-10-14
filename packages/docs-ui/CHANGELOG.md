@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.0...docs-ui-v0.3.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* footer with policies ([d7b89c4](https://github.com/TuwaIO/docs/commit/d7b89c40d28535e2d5e053aac8a18e27e30a97f9))
+
 ## [0.3.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.2.0...docs-ui-v0.3.0) (2026-10-14)
 
 
