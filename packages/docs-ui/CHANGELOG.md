@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.2.0...docs-ui-v0.3.0) (2026-10-14)
+
+
+### Features
+
+* new page for policies ([3f4cd8b](https://github.com/TuwaIO/docs/commit/3f4cd8bb610bfdc702f7048f0f65f80bdfa9733f))
+
 ## [0.2.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.1.1...docs-ui-v0.2.0) (2026-10-10)
 
 
