@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.3...docs-ui-v0.4.0) (2026-10-15)
+
+
+### Features
+
+* updated packages and added bin script ([68a0883](https://github.com/TuwaIO/docs/commit/68a088314438793e2468a30aa201f9d4e560527a))
+
 ## [0.3.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.2...docs-ui-v0.3.3) (2026-10-14)
 
 
