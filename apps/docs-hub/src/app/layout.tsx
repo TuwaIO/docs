@@ -1,5 +1,6 @@
 import './globals.css';
 
+import { PreferenceExpiry } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Head } from 'nextra/components';
@@ -83,7 +84,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
           The background colors are those of the body below. */}
-      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }} />
+      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }}>
+        {/* Before the theme script of next-themes and the tabs of Nextra: the theme and the guide tab are kept 30 days
+            after they are chosen (Cookie Policy) */}
+        <PreferenceExpiry keys={['theme', 'tuwa-guide-network']} />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
       >

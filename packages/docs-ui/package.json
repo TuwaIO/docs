@@ -8,12 +8,15 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "tuwa-docs-search-index": "./bin/search-index.js"
+  },
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
     "./policies": {
       "types": "./dist/policies.d.ts",
@@ -27,6 +30,7 @@
     "access": "public"
   },
   "files": [
+    "bin",
     "dist",
     "socket.json"
   ],
@@ -75,17 +79,17 @@
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "autoprefixer": "^10.6.1",
-    "next": "16.3.7",
+    "next": "16.4.1",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.30",
     "postcss-cli": "^12.0.0",
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "tailwindcss": "^4.3.3",
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "typescript": "6.0.3"
   }
 }

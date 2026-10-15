@@ -7,4 +7,5 @@ export * from './components/PolicyDocument';
 export { default as StarryBackground } from './components/StarryBackground';
 export * from './components/ThemeSwitcher';
 export * from './policies';
+export * from './preferences';
 export * from './utils';

@@ -19,19 +19,19 @@ minimumReleaseAgeExclude:
   - postcss@8.5.19
   - typescript-eslint@8.64.0
   - '@types/react@19.3.0'
-  - react@19.3.0
+  - react@19.3.0 || 19.3.1
   - '@types/react-dom@19.3.0'
-  - react-dom@19.3.0
+  - react-dom@19.3.0 || 19.3.1
   - scheduler@0.28.0
-  - '@next/env@16.3.7'
-  - '@next/swc-darwin-arm64@16.3.7'
-  - '@next/swc-darwin-x64@16.3.7'
-  - '@next/swc-linux-arm64-gnu@16.3.7'
-  - '@next/swc-linux-arm64-musl@16.3.7'
-  - '@next/swc-linux-x64-gnu@16.3.7'
-  - '@next/swc-linux-x64-musl@16.3.7'
-  - '@next/swc-win32-arm64-msvc@16.3.7'
-  - '@next/swc-win32-x64-msvc@16.3.7'
+  - '@next/env@16.3.7 || 16.4.1'
+  - '@next/swc-darwin-arm64@16.3.7 || 16.4.1'
+  - '@next/swc-darwin-x64@16.3.7 || 16.4.1'
+  - '@next/swc-linux-arm64-gnu@16.3.7 || 16.4.1'
+  - '@next/swc-linux-arm64-musl@16.3.7 || 16.4.1'
+  - '@next/swc-linux-x64-gnu@16.3.7 || 16.4.1'
+  - '@next/swc-linux-x64-musl@16.3.7 || 16.4.1'
+  - '@next/swc-win32-arm64-msvc@16.3.7 || 16.4.1'
+  - '@next/swc-win32-x64-msvc@16.3.7 || 16.4.1'
   - '@scalar/agent-chat@0.12.38 || 0.12.40'
   - '@scalar/api-client@3.21.2 || 3.21.4'
   - '@scalar/api-reference-react@0.9.75 || 0.9.77'
@@ -53,7 +53,7 @@ minimumReleaseAgeExclude:
   - '@scalar/use-hooks@0.4.16 || 0.4.17'
   - '@scalar/workspace-store@0.67.1 || 0.68.0'
   - '@tuwaio/nova-core@0.7.1 || 0.7.3 || 0.8.0 || 0.8.1 || 0.9.0 || 0.9.1 || 0.9.3'
-  - next@16.3.7
+  - next@16.3.7 || 16.4.1
   - globals@17.13.0
   - '@scalar/code-highlight@0.4.8'
   - '@scalar/validation@0.6.6'
@@ -79,9 +79,13 @@ minimumReleaseAgeExclude:
   - '@tuwaio/pulsar-solana@0.9.0 || 0.9.1 || 0.10.0'
   - '@tuwaio/satellite-core@0.7.0 || 0.8.0 || 0.9.0'
   - '@tuwaio/satellite-evm@0.7.0 || 0.8.0 || 0.9.0'
-  - '@tuwaio/satellite-react@0.7.0 || 0.8.0 || 0.9.0'
+  - '@tuwaio/satellite-react@0.7.0 || 0.8.0 || 0.9.0 || 0.9.1'
   - '@tuwaio/satellite-solana@0.7.0 || 0.8.0 || 0.9.0'
   - '@tuwaio/quasar-sdk@0.3.0'
+  - '@vitest/mocker@5.0.5'
+  - '@vitest/spy@5.0.5'
+  - viem@2.57.7
+  - vitest@5.0.5
 syncInjectedDepsAfterScripts:
   - build
 overrides:
