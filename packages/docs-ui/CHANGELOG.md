@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.0...docs-ui-v0.4.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* updated packages and playground ([d6fa2fe](https://github.com/TuwaIO/docs/commit/d6fa2fe3004ecf7ea15078febd40845d81655151))
+
 ## [0.4.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.3...docs-ui-v0.4.0) (2026-10-15)
 
 
