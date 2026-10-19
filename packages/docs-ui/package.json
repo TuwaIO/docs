@@ -1,19 +1,27 @@
 {
   "name": "@tuwaio/docs-ui",
-  "version": "0.2.0",
+  "version": "0.4.1",
   "private": false,
   "author": "Oleksandr Tkach",
   "license": "Apache-2.0",
-  "description": "Shared UI of the TUWA documentation sites: Nextra navbar and footer, remote logo, theme switcher, background effects and styles.",
+  "description": "Shared UI of the TUWA documentation sites: Nextra navbar and footer, remote logo, theme switcher, background effects, policy pages and styles.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "tuwa-docs-search-index": "./bin/search-index.js"
+  },
   "type": "module",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
+    },
+    "./policies": {
+      "types": "./dist/policies.d.ts",
+      "import": "./dist/policies.js",
+      "require": "./dist/policies.cjs"
     },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
@@ -22,8 +30,12 @@
     "access": "public"
   },
   "files": [
+    "bin",
     "dist",
     "socket.json"
+  ],
+  "sideEffects": [
+    "*.css"
   ],
   "scripts": {
     "build": "tsup && pnpm exec postcss src/styles/general.css -o ./dist/index.css"
@@ -52,7 +64,7 @@
     }
   ],
   "dependencies": {
-    "@tuwaio/nova-core": "^0.9.0",
+    "@tuwaio/nova-core": "^0.10.0",
     "clsx": "^2.1.1",
     "html-react-parser": "^6.1.8",
     "tailwind-merge": "^3.7.0"
@@ -67,17 +79,17 @@
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "autoprefixer": "^10.6.1",
-    "next": "16.3.7",
+    "next": "16.4.1",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "postcss": "^8.5.28",
+    "postcss": "^8.5.30",
     "postcss-cli": "^12.0.0",
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "tailwindcss": "^4.3.3",
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "typescript": "6.0.3"
   }
 }

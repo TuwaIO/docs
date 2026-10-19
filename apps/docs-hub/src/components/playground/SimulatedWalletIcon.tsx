@@ -1,7 +1,7 @@
 'use client';
 
 import type { WalletIconFallbackIconProps } from '@tuwaio/sdk/nova-connect/components';
-import { cn } from '@tuwaio/sdk/nova-core';
+import { cn } from '@tuwaio/sdk/nova-core/utils';
 
 import { walletIconOf } from '@/lib/playground/wallets';
 

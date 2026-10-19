@@ -214,7 +214,7 @@ export const TUWA: Product = {
   summary: 'Headless, open-source packages for sign-in, wallet connection and transaction tracking, plus Quasar.',
   license: 'Apache-2.0',
   pricing: {
-    text: 'Client packages free. Quasar Cloud: $0.002 per unit, 100 free units. Community Edition: free.',
+    text: 'Client packages free. Quasar Cloud: free public beta, 1,000 free quota units per organization. Community Edition: free.',
     sourceUrl: TUWA_SOURCES.pricing,
     checkedAt: CHECKED,
   },
@@ -245,12 +245,12 @@ export const TUWA: Product = {
     ),
     'free-to-ship': fact(
       'yes',
-      'The client packages are free; Quasar Cloud starts with 100 free units.',
+      'The client packages are free; Quasar Cloud is free during its public beta, with 1,000 free quota units per organization.',
       TUWA_SOURCES.pricing,
     ),
     'no-mau-billing': fact(
       'yes',
-      'Quasar Cloud bills quota units per tracked transaction and webhook delivery.',
+      'Quasar Cloud counts quota units per tracked transaction and webhook delivery, not users.',
       TUWA_SOURCES.pricing,
     ),
     'free-self-host': fact('yes', 'Community Edition: free, Apache-2.0.', TUWA_SOURCES.selfHosting),

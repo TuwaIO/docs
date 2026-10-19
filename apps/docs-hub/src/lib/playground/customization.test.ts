@@ -71,7 +71,7 @@ describe('Nova customization', () => {
 
   it('merges the parts into the style kit', () => {
     const code = customizationCode(everything);
-    expect(code).toContain("import { deepMerge } from '@tuwaio/sdk/nova-core';");
+    expect(code).toContain("import { deepMerge } from '@tuwaio/sdk/nova-core/utils';");
     expect(code).toContain(
       "import { monoConnect, monoConnectButton, monoHistory, monoTransactions } from './monoKit';",
     );

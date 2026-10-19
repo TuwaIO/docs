@@ -1,4 +1,4 @@
-import { cn } from '@tuwaio/sdk/nova-core';
+import { cn } from '@tuwaio/sdk/nova-core/utils';
 
 // Solana finalizes a transaction after 32 confirmations: the bar fills up to it when Nova passes no requirement
 const FINALIZED = 32;

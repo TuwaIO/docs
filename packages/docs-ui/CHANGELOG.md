@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.4.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.0...docs-ui-v0.4.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* updated packages and playground ([d6fa2fe](https://github.com/TuwaIO/docs/commit/d6fa2fe3004ecf7ea15078febd40845d81655151))
+
+## [0.4.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.3...docs-ui-v0.4.0) (2026-10-15)
+
+
+### Features
+
+* updated packages and added bin script ([68a0883](https://github.com/TuwaIO/docs/commit/68a088314438793e2468a30aa201f9d4e560527a))
+
+## [0.3.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.2...docs-ui-v0.3.3) (2026-10-14)
+
+
+### Bug Fixes
+
+* helpers of Nova Core from @tuwaio/nova-core/utils in docs-ui and the hub ([56e630c](https://github.com/TuwaIO/docs/commit/56e630c17130e5c5519cf5d1af4c1264ced680bd))
+
+## [0.3.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.1...docs-ui-v0.3.2) (2026-10-14)
+
+
+### Bug Fixes
+
+* updated docs-ui build ([a186841](https://github.com/TuwaIO/docs/commit/a186841b961a16b1fb68b2ede36de2850270c849))
+
+## [0.3.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.3.0...docs-ui-v0.3.1) (2026-10-14)
+
+
+### Bug Fixes
+
+* footer with policies ([d7b89c4](https://github.com/TuwaIO/docs/commit/d7b89c40d28535e2d5e053aac8a18e27e30a97f9))
+
+## [0.3.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.2.0...docs-ui-v0.3.0) (2026-10-14)
+
+
+### Features
+
+* new page for policies ([3f4cd8b](https://github.com/TuwaIO/docs/commit/3f4cd8bb610bfdc702f7048f0f65f80bdfa9733f))
+
 ## [0.2.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.1.1...docs-ui-v0.2.0) (2026-10-10)
 
 

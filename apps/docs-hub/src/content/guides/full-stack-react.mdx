@@ -396,6 +396,8 @@ export default function HomePage() {
 
 Open the app, connect a wallet and sign the message: the connect button shows the wallet, and the server has a session for it.
 
+Satellite Connect reconnects the last wallet after a reload. With the default `rememberWallet`, it keeps that wallet in `localStorage` until the user disconnects it. The TUWA templates and sites pass `rememberWallet={false}` to `SatelliteConnectProvider`: the wallet is kept in `sessionStorage`, only until the tab closes, unless the user ticks "Remember this wallet" in the connect modal of Nova Connect. Pick one and describe it in the cookie policy of your app.
+
 ---
 
 ## Step 6: Send a Tracked Transaction

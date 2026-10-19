@@ -126,7 +126,9 @@ export function PlaygroundSession({
   };
 
   return (
-    <SatelliteConnectProvider adapter={adapters} autoConnect={false}>
+    // rememberWallet={false}: the wallet is kept until the tab closes unless "Remember this wallet" is ticked
+    // (Cookie Policy of the TUWA sites)
+    <SatelliteConnectProvider adapter={adapters} autoConnect={false} rememberWallet={false}>
       <PlaygroundContext value={value}>
         <TransactionsPoolInitializer />
         {settings.quasar && <HistoryLoader />}

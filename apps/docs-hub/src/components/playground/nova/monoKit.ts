@@ -7,7 +7,7 @@ import type {
   ConnectCardCustomization,
   ConnectedModalCustomization,
 } from '@tuwaio/sdk/nova-connect/components';
-import { cn } from '@tuwaio/sdk/nova-core';
+import { cn } from '@tuwaio/sdk/nova-core/utils';
 import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';
 import type { NovaTransactionsProviderProps } from '@tuwaio/sdk/nova-transactions/providers';
 import type { Transaction } from '@tuwaio/sdk/pulsar';
@@ -210,6 +210,27 @@ export const monoConnect: NovaConnectProviderCustomization = {
                 statusData.state === 'error' ? text.error : statusData.state === 'success' ? text.accent : text.primary,
               ),
             errorMessage: () => cn(text.body, text.error, 'text-center text-sm leading-relaxed'),
+          },
+        },
+        rememberWallet: {
+          classNames: {
+            text: () => cn(text.body, text.primary, 'text-sm leading-tight'),
+            box: ({ checked }) =>
+              cn(
+                'relative flex h-[18px] w-[18px] shrink-0 items-center justify-center border transition-colors',
+                corners,
+                'peer-focus-visible:ring-[length:var(--tuwa-ring-width)] peer-focus-visible:ring-[var(--tuwa-text-accent)]',
+                checked
+                  ? 'border-[var(--tuwa-text-accent)] bg-[var(--tuwa-text-accent)]'
+                  : 'border-[var(--tuwa-border-primary)] bg-transparent group-hover:border-[var(--tuwa-text-accent)]',
+              ),
+            tooltip: () =>
+              cn(
+                'pointer-events-none absolute right-0 bottom-full z-20 mb-2 w-max max-w-[240px] px-3 py-2 text-left text-xs leading-snug shadow-lg',
+                corners,
+                text.body,
+                'bg-[var(--tuwa-text-primary)] text-[var(--tuwa-bg-primary)]',
+              ),
           },
         },
         legalDisclaimer: {

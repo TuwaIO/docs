@@ -1,7 +1,7 @@
 'use client';
 
 import { MoonIcon, SunIcon } from '@heroicons/react/24/solid';
-import { cn } from '@tuwaio/nova-core';
+import { cn } from '@tuwaio/nova-core/utils';
 import { useEffect, useState } from 'react';
 
 /**

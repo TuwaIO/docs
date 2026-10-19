@@ -1,5 +1,6 @@
 import './globals.css';
 
+import { PreferenceExpiry } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Head } from 'nextra/components';
@@ -25,9 +26,9 @@ export const metadata: Metadata = {
     'Central documentation gateway for the TUWA Web3 ecosystem. Explore SIWX, Orbit, Satellite, Pulsar, Nova, Quasar (managed cloud or self-hosted Community Edition), and the TUWA SDK.',
   manifest: '/manifest.json',
   icons: {
-    icon: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/icon0.svg',
-    shortcut: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/web-app-manifest-512x512.png',
-    apple: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/favicon/web-app-manifest-512x512.png',
+    icon: 'https://tuwa.io/brand/icon0.svg',
+    shortcut: 'https://tuwa.io/brand/web-app-manifest-512x512.png',
+    apple: 'https://tuwa.io/brand/web-app-manifest-512x512.png',
   },
   appleWebApp: {
     title: 'TUWA Docs Hub',
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
     siteName: 'TUWA Docs Hub',
     images: [
       {
-        url: 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/preview-logo.png',
+        url: 'https://tuwa.io/brand/preview-logo.png',
         width: 1200,
         height: 630,
       },
@@ -74,7 +75,7 @@ export const metadata: Metadata = {
     site: X_HANDLE,
     title: 'TUWA Docs Hub',
     description: 'Central documentation gateway for the TUWA Web3 ecosystem.',
-    images: ['https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/preview-logo.png'],
+    images: ['https://tuwa.io/brand/preview-logo.png'],
   },
 };
 
@@ -83,7 +84,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
           The background colors are those of the body below. */}
-      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }} />
+      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }}>
+        {/* Before the theme script of next-themes and the tabs of Nextra: the theme and the guide tab are kept 30 days
+            after they are chosen (Cookie Policy) */}
+        <PreferenceExpiry keys={['theme', 'tuwa-guide-network']} />
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
       >
