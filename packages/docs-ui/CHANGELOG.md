@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.1...docs-ui-v0.4.2) (2026-10-20)
+
+
+### Bug Fixes
+
+* update packages; vanilla Solana sign-in stacks of the Stack Configurator install @tuwaio/siwx-solana ([1b19804](https://github.com/TuwaIO/docs/commit/1b198046e1f773284691fb7950807addb1741416))
+
 ## [0.4.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.0...docs-ui-v0.4.1) (2026-10-15)
 
 
