@@ -1,6 +1,8 @@
 import { createBoundedUseStore, createPulsarStore, createTxInMemoryStore } from '@tuwaio/sdk/pulsar';
 import { isSessionMatchingTarget, useSiwxSessionStore } from '@tuwaio/sdk/siwx';
 
+import { shortId } from './encoding';
+import { logEvent } from './eventLog';
 import { createSimulatedPulsarAdapter } from './pulsarAdapters';
 import { createQuasarHistory, quasarPreflight, syncToQuasar } from './quasar';
 import type { PlaygroundTransaction, SimulatedFamily } from './types';
@@ -36,6 +38,9 @@ export function createDevice({ families, quasar }: { families: SimulatedFamily[]
   const pulsarStore = createPulsarStore<PlaygroundTransaction>({
     name: TRANSACTIONS_STORAGE_KEY,
     adapter: families.map((family) => createSimulatedPulsarAdapter(family, trackers)),
+    // Where an app refetches the data a transaction changes: called once per finished transaction, also for one
+    // restored after a reload or finished on another device
+    onTxFinished: (tx) => logEvent('Pulsar', `onTxFinished ${shortId(tx.txKey)} → ${tx.status}`, tx),
     ...(quasar && {
       // As `preFlightTxCheck` in the Quasar stack of the Code tab: no transaction without a SIWX session
       beforeTxProcess: () => quasarPreflight(() => Boolean(useSiwxSessionStore.getState().session)),

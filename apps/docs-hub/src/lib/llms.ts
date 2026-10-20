@@ -19,7 +19,11 @@ const absolute = (url: string) => (url.startsWith('/') ? `${SITE_URL}${url}` : u
 function installCommand(details: PackageDetails): string {
   const command = `\`pnpm add ${details.install.packages.join(' ')}\``;
   const framework = details.install.frameworkPeers.map((peer) => `${peer.name} ${peer.range}`).join(' and ');
-  return framework ? `${command} (and ${framework} in the app)` : command;
+  const lighter = details.lighterEntries.map(
+    ({ entry, description, withoutPeers }) =>
+      `; \`${entry}\` (${description}) does not import ${withoutPeers.join(' and ')}`,
+  );
+  return `${framework ? `${command} (and ${framework} in the app)` : command}${lighter.join('')}`;
 }
 
 function pageLine(page: HubPage): string {

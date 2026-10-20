@@ -19,8 +19,24 @@ export interface PackageDependency {
   name: string;
   /** Version range */
   range: string;
-  /** Whether `peerDependenciesMeta` marks the peer optional (always `false` for regular dependencies) */
+  /**
+   * Whether the main entry of the package can do without the peer: `peerDependenciesMeta` marks it optional and no
+   * {@link LighterEntry} explains why (always `false` for regular dependencies)
+   */
   optional: boolean;
+}
+
+/**
+ * An entry point of a package that imports fewer peers than its main entry. The package marks those peers optional so
+ * that apps importing only this entry need not install them.
+ */
+export interface LighterEntry {
+  /** Import path, for example `@tuwaio/pulsar-evm/safe` */
+  entry: string;
+  /** What the entry exports, for example `the Safe tracker alone` */
+  description: string;
+  /** Peers of the main entry that this entry does not import */
+  withoutPeers: string[];
 }
 
 /**
@@ -61,6 +77,8 @@ export interface PackageDetails {
   usedBy: string[];
   /** Pages of the hub that mention the package, most mentions first (at most three) */
   guides: PackageGuide[];
+  /** Entry points that need fewer peers than the main entry, whose peers the install command includes */
+  lighterEntries: LighterEntry[];
   /**
    * What to install: `packages` is the package and the required peers it needs (see `getInstallPackages`),
    * `frameworkPeers` the required `react` and `react-dom`, which the app already has and the command leaves out.
@@ -92,6 +110,18 @@ const LAYER_PREFIXES = [/^Layer \d+ \(L\d+\) of the TUWA Ecosystem\.\s*/, /^L\d+
 // Required peers that every React app already has; the install command leaves them out
 const FRAMEWORK_PEERS = new Set(['react', 'react-dom']);
 
+// Packages whose optional peers are needed by the main entry and optional only for a lighter entry point; npm cannot
+// say which entry needs which peer. Keep in sync with the `exports` and `peerDependenciesMeta` of the package.
+const LIGHTER_ENTRIES: Record<string, LighterEntry[]> = {
+  '@tuwaio/pulsar-evm': [
+    {
+      entry: '@tuwaio/pulsar-evm/safe',
+      description: 'the Safe tracker alone',
+      withoutPeers: ['@tuwaio/orbit-evm', '@wagmi/core'],
+    },
+  ],
+};
+
 function describe(description: string | undefined): string {
   const text = LAYER_PREFIXES.reduce((value, prefix) => value.replace(prefix, ''), description ?? '');
   // A sentence starts with a capital, but an identifier keeps its case (`useSiwx and useSiwxSession hooks…`)
@@ -102,9 +132,14 @@ const isTuwa = (name: string) => name.startsWith('@tuwaio/');
 
 const byTuwaFirst = (a: string, b: string) => Number(isTuwa(b)) - Number(isTuwa(a)) || a.localeCompare(b);
 
-function requiredPeers(manifest: NpmManifest): [string, string][] {
-  const meta = manifest.peerDependenciesMeta ?? {};
-  return Object.entries(manifest.peerDependencies ?? {}).filter(([peer]) => meta[peer]?.optional !== true);
+// Optional for the main entry: marked optional and not needed by the main entry (see LIGHTER_ENTRIES)
+function isOptionalPeer(name: string, manifest: NpmManifest, peer: string): boolean {
+  const neededByMainEntry = (LIGHTER_ENTRIES[name] ?? []).some(({ withoutPeers }) => withoutPeers.includes(peer));
+  return manifest.peerDependenciesMeta?.[peer]?.optional === true && !neededByMainEntry;
+}
+
+function requiredPeers(name: string, manifest: NpmManifest): [string, string][] {
+  return Object.entries(manifest.peerDependencies ?? {}).filter(([peer]) => !isOptionalPeer(name, manifest, peer));
 }
 
 /**
@@ -123,8 +158,8 @@ function installSpec(name: string, range: string): string {
 }
 
 /**
- * The install arguments of a package: the package, its required peers and, for TUWA peers, their required peers in
- * turn (an app must provide the peers of its peers). Packages that an installed package brings as a regular
+ * The install arguments of a package: the package, its required peers (with the optional peers its main entry needs,
+ * see `LIGHTER_ENTRIES`) and, for TUWA peers, their required peers in turn (an app must provide the peers of its peers). Packages that an installed package brings as a regular
  * dependency (the SDK brings the TUWA projects and their libraries) are left out, so the result matches the guides,
  * e.g. `@tuwaio/evm-sdk @tuwaio/sdk@^0.4.0 @wagmi/core@3 viem@2`. `react` and `react-dom` are left out too.
  *
@@ -142,7 +177,7 @@ function getInstallPackages(name: string, manifests: Record<string, NpmManifest>
     const manifest = manifests[current];
     if (!manifest) continue;
     for (const dependency of Object.keys(manifest.dependencies ?? {})) provided.add(dependency);
-    for (const [peer, range] of requiredPeers(manifest)) {
+    for (const [peer, range] of requiredPeers(current, manifest)) {
       if (FRAMEWORK_PEERS.has(peer)) {
         if (!frameworkPeers.has(peer)) frameworkPeers.set(peer, range);
       } else if (!specs.has(peer)) {
@@ -184,9 +219,8 @@ export function getPackageDetails(): Record<string, PackageDetails> {
   for (const [name, manifest] of Object.entries(manifests)) {
     const short = name.replace('@tuwaio/', '');
     const project = projects.find(({ prefix }) => short.startsWith(prefix))!;
-    const meta = manifest.peerDependenciesMeta ?? {};
     const peers = Object.entries(manifest.peerDependencies ?? {})
-      .map(([peer, range]) => ({ name: peer, range, optional: meta[peer]?.optional === true }))
+      .map(([peer, range]) => ({ name: peer, range, optional: isOptionalPeer(name, manifest, peer) }))
       .sort((a, b) => byTuwaFirst(a.name, b.name));
 
     details[name] = {
@@ -207,6 +241,7 @@ export function getPackageDetails(): Record<string, PackageDetails> {
       includedIn: [],
       usedBy: [],
       guides: manifest.deprecated ? [] : (guides[name] ?? []),
+      lighterEntries: LIGHTER_ENTRIES[name] ?? [],
       install: getInstallPackages(name, manifests),
     };
   }

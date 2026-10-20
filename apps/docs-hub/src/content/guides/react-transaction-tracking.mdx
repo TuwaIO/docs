@@ -1,6 +1,6 @@
 ---
 title: Track Transactions in React with Pulsar
-description: 'Track EVM and Solana transactions in React with Pulsar: a store saved to localStorage, tracking that resumes after a reload, and a tracked contract call.'
+description: 'Track EVM and Solana transactions in React with Pulsar: a store saved to localStorage, tracking that resumes after a reload, a tracked contract call and a refresh of your data when it finishes.'
 ---
 
 import { Tabs } from 'nextra/components';
@@ -12,7 +12,8 @@ This guide adds [Pulsar](https://pulsar.docs.tuwa.io/) to a React app, step by s
 - a transaction store from `@tuwaio/pulsar-core`, saved to `localStorage`;
 - the chain adapter from `@tuwaio/pulsar-evm` or `@tuwaio/pulsar-solana`, which tracks each transaction in the background;
 - `@tuwaio/pulsar-react` restarting the trackers after a page reload;
-- a button that sends a contract (EVM) or program (Solana) call and tracks it until its final status.
+- a button that sends a contract (EVM) or program (Solana) call and tracks it until its final status;
+- a component that refreshes its data when the transaction finishes, also after a reload.
 
 The guide installs the Pulsar packages one by one. The **`nextjs-tuwa-not-sdk`** template on [Starter Templates](/guides/starter-templates) is a complete app built the same way.
 
@@ -364,7 +365,7 @@ export function PulsarInitializer() {
 
 ## Step 6: Send and Track the Transaction
 
-Call `executeTxAction` with the action and the metadata of the transaction. Pulsar validates the title, description and payload, checks the network of the wallet, runs `beforeTxProcess`, calls the action, adds the transaction to the pool and starts its tracker. From then on the store updates the status on its own: components read it with selectors, so it stays correct after navigation or a reload. A `beforeTxProcess` passed to `executeTxAction` replaces the one of the store for that transaction.
+Call `executeTxAction` with the action and the metadata of the transaction. Pulsar validates the title, description and payload, checks the network of the wallet, runs `beforeTxProcess`, calls the action, adds the transaction to the pool and starts its tracker. From then on the store updates the status on its own: components read it with selectors, so it stays correct after navigation or a reload. A `beforeTxProcess` passed to `executeTxAction` replaces the one of the store for that transaction. The `onSuccess`, `onError` and `onReplaced` callbacks of the call run only in the page session that sent it; refresh your data in the event of [Step 7](#step-7-react-to-finished-transactions).
 
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
@@ -518,9 +519,42 @@ export const Increment = () => {
 
 ---
 
+## Step 7: React to Finished Transactions
+
+Functions cannot be saved to `localStorage`, so a transaction still pending at a reload finishes without the callbacks of its `executeTxAction`. Refresh the data a transaction changes (a balance, a list, the counter) in the "transaction finished" event of the store instead. It fires once for every transaction that reaches `Success`, `Failed` or `Replaced`, whatever finished it: the tracker started by `executeTxAction`, one restarted by `useInitializeTransactionsPool` after a reload, or the history of [Quasar](/guides/quasar-transaction-sync).
+
+`useTxFinished` from `@tuwaio/pulsar-react` listens to it while a component is mounted. Use it in the component that owns the data, and decide what to do from the transaction itself: one listener serves every transaction of the app, so check its `type` and read what you need from its `payload`.
+
+```tsx filename="src/components/CounterValue.tsx"
+'use client';
+
+import { TransactionStatus } from '@tuwaio/pulsar-core';
+import { useTxFinished } from '@tuwaio/pulsar-react';
+
+import { usePulsarStore } from '@/hooks/txTrackingHooks';
+
+export function CounterValue({ value, refetch }: { value: number | undefined; refetch: () => void }) {
+  const subscribeTxFinished = usePulsarStore((state) => state.subscribeTxFinished);
+
+  useTxFinished({
+    subscribeTxFinished,
+    onFinished: (tx) => {
+      if (tx.type === 'increment' && tx.status === TransactionStatus.Success) refetch();
+    },
+  });
+
+  return <p>Counter: {value ?? '…'}</p>;
+}
+```
+
+Reactions that need no component, such as analytics or a cache that lives outside React, go into the `onTxFinished` option of `createPulsarStore` in Step 4; it takes the same function. Keep `onSuccess`, `onError` and `onReplaced` for the interface of the page that sent the transaction, such as closing a form; for the same transaction, the event runs first. The differences are listed in [Reacting to finished transactions](https://pulsar.docs.tuwa.io/packages/pulsar-core#reacting-to-finished-transactions) of the `pulsar-core` reference.
+
+---
+
 ## Next Steps
 
 - **Show the transactions.** `withTrackedModal: true` only has an effect with [Nova Transactions](https://stories.tuwa.io/?path=/docs/packages-nova-transactions-overview--docs): render `NovaTransactionsProvider` with the state of your Pulsar store to get the tracking modal, toasts and the transaction history.
+- **Track Safe multisig transactions** with the Safe tracker of `@tuwaio/pulsar-evm`: Nova shows the owner confirmations as `x / y`, and the `@tuwaio/pulsar-evm/safe` entry has the tracker without wagmi. See [`pulsar-evm`](https://pulsar.docs.tuwa.io/packages/pulsar-evm).
 - **Track without the store**, in your own state or on a server: [EVM Trackers Standalone](https://pulsar.docs.tuwa.io/evmStandalone) and [Solana Trackers Standalone](https://pulsar.docs.tuwa.io/solanaStandalone).
 - **Look up an API** in the Pulsar package reference: [`pulsar-core`](https://pulsar.docs.tuwa.io/packages/pulsar-core), [`pulsar-evm`](https://pulsar.docs.tuwa.io/packages/pulsar-evm), [`pulsar-solana`](https://pulsar.docs.tuwa.io/packages/pulsar-solana), [`pulsar-react`](https://pulsar.docs.tuwa.io/packages/pulsar-react).
 - **Understand the failure modes** that Pulsar handles: [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken).

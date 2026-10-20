@@ -143,7 +143,7 @@ Transactions take anywhere from 12 seconds (Ethereum) to several minutes under n
 - Accidentally reload the page.
 - Switch mobile apps while waiting for wallet signing.
 
-Component state lives exclusively in ephemeral RAM. A single refresh obliterates all in-flight tracking state. The transaction is still active in the mempool, but your frontend has forgotten it entirely.
+Component state lives exclusively in ephemeral RAM. A single refresh obliterates all in-flight tracking state. The transaction is still active in the mempool, but your frontend has forgotten it entirely, and any code chained to its promise, such as refetching balances, never runs.
 
 ### Failure Mode 4: Soft Confirmations vs. Finality
 
@@ -464,6 +464,36 @@ export function PendingTransactionsBadge() {
 
 ---
 
+### Step 6: Reactions That Survive a Reload
+
+The callbacks of `executeTxAction` cannot be saved to `localStorage`, so a transaction resumed in Step 4 finishes without them. Refetch the data it changes in the "transaction finished" event of the store: it fires once for every transaction that reaches `Success`, `Failed` or `Replaced`, whatever finished it. `useTxFinished` listens to it while a component is mounted; reactions outside React go into the `onTxFinished` option of `createPulsarStore`.
+
+```tsx
+// src/components/BalanceRefresher.tsx
+'use client';
+
+import { TransactionStatus, useTxFinished } from '@tuwaio/sdk/pulsar';
+
+import { usePulsarStore } from '@/stores/pulsarStore';
+import { AppTxType } from '@/types/transactions';
+
+export function BalanceRefresher({ refetchBalances }: { refetchBalances: () => void }) {
+  const subscribeTxFinished = usePulsarStore((state) => state.subscribeTxFinished);
+
+  // Also runs for a swap whose tracker was restarted after a reload
+  useTxFinished({
+    subscribeTxFinished,
+    onFinished: (tx) => {
+      if (tx.type === AppTxType.TOKEN_SWAP && tx.status === TransactionStatus.Success) refetchBalances();
+    },
+  });
+
+  return null;
+}
+```
+
+---
+
 ## 5. Architectural Comparison: `useState` vs. Pulsar
 
 | Scenario                         | Naive `useState` Pattern                                             | TUWA Pulsar                                                                                              |
@@ -471,6 +501,7 @@ export function PendingTransactionsBadge() {
 | **Route Navigation**             | ❌ Component unmounts; tracking promise destroyed.                   | ✅ Outlives DOM; updates persist in central store.                                                       |
 | **User Speeds Up / Cancels**     | ❌ Naive promise rejects or desyncs from replaced hash.              | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback.        |
 | **Browser Refresh**              | ❌ In-flight state obliterated; reset to idle.                       | ✅ Resumes tracking pending pool automatically upon mount.                                               |
+| **Reaction After a Refresh**     | ❌ Code chained to the lost promise never runs; balances stay stale. | ✅ `onTxFinished` and `useTxFinished` run once for every finished transaction, also after a reload.      |
 | **Multi-Tab Consistency**        | ❌ Tabs are completely desynchronized.                               | ✅ Storage event synchronization reflects states across tabs.                                            |
 | **Multi-Chain Support**          | ❌ Ad-hoc Viem/Solana hook spaghetti.                                | ✅ Unified interface across EVM and Solana clusters.                                                     |
 | **Re-Org & Revert Handling**     | ❌ Throws raw unformatted error into component.                      | ✅ Structured `TransactionStatus` with normalized error objects.                                         |

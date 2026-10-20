@@ -402,7 +402,7 @@ Satellite Connect reconnects the last wallet after a reload. With the default `r
 
 ## Step 6: Send a Tracked Transaction
 
-Sending a transaction is the same as without the SDK: build the contract (EVM) or program (Solana) call and pass it to `executeTxAction` of the store. Follow Steps 2, 3 and 6 of the [React transaction tracking guide](/guides/react-transaction-tracking#step-2-describe-the-contract-or-program) and change the import paths:
+Sending a transaction is the same as without the SDK: build the contract (EVM) or program (Solana) call and pass it to `executeTxAction` of the store. Follow Steps 2, 3, 6 and 7 of the [React transaction tracking guide](/guides/react-transaction-tracking#step-2-describe-the-contract-or-program) and change the import paths:
 
 | In the guide                      | With the SDK                          |
 | --------------------------------- | ------------------------------------- |
@@ -412,12 +412,13 @@ Sending a transaction is the same as without the SDK: build the contract (EVM) o
 | `@tuwaio/nova-connect/components` | `@tuwaio/sdk/nova-connect/components` |
 | `@tuwaio/nova-connect/satellite`  | `@tuwaio/sdk/nova-connect/satellite`  |
 | `@tuwaio/pulsar-evm`              | `@tuwaio/evm-sdk/pulsar`              |
+| `@tuwaio/pulsar-evm/safe`         | `@tuwaio/evm-sdk/pulsar-safe`         |
 | `@tuwaio/orbit-evm`               | `@tuwaio/evm-sdk/orbit`               |
 | `@tuwaio/pulsar-solana`           | `@tuwaio/solana-sdk/pulsar`           |
 | `@tuwaio/orbit-solana`            | `@tuwaio/solana-sdk/orbit`            |
 | `@tuwaio/satellite-solana`        | `@tuwaio/solana-sdk/satellite`        |
 
-The transaction appears in the Nova toasts and in the connected wallet modal, and survives a page reload.
+The transaction appears in the Nova toasts and in the connected wallet modal, and survives a page reload. Refresh your data with `useTxFinished` as in [React to Finished Transactions](/guides/react-transaction-tracking#step-7-react-to-finished-transactions): it also runs for a transaction that finishes after a reload.
 
 ---
 
