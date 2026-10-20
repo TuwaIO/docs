@@ -3,6 +3,7 @@ import { TransactionStatus, TransactionTracker } from '@tuwaio/sdk/pulsar';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createDevice, TRANSACTIONS_STORAGE_KEY } from './device';
+import { clearEvents, eventLog } from './eventLog';
 import type { PlaygroundTransaction } from './types';
 
 const pending: PlaygroundTransaction = {
@@ -60,5 +61,17 @@ describe('device stores', () => {
     device.halt();
     device.pulsarStore.setState({ transactionsPool: { '0x01': { ...pending, pending: false } } });
     expect(saved.has(TRANSACTIONS_STORAGE_KEY)).toBe(false);
+  });
+
+  it('logs the "transaction finished" event of the store once, as an app would refetch its data there', () => {
+    clearEvents();
+    const device = createDevice({ families: [OrbitAdapter.EVM], quasar: false });
+    device.pulsarStore.setState({ transactionsPool: { '0x01': pending } });
+    device.pulsarStore.getState().updateTxParams('0x01', { status: TransactionStatus.Success, pending: false });
+    device.pulsarStore.getState().updateTxParams('0x01', { status: TransactionStatus.Success, pending: false });
+
+    const finished = eventLog.getState().events.filter((event) => event.label.startsWith('onTxFinished'));
+    expect(finished).toHaveLength(1);
+    expect(finished[0]).toMatchObject({ source: 'Pulsar', label: 'onTxFinished 0x01 → Success' });
   });
 });

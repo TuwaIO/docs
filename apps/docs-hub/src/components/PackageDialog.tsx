@@ -183,6 +183,16 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                         `Also needs ${install.frameworkPeers.map((peer) => `${peer.name} ${peer.range}`).join(' and ')} in the app.`}
                     </p>
                   )}
+                  {details.lighterEntries.map((lighter) => (
+                    <p
+                      key={lighter.entry}
+                      className="text-[11px] 2xl:text-xs leading-relaxed text-[var(--tuwa-text-secondary)]"
+                    >
+                      <code className="font-mono text-[var(--tuwa-text-primary)]">{lighter.entry}</code> (
+                      {lighter.description}) does not import {lighter.withoutPeers.join(' and ')}: an app that imports
+                      only this entry can leave them out.
+                    </p>
+                  ))}
                 </div>
               )}
 

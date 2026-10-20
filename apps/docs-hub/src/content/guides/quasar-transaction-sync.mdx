@@ -174,6 +174,8 @@ export const useHistoryStore = createBoundedUseStore(historyStore);
   </Tabs.Tab>
 </Tabs>
 
+`injectExternalPendingTxs` tracks here the pending transactions sent from another device, and marks a transaction that this device still shows as pending with the final status from the history. Both fire the "transaction finished" event of the store once their final status reaches this device, so a `useTxFinished` listener ([React to Finished Transactions](/guides/react-transaction-tracking#step-7-react-to-finished-transactions)) refreshes the data of this device too.
+
 `preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
 
 ### Batches of Calls (EIP-5792)
