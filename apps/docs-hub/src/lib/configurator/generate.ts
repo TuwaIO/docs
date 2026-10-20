@@ -1734,7 +1734,9 @@ function packageLists(o: StackOptions): { packages: string[]; devPackages: strin
           ]
         : []),
       ...(o.siwx ? ['@tuwaio/siwx-core', '@tuwaio/siwx-server'] : []),
+      // The server verifies a sign-in with the package of its chain, which @tuwaio/siwx-server imports at runtime
       ...(o.siwx && o.evm ? ['@tuwaio/siwx-evm'] : []),
+      ...(o.siwx && o.solana ? ['@tuwaio/siwx-solana'] : []),
       ...(o.quasar ? ['@tuwaio/quasar-sdk'] : []),
       ...(server ? ['@hono/node-server'] : []),
     ];

@@ -58,6 +58,9 @@ const compilerOptions = {
 const packageOf = (specifier) =>
   specifier.startsWith('@') ? specifier.split('/').slice(0, 2).join('/') : specifier.split('/')[0];
 
+/** The chain packages `@tuwaio/siwx-server` loads to verify a signature, by the stack option of the chain */
+const SIWX_CHAIN_VERIFIERS = { evm: '@tuwaio/siwx-evm', solana: '@tuwaio/siwx-solana' };
+
 /** The bare module specifiers a file imports */
 function importsOf(code) {
   const specifiers = new Set();
@@ -81,6 +84,16 @@ function checkPackages(stack) {
 
   // Packages brought by an installed TUWA package as regular dependencies (the SDK brings the projects)
   const brought = new Set(stack.packages.flatMap((name) => Object.keys(npmData[name]?.dependencies ?? {})));
+
+  // `@tuwaio/siwx-server` imports the verifier of a chain at runtime, as an optional peer: without it, sign-ins on that
+  // chain fail on the server, and nothing here would notice, because the generated files never import it
+  const siwxServer = installed.has('@tuwaio/siwx-server') || brought.has('@tuwaio/siwx-server');
+  if (stack.options.siwx && siwxServer) {
+    for (const [chain, verifier] of Object.entries(SIWX_CHAIN_VERIFIERS)) {
+      if (stack.options[chain] && !installed.has(verifier) && !brought.has(verifier))
+        problems.push(`@tuwaio/siwx-server needs ${verifier} to verify ${chain} sign-ins`);
+    }
+  }
   for (const name of stack.packages) {
     const optional = npmData[name]?.peerDependenciesMeta ?? {};
     for (const peer of Object.keys(npmData[name]?.peerDependencies ?? {})) {
