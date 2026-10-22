@@ -2412,6 +2412,23 @@ components:
             - collect
             - required
             - companyInvoice
+        consent:
+          type:
+            - object
+            - "null"
+          properties:
+            text:
+              type: string
+              description: The merchant's words, up to 500 characters.
+            required:
+              type: boolean
+              description: The buyer cannot pay without ticking it.
+          required:
+            - text
+            - required
+          description: A line the buyer ticks before paying, such as a request to start a service at once; `null` when the
+            merchant asks none. The quote records the tick in the ledger (`consent.given`) and the receipt email repeats
+            the text.
         methods:
           type: array
           items:
@@ -2617,6 +2634,7 @@ components:
         - theme
         - invoice
         - buyer
+        - consent
         - methods
         - quoteTtlSeconds
         - quote
@@ -4437,6 +4455,9 @@ paths:
                 payer:
                   type: string
                   description: CAIP-10 account.
+                consentGiven:
+                  type: boolean
+                  description: The buyer ticked the checkout `consent`; a required one must be `true`.
               required:
                 - methodId
       responses:
@@ -4465,8 +4486,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`buyer_required`, `invoice_expired`, `invoice_processing`, `invoice_not_payable`, `amount_out_of_range`,
-            `method_not_priced`."
+          description: "`buyer_required`, `consent_required` (a required consent without `consentGiven: true`), `invoice_expired`,
+            `invoice_processing`, `invoice_not_payable`, `amount_out_of_range`, `method_not_priced`."
           content:
             application/json:
               schema:
