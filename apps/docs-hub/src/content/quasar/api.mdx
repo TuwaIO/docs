@@ -11,4 +11,6 @@ The endpoints of the Quasar API that [`@tuwaio/quasar-sdk`](https://sdk.docs.tuw
 
 The Payments endpoints (invoices, refunds, subscriptions) take the secret key of a Payments app. The checkout endpoints take no key: the checkout token of an invoice opens that invoice only, and the buyer's browser calls them. Payment webhooks (`payments.v1`) are listed under **Webhooks**; verify them with `verifyWebhook`.
 
+A refused call answers with its HTTP status and a JSON body. The Payments and checkout endpoints send `{ error: { code, message, issues? } }`, where `code` is stable, such as `invoice_not_found` or `too_many_pending`. A refusal of the key or the app itself, such as a missing key, a disabled app or an app being deleted, sends `{ statusCode, error, message }`. `@tuwaio/quasar-sdk` throws a `QuasarSDKError` with the `status`, the `message` and, where there is one, the `code`.
+
 <QuasarApiReference />

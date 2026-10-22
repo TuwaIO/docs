@@ -1431,6 +1431,9 @@ components:
     PaginatedHistoryResponse:
       type: object
       properties:
+        success:
+          type: boolean
+          description: Always `true` in a 200 answer.
         docs:
           type: array
           items:
@@ -1452,6 +1455,7 @@ components:
           type: boolean
           description: Whether a previous page exists.
       required:
+        - success
         - docs
         - totalDocs
         - totalPages
@@ -1468,6 +1472,12 @@ components:
         message:
           type: string
           description: Error message (NestJS errors).
+        statusCode:
+          type: integer
+          description: The HTTP status (NestJS errors).
+        code:
+          type: string
+          description: A stable code where a client acts on it, such as `data_processing_required`.
     PaymentsError:
       type: object
       properties:
@@ -1499,6 +1509,22 @@ components:
       required:
         - error
       description: "A refused Payments call: `{ error: { code, message, issues?, … } }` with its HTTP status."
+    KeyRefusal:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - statusCode
+        - error
+        - message
+      description: "A refusal of the key or the app before the Payments API answers: `401` for a missing or unknown key; `403`
+        for a public key on a write, a disabled app, an app being deleted, or an IP address or origin the app does not
+        allow."
     InvoiceWithCheckout:
       type: object
       properties:
@@ -2867,7 +2893,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Public key (read-only), disabled app, or IP address or origin not allowed by the app settings.
+          description: "Public key (read-only), disabled app, app being deleted, or IP address or origin not allowed by the app
+            settings. In Quasar Cloud also an organization whose data processing is not set up (`code:
+            data_processing_required`): transactions are accepted once an owner concludes the Data Processing Addendum,
+            and the standard contractual clauses where they apply, in the dashboard."
           content:
             application/json:
               schema:
@@ -2931,7 +2960,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Public key (read-only), disabled app, or IP address or origin not allowed by the app settings.
+          description: "Public key (read-only), disabled app, app being deleted, or IP address or origin not allowed by the app
+            settings. In Quasar Cloud also an organization whose data processing is not set up (`code:
+            data_processing_required`): transactions are accepted once an owner concludes the Data Processing Addendum,
+            and the standard contractual clauses where they apply, in the dashboard."
           content:
             application/json:
               schema:
@@ -2950,62 +2982,6 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Too many requests per second for the app.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /v1/engine/pulsar/sync/{txKey}/hash:
-    post:
-      summary: Send the hash of an EIP-5792 batch
-      description: "Sends the hash of the transaction that executed an EIP-5792 batch (`tracker: eip5792`), which was synced
-        by its batch ID. Quasar then tracks the batch on-chain by the hash, like an Ethereum transaction; the record
-        keeps the batch ID as `txKey`. A batch whose hash never arrives is marked `Failed` an hour after it was synced.
-        Used by `quasar.pulsar.syncHash`."
-      tags:
-        - Pulsar
-      security:
-        - SecretKey: []
-      parameters:
-        - schema:
-            type: string
-            description: The batch ID, the `txKey` of the transaction.
-          required: true
-          description: The batch ID, the `txKey` of the transaction.
-          name: txKey
-          in: path
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/BatchHashRequest"
-      responses:
-        "200":
-          description: "The hash is recorded and on-chain tracking started, or Quasar already had it (`duplicate: true`)."
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/BatchHashResponse"
-        "400":
-          description: The hash is malformed, or the transaction is not an EIP-5792 batch.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "401":
-          description: Missing or invalid key.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "404":
-          description: The app has no transaction with this `txKey`.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "409":
-          description: The batch has another hash, or it is already final.
           content:
             application/json:
               schema:
@@ -3100,6 +3076,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "A public key: the history is read with the secret key, from your server. Also a disabled app, an app being
+            deleted, or an IP address or origin not allowed by the app settings."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Too many requests per second for the app.
           content:
@@ -3160,12 +3143,19 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
     get:
@@ -3230,12 +3220,19 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
   /v1/payments/invoices/{id}:
@@ -3262,12 +3259,19 @@ paths:
                 $ref: "#/components/schemas/InvoiceDetails"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3306,14 +3310,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Invoice"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3321,7 +3338,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: The invoice is not in a state for it.
+          description: "`invoice_not_cancellable`, `invoice_processing`: a payment is being confirmed."
           content:
             application/json:
               schema:
@@ -3360,14 +3377,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Invoice"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3375,7 +3405,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: The invoice is not in a state for it.
+          description: "`invoice_not_held`."
           content:
             application/json:
               schema:
@@ -3414,14 +3444,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InvoiceCorrection"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3429,7 +3472,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: The invoice cannot be corrected.
+          description: "`invoice_not_correctable`, `invoice_replaced` (correct its replacement), `document_not_issued`,
+            `invoice_processing`."
           content:
             application/json:
               schema:
@@ -3461,12 +3505,19 @@ paths:
                 $ref: "#/components/schemas/InvoiceWithCheckout"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3515,12 +3566,19 @@ paths:
                 $ref: "#/components/schemas/InvoiceLedger"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3567,12 +3625,19 @@ paths:
                 format: binary
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`, `document_not_found`."
           content:
@@ -3613,12 +3678,19 @@ paths:
                 format: binary
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`document_not_found`."
           content:
@@ -3665,14 +3737,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RefundStart"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`, `amount_exceeds_refundable`, `held_refund_must_be_whole`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`invoice_not_found`."
           content:
@@ -3680,7 +3765,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: Nothing to refund, or more than is left.
+          description: "`invoice_not_refundable`, `exact_refund_needs_whole_invoice`, `payment_unknown`: the payment to refund is
+            not known."
           content:
             application/json:
               schema:
@@ -3711,12 +3797,19 @@ paths:
                 $ref: "#/components/schemas/Refund"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`refund_not_found`."
           content:
@@ -3760,14 +3853,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Refund"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`, `invalid_transaction`, `invalid_sender`: the transaction must come from
+            the app wallet."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`refund_not_found`."
           content:
@@ -3811,16 +3918,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentQuote"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`method_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`method_not_priced`: the method has no price source."
           content:
             application/json:
               schema:
@@ -3828,7 +3954,7 @@ paths:
         "429":
           description: The rate limit of the organization.
         "503":
-          description: No fresh price now.
+          description: "`price_unavailable`: no fresh price now."
           content:
             application/json:
               schema:
@@ -3861,12 +3987,19 @@ paths:
                   - data
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
   /v1/payments/subscriptions:
@@ -3899,19 +4032,27 @@ paths:
               schema:
                 $ref: "#/components/schemas/SubscriptionStart"
         "400":
-          description: "`invalid_request`, `auto_charge_unavailable` (with `reason`)."
+          description: "`invalid_request` with `issues`, `invalid_lines`, `method_not_found`, `auto_charge_unavailable` (with
+            `reason`)."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`subscriptions_disabled` (the app turned subscriptions off), `secret_key_required`, `not_a_payments_app`,
+            `payments_disabled`; or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
     get:
@@ -3947,12 +4088,19 @@ paths:
                 $ref: "#/components/schemas/SubscriptionList"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
   /v1/payments/subscriptions/{id}:
@@ -3979,12 +4127,19 @@ paths:
                 $ref: "#/components/schemas/SubscriptionDetails"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`subscription_not_found`."
           content:
@@ -4025,14 +4180,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Subscription"
-        "401":
-          description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
+        "400":
+          description: "`invalid_request` with `issues`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`subscription_not_found`."
           content:
@@ -4040,7 +4208,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: Not possible in its state.
+          description: "`subscription_not_active`."
           content:
             application/json:
               schema:
@@ -4072,12 +4240,19 @@ paths:
                 $ref: "#/components/schemas/Subscription"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`subscription_not_found`."
           content:
@@ -4085,7 +4260,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: Not possible in its state.
+          description: "`subscription_not_active`: no cancellation is scheduled."
           content:
             application/json:
               schema:
@@ -4116,12 +4291,19 @@ paths:
                 $ref: "#/components/schemas/Subscription"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`subscription_not_found`."
           content:
@@ -4129,7 +4311,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: Not possible in its state.
+          description: "`subscription_not_active`."
           content:
             application/json:
               schema:
@@ -4160,12 +4342,19 @@ paths:
                 $ref: "#/components/schemas/SubscriptionStart"
         "401":
           description: Missing or invalid key.
-        "403":
-          description: "`payments_disabled`: the app is not a Payments app or the node does not run Payments."
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaymentsError"
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
         "404":
           description: "`subscription_not_found`."
           content:
@@ -4173,7 +4362,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: Not possible in its state.
+          description: "`subscription_not_paused`, `subscription_over`: its cycles or end date are past."
           content:
             application/json:
               schema:
@@ -4258,7 +4447,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CheckoutQuote"
         "400":
-          description: "`payer_required`, `payer_chain_mismatch`."
+          description: "`invalid_request` with `issues`, `payer_required`, `payer_chain_mismatch`."
           content:
             application/json:
               schema:
@@ -4270,13 +4459,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "404":
-          description: "`checkout_not_found`: a wrong or replaced token."
+          description: "`checkout_not_found`, `method_not_found`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`buyer_required`, `invoice_expired`, `invoice_processing`, `amount_out_of_range`…"
+          description: "`buyer_required`, `invoice_expired`, `invoice_processing`, `invoice_not_payable`, `amount_out_of_range`,
+            `method_not_priced`."
           content:
             application/json:
               schema:
@@ -4288,7 +4478,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "503":
-          description: "`screening_unavailable`."
+          description: "`screening_unavailable` (AML in `block` mode while a source is down), `price_unavailable`."
           content:
             application/json:
               schema:
@@ -4328,7 +4518,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CheckoutView"
         "400":
-          description: "`buyer_incomplete`."
+          description: "`invalid_request` with `issues`, `buyer_incomplete`."
           content:
             application/json:
               schema:
@@ -4405,7 +4595,7 @@ paths:
                   - txKey
                   - status
         "400":
-          description: "`invalid_transaction`, `sender_required`."
+          description: "`invalid_request` with `issues`, `invalid_transaction`, `sender_required`."
           content:
             application/json:
               schema:
@@ -4423,7 +4613,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`quote_required`, `invoice_not_payable`."
+          description: "`quote_required`, `invoice_not_payable`, `too_many_pending`: the invoice already has 3 unconfirmed
+            transactions; wait until one is confirmed or fails."
           content:
             application/json:
               schema:
@@ -4480,6 +4671,12 @@ paths:
                     type: string
                 required:
                   - status
+        "400":
+          description: "`invalid_request` with `issues`, `invalid_signature`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
         "403":
           description: "`origin_not_allowed`, `payments_disabled`."
           content:
@@ -4493,13 +4690,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`gasless_unavailable`, `already_relayed`."
+          description: "`gasless_unavailable`, `already_relayed`, `quote_required`."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "429":
-          description: "`rate_limited`: 120 calls a minute per token."
+          description: "`sponsorship_limit` (the gas the merchant sponsors per invoice or day is used up: pay with a normal
+            transfer), `rate_limited`."
           content:
             application/json:
               schema:
@@ -4554,6 +4752,12 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
+        "400":
+          description: "`invalid_request` with `issues`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
         "403":
           description: "`origin_not_allowed`, `payments_disabled`."
           content:
@@ -4689,7 +4893,8 @@ paths:
                 required:
                   - permission
         "400":
-          description: "`payer_chain_mismatch`, a context that does not grant the requested terms."
+          description: "`invalid_request` with `issues`, `payer_chain_mismatch`, `permission_invalid`: the context does not grant
+            the requested terms."
           content:
             application/json:
               schema:
@@ -4707,7 +4912,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`subscription_not_active`."
+          description: "`subscription_not_active`, `auto_charge_unavailable`."
           content:
             application/json:
               schema:
@@ -4886,6 +5091,12 @@ paths:
                     $ref: "#/components/schemas/InvoiceLocale"
                 required:
                   - locale
+        "400":
+          description: "`invalid_request` with `issues`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
         "403":
           description: "`origin_not_allowed`, `payments_disabled`."
           content:
