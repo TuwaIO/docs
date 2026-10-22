@@ -21,6 +21,7 @@ import { logEvent } from '@/lib/playground/eventLog';
 
 import { ConfirmationsBar } from './nova/ConfirmationsBar';
 import { EmptyHistory } from './nova/EmptyHistory';
+import { isoConnect, isoConnectButton, isoHistory, isoTransactions } from './nova/isoKit';
 import {
   monoConnect,
   monoConnectButton,
@@ -36,6 +37,18 @@ import { SimulatedWalletIcon } from './SimulatedWalletIcon';
 // Stage only, not in the Code tab: Nova draws the `icon` of the simulated connectors; if one ever fails, its default
 // fallback would look the name up on GitHub, which knows no simulated wallet
 const walletIcon: WalletIconCustomization = { components: { FallbackIcon: SimulatedWalletIcon } };
+// The class names of each style kit; Nova as it ships has none
+const STYLE_KIT_OBJECTS = {
+  nova: null,
+  mono: {
+    connect: monoConnect,
+    connectButton: monoConnectButton,
+    history: monoHistory,
+    transactions: monoTransactions,
+  },
+  iso: { connect: isoConnect, connectButton: isoConnectButton, history: isoHistory, transactions: isoTransactions },
+} satisfies Record<NovaCustomization['style'], object | null>;
+
 const STAGE_WALLET_ICONS: NovaConnectProviderCustomization = {
   modals: {
     connectModal: {
@@ -56,18 +69,18 @@ const STAGE_WALLET_ICONS: NovaConnectProviderCustomization = {
  * `NovaTransactionsProvider`.
  */
 function buildNovaCustomization(customization: NovaCustomization) {
-  const mono = customization.style === 'mono';
+  const kit = STYLE_KIT_OBJECTS[customization.style];
   const uk = customization.language === 'uk';
   const label = connectLabelOf(customization);
 
-  const historyCustomization = deepMerge<TransactionsHistoryCustomization<Transaction>>(mono ? monoHistory : {}, {
+  const historyCustomization = deepMerge<TransactionsHistoryCustomization<Transaction>>(kit?.history ?? {}, {
     components: {
       ...(customization.historyIcons && { HistoryItem: TxTypeHistoryItem }),
       ...(customization.emptyHistory && { Placeholder: EmptyHistory }),
     },
   });
 
-  const connectButtonCustomization = deepMerge<ConnectButtonCustomization>(mono ? monoConnectButton : {}, {
+  const connectButtonCustomization = deepMerge<ConnectButtonCustomization>(kit?.connectButton ?? {}, {
     ...(customization.logButtonClicks && {
       handlers: {
         onButtonClick: (buttonData, openModal) => {
@@ -79,13 +92,13 @@ function buildNovaCustomization(customization: NovaCustomization) {
   });
 
   const connectCustomization = deepMerge(
-    deepMerge<NovaConnectProviderCustomization>(mono ? monoConnect : {}, {
+    deepMerge<NovaConnectProviderCustomization>(kit?.connect ?? {}, {
       modals: { connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } } },
     }),
     STAGE_WALLET_ICONS,
   );
 
-  const transactionsCustomization = deepMerge<NovaTransactionsCustomization>(mono ? monoTransactions : {}, {
+  const transactionsCustomization = deepMerge<NovaTransactionsCustomization>(kit?.transactions ?? {}, {
     toast: { components: { ...(customization.confirmationsBar && { ConfirmationsBadge: ConfirmationsBar }) } },
     transactionsInfoModal: { historyCustomization },
   });

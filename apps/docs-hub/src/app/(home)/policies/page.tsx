@@ -1,15 +1,9 @@
 import { ArrowDownTrayIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import {
-  getPolicyFileUrl,
-  getPolicyPageUrl,
-  loadPolicy,
-  type Policy,
-  publishedPolicies,
-  StarryBackground,
-} from '@tuwaio/docs-ui';
+import { getPolicyFileUrl, getPolicyPageUrl, loadPolicy, type Policy, publishedPolicies } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 
 import { JsonLd } from '../../../components/JsonLd';
+import { PageBackground } from '../../../components/PageBackground';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
 
 const ROUTE = '/policies';
@@ -72,9 +66,7 @@ export default async function PoliciesPage() {
   return (
     <>
       <JsonLd data={structuredData} />
-      <div className="hidden md:block">
-        <StarryBackground />
-      </div>
+      <PageBackground />
 
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-12 sm:gap-16">

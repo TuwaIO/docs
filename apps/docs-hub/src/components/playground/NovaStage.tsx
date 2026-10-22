@@ -90,7 +90,7 @@ export function NovaStage() {
             <ActionButtons withTrackedModal />
             {connectedWalletAddress && (
               <section aria-label="Transaction history">
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-secondary)]">
                   History
                 </h4>
                 <TransactionsHistory

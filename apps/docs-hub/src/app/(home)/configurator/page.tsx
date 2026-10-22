@@ -1,8 +1,8 @@
-import { StarryBackground } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 
 import { StackConfigurator } from '../../../components/configurator/StackConfigurator';
 import { JsonLd } from '../../../components/JsonLd';
+import { PageBackground } from '../../../components/PageBackground';
 import { allStackOptions } from '../../../lib/configurator/generate';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
 
@@ -45,12 +45,7 @@ export default function ConfiguratorPage() {
   return (
     <>
       <JsonLd data={structuredData} />
-      <div className="hidden md:block">
-        <StarryBackground />
-      </div>
-      <div aria-hidden className="md:hidden pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-24 -right-20 w-56 h-56 rounded-full bg-gradient-to-br from-[var(--tuwa-button-gradient-from)]/15 to-[var(--tuwa-button-gradient-to)]/8 blur-2xl" />
-      </div>
+      <PageBackground />
 
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6">

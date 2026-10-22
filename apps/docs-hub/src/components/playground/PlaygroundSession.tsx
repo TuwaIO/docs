@@ -132,8 +132,8 @@ export function PlaygroundSession({
       <PlaygroundContext value={value}>
         <TransactionsPoolInitializer />
         {settings.quasar && <HistoryLoader />}
-        {/* lg: the controls take the left column of both rows, the inspector sits under the stage; xl: three columns */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)_380px] items-start">
+        {/* One column: the controls above the stage, the inspector under it */}
+        <div className="flex flex-col gap-5">
           <ControlsPanel />
           <Stage />
           <Inspector />

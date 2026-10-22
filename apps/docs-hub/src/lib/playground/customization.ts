@@ -3,7 +3,7 @@
 import type { GeneratedFile } from '../configurator/generate';
 
 /** A set of class names for every part of Nova UI Kit (`customization.classNames` of the components). */
-export type StyleKit = 'nova' | 'mono';
+export type StyleKit = 'nova' | 'mono' | 'iso';
 
 /** The language of the Nova texts (`labels`). */
 export type NovaLanguage = 'en' | 'uk';
@@ -75,6 +75,10 @@ export const DEFAULT_CUSTOMIZATION: NovaCustomization = {
 export const STYLE_KITS: Record<StyleKit, { label: string; description: string }> = {
   nova: { label: 'Nova', description: 'The class names Nova UI Kit ships with.' },
   mono: { label: 'TUWA Mono', description: 'Monospace type, outlined surfaces and accent rings on every part.' },
+  iso: {
+    label: 'Isometric',
+    description: 'A line drawing: boxes and buttons with an extruded face, an ink bar on every modal.',
+  },
 };
 
 /** The wallets of the "Popular" group: a simulated wallet here, the names of your wallets in an app. */
@@ -122,12 +126,12 @@ const CODE_FLAGS = [
 ] as const;
 
 /**
- * Every customization that gives a different `customization.tsx`: both style kits and languages, with and without a
- * text of the connect button, every combination of the switches, with the default and with changed options. The
- * configurator check compiles the code of each one (2048 variants).
+ * Every customization that gives a different `customization.tsx`: every style kit and both languages, with and
+ * without a text of the connect button, every combination of the switches, with the default and with changed options.
+ * The configurator check compiles the code of each one (3072 variants).
  */
 export function allCustomizations(): NovaCustomization[] {
-  return (['nova', 'mono'] as const).flatMap((style) =>
+  return (['nova', 'mono', 'iso'] as const).flatMap((style) =>
     (['en', 'uk'] as const).flatMap((language) =>
       ['', "Let's go"].flatMap((connectLabel) =>
         [false, true].flatMap((changedOptions) =>
@@ -153,6 +157,7 @@ export function allCustomizations(): NovaCustomization[] {
 /** The copyable files of the customization, in `src/components/playground/nova/` of the hub. */
 export const CUSTOMIZATION_SOURCES = [
   'monoKit.ts',
+  'isoKit.ts',
   'ukrainianTransactionsLabels.ts',
   'TxTypeHistoryItem.tsx',
   'ConfirmationsBar.tsx',
@@ -185,7 +190,8 @@ function objectOf(entries: (string | false | null | undefined)[]): string | null
 
 /** The code of `customization.tsx`: the four objects the app passes to Nova, built as on the stage. */
 export function customizationCode(customization: NovaCustomization): string {
-  const mono = customization.style === 'mono';
+  // The prefix of the exports of the style kit file (`monoKit.ts`, `isoKit.ts`), or `null` for Nova as it ships
+  const kit = customization.style === 'nova' ? null : customization.style;
   const uk = customization.language === 'uk';
   const label = connectLabelOf(customization);
   const { historyIcons, confirmationsBar, emptyHistory, logButtonClicks, toastPosition } = customization;
@@ -196,8 +202,8 @@ export function customizationCode(customization: NovaCustomization): string {
         .filter(Boolean)
         .join(', ')} }`,
   ]);
-  const hasHistory = mono || historyExtra !== null;
-  const history = merged(mono ? 'monoHistory' : null, historyExtra);
+  const hasHistory = kit !== null || historyExtra !== null;
+  const history = merged(kit && `${kit}History`, historyExtra);
 
   const buttonExtra = objectOf([
     logButtonClicks &&
@@ -210,19 +216,19 @@ export function customizationCode(customization: NovaCustomization): string {
         '}',
       ].join('\n'),
   ]);
-  const button = merged(mono ? 'monoConnectButton' : null, buttonExtra);
+  const button = merged(kit && `${kit}ConnectButton`, buttonExtra);
 
   const connectExtra = objectOf([
     hasHistory &&
       'modals: { connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } } }',
   ]);
-  const connect = mono || connectExtra ? merged(mono ? 'monoConnect' : null, connectExtra) : null;
+  const connect = kit || connectExtra ? merged(kit && `${kit}Connect`, connectExtra) : null;
 
   const transactionsExtra = objectOf([
     confirmationsBar && 'toast: { components: { ConfirmationsBadge: ConfirmationsBar } }',
     hasHistory && 'transactionsInfoModal: { historyCustomization }',
   ]);
-  const transactions = mono || transactionsExtra ? merged(mono ? 'monoTransactions' : null, transactionsExtra) : null;
+  const transactions = kit || transactionsExtra ? merged(kit && `${kit}Transactions`, transactionsExtra) : null;
 
   const connectLabels =
     uk && label
@@ -244,7 +250,7 @@ export function customizationCode(customization: NovaCustomization): string {
   const localImports = [
     confirmationsBar && "import { ConfirmationsBar } from './ConfirmationsBar';",
     emptyHistory && "import { EmptyHistory } from './EmptyHistory';",
-    mono && "import { monoConnect, monoConnectButton, monoHistory, monoTransactions } from './monoKit';",
+    kit && `import { ${kit}Connect, ${kit}ConnectButton, ${kit}History, ${kit}Transactions } from './${kit}Kit';`,
     historyIcons && "import { TxTypeHistoryItem } from './TxTypeHistoryItem';",
     uk && "import { ukrainianTransactionsLabels } from './ukrainianTransactionsLabels';",
   ].filter(Boolean);
@@ -296,6 +302,7 @@ export function customizationSourcesOf(customization: NovaCustomization): Custom
   return CUSTOMIZATION_SOURCES.filter(
     (file) =>
       (file === 'monoKit.ts' && customization.style === 'mono') ||
+      (file === 'isoKit.ts' && customization.style === 'iso') ||
       (file === 'ukrainianTransactionsLabels.ts' && customization.language === 'uk') ||
       (file === 'TxTypeHistoryItem.tsx' && customization.historyIcons) ||
       (file === 'ConfirmationsBar.tsx' && customization.confirmationsBar) ||

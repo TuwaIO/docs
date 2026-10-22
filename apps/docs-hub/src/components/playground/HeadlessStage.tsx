@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { formatConnectorName, OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { TransactionStatus } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
@@ -83,21 +84,28 @@ function Account({ family }: { family: SimulatedFamily }) {
           <p className="text-xs text-[var(--tuwa-text-secondary)]">{activeConnection.connectorType}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <select
-            aria-label="Network"
-            value={String(activeConnection.chainId)}
-            onChange={(event) => {
-              const chain = CHAINS[family].find(({ id }) => String(id) === event.target.value);
-              if (chain) void switchNetwork(chain.id);
-            }}
-            className={buttonClass}
-          >
-            {CHAINS[family].map(({ id, label }) => (
-              <option key={id} value={String(id)}>
-                {label}
-              </option>
-            ))}
-          </select>
+          {/* The native arrow gives way to a chevron in the theme colors */}
+          <span className="relative inline-flex">
+            <select
+              aria-label="Network"
+              value={String(activeConnection.chainId)}
+              onChange={(event) => {
+                const chain = CHAINS[family].find(({ id }) => String(id) === event.target.value);
+                if (chain) void switchNetwork(chain.id);
+              }}
+              className={`${buttonClass} appearance-none pr-9 [&_option]:bg-[var(--tuwa-bg-secondary)] [&_option]:text-[var(--tuwa-text-primary)]`}
+            >
+              {CHAINS[family].map(({ id, label }) => (
+                <option key={id} value={String(id)}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-[var(--tuwa-text-secondary)]"
+            />
+          </span>
           <button type="button" onClick={() => void disconnect()} className={buttonClass}>
             Disconnect
           </button>
@@ -167,7 +175,7 @@ function Transactions() {
   return (
     <div className="flex flex-col gap-2">
       {error && <p className="text-sm text-[var(--tuwa-error-text)]">{error.message}</p>}
-      {transactions.length === 0 && <p className="text-sm text-[var(--tuwa-text-tertiary)]">No transactions yet.</p>}
+      {transactions.length === 0 && <p className="text-sm text-[var(--tuwa-text-secondary)]">No transactions yet.</p>}
       <ul className="flex flex-col gap-2">
         {transactions.map((tx) => {
           const status = tx.pending ? 'pending' : (tx.status ?? 'pending');
