@@ -17,7 +17,7 @@ import {
   settingsQuery,
   stageKey,
 } from '@/lib/playground/settings';
-import { THEME_PRESETS, type ThemeValues } from '@/lib/playground/themes';
+import { pickStyle, pickTheme, THEME_PRESETS, type ThemeId, type ThemeValues } from '@/lib/playground/themes';
 import { replaceQuery, useQueryString } from '@/lib/queryState';
 
 import { PlaygroundSession } from './PlaygroundSession';
@@ -25,18 +25,38 @@ import { PlaygroundSession } from './PlaygroundSession';
 /**
  * The Playground of `/playground`. It runs only in the browser (`PlaygroundLoader` imports it with `ssr: false`), so
  * the TUWA packages load on this page only. The settings live in the query string; a change of chains, UI or features
- * starts a new session (new stores and providers); the theme and the customization of Nova keep it.
+ * starts a new session (new stores and providers); the theme and the customization of Nova keep it. A theme drawn for
+ * one style kit (Isometric) and that kit are picked together: see `pickTheme` and `pickStyle`.
  */
 export default function PlaygroundStudio() {
   const query = useQueryString();
   const settings = useMemo(() => parseSettings(new URLSearchParams(query)), [query]);
   const [generation, setGeneration] = useState(0);
   const [themeEdits, setThemeEdits] = useState<Partial<ThemeValues>>({});
-  const [customization, setCustomization] = useState<NovaCustomization>(DEFAULT_CUSTOMIZATION);
+  const [customization, setCustomization] = useState<NovaCustomization>(() => ({
+    ...DEFAULT_CUSTOMIZATION,
+    style: pickTheme(settings.theme, DEFAULT_CUSTOMIZATION.style).style,
+  }));
 
   const changeSettings = (patch: Partial<PlaygroundSettings>) => {
-    if (patch.theme) setThemeEdits({});
+    if (patch.theme) {
+      setThemeEdits({});
+      const { style } = pickTheme(patch.theme, customization.style);
+      if (style !== customization.style) setCustomization((current) => ({ ...current, style }));
+    }
     replaceQuery(settingsQuery(normalizeSettings({ ...settings, ...patch })));
+  };
+
+  // A theme picked together with a style kit, without the pairing of `changeSettings`
+  const switchTheme = (theme: ThemeId) => {
+    if (theme === settings.theme) return;
+    setThemeEdits({});
+    replaceQuery(settingsQuery(normalizeSettings({ ...settings, theme })));
+  };
+
+  const changeCustomization = (patch: Partial<NovaCustomization>) => {
+    setCustomization((current) => ({ ...current, ...patch }));
+    if (patch.style) switchTheme(pickStyle(patch.style, settings.theme).theme);
   };
 
   return (
@@ -50,8 +70,11 @@ export default function PlaygroundStudio() {
       resetThemeEdits={() => setThemeEdits({})}
       resetTheme={() => changeSettings({ theme: DEFAULT_SETTINGS.theme })}
       customization={customization}
-      changeCustomization={(patch) => setCustomization((current) => ({ ...current, ...patch }))}
-      resetCustomization={() => setCustomization(DEFAULT_CUSTOMIZATION)}
+      changeCustomization={changeCustomization}
+      resetCustomization={() => {
+        setCustomization(DEFAULT_CUSTOMIZATION);
+        switchTheme(pickStyle(DEFAULT_CUSTOMIZATION.style, settings.theme).theme);
+      }}
       restart={() => setGeneration((value) => value + 1)}
     />
   );

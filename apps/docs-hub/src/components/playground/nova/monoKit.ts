@@ -1,11 +1,15 @@
 // TUWA Mono: class names for every part of Nova UI Kit (the `customization` props). Monospace type, outlined surfaces
 // and accent rings. Every color, corner and ring comes from the `--tuwa-*` variables, so the kit works with any theme.
+// Some Nova parts add these classes to their own defaults instead of replacing them, so the colors of buttons and list
+// rows are marked important (`!`): the default hover colors of Nova would win otherwise.
 // Tailwind CSS generates these classes from this file: keep each class a complete string literal.
 import type { NovaConnectProviderCustomization } from '@tuwaio/sdk/nova-connect';
 import type {
+  ChainListRendererCustomization,
   ConnectButtonCustomization,
   ConnectCardCustomization,
   ConnectedModalCustomization,
+  StatusIconCustomization,
 } from '@tuwaio/sdk/nova-connect/components';
 import { cn } from '@tuwaio/sdk/nova-core/utils';
 import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';
@@ -28,56 +32,80 @@ const text = {
   error: 'text-[var(--tuwa-error-icon)]',
 };
 
+// A status badge: its icon takes the color of its text, which every theme keeps readable on the badge
+const statusBadge = cn(text.body, 'text-xs [&_svg]:text-current!');
+
 const surface = {
   base: 'bg-[var(--tuwa-bg-secondary)]',
-  deep: 'bg-[var(--tuwa-bg-primary)]',
   muted: 'bg-[var(--tuwa-bg-muted)]',
   border: 'border border-[var(--tuwa-border-primary)]',
 };
 
+// The outlined button: the surface stays, the line and the text take the accent under the pointer
+const buttonBase = cn(
+  'cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm scale-100!',
+  'disabled:cursor-not-allowed disabled:opacity-50',
+  corners,
+  focus,
+);
+const outlined = cn(
+  buttonBase,
+  'transition-colors',
+  text.body,
+  'bg-[var(--tuwa-bg-secondary)]! hover:bg-[var(--tuwa-bg-secondary)]! text-[var(--tuwa-text-primary)]!',
+  'border! border-[var(--tuwa-border-primary)]!',
+);
+
 const button = {
   primary: cn(
-    'cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm transition-colors',
-    corners,
+    buttonBase,
+    'transition-opacity',
     text.strong,
-    'bg-[var(--tuwa-text-accent)] text-[var(--tuwa-text-on-accent)] hover:opacity-90',
-    focus,
+    // The text takes the page color: it stands out on the accent in every theme, also on a light accent
+    'bg-[var(--tuwa-text-accent)]! hover:bg-[var(--tuwa-text-accent)]! text-[var(--tuwa-bg-primary)]! hover:opacity-90',
   ),
   ghost: cn(
-    'cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm transition-colors',
-    corners,
-    text.body,
-    text.primary,
-    surface.base,
-    surface.border,
-    'hover:border-[var(--tuwa-text-accent)] hover:text-[var(--tuwa-text-accent)]',
-    focus,
+    outlined,
+    'not-disabled:hover:border-[var(--tuwa-text-accent)]! not-disabled:hover:text-[var(--tuwa-text-accent)]!',
   ),
   danger: cn(
-    'cursor-pointer inline-flex items-center justify-center gap-2 px-4 py-2 text-sm transition-colors',
-    corners,
-    text.body,
-    text.primary,
-    surface.base,
-    surface.border,
-    'hover:border-[var(--tuwa-error-icon)] hover:text-[var(--tuwa-error-icon)]',
-    focus,
+    outlined,
+    'not-disabled:hover:border-[var(--tuwa-error-icon)]! not-disabled:hover:text-[var(--tuwa-error-icon)]!',
   ),
   link: cn('cursor-pointer text-sm transition-opacity hover:opacity-80', text.body, text.accent),
+  quiet: cn('cursor-pointer text-sm transition-opacity hover:opacity-80', text.body, text.secondary),
   icon: cn(
-    'cursor-pointer p-1 transition-colors',
+    'cursor-pointer p-1 transition-colors scale-100!',
     corners,
-    text.secondary,
-    'hover:bg-[var(--tuwa-bg-muted)] hover:text-[var(--tuwa-text-primary)] [&_svg]:text-current',
+    'bg-transparent! text-[var(--tuwa-text-secondary)]!',
+    'hover:bg-[var(--tuwa-bg-muted)]! hover:text-[var(--tuwa-text-primary)]! [&_svg]:text-current',
     focus,
   ),
-  copy: cn('cursor-pointer transition-colors', text.secondary, 'hover:text-[var(--tuwa-text-accent)]'),
+  copy: cn('cursor-pointer transition-colors text-[var(--tuwa-text-secondary)]! hover:text-[var(--tuwa-text-accent)]!'),
 };
 
 const modal = {
   header: cn(surface.base, 'border-b border-[var(--tuwa-border-primary)]'),
-  title: cn(text.strong, text.primary, 'text-base uppercase tracking-wider'),
   footer: cn(surface.base, 'border-t border-[var(--tuwa-border-primary)]'),
+};
+
+// A row of a chain list, in the selector and in the connected modal: the current chain is filled with the accent
+const chainList: ChainListRendererCustomization = {
+  classNames: {
+    item: ({ isActive, isMobile }) =>
+      cn(
+        'flex w-full cursor-pointer items-center gap-3 px-2 py-2 text-left text-sm outline-none transition-colors',
+        'ring-0! ring-offset-0!',
+        isMobile && 'justify-between',
+        corners,
+        text.body,
+        isActive
+          ? 'bg-[var(--tuwa-text-accent)]! text-[var(--tuwa-bg-primary)]! hover:bg-[var(--tuwa-text-accent)]! focus:bg-[var(--tuwa-text-accent)]!'
+          : 'bg-transparent! text-[var(--tuwa-text-primary)]! hover:bg-[var(--tuwa-bg-muted)]! focus:bg-[var(--tuwa-bg-muted)]!',
+      ),
+    chainName: () => 'text-current!',
+    activeIndicatorWrapper: () => 'text-current! opacity-80',
+  },
 };
 
 const connectCard: ConnectCardCustomization = {
@@ -97,6 +125,8 @@ const connectCard: ConnectCardCustomization = {
     iconWrapper: () => cn('h-8 w-8 overflow-hidden leading-[0] [&_img]:h-8! [&_img]:w-8!', corners),
     title: () => cn(text.body, text.primary, 'transition-colors group-hover:text-[var(--tuwa-text-accent)]'),
     subtitle: () => cn(text.body, text.secondary, 'text-xs'),
+    // The badge gives way to the chevron under the pointer
+    recentBadgeWrapper: () => 'absolute top-0.5 right-0.5 transition group-hover:scale-90 group-hover:opacity-0',
     chevron: () =>
       cn(
         'h-5 w-5 -translate-x-2 opacity-0 transition duration-300',
@@ -109,7 +139,6 @@ const connectCard: ConnectCardCustomization = {
 const connectedModal: ConnectedModalCustomization = {
   classNames: {
     header: () => cn(modal.header, 'p-4'),
-    dialogTitle: () => modal.title,
     closeButton: () => button.icon,
     mainContent: () => surface.base,
     footer: () => cn(modal.footer, 'p-4'),
@@ -124,7 +153,7 @@ const connectedModal: ConnectedModalCustomization = {
         walletAvatar: {
           classNames: {
             container: () =>
-              'relative h-32 w-32 shrink-0 overflow-hidden rounded-full ring-2 ring-[var(--tuwa-text-accent)]',
+              'relative h-32 w-32 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--tuwa-border-primary)]',
           },
         },
         nameAndBalance: {
@@ -135,6 +164,7 @@ const connectedModal: ConnectedModalCustomization = {
         },
       },
     },
+    chainList: { chainListRenderer: chainList },
     connections: {
       classNames: {
         container: () => cn('flex flex-col gap-6 p-4', surface.base),
@@ -161,7 +191,10 @@ const connectedModal: ConnectedModalCustomization = {
     footer: {
       classNames: {
         container: () =>
-          cn('flex w-full flex-col-reverse flex-wrap items-center justify-between gap-4 p-4 sm:flex-row', modal.footer),
+          cn(
+            'flex w-full flex-col-reverse flex-wrap items-center justify-between gap-4 p-4 sm:flex-row *:grow',
+            modal.footer,
+          ),
         disconnectButton: () => cn(button.danger, 'min-h-10'),
         explorerLink: () => cn(button.ghost, 'min-h-10 no-underline'),
       },
@@ -176,7 +209,6 @@ export const monoConnect: NovaConnectProviderCustomization = {
       classNames: {
         modalContainer: () => surface.base,
         header: () => cn(modal.header, 'border-[var(--tuwa-border-primary)]'),
-        title: () => modal.title,
         infoButton: () => button.icon,
         closeButton: () => button.icon,
         mainContent: () => surface.base,
@@ -210,6 +242,13 @@ export const monoConnect: NovaConnectProviderCustomization = {
                 statusData.state === 'error' ? text.error : statusData.state === 'success' ? text.accent : text.primary,
               ),
             errorMessage: () => cn(text.body, text.error, 'text-center text-sm leading-relaxed'),
+          },
+        },
+        // The text and the strip behind the indicators take the surface of the modal
+        aboutWallets: {
+          classNames: {
+            contentSection: () => 'bg-[var(--tuwa-bg-secondary)]!',
+            navigation: () => '[&>div:last-child]:bg-[var(--tuwa-bg-secondary)]!',
           },
         },
         rememberWallet: {
@@ -257,6 +296,11 @@ export const monoConnect: NovaConnectProviderCustomization = {
   },
 };
 
+// A transaction status on the connect button, in a ring of its color
+const statusIcon = (colors: string): StatusIconCustomization => ({
+  classNames: { container: () => cn('flex h-6 w-6 items-center justify-center rounded-full ring-1', colors) },
+});
+
 /** The `customization` prop of `ConnectButton`, with its network selector and connected state. */
 export const monoConnectButton: ConnectButtonCustomization = {
   classNames: {
@@ -270,7 +314,7 @@ export const monoConnectButton: ConnectButtonCustomization = {
         'disabled:cursor-not-allowed disabled:opacity-50',
         buttonData.isConnected
           ? cn(surface.base, surface.border, text.primary, 'hover:border-[var(--tuwa-text-accent)]')
-          : 'bg-[var(--tuwa-text-accent)] text-[var(--tuwa-text-on-accent)] hover:opacity-90',
+          : 'bg-[var(--tuwa-text-accent)] text-[var(--tuwa-bg-primary)] hover:opacity-90',
       ),
   },
   childComponents: {
@@ -283,28 +327,17 @@ export const monoConnectButton: ConnectButtonCustomization = {
         walletAvatar: {
           classNames: {
             container: () =>
-              'relative z-2 h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--tuwa-text-accent)]',
+              'relative z-2 h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--tuwa-border-primary)]',
           },
         },
         statusIcon: {
-          succeed: {
-            classNames: {
-              container: () =>
-                'flex h-6 w-6 items-center justify-center rounded-full bg-[var(--tuwa-success-bg)] text-[var(--tuwa-success-icon)] ring-1 ring-[var(--tuwa-success-icon)]',
-            },
-          },
-          failed: {
-            classNames: {
-              container: () =>
-                'flex h-6 w-6 items-center justify-center rounded-full bg-[var(--tuwa-error-bg)] text-[var(--tuwa-error-icon)] ring-1 ring-[var(--tuwa-error-icon)]',
-            },
-          },
-          replaced: {
-            classNames: {
-              container: () =>
-                'flex h-6 w-6 items-center justify-center rounded-full bg-[var(--tuwa-info-bg)] text-[var(--tuwa-info-icon)] ring-1 ring-[var(--tuwa-border-primary)]',
-            },
-          },
+          succeed: statusIcon(
+            'bg-[var(--tuwa-success-bg)] text-[var(--tuwa-success-icon)] ring-[var(--tuwa-success-icon)]',
+          ),
+          failed: statusIcon('bg-[var(--tuwa-error-bg)] text-[var(--tuwa-error-icon)] ring-[var(--tuwa-error-icon)]'),
+          replaced: statusIcon(
+            'bg-[var(--tuwa-info-bg)] text-[var(--tuwa-info-icon)] ring-[var(--tuwa-border-primary)]',
+          ),
         },
       },
     },
@@ -316,18 +349,7 @@ export const monoConnectButton: ConnectButtonCustomization = {
         },
       },
       selectContent: { contentClassName: cn(surface.base, surface.border, corners) },
-      chainListRenderer: {
-        classNames: {
-          item: ({ isActive }) =>
-            cn(
-              'cursor-pointer text-sm transition-colors',
-              text.body,
-              isActive
-                ? 'bg-[var(--tuwa-text-accent)] text-[var(--tuwa-text-on-accent)]'
-                : cn(text.primary, 'hover:bg-[var(--tuwa-bg-muted)]'),
-            ),
-        },
-      },
+      chainListRenderer: chainList,
     },
   },
 };
@@ -348,7 +370,7 @@ export const monoHistory: TransactionsHistoryCustomization<Transaction> = {
     itemTitle: cn(text.strong, text.primary, 'text-sm'),
     itemTimestamp: cn(text.body, text.secondary, 'mb-1 block text-xs'),
     itemDescription: cn(text.body, text.secondary, 'mt-1 text-xs'),
-    itemStatusBadge: cn(text.body, 'text-xs'),
+    itemStatusBadge: statusBadge,
     itemHashLabel: cn(text.strong, text.primary, 'pr-1 text-sm'),
     itemHashLink: cn(text.body, text.accent, 'flex items-center gap-x-1 hover:underline'),
     itemHashCopyButton: button.copy,
@@ -367,16 +389,15 @@ export const monoTransactions: NovaTransactionsCustomization = {
       hashLabel: cn(text.strong, text.primary, 'pr-1 text-sm'),
       hashLink: cn(text.body, text.accent, 'hover:underline'),
       hashCopyButton: button.copy,
-      statusBadge: cn(text.body, 'text-xs'),
+      statusBadge,
       speedUpButton: button.link,
-      cancelButton: cn(text.body, text.secondary, 'cursor-pointer text-sm hover:opacity-80'),
-      txInfoButton: cn(button.primary, 'px-2 py-1 text-xs'),
+      cancelButton: button.quiet,
+      txInfoButton: cn(button.primary, 'min-h-8 px-3 py-1'),
     },
   },
   transactionsInfoModal: {
     classNames: {
       header: cn(modal.header, text.primary),
-      headerTitle: modal.title,
       closeButton: button.icon,
     },
     historyCustomization: monoHistory,
@@ -385,12 +406,11 @@ export const monoTransactions: NovaTransactionsCustomization = {
     classNames: {
       container: surface.base,
       header: cn(modal.header, text.primary),
-      headerTitle: modal.title,
       closeButton: button.icon,
       main: surface.base,
       footer: cn(modal.footer, 'p-4'),
       speedUpButton: button.link,
-      cancelButton: cn(text.body, text.secondary, 'cursor-pointer text-sm hover:opacity-80'),
+      cancelButton: button.quiet,
       retryButton: button.primary,
       allTransactionsButton: button.ghost,
       closeModalButton: button.ghost,

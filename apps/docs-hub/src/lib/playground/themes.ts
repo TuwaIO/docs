@@ -1,3 +1,5 @@
+import type { StyleKit } from './customization';
+
 /** The CSS variables of Nova UI Kit (`@tuwaio/nova-core`), in the order of the editor groups. */
 export const THEME_VARIABLES = [
   '--tuwa-bg-primary',
@@ -52,7 +54,8 @@ export const THEME_GROUPS: { label: string; variables: ThemeVariable[] }[] = [
 ];
 
 /** The theme presets of the Playground. */
-export type ThemeId = 'default-dark' | 'clean-light' | 'cyberpunk' | 'minimalist';
+export type ThemeId =
+  'default-dark' | 'clean-light' | 'cyberpunk' | 'minimalist' | 'isometric-light' | 'isometric-dark';
 
 /** A theme preset. */
 export interface ThemePreset {
@@ -61,9 +64,14 @@ export interface ThemePreset {
   /** One line for the preset picker. */
   description: string;
   values: ThemeValues;
+  /** The style kit picked together with the theme, for a theme drawn for one kit. */
+  pairedStyle?: StyleKit;
 }
 
-/** The presets: Nova's own dark and light themes, and two that show how far the variables go. */
+/**
+ * The presets: Nova's own dark and light themes, two that show how far the variables go, and the Isometric pair, a line
+ * drawing in one ink that the Isometric style kit gives depth.
+ */
 export const THEME_PRESETS: Record<ThemeId, ThemePreset> = {
   'default-dark': {
     id: 'default-dark',
@@ -217,11 +225,133 @@ export const THEME_PRESETS: Record<ThemeId, ThemePreset> = {
       '--tuwa-ring-width': '1px',
     },
   },
+  'isometric-light': {
+    id: 'isometric-light',
+    label: 'Isometric Light',
+    description: 'One dark ink on white with square corners, a line drawing. Picks the Isometric style.',
+    pairedStyle: 'iso',
+    values: {
+      '--tuwa-bg-primary': '#ffffff',
+      '--tuwa-bg-secondary': '#ffffff',
+      '--tuwa-bg-muted': '#eef0f5',
+      '--tuwa-border-primary': '#101423',
+      '--tuwa-border-secondary': '#d5d8e0',
+      '--tuwa-text-primary': '#101423',
+      '--tuwa-text-secondary': '#4b5163',
+      '--tuwa-text-tertiary': '#8a90a2',
+      '--tuwa-text-accent': '#101423',
+      '--tuwa-text-on-accent': '#ffffff',
+      '--tuwa-button-gradient-from': '#101423',
+      '--tuwa-button-gradient-to': '#101423',
+      '--tuwa-button-gradient-from-hover': '#2a3043',
+      '--tuwa-button-gradient-to-hover': '#2a3043',
+      '--tuwa-standart-button-bg': '#ffffff',
+      '--tuwa-standart-button-hover': '#eef0f5',
+      '--tuwa-success-bg': '#e7f6ec',
+      '--tuwa-success-text': '#0b6e35',
+      '--tuwa-success-icon': '#15803d',
+      '--tuwa-error-bg': '#fdecec',
+      '--tuwa-error-text': '#b42318',
+      '--tuwa-error-icon': '#e5484d',
+      '--tuwa-pending-bg': '#fff6dc',
+      '--tuwa-pending-text': '#8a5300',
+      '--tuwa-pending-icon': '#a16207',
+      '--tuwa-info-bg': '#eef0f5',
+      '--tuwa-info-text': '#4b5163',
+      '--tuwa-info-icon': '#6b7184',
+      '--tuwa-testnet-icons': '#8a90a2',
+      '--tuwa-rounded-corners': '0px',
+      '--tuwa-ring-width': '1px',
+    },
+  },
+  'isometric-dark': {
+    id: 'isometric-dark',
+    label: 'Isometric Dark',
+    description: 'The Isometric drawing on deep navy, in dimmed gray lines. Picks the Isometric style.',
+    pairedStyle: 'iso',
+    values: {
+      '--tuwa-bg-primary': '#141829',
+      '--tuwa-bg-secondary': '#141829',
+      '--tuwa-bg-muted': '#1f2438',
+      '--tuwa-border-primary': '#363c52',
+      '--tuwa-border-secondary': '#242a3c',
+      '--tuwa-text-primary': '#e8eaf2',
+      '--tuwa-text-secondary': '#a5abbd',
+      '--tuwa-text-tertiary': '#6e7489',
+      '--tuwa-text-accent': '#c8cddb',
+      '--tuwa-text-on-accent': '#e8eaf2',
+      '--tuwa-button-gradient-from': '#454c66',
+      '--tuwa-button-gradient-to': '#454c66',
+      '--tuwa-button-gradient-from-hover': '#525a77',
+      '--tuwa-button-gradient-to-hover': '#525a77',
+      '--tuwa-standart-button-bg': '#141829',
+      '--tuwa-standart-button-hover': '#1f2438',
+      '--tuwa-success-bg': '#0f2e1d',
+      '--tuwa-success-text': '#7be3a2',
+      '--tuwa-success-icon': '#3ccb7f',
+      '--tuwa-error-bg': '#3a1216',
+      '--tuwa-error-text': '#ff9b9b',
+      '--tuwa-error-icon': '#ff6b6b',
+      '--tuwa-pending-bg': '#3a2c07',
+      '--tuwa-pending-text': '#ffd866',
+      '--tuwa-pending-icon': '#f5c242',
+      '--tuwa-info-bg': '#1f2438',
+      '--tuwa-info-text': '#c8cddb',
+      '--tuwa-info-icon': '#a5abbd',
+      '--tuwa-testnet-icons': '#6e7489',
+      '--tuwa-rounded-corners': '0px',
+      '--tuwa-ring-width': '1px',
+    },
+  },
 };
 
 /** Whether a value is a theme preset id, for example from the query string. */
 export function isThemeId(value: string | null | undefined): value is ThemeId {
   return value !== null && value !== undefined && Object.hasOwn(THEME_PRESETS, value);
+}
+
+/** Whether a preset draws on a dark background, by the brightness of `--tuwa-bg-primary`. */
+function isDarkTheme(id: ThemeId): boolean {
+  const hex = THEME_PRESETS[id].values['--tuwa-bg-primary'];
+  const [red, green, blue] = [1, 3, 5].map((start) => Number.parseInt(hex.slice(start, start + 2), 16));
+  return 0.299 * red + 0.587 * green + 0.114 * blue < 128;
+}
+
+/** The presets drawn for a style kit; empty for a kit that fits every theme. */
+function themesOf(style: StyleKit): ThemeId[] {
+  return Object.values(THEME_PRESETS)
+    .filter((preset) => preset.pairedStyle === style)
+    .map((preset) => preset.id);
+}
+
+/**
+ * The theme and the style kit after a theme is picked. A theme drawn for one kit (Isometric) picks that kit, and a kit
+ * drawn for its own themes gives way to Nova on any other theme.
+ * @param theme - The picked theme.
+ * @param style - The current style kit.
+ * @returns The theme and the style kit to show.
+ */
+export function pickTheme(theme: ThemeId, style: StyleKit): { theme: ThemeId; style: StyleKit } {
+  const paired = THEME_PRESETS[theme].pairedStyle;
+  if (paired) return { theme, style: paired };
+  return { theme, style: themesOf(style).length > 0 ? 'nova' : style };
+}
+
+/**
+ * The theme and the style kit after a style kit is picked. A kit drawn for its own themes picks one of them, dark after
+ * a dark theme, and any other kit leaves such a theme for Nova's own theme of the same brightness.
+ * @param style - The picked style kit.
+ * @param theme - The current theme.
+ * @returns The theme and the style kit to show.
+ */
+export function pickStyle(style: StyleKit, theme: ThemeId): { theme: ThemeId; style: StyleKit } {
+  const own = themesOf(style);
+  if (own.length > 0) {
+    if (own.includes(theme)) return { theme, style };
+    return { theme: own.find((id) => isDarkTheme(id) === isDarkTheme(theme)) ?? own[0], style };
+  }
+  if (THEME_PRESETS[theme].pairedStyle) return { theme: isDarkTheme(theme) ? 'default-dark' : 'clean-light', style };
+  return { theme, style };
 }
 
 /**

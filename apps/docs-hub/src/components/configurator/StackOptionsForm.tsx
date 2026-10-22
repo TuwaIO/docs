@@ -1,7 +1,8 @@
 'use client';
 
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@tuwaio/nova-core/utils';
-import type { ReactNode } from 'react';
+import { type ReactNode, useId } from 'react';
 
 import { type Framework, normalizeStackOptions, type StackOptions } from '@/lib/configurator/generate';
 
@@ -56,28 +57,54 @@ export function Choice({
  * A labelled group of {@link Choice} buttons. Shared with the Playground controls.
  * @param props.label - The legend.
  * @param props.hint - A line under the buttons, hidden in the compact variant.
+ * @param props.info - What the group does, behind an "i" next to the legend: shown on hover, focus or tap.
  * @param props.compact - The small variant.
  */
 export function Group({
   label,
   hint,
+  info,
   children,
   compact,
 }: {
   label: string;
   hint?: string;
+  info?: string;
   children: ReactNode;
   compact?: boolean;
 }) {
+  const infoId = useId();
   return (
-    <fieldset className={cn('flex flex-col', compact ? 'gap-1.5' : 'gap-2')}>
+    <fieldset className={cn('relative flex flex-col', compact ? 'gap-1.5' : 'gap-2')}>
       <legend
         className={cn(
-          'font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]',
+          'flex items-center gap-1 font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]',
           compact ? 'text-[10px] mb-1.5' : 'text-[11px] mb-2',
         )}
       >
         {label}
+        {info && (
+          <span className="group/info inline-flex">
+            <button
+              type="button"
+              aria-label={`About ${label}`}
+              aria-describedby={infoId}
+              // Safari does not focus a tapped button, and hover is off on touch screens: the focus opens the tip there
+              onClick={(event) => event.currentTarget.focus()}
+              className="-m-1 rounded-full p-1 text-[var(--tuwa-text-tertiary)] hover:text-[var(--tuwa-text-primary)] focus-visible:text-[var(--tuwa-text-primary)] cursor-help"
+            >
+              <InformationCircleIcon className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} aria-hidden="true" />
+            </button>
+            {/* Placed against the group, so it opens under the legend, inside the panel */}
+            <span
+              role="tooltip"
+              id={infoId}
+              className="pointer-events-none absolute top-5 left-0 z-30 hidden w-64 max-w-[80vw] rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] px-3 py-2 text-xs font-normal leading-relaxed tracking-normal normal-case text-[var(--tuwa-text-secondary)] shadow-xl group-hover/info:block group-focus-within/info:block"
+            >
+              {info}
+            </span>
+          </span>
+        )}
       </legend>
       <div className="flex flex-wrap gap-2">{children}</div>
       {hint && !compact && <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">{hint}</p>}

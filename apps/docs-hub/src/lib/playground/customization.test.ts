@@ -86,6 +86,13 @@ describe('Nova customization', () => {
     expect(customizationCode(DEFAULT_CUSTOMIZATION)).not.toContain('NovaTransactionsLabelsProvider');
   });
 
+  it('uses the Isometric kit for the iso style', () => {
+    const code = customizationCode({ ...DEFAULT_CUSTOMIZATION, style: 'iso' });
+    expect(code).toContain("import { isoConnect, isoConnectButton, isoHistory, isoTransactions } from './isoKit';");
+    expect(code).toContain('export const connectButtonCustomization: ConnectButtonCustomization = isoConnectButton;');
+    expect(code).not.toContain('monoKit');
+  });
+
   it('keeps any text of the connect button a valid string literal', () => {
     expect(customizationCode({ ...DEFAULT_CUSTOMIZATION, connectLabel: "Let's go" })).toContain(
       `labels: { connectWallet: "Let's go" },`,
@@ -107,12 +114,17 @@ describe('Nova customization', () => {
     ]);
     expect(files[2].code).toBe('// kit');
     expect(files[3]).toEqual(expect.objectContaining({ language: 'tsx', code: expect.stringContaining('is missing') }));
+    expect(customizationFiles({ ...DEFAULT_CUSTOMIZATION, style: 'iso' }, ':root {}', {}).map((f) => f.path)).toEqual([
+      'src/styles/nova-theme.css',
+      'src/nova/customization.tsx',
+      'src/nova/isoKit.ts',
+    ]);
   });
 
   it('gives every variant of the configurator check its own code', () => {
     const variants = allCustomizations();
-    expect(variants).toHaveLength(2048);
-    expect(new Set(variants.map(customizationCode)).size).toBe(2048);
+    expect(variants).toHaveLength(3072);
+    expect(new Set(variants.map(customizationCode)).size).toBe(3072);
   });
 
   it('ships every copyable file, importing only published packages', () => {

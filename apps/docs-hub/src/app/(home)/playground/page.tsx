@@ -1,7 +1,7 @@
-import { StarryBackground } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 
 import { JsonLd } from '../../../components/JsonLd';
+import { PageBackground } from '../../../components/PageBackground';
 import { PlaygroundLoader } from '../../../components/playground/PlaygroundLoader';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
 
@@ -44,16 +44,11 @@ export default function PlaygroundPage() {
   return (
     <>
       <JsonLd data={structuredData} />
-      <div className="hidden md:block">
-        <StarryBackground />
-      </div>
-      <div aria-hidden className="md:hidden pointer-events-none fixed inset-0 z-0 overflow-hidden">
-        <div className="absolute -top-24 -right-20 w-56 h-56 rounded-full bg-gradient-to-br from-[var(--tuwa-button-gradient-from)]/15 to-[var(--tuwa-button-gradient-to)]/8 blur-2xl" />
-      </div>
+      <PageBackground />
 
       {/* Above the footer (z-10): the fixed Nova toasts of the stage render inside this layer */}
       <div className="relative z-20 pt-28 sm:pt-32 pb-16">
-        <div className="mx-auto max-w-[1600px] px-4 sm:px-6">
+        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6">
           <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight font-geist-mono uppercase tracking-tight">
               <span className="bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] bg-clip-text text-transparent">
