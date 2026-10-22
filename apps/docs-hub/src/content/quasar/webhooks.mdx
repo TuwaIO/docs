@@ -102,6 +102,7 @@ Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at 
 - A delivery that fails (network error, timeout or a non-`2xx` status) is retried, up to 5 attempts in total, with an exponential backoff that starts at one minute.
 - Every attempt is logged under **Webhook Deliveries** in the dashboard, with the status code and the response. Keys that look like secrets (`secret`, `token`, `password`, `key`, `privatekey`, `secretkey`, `apikey`, `signingsecret`, `credential`) are masked in the logs.
 - A failed delivery can be sent again from its log entry.
+- Delivery logs are kept for up to 3 months. For a longer audit trail, keep the events your endpoint receives.
 - Each delivery uses 1 quota unit, counted for the first attempt only (see [Quotas & Limits](/quasar/quotas-and-limits)).
 
 **Destination checks:** Quasar resolves the host of the URL before every attempt and refuses private, loopback and link-local addresses (also when the connection is made), so a webhook URL cannot reach the internal network of Quasar.
