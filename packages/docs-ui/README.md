@@ -14,7 +14,7 @@
 - **Theme switch:** `ThemeSwitcher` is a light/dark switch for any theme state (for example `next-themes`).
 - **Interface settings for 30 days:** `PreferenceExpiry` is an inline script for the `<head>` of a site's root layout. It forgets the Local Storage values of the given keys (by default `theme`) 30 days after they were written, as the [Cookie Policy](https://tuwa.io/cookie) states, and dates each later write, whatever library writes it (`next-themes`, the `Tabs` of Nextra).
 - **Decoration:** `Orb` (an animated sphere in the brand color of a TUWA project), `StarryBackground` (an animated star field on a canvas) and `NoSSR` (renders its children only on the client).
-- **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy, and `PolicyDocument` renders it with the date of the version, a Download PDF button, anchored sections and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs). Code that needs only the list or `loadPolicy` (footers, sitemaps, route handlers) imports them from `@tuwaio/docs-ui/policies`, which has no React, Next.js or Nextra imports.
+- **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy in a language, and `PolicyDocument` renders it with the date of the version, a Download PDF button, a language switch (English, Українська) when the policy is translated, anchored sections (the same anchors in every language) and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs). Code that needs only the list or `loadPolicy` (footers, sitemaps, route handlers) imports them from `@tuwaio/docs-ui/policies`, which has no React, Next.js or Nextra imports.
 - **Search index:** the `tuwa-docs-search-index` command builds the [Pagefind](https://pagefind.app) index that the Nextra search loads from `/_pagefind`, from the pages `next build` prerendered. It reads both places Next.js keeps them: `.next/server/app` and, in builds with a deployment adapter (Next.js 16.3.8 and later on Vercel), `.next/server/route-cache`, where `pagefind --site .next/server/app` finds no pages.
 - **Stylesheet:** `dist/index.css` contains the `--tuwa-*` theme variables of [`@tuwaio/nova-core`](https://stories.tuwa.io/?path=/docs/packages-nova-core-overview--docs) (light and `.dark`), the styles of the Nextra parts and the Tailwind CSS v4 utilities used by the components, prefixed with `tuwadocs:`.
 
@@ -85,13 +85,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
 ### Policy pages
 
-A policy page in the Next.js App Router (a Server Component; the content is cached for an hour):
+A policy page in the Next.js App Router (a Server Component; the content is cached for an hour). The language comes from `?lang=` (`en` by default, `uk` for Ukrainian); a policy without a translation loads in English, and the switch links each language with `?lang=<language>`:
 
 ```tsx
-import { loadPolicy, PolicyDocument } from '@tuwaio/docs-ui';
+import { loadPolicy, PolicyDocument, policyLanguageFrom } from '@tuwaio/docs-ui';
 
-export default async function RefundPage() {
-  const content = await loadPolicy('refund');
+export default async function RefundPage({ searchParams }: { searchParams: Promise<{ lang?: string | string[] }> }) {
+  const content = await loadPolicy('refund', { language: policyLanguageFrom((await searchParams).lang) });
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
@@ -147,7 +147,7 @@ It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) 
 
 ## 🌐 External Services
 
-`RemoteLogo` requests its `url` on the server (by default `cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. The other components send no requests.
+`RemoteLogo` requests its `url` on the server (by default `cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. The other components send no requests.
 
 ---
 
