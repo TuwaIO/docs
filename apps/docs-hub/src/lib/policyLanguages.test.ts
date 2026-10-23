@@ -44,7 +44,7 @@ describe('policy languages', () => {
   });
 
   it('loads the translation with its languages', async () => {
-    const fetchMock = vi.fn(async () => answer(page()));
+    const fetchMock = vi.fn<(url: string) => Promise<Response>>(async () => answer(page()));
     vi.stubGlobal('fetch', fetchMock);
     const content = await loadPolicy('refund', { language: 'uk' });
     expect(fetchMock.mock.calls[0][0]).toBe(`${SOURCE}/uk/refund.json`);
