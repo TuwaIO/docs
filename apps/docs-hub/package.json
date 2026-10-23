@@ -24,7 +24,7 @@
     "@tuwaio/satellite-core": "^0.11.0",
     "@tuwaio/satellite-react": "^0.10.0",
     "@tuwaio/sdk": "^0.6.3",
-    "@tuwaio/solana-sdk": "^0.6.2",
+    "@tuwaio/solana-sdk": "^0.6.3",
     "@wagmi/core": "^3.6.5",
     "@wallet-standard/app": "^1.1.1",
     "@wallet-standard/base": "^1.1.1",
