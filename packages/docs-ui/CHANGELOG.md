@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.2...docs-ui-v0.5.0) (2026-10-23)
+
+
+### Features
+
+* **docs-ui:** policies in more than one language ([233031e](https://github.com/TuwaIO/docs/commit/233031e3c241e901335a81ae55b0ec0fee20983e))
+
 ## [0.4.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.1...docs-ui-v0.4.2) (2026-10-20)
 
 
