@@ -98,6 +98,11 @@ components:
             settlement:
               type: object
               properties:
+                methodId:
+                  type:
+                    - string
+                    - "null"
+                  description: "The payment method paid with (`GET /methods`): its token and network read `amountPaid`."
                 chainId:
                   type:
                     - string
@@ -123,6 +128,7 @@ components:
                 overpaid:
                   type: string
               required:
+                - methodId
                 - chainId
                 - txHash
                 - blockRef
@@ -207,11 +213,7 @@ components:
           format: date-time
           description: When it stops being payable.
         seller:
-          type:
-            - object
-            - "null"
-          additionalProperties: {}
-          description: The seller as printed.
+          $ref: "#/components/schemas/InvoiceSeller"
         buyer:
           allOf:
             - $ref: "#/components/schemas/Buyer"
@@ -382,6 +384,11 @@ components:
             - object
             - "null"
           properties:
+            methodId:
+              type:
+                - string
+                - "null"
+              description: "The payment method paid with (`GET /methods`): its token and network read `amountPaid`."
             chainId:
               type:
                 - string
@@ -407,6 +414,7 @@ components:
             overpaid:
               type: string
           required:
+            - methodId
             - chainId
             - txHash
             - blockRef
@@ -556,6 +564,63 @@ components:
         - it
         - null
       description: Language of the invoice, its documents and emails.
+    InvoiceSeller:
+      type:
+        - object
+        - "null"
+      properties:
+        legalName:
+          type:
+            - string
+            - "null"
+        tradingName:
+          type:
+            - string
+            - "null"
+        address:
+          type:
+            - string
+            - "null"
+          description: The postal address as one text, as the checkout shows it.
+        addressLine1:
+          type:
+            - string
+            - "null"
+        addressLine2:
+          type:
+            - string
+            - "null"
+        postalCode:
+          type:
+            - string
+            - "null"
+        city:
+          type:
+            - string
+            - "null"
+        country:
+          type:
+            - string
+            - "null"
+          description: ISO 3166-1 alpha-2.
+        registrationNumber:
+          type:
+            - string
+            - "null"
+        taxId:
+          type:
+            - string
+            - "null"
+        supportEmail:
+          type:
+            - string
+            - "null"
+        website:
+          type:
+            - string
+            - "null"
+      description: The seller as printed, from the app's payment settings when the invoice was issued. Invoices issued before
+        the address had its parts carry only `address`.
     Buyer:
       type: object
       properties:
@@ -4994,8 +5059,9 @@ paths:
       tags:
         - Checkout
       summary: Get the merchant's logo
-      description: "The merchant's PNG or JPEG logo; any site may show it. No key: the token opens this invoice only; a
-        browser may call from the app's domains (any, when it lists none)."
+      description: "The app's PNG or JPEG logo from its Business & documents settings, else the WebP logo of its organization;
+        any site may show it. No key: the token opens this invoice only; a browser may call from the app's domains (any,
+        when it lists none)."
       parameters:
         - schema:
             type: string
@@ -5013,6 +5079,10 @@ paths:
                 type: string
                 format: binary
             image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/webp:
               schema:
                 type: string
                 format: binary
