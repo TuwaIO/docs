@@ -20,25 +20,25 @@
     "@tuwaio/satellite-core": "^0.11.0",
     "@tuwaio/satellite-evm": "^0.10.0",
     "@tuwaio/satellite-solana": "^0.11.0",
-    "@tuwaio/sdk": "^0.6.3",
+    "@tuwaio/sdk": "^0.6.4",
     "@tuwaio/siwx-core": "^0.7.1",
     "@tuwaio/siwx-evm": "^0.5.2",
     "@tuwaio/siwx-server": "^0.8.0",
     "@tuwaio/siwx-solana": "^0.7.0",
     "@tuwaio/solana-sdk": "^0.6.3",
-    "@wagmi/core": "^3.6.5",
+    "@wagmi/core": "^3.6.7",
     "@wallet-standard/app": "^1.1.1",
     "@wallet-standard/base": "^1.1.1",
     "@wallet-standard/features": "^1.1.1",
     "@wallet-standard/react": "^1.0.3",
     "@wallet-standard/ui": "^1.0.3",
     "@wallet-standard/ui-registry": "^1.1.1",
-    "immer": "^11.1.21",
-    "next": "16.4.1",
+    "immer": "^11.2.9",
+    "next": "16.4.3",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "viem": "^2.57.7",
-    "zustand": "^5.0.15"
+    "viem": "^2.57.11",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -48,6 +48,6 @@
     "@vitejs/plugin-react": "^6.1.2",
     "tailwindcss": "^4.3.3",
     "typescript": "6.0.3",
-    "vite": "^8.3.4"
+    "vite": "^8.3.5"
   }
 }

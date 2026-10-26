@@ -2,7 +2,7 @@ import './globals.css';
 
 import { PreferenceExpiry } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist } from 'next/font/google';
 import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
 
@@ -11,11 +11,6 @@ import { Providers } from './providers';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
   subsets: ['latin'],
 });
 
@@ -90,7 +85,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <PreferenceExpiry keys={['theme', 'tuwa-guide-network']} />
       </Head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
+        className={`${geistSans.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
       >
         <Providers>{children}</Providers>
       </body>

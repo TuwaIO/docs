@@ -76,7 +76,23 @@ html {
 }
 
 .dark .remote-logo {
-  filter: invert(1);
+  filter: drop-shadow(0 0 12px rgba(103, 232, 249, 0.45));
+}
+
+.dark .remote-logo path:not([style*='fill: none']):not([style*='fill:none']),
+.dark .remote-logo circle {
+  fill: #7cf3ff !important;
+  fill: url(#tuwa-dark-logo-gradient) !important;
+}
+
+.dark .remote-logo path[style*='stroke'],
+.dark .remote-logo [stroke] {
+  stroke: #7cf3ff !important;
+}
+
+.dark .remote-logo path[style*='fill: none'],
+.dark .remote-logo path[style*='fill:none'] {
+  fill: none !important;
 }
 
 .tuwa-gradient-text {
@@ -177,7 +193,10 @@ html {
 
 .nextra-breadcrumb,
 .nextra-breadcrumbs {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-family: var(
+    --tuwa-font-mono,
+    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
+  ) !important;
 }
 
 article h1,
@@ -186,7 +205,10 @@ article h3,
 article h4,
 article h5,
 article h6 {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-family: var(
+    --tuwa-font-mono,
+    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
+  ) !important;
   color: var(--tuwa-text-primary) !important;
   @apply tuwadocs:tracking-tight;
 }
@@ -285,7 +307,7 @@ article .nextra-border a:hover {
 
 /* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security */
 .tuwadocs-policy-title {
-  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
 }
 
 .tuwadocs-policy {
@@ -301,7 +323,7 @@ article .nextra-border a:hover {
 .tuwadocs-policy h2,
 .tuwadocs-policy h3 {
   color: var(--tuwa-text-primary);
-  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
   font-weight: 700;
   letter-spacing: -0.01em;
   scroll-margin-top: 6rem;
@@ -385,7 +407,7 @@ article .nextra-border a:hover {
   border-radius: var(--tuwa-rounded-corners);
   background: var(--tuwa-bg-muted);
   padding: 0.1em 0.35em;
-  font-family: var(--font-geist-mono, ui-monospace), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
   font-size: 0.875em;
 }
 

@@ -1,13 +1,13 @@
 import parse, { type DOMNode, domToReact, Element } from 'html-react-parser';
 import React from 'react';
 
-const LOGO_URL = 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg';
+const LOGO_URL = 'https://tuwa.io/brand/logo_v2.svg';
 
 /**
  * Props of {@link RemoteLogo}: the SVG attributes are applied to the root `svg` element.
  */
 export interface RemoteLogoProps extends React.SVGProps<SVGSVGElement> {
-  /** URL of the SVG (default: the TUWA logo on jsDelivr, `cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg`) */
+  /** URL of the SVG (default: the TUWA logo, `https://tuwa.io/brand/logo_v2.svg`) */
   url?: string;
 }
 
@@ -65,6 +65,12 @@ export async function RemoteLogo({ url = LOGO_URL, className, style, ...props }:
         const svgClassName = [className, 'remote-logo'].filter(Boolean).join(' ');
         return (
           <svg {...attribs} className={svgClassName} style={style} {...props}>
+            <defs>
+              <linearGradient id="tuwa-dark-logo-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#7cf3ff" />
+                <stop offset="1" stopColor="#22c3e6" />
+              </linearGradient>
+            </defs>
             {children}
           </svg>
         );

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.1...docs-ui-v0.5.2) (2026-10-26)
+
+
+### Bug Fixes
+
+* updated packages and added language switcher to playgrounds ([0765c8c](https://github.com/TuwaIO/docs/commit/0765c8c24ede78a3fdd56104939909590df08224))
+
 ## [0.5.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.0...docs-ui-v0.5.1) (2026-10-26)
 
 

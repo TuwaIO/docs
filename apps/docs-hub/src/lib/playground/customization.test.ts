@@ -86,6 +86,17 @@ describe('Nova customization', () => {
     expect(customizationCode(DEFAULT_CUSTOMIZATION)).not.toContain('NovaTransactionsLabelsProvider');
   });
 
+  it('generates Chinese labels when language is zh', () => {
+    const code = customizationCode({ ...DEFAULT_CUSTOMIZATION, language: 'zh' });
+    expect(code).toContain("import { chineseLabels } from '@tuwaio/sdk/nova-connect/i18n';");
+    expect(code).toContain(
+      "import { chineseLabels as chineseTransactionsLabels } from '@tuwaio/sdk/nova-transactions';",
+    );
+    expect(code).toContain('labels: chineseLabels');
+    expect(code).toContain('labels: chineseTransactionsLabels');
+    expect(code).toContain('// <NovaTransactionsLabelsProvider labels={chineseTransactionsLabels}> around the app');
+  });
+
   it('uses the Isometric kit for the iso style', () => {
     const code = customizationCode({ ...DEFAULT_CUSTOMIZATION, style: 'iso' });
     expect(code).toContain("import { isoConnect, isoConnectButton, isoHistory, isoTransactions } from './isoKit';");
@@ -123,8 +134,8 @@ describe('Nova customization', () => {
 
   it('gives every variant of the configurator check its own code', () => {
     const variants = allCustomizations();
-    expect(variants).toHaveLength(3072);
-    expect(new Set(variants.map(customizationCode)).size).toBe(3072);
+    expect(variants).toHaveLength(4608);
+    expect(new Set(variants.map(customizationCode)).size).toBe(4608);
   });
 
   it('ships every copyable file, importing only published packages', () => {

@@ -17,9 +17,12 @@ html {
   }
 }
 
-/* Force Geist Mono font for Heading and Button components */
+/* Monospace font: uses --tuwa-font-mono from @tuwaio/nova-core */
 .font-geist-mono {
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-family: var(
+    --tuwa-font-mono,
+    var(--font-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
+  ) !important;
 }
 
 /* Sequence Diagram theme adaptation (Light & Dark) */

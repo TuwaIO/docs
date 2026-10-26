@@ -11,7 +11,7 @@ import { JsonLd } from '../components/JsonLd';
 import { useMDXComponents as getMDXComponents } from '../mdx-components';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
-const LOGO_URL = 'https://cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg';
+const LOGO_URL = 'https://tuwa.io/brand/logo_v2.svg';
 
 const logo = (
   <RemoteLogo url={LOGO_URL} width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
@@ -129,8 +129,8 @@ export function createSectionPage(section: string, sectionTitle: string) {
 
 /**
  * The Nextra docs layout of a section: the TUWA navbar and footer, the sidebar built from the page map of
- * `src/content` and the top loading bar. Side effect: `RemoteLogo` fetches the TUWA logo from jsDelivr (cached by
- * Next.js for 24 hours).
+ * `src/content` and the top loading bar. Side effect: `RemoteLogo` fetches the TUWA logo (cached by Next.js for
+ * 24 hours).
  *
  * @param props - Layout props.
  * @param props.children - The page.
