@@ -1,4 +1,5 @@
 export * from './components/Footer';
+export * from './components/LocaleSwitcher';
 export * from './components/Logo';
 export * from './components/NavBar';
 export { default as NoSSR } from './components/NoSSR';
