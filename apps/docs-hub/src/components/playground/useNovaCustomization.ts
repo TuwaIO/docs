@@ -2,9 +2,13 @@
 
 import type { NovaConnectProviderCustomization } from '@tuwaio/sdk/nova-connect';
 import type { ConnectButtonCustomization, WalletIconCustomization } from '@tuwaio/sdk/nova-connect/components';
-import { ukrainianLabels } from '@tuwaio/sdk/nova-connect/i18n';
+import {
+  chineseLabels as chineseConnectLabels,
+  ukrainianLabels as ukrainianConnectLabels,
+} from '@tuwaio/sdk/nova-connect/i18n';
 import { deepMerge } from '@tuwaio/sdk/nova-core/utils';
 import {
+  chineseLabels as chineseTransactionsLabels,
   defaultLabels as englishTransactionsLabels,
   type TransactionsHistoryCustomization,
 } from '@tuwaio/sdk/nova-transactions';
@@ -71,6 +75,7 @@ const STAGE_WALLET_ICONS: NovaConnectProviderCustomization = {
 function buildNovaCustomization(customization: NovaCustomization) {
   const kit = STYLE_KIT_OBJECTS[customization.style];
   const uk = customization.language === 'uk';
+  const zh = customization.language === 'zh';
   const label = connectLabelOf(customization);
 
   const historyCustomization = deepMerge<TransactionsHistoryCustomization<Transaction>>(kit?.history ?? {}, {
@@ -103,25 +108,35 @@ function buildNovaCustomization(customization: NovaCustomization) {
     transactionsInfoModal: { historyCustomization },
   });
 
+  const connectLabels = uk
+    ? { ...ukrainianConnectLabels, ...(label && { connectWallet: label }) }
+    : zh
+      ? { ...chineseConnectLabels, ...(label && { connectWallet: label }) }
+      : label
+        ? { connectWallet: label }
+        : undefined;
+
+  const transactionsLabels = uk
+    ? ukrainianTransactionsLabels
+    : zh
+      ? chineseTransactionsLabels
+      : englishTransactionsLabels;
+
   return {
     connectProps: {
       ...connectProviderOptions(customization),
-      labels: uk
-        ? { ...ukrainianLabels, ...(label && { connectWallet: label }) }
-        : label
-          ? { connectWallet: label }
-          : undefined,
+      labels: connectLabels,
       customization: connectCustomization,
     },
     transactionsProps: {
       ...transactionsProviderOptions(customization),
-      labels: uk ? ukrainianTransactionsLabels : undefined,
+      labels: customization.language === 'en' ? undefined : transactionsLabels,
       customization: transactionsCustomization,
     },
     connectButtonCustomization,
     historyCustomization,
     // TransactionsHistory and the history of the connected modal sit outside NovaTransactionsProvider
-    transactionsLabels: uk ? ukrainianTransactionsLabels : englishTransactionsLabels,
+    transactionsLabels,
   };
 }
 

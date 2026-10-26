@@ -6,7 +6,7 @@ import type { GeneratedFile } from '../configurator/generate';
 export type StyleKit = 'nova' | 'mono' | 'iso';
 
 /** The language of the Nova texts (`labels`). */
-export type NovaLanguage = 'en' | 'uk';
+export type NovaLanguage = 'en' | 'zh' | 'uk';
 
 /** Where the transaction toasts appear (the `position` of `NovaTransactionsProvider`). */
 export const TOAST_POSITIONS = [
@@ -132,7 +132,7 @@ const CODE_FLAGS = [
  */
 export function allCustomizations(): NovaCustomization[] {
   return (['nova', 'mono', 'iso'] as const).flatMap((style) =>
-    (['en', 'uk'] as const).flatMap((language) =>
+    (['en', 'zh', 'uk'] as const).flatMap((language) =>
       ['', "Let's go"].flatMap((connectLabel) =>
         [false, true].flatMap((changedOptions) =>
           Array.from({ length: 1 << CODE_FLAGS.length }, (_, mask): NovaCustomization => ({
@@ -193,6 +193,7 @@ export function customizationCode(customization: NovaCustomization): string {
   // The prefix of the exports of the style kit file (`monoKit.ts`, `isoKit.ts`), or `null` for Nova as it ships
   const kit = customization.style === 'nova' ? null : customization.style;
   const uk = customization.language === 'uk';
+  const zh = customization.language === 'zh';
   const label = connectLabelOf(customization);
   const { historyIcons, confirmationsBar, emptyHistory, logButtonClicks, toastPosition } = customization;
 
@@ -235,13 +236,19 @@ export function customizationCode(customization: NovaCustomization): string {
       ? `{ ...ukrainianLabels, connectWallet: ${quote(label)} }`
       : uk
         ? 'ukrainianLabels'
-        : label && `{ connectWallet: ${quote(label)} }`;
+        : zh && label
+          ? `{ ...chineseLabels, connectWallet: ${quote(label)} }`
+          : zh
+            ? 'chineseLabels'
+            : label && `{ connectWallet: ${quote(label)} }`;
   const usesDeepMerge = [history, button, connect, transactions].some((code) => code?.startsWith('deepMerge('));
 
   const imports = [
     "import type { NovaConnectProviderPropsWithCustomization } from '@tuwaio/sdk/nova-connect';",
     "import type { ConnectButtonCustomization } from '@tuwaio/sdk/nova-connect/components';",
     uk && "import { ukrainianLabels } from '@tuwaio/sdk/nova-connect/i18n';",
+    zh && "import { chineseLabels } from '@tuwaio/sdk/nova-connect/i18n';",
+    zh && "import { chineseLabels as chineseTransactionsLabels } from '@tuwaio/sdk/nova-transactions';",
     usesDeepMerge && "import { deepMerge } from '@tuwaio/sdk/nova-core/utils';",
     "import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';",
     "import type { NovaTransactionsProviderProps } from '@tuwaio/sdk/nova-transactions/providers';",
@@ -269,6 +276,7 @@ export function customizationCode(customization: NovaCustomization): string {
     customization.autoCloseToasts && 'autoClose: 5000',
     !customization.trackingModal && 'features: { trackingTxModal: false }',
     uk && 'labels: ukrainianTransactionsLabels',
+    zh && 'labels: chineseTransactionsLabels',
     transactions && `customization: ${transactions}`,
   ]);
 
@@ -282,7 +290,11 @@ export function customizationCode(customization: NovaCustomization): string {
       ? [
           '// <NovaTransactionsLabelsProvider labels={ukrainianTransactionsLabels}> around the app, for TransactionsHistory',
         ]
-      : []),
+      : zh
+        ? [
+            '// <NovaTransactionsLabelsProvider labels={chineseTransactionsLabels}> around the app, for TransactionsHistory',
+          ]
+        : []),
     ...imports,
     ...(localImports.length > 0 ? ['', ...localImports] : []),
     '',

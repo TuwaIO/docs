@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
 import type { ReplacementReason } from '@/lib/playground/chain';
-import { STYLE_KITS, type StyleKit } from '@/lib/playground/customization';
+import { type NovaLanguage, STYLE_KITS, type StyleKit } from '@/lib/playground/customization';
 import { logEvent } from '@/lib/playground/eventLog';
 import { scenarioStore, type TxOutcome } from '@/lib/playground/scenario';
 import { THEME_PRESETS, type ThemePreset } from '@/lib/playground/themes';
@@ -46,6 +46,7 @@ const INFO = {
     'Class names for every Nova part (customization.classNames): Nova as it ships, TUWA Mono, or Isometric, drawn for its own themes.',
   connectButton:
     'Full: the balance and the network selector next to the button. Minimal: the button alone (withBalance and withChain off).',
+  language: 'The language of Nova UI Kit texts and modals: English (EN), Simplified Chinese (CN), or Ukrainian (UA).',
   outcome: 'How the next transaction you send from the stage ends.',
   speed: 'How long the simulated wallet and chain take. Fast divides every delay by 4.',
   signatures: 'Whether the simulated wallet approves or rejects the next message to sign, such as the SIWX sign-in.',
@@ -129,6 +130,73 @@ function ThemeMenu() {
             >
               <Swatch preset={option} />
               {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const LANGUAGE_OPTIONS: { id: NovaLanguage; label: string; short: string }[] = [
+  { id: 'en', label: 'English', short: 'EN' },
+  { id: 'zh', label: '简体中文', short: 'CN' },
+  { id: 'uk', label: 'Українська', short: 'UA' },
+];
+
+/** The language selection as a dropdown menu in the same style as ThemeMenu. */
+function LanguageMenu() {
+  const { customization, changeCustomization } = usePlayground();
+  const [open, setOpen] = useState(false);
+  const menu = useRef<HTMLDivElement>(null);
+  const current = LANGUAGE_OPTIONS.find((opt) => opt.id === customization.language) ?? LANGUAGE_OPTIONS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => !menu.current?.contains(event.target as Node) && setOpen(false);
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && setOpen(false);
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
+
+  return (
+    <div ref={menu} className="relative">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className={cn(fieldClass, 'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs')}
+      >
+        <span>{current.short}</span>
+        <span className="text-[var(--tuwa-text-tertiary)]">·</span>
+        <span>{current.label}</span>
+        <ChevronDownIcon className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          aria-label="Language"
+          className="absolute top-full left-0 z-30 mt-1 flex w-44 flex-col gap-0.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-1 shadow-xl"
+        >
+          {LANGUAGE_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              role="option"
+              aria-selected={customization.language === option.id}
+              onClick={() => {
+                changeCustomization({ language: option.id });
+                setOpen(false);
+              }}
+              className="flex items-center justify-between rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-1.5 text-left text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] aria-selected:bg-[var(--tuwa-text-accent)]/10 aria-selected:text-[var(--tuwa-text-primary)] cursor-pointer"
+            >
+              <span>{option.label}</span>
+              <span className="font-mono text-[11px] text-[var(--tuwa-text-tertiary)]">{option.short}</span>
             </button>
           ))}
         </div>
@@ -242,6 +310,22 @@ function LookGroups({ compact }: { compact: boolean }) {
                 {minimal ? 'Minimal' : 'Full'}
               </Choice>
             ))}
+          </Group>
+          <Group label="Language" info={INFO.language} compact={compact}>
+            {compact ? (
+              <LanguageMenu />
+            ) : (
+              LANGUAGE_OPTIONS.map((option) => (
+                <Choice
+                  key={option.id}
+                  pressed={customization.language === option.id}
+                  onClick={() => changeCustomization({ language: option.id })}
+                >
+                  <span>{option.label}</span>
+                  <span className="ml-1 text-[var(--tuwa-text-tertiary)]">({option.short})</span>
+                </Choice>
+              ))
+            )}
           </Group>
         </>
       )}

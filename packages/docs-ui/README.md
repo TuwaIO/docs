@@ -148,7 +148,7 @@ It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) 
 
 ## 🌐 External Services
 
-`RemoteLogo` requests its `url` on the server (by default `cdn.jsdelivr.net/gh/TuwaIO/workflows@main/preview/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. The other components send no requests.
+`RemoteLogo` requests its `url` on the server (by default `tuwa.io/brand/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. The other components send no requests.
 
 ---
 

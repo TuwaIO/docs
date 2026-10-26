@@ -138,6 +138,13 @@ export function CustomizeTab() {
             English
           </Choice>
           <Choice
+            pressed={customization.language === 'zh'}
+            onClick={() => changeCustomization({ language: 'zh' })}
+            compact
+          >
+            简体中文
+          </Choice>
+          <Choice
             pressed={customization.language === 'uk'}
             onClick={() => changeCustomization({ language: 'uk' })}
             compact
@@ -153,7 +160,13 @@ export function CustomizeTab() {
             type="text"
             value={customization.connectLabel}
             maxLength={CONNECT_LABEL_MAX_LENGTH}
-            placeholder={customization.language === 'uk' ? 'Підключити Гаманець' : 'Connect Wallet'}
+            placeholder={
+              customization.language === 'uk'
+                ? 'Підключити Гаманець'
+                : customization.language === 'zh'
+                  ? '连接钱包'
+                  : 'Connect Wallet'
+            }
             onChange={(event) => changeCustomization({ connectLabel: event.target.value })}
             className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 bg-transparent px-3 py-2 text-sm text-[var(--tuwa-text-primary)] outline-none focus:border-[var(--tuwa-text-accent)] dark:border-white/10"
           />

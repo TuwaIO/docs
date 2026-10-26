@@ -4,7 +4,7 @@
   "private": true,
   "author": "Oleksandr Tkach",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@12.11.2",
+  "packageManager": "pnpm@12.15.0",
   "description": "Monorepo for the unified documentation infrastructure for the TUWA Ecosystem.",
   "scripts": {
     "build": "pnpm --filter \"./packages/**\" build",
@@ -50,6 +50,6 @@
     "prettier-plugin-tailwindcss": "^0.8.1",
     "semantic-release": "^25.0.9",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.71.2"
+    "typescript-eslint": "^8.72.0"
   }
 }
