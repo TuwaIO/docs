@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.0...docs-ui-v0.5.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* added locale switcher ([1b84a05](https://github.com/TuwaIO/docs/commit/1b84a059010191524e91faa3ad74bdbadbafb336))
+
 ## [0.5.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.4.2...docs-ui-v0.5.0) (2026-10-23)
 
 
