@@ -2,17 +2,11 @@ import './globals.css';
 
 import { PreferenceExpiry } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
 import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
 
 import { SITE_URL, X_HANDLE } from '../lib/site';
 import { Providers } from './providers';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -84,9 +78,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             after they are chosen (Cookie Policy) */}
         <PreferenceExpiry keys={['theme', 'tuwa-guide-network']} />
       </Head>
-      <body
-        className={`${geistSans.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
-      >
+      <body className={`antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}>
         <Providers>{children}</Providers>
       </body>
     </html>
