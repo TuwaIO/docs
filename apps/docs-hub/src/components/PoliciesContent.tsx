@@ -21,7 +21,9 @@ export function PoliciesContent({ dates }: { dates: (string | undefined)[] }) {
       <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-12 sm:gap-16">
         <header className="text-center max-w-3xl mx-auto">
           <h1 className="text-3xl sm:text-5xl font-bold text-[var(--tuwa-text-primary)] leading-tight font-geist-mono uppercase tracking-tight">
-            {t.policies.title}
+            <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
+              {t.policies.title}
+            </span>
           </h1>
           <p className="mt-6 text-base sm:text-lg text-[var(--tuwa-text-secondary)] leading-relaxed">
             {t.policies.description}

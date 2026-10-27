@@ -17,7 +17,7 @@ const SOURCE_CLASS: Record<EventSource, string> = {
   SIWX: 'bg-teal-500/15 text-teal-700 dark:text-teal-300',
   Quasar: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
   Webhook: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-  Nova: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
+  Nova: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
 };
 
 const SOURCES = Object.keys(SOURCE_CLASS) as EventSource[];

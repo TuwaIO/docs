@@ -30,7 +30,7 @@ export function PlaygroundHeader() {
   return (
     <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
       <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight font-geist-mono uppercase tracking-tight">
-        <span className="bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
           {t.playground.titlePrefix} {t.playground.titleHighlight}
         </span>
       </h1>

@@ -47,7 +47,7 @@ export function ComparisonsContent() {
             {formatLabel(t.ui.comparisonsExtra.criteriaCount, { count: CRITERIA.length })}
           </p>
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-[var(--tuwa-text-primary)] leading-tight font-geist-mono uppercase tracking-tight">
-            <span className="bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
               {t.comparisons.titlePrefix}
             </span>
             <span className="block mt-2 text-xl sm:text-3xl lg:text-4xl text-[var(--tuwa-text-primary)]">
@@ -112,7 +112,7 @@ export function ComparisonsContent() {
           <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/guides/starter-templates"
-              className="inline-flex items-center gap-2 rounded-[var(--tuwa-rounded-corners)] bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] px-5 py-2.5 text-sm font-semibold font-geist-mono text-white shadow-md shadow-black/10 hover:opacity-95 transition-opacity"
+              className="inline-flex items-center gap-2 rounded-[var(--tuwa-rounded-corners)] bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] px-5 py-2.5 text-sm font-semibold font-geist-mono text-white shadow-md shadow-black/10 hover:opacity-95 transition-opacity"
             >
               {t.ui.comparisonsExtra.startFromTemplate}
             </Link>

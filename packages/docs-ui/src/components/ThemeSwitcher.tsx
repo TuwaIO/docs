@@ -87,8 +87,8 @@ export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: T
           <MoonIcon
             className={`tuwadocs:h-6 tuwadocs:w-6 tuwadocs:relative tuwadocs:left-[2px] tuwadocs:md:h-5 tuwadocs:md:w-5 tuwadocs:transition-colors tuwadocs:duration-300 ${
               isDark
-                ? 'tuwadocs:text-cyan-400' // Active color
-                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-cyan-300' // Passive + Hover color
+                ? 'tuwadocs:text-[#0052ff]' // Active color
+                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-[#0052ff]' // Passive + Hover color
             }`}
           />
         </div>

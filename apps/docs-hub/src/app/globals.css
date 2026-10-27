@@ -5,11 +5,23 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Main page & Hub hero gradient palette (preserves --tuwa-button-gradient-* for ConnectButton):
+   - Light mode: Electric Blue (#0052ff) -> Royal Cobalt (#1d4ed8) -> Oceanic Azure (#0284c7)
+   - Dark mode: Royal Blue (#2563eb) -> Sapphire (#3b82f6) -> Glacial Sky (#7dd3fc) on cosmic dark (#0a0e27) */
+:root {
+  --tuwa-hero-gradient-from: #0052ff;
+  --tuwa-hero-gradient-via: #1d4ed8;
+  --tuwa-hero-gradient-to: #0284c7;
+}
+
 /* Cosmic Dark Background (#0a0e27) for Nextra Layouts */
 html.dark,
 .dark {
   --nextra-bg: 10 14 39;
   --tuwa-bg-dark: #0a0e27;
+  --tuwa-hero-gradient-from: #2563eb;
+  --tuwa-hero-gradient-via: #3b82f6;
+  --tuwa-hero-gradient-to: #7dd3fc;
 }
 
 /* Heading links in dark mode: soft refined accent blue (#38bdf8), never pure white or blinding saturated blue */

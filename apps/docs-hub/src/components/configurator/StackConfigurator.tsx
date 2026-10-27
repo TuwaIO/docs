@@ -39,7 +39,7 @@ export function ConfiguratorHeader() {
   return (
     <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
       <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight font-geist-mono uppercase tracking-tight">
-        <span className="bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
           {t.configurator.titleHighlight}
         </span>
       </h1>
@@ -63,7 +63,7 @@ function Step({
 }) {
   return (
     <section className="relative pl-10">
-      <span className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)] font-mono text-xs font-bold text-white shadow-md shadow-black/10">
+      <span className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] font-mono text-xs font-bold text-white shadow-md shadow-black/10">
         {index}
       </span>
       <div className="mb-3 flex min-h-7 flex-wrap items-center justify-between gap-x-4 gap-y-2">

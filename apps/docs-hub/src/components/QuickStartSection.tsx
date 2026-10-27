@@ -27,12 +27,12 @@ export function QuickStartSection() {
       <div className="mx-auto max-w-4xl 2xl:max-w-5xl">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-12 h-12 2xl:w-14 2xl:h-14 mb-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg opacity-90">
+          <div className="w-12 h-12 2xl:w-14 2xl:h-14 mb-4 bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] rounded-full flex items-center justify-center shadow-lg opacity-90">
             <RocketLaunchIcon className="w-6 h-6 2xl:w-7 2xl:h-7 text-white" aria-hidden="true" />
           </div>
           <h2 className="text-xl sm:text-2xl 2xl:text-3xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
             {t.home.quickStart.titlePrefix}{' '}
-            <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
               Cosmos Playground
             </span>
           </h2>
@@ -118,7 +118,7 @@ export function QuickStartSection() {
         {/* 3 Numbered Steps */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-left">
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               1
             </div>
             <div>
@@ -132,7 +132,7 @@ export function QuickStartSection() {
           </div>
 
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               2
             </div>
             <div>
@@ -152,7 +152,7 @@ export function QuickStartSection() {
           </div>
 
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               3
             </div>
             <div>

@@ -100,7 +100,7 @@ function ScoreBar({ value, color }: { value: number; color?: string }) {
   return (
     <span className="relative block h-1 w-full rounded-full bg-[var(--tuwa-border-primary)]/30 dark:bg-white/[0.06] overflow-hidden">
       <span
-        className={`absolute inset-y-0 left-0 rounded-full ${color ? '' : 'bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)]'}`}
+        className={`absolute inset-y-0 left-0 rounded-full ${color ? '' : 'bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]'}`}
         style={{ width: `${value}%`, ...(color && { backgroundColor: color }) }}
       />
     </span>
@@ -138,7 +138,7 @@ export function ComparisonRadar() {
         <div className="p-3 sm:p-6 lg:border-r border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs font-mono">
             <span className="inline-flex items-center gap-2 text-[var(--tuwa-text-primary)] font-semibold">
-              <span className="w-3 h-3 rounded-sm bg-gradient-to-br from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)]" />
+              <span className="w-3 h-3 rounded-sm bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]" />
               TUWA
             </span>
             <span className="inline-flex items-center gap-2 text-[var(--tuwa-text-primary)] font-semibold">
@@ -158,8 +158,9 @@ export function ComparisonRadar() {
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" style={{ stopColor: 'var(--tuwa-button-gradient-from)' }} />
-                <stop offset="100%" style={{ stopColor: 'var(--tuwa-button-gradient-to)' }} />
+                <stop offset="0%" style={{ stopColor: 'var(--tuwa-hero-gradient-from)' }} />
+                <stop offset="50%" style={{ stopColor: 'var(--tuwa-hero-gradient-via)' }} />
+                <stop offset="100%" style={{ stopColor: 'var(--tuwa-hero-gradient-to)' }} />
               </linearGradient>
               <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
                 <feGaussianBlur stdDeviation="6" />
@@ -353,7 +354,7 @@ export function ComparisonRadar() {
                 className={`relative text-left px-4 py-3 transition-colors cursor-pointer border-[var(--tuwa-border-primary)]/20 dark:border-white/[0.04] [&:not(:last-child)]:border-r ${isActive ? 'bg-[var(--tuwa-text-accent)]/[0.06]' : 'hover:bg-[var(--tuwa-bg-secondary)]/50 dark:hover:bg-white/[0.02]'}`}
               >
                 {isActive && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[var(--tuwa-button-gradient-from)] to-[var(--tuwa-button-gradient-to)]" />
+                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]" />
                 )}
                 <span
                   className={`block text-xs font-semibold font-geist-mono uppercase tracking-wide ${isActive ? 'text-[var(--tuwa-text-primary)]' : 'text-[var(--tuwa-text-secondary)]'}`}

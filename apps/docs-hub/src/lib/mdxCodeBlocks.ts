@@ -36,4 +36,3 @@ export function extractMdxCodeBlocks(sourceCode: string): MdxCodeBlock[] {
 
   return blocks;
 }
-
