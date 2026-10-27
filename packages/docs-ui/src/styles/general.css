@@ -27,10 +27,7 @@ html {
   --tuwa-hero-gradient-from: #0052ff;
   --tuwa-hero-gradient-via: #1d4ed8;
   --tuwa-hero-gradient-to: #0284c7;
-  --tuwa-button-gradient-from: #0052ff;
-  --tuwa-button-gradient-to: #00d2ff;
-  --tuwa-button-gradient-from-hover: #0045d8;
-  --tuwa-button-gradient-to-hover: #00bce6;
+  /* --tuwa-button-gradient-* are left to @tuwaio/nova-core, so the Connect Button keeps Nova's colors */
 
   --nextra-primary-hue: 212;
   --nextra-primary-saturation: 100%;
@@ -68,10 +65,6 @@ html {
   --tuwa-hero-gradient-from: #2563eb;
   --tuwa-hero-gradient-via: #3b82f6;
   --tuwa-hero-gradient-to: #7dd3fc;
-  --tuwa-button-gradient-from: #2563eb;
-  --tuwa-button-gradient-to: #00d2ff;
-  --tuwa-button-gradient-from-hover: #1d4ed8;
-  --tuwa-button-gradient-to-hover: #38bdf8;
 
   --x-color-primary-50: rgb(15 23 42);
   --x-color-primary-100: rgb(23 37 84);
