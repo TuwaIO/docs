@@ -4,6 +4,7 @@ import { CursorArrowRaysIcon } from '@heroicons/react/24/outline';
 import { cn } from '@tuwaio/nova-core/utils';
 import type { Ref } from 'react';
 
+import { formatLabel, useI18n } from '../i18n';
 import type { PackageDetails } from '../lib/packages';
 
 export interface PackagePreviewProps {
@@ -18,7 +19,15 @@ export interface PackagePreviewProps {
 // Chips shown per list before "+N more"
 const MAX_CHIPS = 6;
 
-function ChipList({ title, items }: { title: string; items: { label: string; isTuwa: boolean }[] }) {
+function ChipList({
+  title,
+  items,
+  moreText,
+}: {
+  title: string;
+  items: { label: string; isTuwa: boolean }[];
+  moreText: (count: number) => string;
+}) {
   const hidden = items.length - MAX_CHIPS;
   return (
     <div className="flex flex-col gap-1.5">
@@ -41,7 +50,7 @@ function ChipList({ title, items }: { title: string; items: { label: string; isT
         ))}
         {hidden > 0 && (
           <span className="px-1 py-px text-[10px] 2xl:text-[11px] text-[var(--tuwa-text-secondary)]">
-            +{hidden} more
+            {moreText(hidden)}
           </span>
         )}
       </span>
@@ -59,7 +68,12 @@ function ChipList({ title, items }: { title: string; items: { label: string; isT
  * @param props - See {@link PackagePreviewProps}.
  */
 export function PackagePreview({ details, placement, ref }: PackagePreviewProps) {
+  const { t } = useI18n();
   const required = details.peers.filter((peer) => !peer.optional);
+  const localizedDescription = t.home.packageDialog.packageDescriptions[details.name] ?? details.description;
+  const localizedDeprecation = t.home.packageDialog.packageDeprecations?.[details.name] ?? details.deprecated;
+  const moreText = (count: number) => formatLabel(t.ui.moreCount, { count });
+
   return (
     <div
       ref={ref}
@@ -74,21 +88,25 @@ export function PackagePreview({ details, placement, ref }: PackagePreviewProps)
       )}
     >
       <div className="flex flex-col gap-3 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-4 shadow-2xl shadow-black/30">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           <span className="flex items-baseline gap-2">
             <span className="font-mono text-xs 2xl:text-sm font-semibold text-[var(--tuwa-text-primary)] truncate">
               {details.name}
             </span>
             <span className="shrink-0 text-[11px] text-[var(--tuwa-text-secondary)]">v{details.version}</span>
           </span>
-          <span className="line-clamp-2 text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
-            {details.deprecated ? `Deprecated: ${details.deprecated}` : details.description}
-          </span>
+          {details.deprecated && (
+            <span className="text-xs font-medium text-red-500 dark:text-red-400">
+              {t.home.packageDialog.deprecatedPrefix} {localizedDeprecation}
+            </span>
+          )}
+          <span className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">{localizedDescription}</span>
         </div>
 
         {required.length > 0 && (
           <ChipList
-            title="Required peers"
+            title={t.ui.requiredPeers}
+            moreText={moreText}
             items={required.map((peer) => ({
               label: `${peer.name} ${peer.range}`,
               isTuwa: peer.name.startsWith('@tuwaio/'),
@@ -96,12 +114,16 @@ export function PackagePreview({ details, placement, ref }: PackagePreviewProps)
           />
         )}
         {details.usedBy.length > 0 && (
-          <ChipList title="Used by" items={details.usedBy.map((user) => ({ label: user, isTuwa: true }))} />
+          <ChipList
+            title={t.ui.usedBy}
+            moreText={moreText}
+            items={details.usedBy.map((user) => ({ label: user, isTuwa: true }))}
+          />
         )}
 
         <span className="flex items-center gap-1.5 border-t border-[var(--tuwa-border-primary)]/60 pt-2.5 text-[11px] font-medium text-[var(--tuwa-text-accent)]">
           <CursorArrowRaysIcon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-          {details.deprecated ? 'Click for the details' : 'Click for the install command with peers, guides and links'}
+          {details.deprecated ? t.ui.clickForDetails : t.ui.clickForInstall}
         </span>
       </div>
     </div>

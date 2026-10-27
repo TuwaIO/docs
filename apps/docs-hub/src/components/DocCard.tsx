@@ -4,6 +4,7 @@ import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/out
 import { Orb, PackageType } from '@tuwaio/docs-ui';
 import React, { type FocusEvent, type MouseEvent, type ReactNode, useRef, useState } from 'react';
 
+import { useI18n } from '../i18n';
 import type { DocEntry } from '../lib/ecosystem';
 import type { PackageDetails } from '../lib/packages';
 import { PackagePreview } from './PackagePreview';
@@ -75,6 +76,7 @@ export function DocCard({
   packageDetails,
   onOpenPackage,
 }: DocCardProps) {
+  const { t } = useI18n();
   return (
     // No `overflow-hidden`: the package previews float out of the card. A hovered card is raised over the next ones.
     <div className="group relative hover:z-20 focus-within:z-20 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
@@ -113,7 +115,7 @@ export function DocCard({
             // The hub's own pages (such as `/quasar`) open in the same tab
             target={docsUrl.startsWith('/') ? undefined : '_blank'}
             rel={docsUrl.startsWith('/') ? undefined : 'noopener noreferrer'}
-            title="Documentation"
+            title={t.ui.documentationTitle}
             className="w-8 h-8 2xl:w-9 2xl:h-9 rounded-[var(--tuwa-rounded-corners)] flex items-center justify-center text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-accent)] hover:bg-[var(--tuwa-text-accent)]/10 transition-all duration-200"
           >
             <BookOpenIcon className="w-4 h-4 2xl:w-5 2xl:h-5" />
@@ -155,7 +157,7 @@ export function DocCard({
                   </span>
                   {pkg.isDeprecated && (
                     <span className="shrink-0 text-[9px] 2xl:text-[10px] uppercase font-bold text-red-500/90 bg-red-500/10 px-1.5 py-0.5 rounded border border-red-500/20">
-                      Deprecated
+                      {t.ui.deprecatedBadge}
                     </span>
                   )}
                 </div>

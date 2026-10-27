@@ -24,10 +24,10 @@ export interface OrbProps extends React.HTMLAttributes<HTMLDivElement> {
 const packageColors: Record<PackageType, string> = {
   siwx: '#10b981',
   orbit: '#0d9488',
-  satellite: '#6366f1',
+  satellite: '#2563eb',
   pulsar: '#f59e0b',
   quasar: '#06b6d4',
-  nova: '#8b5cf6',
+  nova: '#00d2ff',
   sdk: '#3b82f6',
 };
 
@@ -35,10 +35,10 @@ const packageColors: Record<PackageType, string> = {
 const packageTints: Record<PackageType, string> = {
   siwx: 'rgba(16,185,129,0.12)',
   orbit: 'rgba(13,148,136,0.12)',
-  satellite: 'rgba(99,102,241,0.12)',
+  satellite: 'rgba(37,99,235,0.12)',
   pulsar: 'rgba(245,158,11,0.12)',
   quasar: 'rgba(6,182,212,0.12)',
-  nova: 'rgba(139,92,246,0.12)',
+  nova: 'rgba(0,210,255,0.12)',
   sdk: 'rgba(59,130,246,0.12)',
 };
 

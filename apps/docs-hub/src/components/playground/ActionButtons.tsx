@@ -5,57 +5,31 @@ import type { InitialTransactionParams } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import type { ComponentType, SVGProps } from 'react';
 
+import { useI18n } from '@/i18n';
 import { familyOf, requestTransaction } from '@/lib/playground/wallets';
 
 import { usePlayground } from './PlaygroundContext';
 
 interface PlaygroundAction {
-  type: string;
-  label: string;
+  type: 'MINT' | 'SWAP' | 'STAKE';
   icon: ComponentType<SVGProps<SVGSVGElement>>;
-  title: [string, string, string, string];
-  description: [string, string, string, string];
   payload: InitialTransactionParams['payload'];
 }
 
 const ACTIONS: PlaygroundAction[] = [
   {
     type: 'MINT',
-    label: 'Mint NFT',
     icon: SparklesIcon,
-    title: ['Minting Orbit #42', 'Orbit #42 minted', 'Mint failed', 'Mint replaced'],
-    description: [
-      'Minting an NFT of the TUWA Orbits collection',
-      'Orbit #42 is in your wallet',
-      'The mint did not go through',
-      'Another transaction took its place',
-    ],
     payload: { collection: 'TUWA Orbits', tokenId: 42 },
   },
   {
     type: 'SWAP',
-    label: 'Swap',
     icon: ArrowsRightLeftIcon,
-    title: ['Swapping 100 USDC', 'Swap complete', 'Swap failed', 'Swap replaced'],
-    description: [
-      'Swapping 100 USDC for the native token',
-      '100 USDC swapped',
-      'The swap did not go through',
-      'Another transaction took its place',
-    ],
     payload: { tokenIn: 'USDC', amount: 100 },
   },
   {
     type: 'STAKE',
-    label: 'Stake',
     icon: LockClosedIcon,
-    title: ['Staking 1.5 tokens', 'Staked', 'Staking failed', 'Stake replaced'],
-    description: [
-      'Locking 1.5 tokens in the staking pool',
-      '1.5 tokens are staked',
-      'The stake did not go through',
-      'Another transaction took its place',
-    ],
     payload: { pool: 'Orbit Staking', amount: 1.5 },
   },
 ];
@@ -66,6 +40,7 @@ const ACTIONS: PlaygroundAction[] = [
  * @param props.withTrackedModal - Whether Nova's tracking modal opens for the transaction.
  */
 export function ActionButtons({ withTrackedModal }: { withTrackedModal: boolean }) {
+  const { t } = useI18n();
   const { device } = usePlayground();
   const executeTxAction = device.usePulsarStore((state) => state.executeTxAction);
   const isInitializing = device.usePulsarStore((state) => state.initialTx?.isInitializing ?? false);
@@ -74,14 +49,15 @@ export function ActionButtons({ withTrackedModal }: { withTrackedModal: boolean 
 
   const run = (action: PlaygroundAction) => {
     if (!activeConnection || !family) return;
+    const localized = t.playground.stage.actions[action.type];
     executeTxAction({
-      actionFunction: () => requestTransaction(family, action.title[0]),
+      actionFunction: () => requestTransaction(family, localized.title[0]),
       params: {
         type: action.type,
         adapter: family,
         desiredChainID: activeConnection.chainId,
-        title: action.title,
-        description: action.description,
+        title: localized.title,
+        description: localized.description,
         payload: action.payload,
         withTrackedModal,
       },
@@ -92,19 +68,22 @@ export function ActionButtons({ withTrackedModal }: { withTrackedModal: boolean 
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-      {ACTIONS.map((action) => (
-        <button
-          key={action.type}
-          type="button"
-          onClick={() => run(action)}
-          disabled={!family || isInitializing}
-          className="group flex flex-col items-start gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-secondary)] p-4 text-left transition-colors hover:border-[var(--tuwa-text-accent)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-        >
-          <action.icon className="h-5 w-5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
-          <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{action.label}</span>
-          <span className="text-xs text-[var(--tuwa-text-secondary)]">{action.description[0]}</span>
-        </button>
-      ))}
+      {ACTIONS.map((action) => {
+        const localized = t.playground.stage.actions[action.type];
+        return (
+          <button
+            key={action.type}
+            type="button"
+            onClick={() => run(action)}
+            disabled={!family || isInitializing}
+            className="group flex flex-col items-start gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-secondary)] p-4 text-left transition-colors hover:border-[var(--tuwa-text-accent)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+          >
+            <action.icon className="h-5 w-5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
+            <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{localized.label}</span>
+            <span className="text-xs text-[var(--tuwa-text-secondary)]">{localized.description[0]}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

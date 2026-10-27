@@ -6,6 +6,7 @@ import { TransactionStatus } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import { getSatelliteSiwxFields, isSessionMatchingConnection, useSiwx, useSiwxSession } from '@tuwaio/sdk/siwx';
 
+import { useI18n } from '@/i18n';
 import { shortId } from '@/lib/playground/encoding';
 import { isSignInPending } from '@/lib/playground/siwx';
 import type { PlaygroundTransaction, SimulatedFamily } from '@/lib/playground/types';
@@ -63,6 +64,7 @@ function Wallets() {
 }
 
 function Account({ family }: { family: SimulatedFamily }) {
+  const { t } = useI18n();
   const { siwx, settings } = usePlayground();
   const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
   const disconnect = useSatelliteConnectStore((state) => state.disconnect);
@@ -87,7 +89,7 @@ function Account({ family }: { family: SimulatedFamily }) {
           {/* The native arrow gives way to a chevron in the theme colors */}
           <span className="relative inline-flex">
             <select
-              aria-label="Network"
+              aria-label={t.playground.stage.networkAria}
               value={String(activeConnection.chainId)}
               onChange={(event) => {
                 const chain = CHAINS[family].find(({ id }) => String(id) === event.target.value);
@@ -107,7 +109,7 @@ function Account({ family }: { family: SimulatedFamily }) {
             />
           </span>
           <button type="button" onClick={() => void disconnect()} className={buttonClass}>
-            Disconnect
+            {t.playground.stage.disconnect}
           </button>
         </div>
       </div>
@@ -115,7 +117,7 @@ function Account({ family }: { family: SimulatedFamily }) {
         <div className="flex flex-wrap items-center gap-3 border-t border-[var(--tuwa-border-secondary)] pt-3 text-sm">
           {signedIn ? (
             <>
-              <span className="text-[var(--tuwa-success-text)]">Signed in with SIWX</span>
+              <span className="text-[var(--tuwa-success-text)]">{t.playground.stage.signedInWithSiwx}</span>
               <button
                 type="button"
                 onClick={async () => {
@@ -124,7 +126,7 @@ function Account({ family }: { family: SimulatedFamily }) {
                 }}
                 className={buttonClass}
               >
-                Sign out
+                {t.playground.stage.signOut}
               </button>
             </>
           ) : (
@@ -142,7 +144,7 @@ function Account({ family }: { family: SimulatedFamily }) {
               }
               className={buttonClass}
             >
-              {isSignInPending(status) ? `${status}…` : 'Sign in with SIWX'}
+              {isSignInPending(status) ? `${status}…` : t.playground.stage.signInWithSiwx}
             </button>
           )}
         </div>
@@ -167,6 +169,7 @@ const STATUS_CLASS: Record<string, string> = {
 };
 
 function Transactions() {
+  const { t } = useI18n();
   const { device } = usePlayground();
   const pool = device.useStagePool();
   const error = device.usePulsarStore((state) => state.initialTx?.error);
@@ -175,7 +178,9 @@ function Transactions() {
   return (
     <div className="flex flex-col gap-2">
       {error && <p className="text-sm text-[var(--tuwa-error-text)]">{error.message}</p>}
-      {transactions.length === 0 && <p className="text-sm text-[var(--tuwa-text-secondary)]">No transactions yet.</p>}
+      {transactions.length === 0 && (
+        <p className="text-sm text-[var(--tuwa-text-secondary)]">{t.playground.stage.noTransactionsYet}</p>
+      )}
       <ul className="flex flex-col gap-2">
         {transactions.map((tx) => {
           const status = tx.pending ? 'pending' : (tx.status ?? 'pending');
@@ -191,7 +196,7 @@ function Transactions() {
               <span className="flex items-center gap-2 text-xs">
                 {tx.syncStatus && (
                   <span className="text-[var(--tuwa-text-tertiary)]">
-                    {tx.syncStatus === 'synced' ? 'synced to Quasar' : 'sync pending'}
+                    {tx.syncStatus === 'synced' ? t.playground.stage.syncedToQuasar : t.playground.stage.syncPending}
                   </span>
                 )}
                 {tx.pending && tx.confirmations ? (
@@ -212,6 +217,7 @@ function Transactions() {
  * It shows that the TUWA stores do not need Nova: the UI is the app's own.
  */
 export function HeadlessStage() {
+  const { t } = useI18n();
   const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
   const family = activeConnection && familyOf(activeConnection.connectorType);
 
@@ -219,9 +225,7 @@ export function HeadlessStage() {
     <div className="flex flex-col gap-6 font-mono">
       <header className="flex flex-col gap-1">
         <p className="text-sm font-bold uppercase tracking-widest">Orbit dApp, headless</p>
-        <p className="text-xs text-[var(--tuwa-text-secondary)]">
-          No Nova UI Kit: this UI is the app&apos;s own, on the Satellite, SIWX and Pulsar stores.
-        </p>
+        <p className="text-xs text-[var(--tuwa-text-secondary)]">{t.playground.stage.headlessSubtitle}</p>
       </header>
       {activeConnection && family ? <Account family={family} /> : <Wallets />}
       <ActionButtons withTrackedModal={false} />

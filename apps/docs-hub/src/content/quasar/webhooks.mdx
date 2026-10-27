@@ -9,7 +9,7 @@ When a transaction synced to Quasar reaches a final status, Quasar sends an HTTP
 
 ---
 
-## 🛠️ Register an Endpoint
+## 🛠️ Register an Endpoint [#register-an-endpoint]
 
 In the dashboard, open **Webhooks** and add an endpoint to an app:
 
@@ -24,7 +24,7 @@ Quasar generates a **signing secret** for the endpoint: `whsec_` followed by 64 
 
 ---
 
-## 📨 The Request
+## 📨 The Request [#the-request]
 
 ```http
 POST /api/webhooks/quasar HTTP/1.1
@@ -58,7 +58,7 @@ x-quasar-event: Success
 
 ---
 
-## 🔐 Verify the Signature
+## 🔐 Verify the Signature [#verify-the-signature]
 
 `x-quasar-signature` is the HMAC-SHA256 of the raw request body, keyed with the signing secret, in hexadecimal. Compute it over the body exactly as received, before parsing it, and compare in constant time:
 
@@ -92,7 +92,7 @@ Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at 
 
 ---
 
-## 🔁 Retries and Delivery Logs
+## 🔁 Retries and Delivery Logs [#retries-and-delivery-logs]
 
 - A delivery that fails (network error, timeout or a non-`2xx` status) is retried, up to 5 attempts in total, with an exponential backoff that starts at one minute.
 - Every attempt is logged under **Webhook Deliveries** in the dashboard, with the status code and the response. Keys that look like secrets (`secret`, `token`, `password`, `key`, `privatekey`, `secretkey`, `apikey`, `signingsecret`, `credential`) are masked in the logs.
@@ -103,7 +103,7 @@ Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at 
 
 ---
 
-## 💻 Local Development
+## 💻 Local Development [#local-development]
 
 Quasar Cloud cannot reach `localhost`. For development, add one endpoint per organization with a `localhost` URL (for example `http://localhost:3000/api/webhooks/quasar`): Quasar then keeps its deliveries for the **local relay** of the `quasar-sdk` CLI, which receives them over a Server-Sent Events stream and posts them to your app with the same body and headers (plus `x-quasar-delivery-id`), so the signature check above works unchanged.
 

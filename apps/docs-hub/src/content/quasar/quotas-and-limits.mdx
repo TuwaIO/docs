@@ -9,7 +9,7 @@ Quasar Cloud meters usage per organization in **quota units**. The Community Edi
 
 ---
 
-## 🧪 Public Beta
+## 🧪 Public Beta [#public-beta]
 
 Quasar Cloud is in public beta and free of charge:
 
@@ -19,7 +19,7 @@ Quasar Cloud is in public beta and free of charge:
 
 ---
 
-## 🧮 What Costs Quota
+## 🧮 What Costs Quota [#what-costs-quota]
 
 | Operation                                                    | Units                         |
 | ------------------------------------------------------------ | ----------------------------- |
@@ -33,7 +33,7 @@ Every sync request is counted, also one that Quasar answers with `duplicate: tru
 
 ---
 
-## 📉 When the Quota Is Used Up
+## 📉 When the Quota Is Used Up [#when-the-quota-is-used-up]
 
 - **Syncs are still accepted** so that no transaction of your users is lost: the response has `mode: "lazy"` (HTTP `202` instead of `200`), and the transaction waits in a queue instead of being tracked right away.
 - **Other requests with a key**, including the history, are rejected with `402 Payment Required` until the organization has quota again.
@@ -42,7 +42,7 @@ Watch the usage of your organization in the dashboard; Quasar Cloud emails the o
 
 ---
 
-## 🚦 Other Limits
+## 🚦 Other Limits [#other-limits]
 
 | Limit                         | Value                                                                       |
 | ----------------------------- | --------------------------------------------------------------------------- |

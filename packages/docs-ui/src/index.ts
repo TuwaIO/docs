@@ -7,6 +7,8 @@ export * from './components/Orb';
 export * from './components/PolicyDocument';
 export { default as StarryBackground } from './components/StarryBackground';
 export * from './components/ThemeSwitcher';
+export * from './i18n';
+export * from './locale';
 export * from './policies';
 export * from './preferences';
 export * from './utils';

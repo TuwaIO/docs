@@ -9,7 +9,7 @@ function Value({ value }: { value: unknown }) {
     return <span className="text-amber-700 dark:text-amber-400">{String(value)}</span>;
   }
   if (typeof value === 'boolean' || value === null) {
-    return <span className="text-violet-700 dark:text-violet-400">{String(value)}</span>;
+    return <span className="text-sky-700 dark:text-sky-400">{String(value)}</span>;
   }
   if (typeof value === 'function') return <span className="italic text-sky-700 dark:text-sky-400">ƒ()</span>;
   return <span className="text-[var(--tuwa-text-tertiary)]">undefined</span>;

@@ -9,7 +9,7 @@ description: Quasar tracks the transactions of your app on the server, keeps the
 
 ---
 
-## 🔄 How Quasar Fits In
+## 🔄 How Quasar Fits In [#how-quasar-fits-in]
 
 Quasar supports both **wallet-signed transactions from the browser** (deposits, swaps, contract calls) and **server-signed transactions from your backend** (withdrawals, automated payouts, server relayers) without requiring a browser `localStorage` store.
 
@@ -75,7 +75,7 @@ Quasar comes in two editions with the same tracking engine and the same API, so 
 
 Quasar Cloud is in **public beta and free of charge**: paid quota is not available, and during the beta its features, limits and the free units may change. The Community Edition has no SIWX sign-in, no passkeys, no transactional email, no billing and no customer portal. To move an organization from Quasar Cloud to your node with its keys and history, see [Move from Quasar Cloud to Community](/quasar/migrate-to-community); to set up a node, see [Self-Hosting](/quasar/self-hosting).
 
-### Which Path Fits Your Stack
+### Which Path Fits Your Stack [#which-path-fits-your-stack]
 
 - **Serverless or edge backends (Vercel, Cloudflare Workers):** Use **Quasar Cloud**. Waiting ~13–15 seconds for Solana `finalized` commitment or EVM block confirmations inside a serverless function burns wall-clock execution time and risks timeouts, while running the full Docker stack of Quasar Community Edition (NestJS, BullMQ, Redis, Payload) is unnecessary overhead for a small serverless team. With Quasar Cloud, your route handler makes one `quasar.pulsar.syncCreate` call, exits immediately, and receives a signed webhook when the transaction reaches `finalized` or expires.
 - **Custom worker or cron against your own database (without Quasar):** If you only need the chain fetcher and finality/expiry loop inside your own cron or background process, import the standalone headless trackers directly from [`@tuwaio/pulsar-solana`](https://pulsar.docs.tuwa.io/solanaStandalone) (`solanaFetcher` + `initializePollingTracker`) or [`@tuwaio/pulsar-evm`](https://pulsar.docs.tuwa.io/evmStandalone) — neither package requires React, a browser or `localStorage`.
@@ -83,7 +83,7 @@ Quasar Cloud is in **public beta and free of charge**: paid quota is not availab
 
 ---
 
-## 📚 Next Steps
+## 📚 Next Steps [#next-steps]
 
 - Create an app and get its keys: [Apps & Keys](/quasar/apps-and-keys).
 - Sync the transactions of your React app: [Quasar transaction sync guide](/guides/quasar-transaction-sync), or the complete app in the [Full-Stack React guide](/guides/full-stack-react).

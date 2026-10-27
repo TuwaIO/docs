@@ -43,7 +43,7 @@ This pattern is fundamentally flawed. It collapses the moment it encounters real
 
 ---
 
-## 1. The Distributed State Mismatch
+## 1. The Distributed State Mismatch [#1-the-distributed-state-mismatch]
 
 In classical Web2 client-server architectures, a request follows a synchronous, binary lifecycle:
 
@@ -95,9 +95,9 @@ When your frontend models this complex lifecycle as a boolean `isLoading`, your 
 
 ---
 
-## 2. Four Production Failure Modes of `useState`
+## 2. Four Production Failure Modes of `useState` [#2-four-production-failure-modes-of-usestate]
 
-### Failure Mode 1: The Component Unmount Bug
+### Failure Mode 1: The Component Unmount Bug [#failure-mode-1-the-component-unmount-bug]
 
 When a user initiates a transaction (e.g., swapping tokens or staking collateral) and then navigates to `/portfolio` or closes a modal sheet, **React unmounts the originating component**.
 
@@ -106,7 +106,7 @@ When a user initiates a transaction (e.g., swapping tokens or staking collateral
 3. The UI loses all awareness of the pending transaction.
 4. When the user navigates back, the button is reset to idle. The user believes their transaction vanished or failed, prompting them to submit a duplicate transaction that results in wasted gas or inadvertent double-spending.
 
-### Failure Mode 2: The Mempool Replacement Trap (Speed-Ups and Cancels)
+### Failure Mode 2: The Mempool Replacement Trap (Speed-Ups and Cancels) [#failure-mode-2-the-mempool-replacement-trap-speed-ups-and-cancels]
 
 When Ethereum or an EVM rollup experiences gas volatility, a transaction can sit pending in the mempool for minutes. Users routinely open MetaMask, Rabby, or Coinbase Wallet and click **"Speed Up"** or **"Cancel"**.
 
@@ -135,7 +135,7 @@ Although modern lower-level libraries like `viem` provide internal replacement d
 
 Pulsar solves this by intercepting Viem's `onReplaced` event at the adapter level, updating the transaction record in the central persistent store (`status = TransactionStatus.Replaced`, `replacedTxHash = H2`, `pending: false`), and emitting the replacement hash via the `onReplaced` callback for application-level handling.
 
-### Failure Mode 3: Cross-Tab & Browser Reload Amnesia
+### Failure Mode 3: Cross-Tab & Browser Reload Amnesia [#failure-mode-3-cross-tab--browser-reload-amnesia]
 
 Transactions take anywhere from 12 seconds (Ethereum) to several minutes under network congestion. Users frequently:
 
@@ -145,7 +145,7 @@ Transactions take anywhere from 12 seconds (Ethereum) to several minutes under n
 
 Component state lives exclusively in ephemeral RAM. A single refresh obliterates all in-flight tracking state. The transaction is still active in the mempool, but your frontend has forgotten it entirely, and any code chained to its promise, such as refetching balances, never runs.
 
-### Failure Mode 4: Soft Confirmations, Finality & Blockhash Expiry
+### Failure Mode 4: Soft Confirmations, Finality & Blockhash Expiry [#failure-mode-4-soft-confirmations-finality--blockhash-expiry]
 
 On high-throughput chains like Solana or optimistic rollups (Arbitrum, Base), a transaction passes through distinct consensus stages:
 
@@ -165,7 +165,7 @@ On Solana, naive polling also mishandles **dropped transactions**:
 
 ---
 
-## 3. The Solution: Decoupled, Local-First State Machines
+## 3. The Solution: Decoupled, Local-First State Machines [#3-the-solution-decoupled-local-first-state-machines]
 
 To build resilient Web3 frontends, transaction tracking must **never live in React components**. It must exist in an independent, headless state machine that operates outside the DOM tree:
 
@@ -199,11 +199,11 @@ A production-grade Web3 transaction architecture enforces four non-negotiable ru
 
 ---
 
-## 4. Implementation in the TUWA Ecosystem
+## 4. Implementation in the TUWA Ecosystem [#4-implementation-in-the-tuwa-ecosystem]
 
 The TUWA stack implements this architecture via **Pulsar** (`@tuwaio/pulsar-core`, `@tuwaio/pulsar-evm`, `@tuwaio/pulsar-solana`).
 
-### Step 1: Define Strongly-Typed Transaction Unions
+### Step 1: Define Strongly-Typed Transaction Unions [#step-1-define-strongly-typed-transaction-unions]
 
 Transactions carry custom business payloads (e.g., token amounts, recipient addresses) alongside protocol metadata:
 
@@ -230,7 +230,7 @@ export type TransactionUnion = TokenSwapTx | SolanaTransaction;
 
 ---
 
-### Step 2: Initialize the Persistent Pulsar Store
+### Step 2: Initialize the Persistent Pulsar Store [#step-2-initialize-the-persistent-pulsar-store]
 
 Instantiate the headless store with multi-chain adapters and local-first persistence:
 
@@ -311,7 +311,7 @@ export async function syncTransaction(tx: Transaction) {
 
 ---
 
-### Step 3: Dispatching Write Actions via `executeTxAction`
+### Step 3: Dispatching Write Actions via `executeTxAction` [#step-3-dispatching-write-actions-via-executetxaction]
 
 Instead of embedding arbitrary wallet calls inside a component closure, extract your transaction dispatch into a clean `@wagmi/core` action and pass it to `executeTxAction`:
 
@@ -420,7 +420,7 @@ export function SwapActionButton({
 
 ---
 
-### Step 4: Resuming Active Trackers on Page Reload
+### Step 4: Resuming Active Trackers on Page Reload [#step-4-resuming-active-trackers-on-page-reload]
 
 When the user reloads the application or opens a new tab, invoke `initializeTransactionsPool` once in your layout. Pulsar scans the persisted store and seamlessly resumes polling all pending transactions:
 
@@ -445,7 +445,7 @@ export function TransactionTrackerBootstrap({ children }: { children: React.Reac
 
 ---
 
-### Step 5: Passive UI Subscriptions via Selectors
+### Step 5: Passive UI Subscriptions via Selectors [#step-5-passive-ui-subscriptions-via-selectors]
 
 Components simply select active or pending transactions from the pool. If the component unmounts and remounts, it immediately displays the true, up-to-date state from the store:
 
@@ -470,7 +470,7 @@ export function PendingTransactionsBadge() {
 
 ---
 
-### Step 6: Reactions That Survive a Reload
+### Step 6: Reactions That Survive a Reload [#step-6-reactions-that-survive-a-reload]
 
 The callbacks of `executeTxAction` cannot be saved to `localStorage`, so a transaction resumed in Step 4 finishes without them. Refetch the data it changes in the "transaction finished" event of the store: it fires once for every transaction that reaches `Success`, `Failed` or `Replaced`, whatever finished it. `useTxFinished` listens to it while a component is mounted; reactions outside React go into the `onTxFinished` option of `createPulsarStore`.
 
@@ -500,7 +500,7 @@ export function BalanceRefresher({ refetchBalances }: { refetchBalances: () => v
 
 ---
 
-## 5. Architectural Comparison: `useState` vs. Pulsar
+## 5. Architectural Comparison: `useState` vs. Pulsar [#5-architectural-comparison-usestate-vs-pulsar]
 
 | Scenario                         | Naive `useState` Pattern                                             | TUWA Pulsar                                                                                              |
 | :------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
@@ -516,13 +516,13 @@ export function BalanceRefresher({ refetchBalances }: { refetchBalances: () => v
 
 ---
 
-## Conclusion
+## Conclusion [#conclusion]
 
 Treating Web3 transactions as ephemeral asynchronous promises is technical debt by default.
 
 By decoupling execution from the React component tree, enforcing local-first persistence, and actively tracking mempool nonces, applications built on the TUWA ecosystem achieve deterministic reliability across arbitrary network conditions and user behaviors.
 
-### Next Steps
+### Next Steps [#next-steps]
 
 - Inspect the [Complete Integration Standard](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md) for full architectural guidelines.
 - Explore the [Pulsar documentation](https://pulsar.docs.tuwa.io/) for low-level tracker APIs.

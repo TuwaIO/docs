@@ -12,6 +12,8 @@ export interface ThemeSwitcherProps {
   theme: string;
   /** Called when the switch is clicked; switch the theme of the site here (for example with `next-themes`) */
   onToggle: () => void;
+  /** Accessible name of the switch button (default: `'Toggle theme'`) */
+  ariaLabel?: string;
 }
 
 /**
@@ -22,7 +24,7 @@ export interface ThemeSwitcherProps {
  * @param props - See {@link ThemeSwitcherProps}.
  * @returns The switch button.
  */
-export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
+export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: ThemeSwitcherProps) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -52,7 +54,7 @@ export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
         'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:h-10 tuwadocs:w-20 tuwadocs:md:h-8 tuwadocs:md:w-16 tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:p-1 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border',
         defaultStyles,
       )}
-      aria-label="Toggle theme"
+      aria-label={ariaLabel}
     >
       {/* Mobile slide indicator with custom spring-like keyframe animation */}
       <div
@@ -85,8 +87,8 @@ export function ThemeSwitcher({ theme, onToggle }: ThemeSwitcherProps) {
           <MoonIcon
             className={`tuwadocs:h-6 tuwadocs:w-6 tuwadocs:relative tuwadocs:left-[2px] tuwadocs:md:h-5 tuwadocs:md:w-5 tuwadocs:transition-colors tuwadocs:duration-300 ${
               isDark
-                ? 'tuwadocs:text-indigo-400' // Active color
-                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-indigo-300' // Passive + Hover color
+                ? 'tuwadocs:text-cyan-400' // Active color
+                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-cyan-300' // Passive + Hover color
             }`}
           />
         </div>

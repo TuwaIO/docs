@@ -12,6 +12,7 @@ import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
+import { useI18n } from '@/i18n';
 import type { ReplacementReason } from '@/lib/playground/chain';
 import { type NovaLanguage, STYLE_KITS, type StyleKit } from '@/lib/playground/customization';
 import { logEvent } from '@/lib/playground/eventLog';
@@ -21,43 +22,7 @@ import { THEME_PRESETS, type ThemePreset } from '@/lib/playground/themes';
 import { Choice, Group } from '../configurator/StackOptionsForm';
 import { usePlayground } from './PlaygroundContext';
 
-const OUTCOMES: { id: TxOutcome; label: string }[] = [
-  { id: 'success', label: 'Success' },
-  { id: 'revert', label: 'Revert' },
-  { id: 'replaced', label: 'Replaced' },
-  { id: 'rejected', label: 'Rejected' },
-];
-
-const OUTCOME_HINTS: Record<TxOutcome, string> = {
-  success: 'Mined on EVM. On Solana, confirmed in a second, then finalized.',
-  revert: 'The contract (EVM) or the program (Solana) fails the transaction.',
-  replaced: 'EVM: another transaction with the same nonce is mined. Solana: the blockhash expires.',
-  rejected: 'The user rejects the transaction in the wallet.',
-};
-
-// What each group does, behind the "i" next to its name
-const INFO = {
-  chains: 'The chain families of the simulated dApp, each with its simulated wallets and networks. One stays on.',
-  ui: 'Nova UI Kit: the ready-made connect modal, button and toasts. Headless: hand-written components on the same stores, as an app without Nova builds them.',
-  features:
-    'SIWX sign-in: after connecting, the wallet signs a message and the app gets a session. Quasar sync: the transactions sync to a simulated Quasar and follow the user to another device; it needs SIWX.',
-  theme: 'The --tuwa-* variables of Nova on the stage. Customize › Theme edits each one and gives the CSS to paste.',
-  style:
-    'Class names for every Nova part (customization.classNames): Nova as it ships, TUWA Mono, or Isometric, drawn for its own themes.',
-  connectButton:
-    'Full: the balance and the network selector next to the button. Minimal: the button alone (withBalance and withChain off).',
-  language: 'The language of Nova UI Kit texts and modals: English (EN), Simplified Chinese (CN), or Ukrainian (UA).',
-  outcome: 'How the next transaction you send from the stage ends.',
-  speed: 'How long the simulated wallet and chain take. Fast divides every delay by 4.',
-  signatures: 'Whether the simulated wallet approves or rejects the next message to sign, such as the SIWX sign-in.',
-  quasar:
-    "Offline: the sync fails, Pulsar keeps the transaction unsynced and resends it when Quasar is back. A real app's preFlightTxCheck also stops new transactions while Quasar is unreachable.",
-  pendingEvm:
-    'Replaces the latest pending EVM transaction with one of the same nonce, as a wallet does: Speed up resends it, Cancel sends an empty one. The original ends as Replaced.',
-};
-
-const ANOTHER_DEVICE_HINT =
-  'Simulates the same user on a new device: the local transactions are gone, and signing in with the same wallet loads the history from Quasar';
+const OUTCOMES: TxOutcome[] = ['success', 'revert', 'replaced', 'rejected'];
 
 // A button or a select in the look of an unpressed `Choice`
 const fieldClass =
@@ -80,10 +45,12 @@ function Swatch({ preset }: { preset: ThemePreset }) {
 
 /** The theme presets as a menu button: it closes on a pick, a click outside or Escape. */
 function ThemeMenu() {
+  const { t } = useI18n();
   const { settings, changeSettings } = usePlayground();
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const preset = THEME_PRESETS[settings.theme];
+  const presetLabel = t.playground.inspector.customize.themePresets[preset.id]?.label ?? preset.label;
 
   useEffect(() => {
     if (!open) return;
@@ -107,13 +74,13 @@ function ThemeMenu() {
         className={cn(fieldClass, 'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs')}
       >
         <Swatch preset={preset} />
-        {preset.label}
+        {presetLabel}
         <ChevronDownIcon className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} aria-hidden="true" />
       </button>
       {open && (
         <div
           role="listbox"
-          aria-label="Theme"
+          aria-label={t.playground.inspector.customize.themeLayer}
           className="absolute top-full left-0 z-30 mt-1 flex w-52 flex-col gap-0.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-1 shadow-xl"
         >
           {Object.values(THEME_PRESETS).map((option) => (
@@ -129,7 +96,7 @@ function ThemeMenu() {
               className="flex items-center gap-2 rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-1.5 text-left text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] aria-selected:bg-[var(--tuwa-text-accent)]/10 aria-selected:text-[var(--tuwa-text-primary)] cursor-pointer"
             >
               <Swatch preset={option} />
-              {option.label}
+              {t.playground.inspector.customize.themePresets[option.id]?.label ?? option.label}
             </button>
           ))}
         </div>
@@ -146,6 +113,7 @@ const LANGUAGE_OPTIONS: { id: NovaLanguage; label: string; short: string }[] = [
 
 /** The language selection as a dropdown menu in the same style as ThemeMenu. */
 function LanguageMenu() {
+  const { t } = useI18n();
   const { customization, changeCustomization } = usePlayground();
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
@@ -180,7 +148,7 @@ function LanguageMenu() {
       {open && (
         <div
           role="listbox"
-          aria-label="Language"
+          aria-label={t.playground.inspector.customize.languageLabel}
           className="absolute top-full left-0 z-30 mt-1 flex w-44 flex-col gap-0.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-1 shadow-xl"
         >
           {LANGUAGE_OPTIONS.map((option) => (
@@ -207,10 +175,11 @@ function LanguageMenu() {
 
 /** The stack of the stage: chains, UI and features. */
 function StackGroups({ compact }: { compact: boolean }) {
+  const { t } = useI18n();
   const { settings, changeSettings } = usePlayground();
   return (
     <>
-      <Group label="Chains" info={INFO.chains} compact={compact}>
+      <Group label={t.playground.controls.chains} info={t.ui.playgroundExtra.info.chains} compact={compact}>
         <Choice
           pressed={settings.evm}
           disabled={settings.evm && !settings.solana}
@@ -228,33 +197,33 @@ function StackGroups({ compact }: { compact: boolean }) {
           Solana
         </Choice>
       </Group>
-      <Group label="UI" info={INFO.ui} compact={compact}>
+      <Group label={t.playground.controls.ui} info={t.ui.playgroundExtra.info.ui} compact={compact}>
         <Choice pressed={settings.ui === 'nova'} onClick={() => changeSettings({ ui: 'nova' })} compact={compact}>
-          Nova UI Kit
+          {t.playground.controls.uiNova}
         </Choice>
         <Choice
           pressed={settings.ui === 'headless'}
           onClick={() => changeSettings({ ui: 'headless' })}
           compact={compact}
         >
-          Headless
+          {t.playground.controls.uiHeadless}
         </Choice>
       </Group>
-      <Group label="Features" info={INFO.features} compact={compact}>
+      <Group label={t.ui.configuratorExtra.featuresLabel} info={t.ui.playgroundExtra.info.features} compact={compact}>
         <Choice
           pressed={settings.siwx}
           disabled={settings.quasar}
           onClick={() => changeSettings({ siwx: !settings.siwx })}
           compact={compact}
         >
-          SIWX sign-in
+          {t.ui.configuratorExtra.siwxChoice}
         </Choice>
         <Choice
           pressed={settings.quasar}
           onClick={() => changeSettings({ quasar: !settings.quasar })}
           compact={compact}
         >
-          Quasar sync
+          {t.ui.configuratorExtra.quasarChoice}
         </Choice>
       </Group>
     </>
@@ -263,10 +232,15 @@ function StackGroups({ compact }: { compact: boolean }) {
 
 /** The look of the stage: the theme (a menu in the panel, buttons in the sheet), the style kit, the connect button. */
 function LookGroups({ compact }: { compact: boolean }) {
+  const { t } = useI18n();
   const { settings, customization, changeSettings, changeCustomization } = usePlayground();
   return (
     <>
-      <Group label="Theme" info={INFO.theme} compact={compact}>
+      <Group
+        label={t.playground.inspector.customize.themeLayer}
+        info={t.ui.playgroundExtra.info.theme}
+        compact={compact}
+      >
         {compact ? (
           <ThemeMenu />
         ) : (
@@ -278,7 +252,7 @@ function LookGroups({ compact }: { compact: boolean }) {
             >
               <span className="inline-flex items-center gap-1.5">
                 <Swatch preset={preset} />
-                {preset.label}
+                {t.playground.inspector.customize.themePresets[preset.id]?.label ?? preset.label}
               </span>
             </Choice>
           ))
@@ -286,7 +260,11 @@ function LookGroups({ compact }: { compact: boolean }) {
       </Group>
       {settings.ui === 'nova' && (
         <>
-          <Group label="Style" info={INFO.style} compact={compact}>
+          <Group
+            label={t.playground.inspector.customize.styleLayer}
+            info={t.ui.playgroundExtra.info.style}
+            compact={compact}
+          >
             {(Object.keys(STYLE_KITS) as StyleKit[]).map((kit) => (
               <Choice
                 key={kit}
@@ -294,12 +272,16 @@ function LookGroups({ compact }: { compact: boolean }) {
                 onClick={() => changeCustomization({ style: kit })}
                 compact={compact}
               >
-                {STYLE_KITS[kit].label}
+                {t.playground.inspector.customize.styleKits[kit]?.label ?? STYLE_KITS[kit].label}
               </Choice>
             ))}
           </Group>
           {/* Minimal: the connect button alone, without the balance and the network selector */}
-          <Group label="Connect button" info={INFO.connectButton} compact={compact}>
+          <Group
+            label={t.ui.playgroundExtra.connectButtonGroup}
+            info={t.ui.playgroundExtra.info.connectButton}
+            compact={compact}
+          >
             {[false, true].map((minimal) => (
               <Choice
                 key={String(minimal)}
@@ -307,11 +289,15 @@ function LookGroups({ compact }: { compact: boolean }) {
                 onClick={() => changeCustomization({ withBalance: !minimal, withChain: !minimal })}
                 compact={compact}
               >
-                {minimal ? 'Minimal' : 'Full'}
+                {minimal ? t.ui.playgroundExtra.minimal : t.ui.playgroundExtra.full}
               </Choice>
             ))}
           </Group>
-          <Group label="Language" info={INFO.language} compact={compact}>
+          <Group
+            label={t.playground.inspector.customize.languageLabel}
+            info={t.ui.playgroundExtra.info.language}
+            compact={compact}
+          >
             {compact ? (
               <LanguageMenu />
             ) : (
@@ -343,6 +329,7 @@ function useLatestPendingEvmTx() {
 
 /** The simulation: the next transaction (in the panel; the phone bar has its own), speed, signatures, Quasar, EVM. */
 function SimulationGroups({ compact }: { compact: boolean }) {
+  const { t } = useI18n();
   const { settings, families, device } = usePlayground();
   const scenario = useStore(scenarioStore);
   const pendingEvmTx = useLatestPendingEvmTx();
@@ -369,70 +356,78 @@ function SimulationGroups({ compact }: { compact: boolean }) {
   return (
     <>
       {compact && (
-        <Group label="Next transaction" info={INFO.outcome} compact>
-          {OUTCOMES.map(({ id, label }) => (
+        <Group label={t.ui.playgroundExtra.nextTxGroup} info={t.ui.playgroundExtra.info.outcome} compact>
+          {OUTCOMES.map((id) => (
             <Choice
               key={id}
               pressed={scenario.outcome === id}
               onClick={() => scenarioStore.setState({ outcome: id })}
               compact
             >
-              {label}
+              {t.ui.playgroundExtra.outcomeLabels[id]}
             </Choice>
           ))}
         </Group>
       )}
-      <Group label="Speed" info={INFO.speed} compact={compact}>
+      <Group label={t.ui.playgroundExtra.speedGroup} info={t.ui.playgroundExtra.info.speed} compact={compact}>
         <Choice
           pressed={scenario.speed === 'realistic'}
           onClick={() => scenarioStore.setState({ speed: 'realistic' })}
           compact={compact}
         >
-          Realistic
+          {t.playground.controls.realistic}
         </Choice>
         <Choice
           pressed={scenario.speed === 'fast'}
           onClick={() => scenarioStore.setState({ speed: 'fast' })}
           compact={compact}
         >
-          Fast
+          {t.playground.controls.fast}
         </Choice>
       </Group>
       {settings.siwx && (
-        <Group label="Wallet signatures" info={INFO.signatures} compact={compact}>
+        <Group
+          label={t.ui.playgroundExtra.signaturesGroup}
+          info={t.ui.playgroundExtra.info.signatures}
+          compact={compact}
+        >
           <Choice
             pressed={!scenario.rejectSignature}
             onClick={() => scenarioStore.setState({ rejectSignature: false })}
             compact={compact}
           >
-            Approve
+            {t.ui.playgroundExtra.approve}
           </Choice>
           <Choice
             pressed={scenario.rejectSignature}
             onClick={() => scenarioStore.setState({ rejectSignature: true })}
             compact={compact}
           >
-            Reject
+            {t.ui.playgroundExtra.reject}
           </Choice>
         </Group>
       )}
       {settings.quasar && (
-        <Group label="Quasar" info={INFO.quasar} compact={compact}>
+        <Group label={t.ui.playgroundExtra.quasarGroup} info={t.ui.playgroundExtra.info.quasar} compact={compact}>
           <Choice pressed={scenario.quasarOnline} onClick={() => setQuasarOnline(true)} compact={compact}>
-            Online
+            {t.ui.playgroundExtra.online}
           </Choice>
           <Choice pressed={!scenario.quasarOnline} onClick={() => setQuasarOnline(false)} compact={compact}>
-            Offline
+            {t.ui.playgroundExtra.offline}
           </Choice>
         </Group>
       )}
       {families.includes(OrbitAdapter.EVM) && (
-        <Group label="Pending EVM transaction" info={INFO.pendingEvm} compact={compact}>
+        <Group
+          label={t.ui.playgroundExtra.pendingEvmGroup}
+          info={t.ui.playgroundExtra.info.pendingEvm}
+          compact={compact}
+        >
           <Choice pressed={false} disabled={!pendingEvmTx} onClick={() => void replace('speed-up')} compact={compact}>
-            Speed up
+            {t.ui.playgroundExtra.speedUp}
           </Choice>
           <Choice pressed={false} disabled={!pendingEvmTx} onClick={() => void replace('cancel')} compact={compact}>
-            Cancel
+            {t.ui.playgroundExtra.cancel}
           </Choice>
         </Group>
       )}
@@ -442,6 +437,7 @@ function SimulationGroups({ compact }: { compact: boolean }) {
 
 /** The session actions: a new device (with Quasar) and a full reset. */
 function SessionActions({ className, short }: { className?: string; short?: boolean }) {
+  const { t } = useI18n();
   const { settings, openOnAnotherDevice, resetPlayground } = usePlayground();
   return (
     <div className={cn('flex gap-2', className)}>
@@ -449,30 +445,35 @@ function SessionActions({ className, short }: { className?: string; short?: bool
         <button
           type="button"
           onClick={openOnAnotherDevice}
-          title={ANOTHER_DEVICE_HINT}
+          title={t.playground.controls.openAnotherDeviceHint}
           className={cn(fieldClass, 'inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs')}
         >
           <DevicePhoneMobileIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          {short ? 'Other device' : 'Open on another device'}
+          {short ? t.ui.playgroundExtra.otherDeviceShort : t.playground.controls.openAnotherDevice}
         </button>
       )}
       <button
         type="button"
         onClick={resetPlayground}
-        title="Reset the Playground: a new session with the default settings"
-        aria-label={short ? 'Reset the Playground' : undefined}
+        title={t.ui.playgroundExtra.resetTitle}
+        aria-label={short ? t.playground.controls.resetPlayground : undefined}
         className={cn(fieldClass, 'inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs')}
       >
         <ArrowPathIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-        {!short && 'Reset'}
+        {!short && t.ui.playgroundExtra.resetShort}
       </button>
     </div>
   );
 }
 
 function OutcomeHint() {
+  const { t } = useI18n();
   const outcome = useStore(scenarioStore, (state) => state.outcome);
-  return <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">{OUTCOME_HINTS[outcome]}</p>;
+  return (
+    <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
+      {t.ui.playgroundExtra.outcomeHints[outcome]}
+    </p>
+  );
 }
 
 /**
@@ -480,14 +481,17 @@ function OutcomeHint() {
  * phone a bar keeps the next transaction and the session actions, and the rest opens in a sheet from the bottom.
  */
 export function ControlsPanel() {
+  const { t } = useI18n();
   const { settings } = usePlayground();
   const outcome = useStore(scenarioStore, (state) => state.outcome);
   const sheet = useRef<HTMLDialogElement>(null);
   const chains = [settings.evm && 'EVM', settings.solana && 'Solana'].filter(Boolean).join(', ');
+  const presetLabel =
+    t.playground.inspector.customize.themePresets[settings.theme]?.label ?? THEME_PRESETS[settings.theme].label;
 
   return (
     <section
-      aria-label="Playground controls"
+      aria-label={t.playground.controls.stackHeading}
       className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm p-2.5 sm:p-4"
     >
       <div className="hidden flex-col gap-3.5 sm:flex">
@@ -510,24 +514,24 @@ export function ControlsPanel() {
           className="flex min-h-11 items-center gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-text-accent)]/60 bg-[var(--tuwa-text-accent)]/10 px-3 text-sm font-semibold cursor-pointer"
         >
           <AdjustmentsHorizontalIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
-          Setup
+          {t.ui.playgroundExtra.setupButton}
           <span className="ml-auto truncate text-xs font-medium text-[var(--tuwa-text-secondary)]">
-            {chains} · {THEME_PRESETS[settings.theme].label}
+            {chains} · {presetLabel}
           </span>
         </button>
         <div className="flex gap-2">
           <label className={cn(fieldClass, 'relative flex min-h-11 flex-1 items-center gap-2 pl-2.5')}>
             <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
-              Next tx
+              {t.ui.playgroundExtra.nextTxShort}
             </span>
             <select
               value={outcome}
               onChange={(event) => scenarioStore.setState({ outcome: event.target.value as TxOutcome })}
               className="min-w-0 flex-1 appearance-none bg-transparent pr-7 text-sm text-[var(--tuwa-text-primary)] outline-none cursor-pointer [&_option]:bg-[var(--tuwa-bg-secondary)]"
             >
-              {OUTCOMES.map(({ id, label }) => (
+              {OUTCOMES.map((id) => (
                 <option key={id} value={id}>
-                  {label}
+                  {t.ui.playgroundExtra.outcomeLabels[id]}
                 </option>
               ))}
             </select>
@@ -541,16 +545,16 @@ export function ControlsPanel() {
       {/* A modal sheet: the backdrop closes it, as does Escape */}
       <dialog
         ref={sheet}
-        aria-label="Playground setup"
+        aria-label={t.ui.playgroundExtra.setupButton}
         onClick={(event) => event.target === event.currentTarget && event.currentTarget.close()}
         className="mt-auto mb-0 max-h-[85dvh] w-full max-w-none open:flex open:flex-col rounded-t-[var(--tuwa-rounded-corners)] border-t border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-0 text-[var(--tuwa-text-primary)] backdrop:bg-black/50 backdrop:backdrop-blur-sm sm:hidden"
       >
         <div className={cn('flex items-center justify-between border-b px-4 py-2', divider)}>
-          <span className="font-semibold">Setup</span>
+          <span className="font-semibold">{t.ui.playgroundExtra.setupButton}</span>
           <button
             type="button"
             onClick={() => sheet.current?.close()}
-            aria-label="Close the setup"
+            aria-label={t.ui.playgroundExtra.closeSetup}
             className="flex h-11 w-11 items-center justify-center rounded-[var(--tuwa-rounded-corners)] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
           >
             <XMarkIcon className="h-5 w-5" aria-hidden="true" />

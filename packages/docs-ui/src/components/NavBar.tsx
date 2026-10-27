@@ -26,6 +26,8 @@ export interface NavProps {
   links?: SocialLink[];
   /** Logo of the site, for example {@link RemoteLogo} */
   logo?: ReactNode;
+  /** Extra elements rendered in the navbar next to the links, for example {@link LocaleSwitcher} */
+  children?: ReactNode;
 }
 
 /**
@@ -35,7 +37,7 @@ export interface NavProps {
  * @param props - See {@link NavProps}.
  * @returns The navbar.
  */
-export function Navbar({ links, logo }: NavProps) {
+export function Navbar({ links, logo, children }: NavProps) {
   return (
     <NextraNavbar logo={logo}>
       <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-3">
@@ -54,6 +56,7 @@ export function Navbar({ links, logo }: NavProps) {
             {title}
           </a>
         ))}
+        {children}
       </div>
     </NextraNavbar>
   );

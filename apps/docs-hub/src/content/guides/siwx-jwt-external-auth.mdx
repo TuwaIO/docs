@@ -22,7 +22,7 @@ The user signs in once with their own wallet; the provider only receives a token
 
 ---
 
-## How It Works
+## How It Works [#how-it-works]
 
 ```text
 Wallet ──signs CAIP-122──▶ POST /api/siwx/verify ──▶ session cookie
@@ -31,14 +31,14 @@ Provider ──▶ GET /api/siwx/jwks ──▶ public keys ──▶ checks the
 Provider ──▶ finds or creates the user of `sub`
 ```
 
-## Before You Start
+## Before You Start [#before-you-start]
 
 - **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `src/lib/authStores.ts` of Step 3.
 - **A public HTTPS URL** for the app: the provider downloads your JWKS from it (see [Local Development](#local-development)).
 
 ---
 
-## Step 1: Create a Signing Key
+## Step 1: Create a Signing Key [#step-1-create-a-signing-key]
 
 Run this once and keep the private JWK as a secret of your deployment. ES256 (P-256) is the default: short keys and signatures, accepted by Coinbase CDP; pass `'RS256'` for services that only accept RSA.
 
@@ -58,7 +58,7 @@ Put the printed `SIWX_JWT_PRIVATE_KEY` into your environment (`.env.local` and t
 
 ---
 
-## Step 2: Enable JWT in the Route Handler
+## Step 2: Enable JWT in the Route Handler [#step-2-enable-jwt-in-the-route-handler]
 
 The `jwt` option adds the `/token` and `/jwks` routes to the handler of the Full-Stack React guide. `issuer` is the URL of your app; `audience` is the value the provider expects in `aud`.
 
@@ -136,7 +136,7 @@ export const { GET, POST, DELETE } = createSiwxApiHandler({
 
 ---
 
-## Step 3: Connect Coinbase CDP Custom Authentication
+## Step 3: Connect Coinbase CDP Custom Authentication [#step-3-connect-coinbase-cdp-custom-authentication]
 
 In the [CDP Portal](https://portal.cdp.coinbase.com/), open the custom authentication settings of your project and enter:
 
@@ -201,7 +201,7 @@ Render `CdpProvider` inside the providers of Step 5 of the Full-Stack React guid
 
 ---
 
-## Step 4: Trust the Token in Your Own Services
+## Step 4: Trust the Token in Your Own Services [#step-4-trust-the-token-in-your-own-services]
 
 Any service that can fetch your JWKS can check the token. `verifySiwxJwt` returns the claims of a valid token and `null` for anything else (wrong signature, issuer or audience, expired, unknown key):
 
@@ -223,7 +223,7 @@ Cache the JWKS for a few minutes in a real service, as the `Cache-Control` heade
 
 ---
 
-## What Ends Up in the Token
+## What Ends Up in the Token [#what-ends-up-in-the-token]
 
 | Claim        | Value                                                                                                            |
 | :----------- | :--------------------------------------------------------------------------------------------------------------- |
@@ -239,7 +239,7 @@ Cache the JWKS for a few minutes in a real service, as the `Cache-Control` heade
 
 ---
 
-## Security and Key Rotation
+## Security and Key Rotation [#security-and-key-rotation]
 
 - **Keep tokens short.** The default 10 minutes is enough: CDP asks again when it needs a token. Do not store tokens in `localStorage`; fetch them from `/token` when needed.
 - **Keep the key on the server.** `SIWX_JWT_PRIVATE_KEY` is a secret of your deployment; the browser only ever sees signed tokens.
@@ -248,13 +248,13 @@ Cache the JWKS for a few minutes in a real service, as the `Cache-Control` heade
 
 ---
 
-## Local Development
+## Local Development [#local-development]
 
 The provider downloads your JWKS from the internet, so `http://localhost:3000/api/siwx/jwks` is out of its reach. Test the CDP flow on a preview deployment, or expose the local server through a tunnel and use the tunnel URL as `NEXT_PUBLIC_APP_URL`, `issuer` and JWKS URL. `verifySiwxJwt` in your own services works locally as it is.
 
 ---
 
-## 📚 Next Steps
+## 📚 Next Steps [#next-steps]
 
 - Every option of the handler, the stores and the JWT functions: [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server).
 - How the CAIP-122 sign-in itself works on EVM and Solana: [Multi-Chain Authentication guide](/guides/multi-chain-auth-siwx-caip122).

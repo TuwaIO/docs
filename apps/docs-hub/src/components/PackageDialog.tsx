@@ -13,6 +13,7 @@ import {
 } from '@tuwaio/nova-core';
 import { Fragment, type ReactNode } from 'react';
 
+import { formatLabel, useI18n } from '../i18n';
 import { installCommand, usePackageManager } from '../lib/packageManager';
 import type { PackageDependency, PackageDetails } from '../lib/packages';
 import { CommandLine, PackageManagerSwitch } from './CommandLine';
@@ -57,6 +58,7 @@ const chipClass =
  * @param props - See {@link PackageDialogProps}.
  */
 export function PackageDialog({ open, name, packages, onSelect, onClose }: PackageDialogProps) {
+  const { t } = useI18n();
   const [packageManager, choosePackageManager] = usePackageManager();
   const details = name ? packages[name] : undefined;
 
@@ -98,11 +100,11 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
   const links = details
     ? [
         details.docsUrl && {
-          label: details.name.includes('/nova-') ? 'Storybook' : 'Reference',
+          label: details.name.includes('/nova-') ? 'Storybook' : t.ui.referenceLink,
           href: details.docsUrl,
         },
         { label: 'npm', href: `https://www.npmjs.com/package/${details.name}` },
-        details.sourceUrl && { label: 'Source', href: details.sourceUrl },
+        details.sourceUrl && { label: t.ui.sourceLink, href: details.sourceUrl },
       ].filter((link): link is { label: string; href: string } => Boolean(link))
     : [];
   const required = details?.peers.filter((peer) => !peer.optional) ?? [];
@@ -110,6 +112,12 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
   const install = details?.install;
   const command = install ? installCommand(packageManager, install.packages) : '';
   const peerCount = install ? install.packages.length - 1 : 0;
+  const localizedDescription = details
+    ? (t.home.packageDialog.packageDescriptions[details.name] ?? details.description)
+    : '';
+  const localizedDeprecation = details
+    ? (t.home.packageDialog.packageDeprecations?.[details.name] ?? details.deprecated)
+    : '';
 
   return (
     <Dialog open={open && Boolean(details)} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -127,7 +135,7 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                 <span className="text-xs font-normal text-[var(--tuwa-text-secondary)]">v{details.version}</span>
               </DialogTitle>
               <DialogClose
-                aria-label="Close"
+                aria-label={t.common.close}
                 className="shrink-0 cursor-pointer rounded-[var(--tuwa-rounded-corners)] p-1 text-[var(--tuwa-text-tertiary)] transition-colors hover:bg-[var(--tuwa-bg-muted)] hover:text-[var(--tuwa-text-primary)]"
               >
                 <CloseIcon aria-hidden="true" />
@@ -136,9 +144,11 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
 
             <div className="flex flex-col gap-5 p-4 sm:p-5">
               {details.deprecated && (
-                <p className="text-xs font-medium text-red-500 dark:text-red-400">Deprecated: {details.deprecated}</p>
+                <p className="text-xs font-medium text-red-500 dark:text-red-400">
+                  {t.home.packageDialog.deprecatedPrefix} {localizedDeprecation}
+                </p>
               )}
-              <DialogDescription className="leading-relaxed 2xl:text-base">{details.description}</DialogDescription>
+              <DialogDescription className="leading-relaxed 2xl:text-base">{localizedDescription}</DialogDescription>
 
               {details.includedIn.length > 0 && !details.deprecated && (
                 <p className="flex items-start gap-2 text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
@@ -147,10 +157,10 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                     aria-hidden="true"
                   />
                   <span>
-                    Included in{' '}
+                    {t.ui.includedInPrefix}{' '}
                     {details.includedIn.map((sdk, index) => (
                       <Fragment key={sdk}>
-                        {index > 0 && ' and '}
+                        {index > 0 && t.ui.includedInAnd}
                         <button
                           type="button"
                           onClick={() => onSelect(sdk)}
@@ -160,7 +170,7 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                         </button>
                       </Fragment>
                     ))}
-                    : in an app on the TUWA SDK, import it from there instead of installing it.
+                    {t.ui.includedInSuffix}
                   </span>
                 </p>
               )}
@@ -170,17 +180,24 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-[11px] 2xl:text-xs font-semibold uppercase tracking-wider text-[var(--tuwa-text-secondary)]">
-                      Install
+                      {t.home.packageDialog.install}
                     </h3>
                     <PackageManagerSwitch value={packageManager} onChange={choosePackageManager} />
                   </div>
-                  <CommandLine command={command} copyTitle="Copy the install command" />
+                  <CommandLine command={command} copyTitle={t.home.packageDialog.copyInstallTitle} />
                   {(peerCount > 0 || install.frameworkPeers.length > 0) && (
                     <p className="text-[11px] 2xl:text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
                       {peerCount > 0 &&
-                        `Installs the package with its ${peerCount} required ${peerCount === 1 ? 'peer' : 'peers'}, the peers of TUWA peers included. `}
+                        formatLabel(t.ui.installsWithPeers, {
+                          count: peerCount,
+                          peerWord: peerCount === 1 ? t.ui.peerSingular : t.ui.peerPlural,
+                        })}
                       {install.frameworkPeers.length > 0 &&
-                        `Also needs ${install.frameworkPeers.map((peer) => `${peer.name} ${peer.range}`).join(' and ')} in the app.`}
+                        formatLabel(t.ui.alsoNeedsFrameworkPeers, {
+                          peers: install.frameworkPeers
+                            .map((peer) => `${peer.name} ${peer.range}`)
+                            .join(t.ui.includedInAnd),
+                        })}
                     </p>
                   )}
                   {details.lighterEntries.map((lighter) => (
@@ -189,37 +206,42 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                       className="text-[11px] 2xl:text-xs leading-relaxed text-[var(--tuwa-text-secondary)]"
                     >
                       <code className="font-mono text-[var(--tuwa-text-primary)]">{lighter.entry}</code> (
-                      {lighter.description}) does not import {lighter.withoutPeers.join(' and ')}: an app that imports
-                      only this entry can leave them out.
+                      {t.ui.lighterEntryDescriptions[lighter.entry] ?? lighter.description}){' '}
+                      {formatLabel(t.ui.lighterDoesNotImport, {
+                        peers: lighter.withoutPeers.join(t.ui.includedInAnd),
+                      })}
                     </p>
                   ))}
                 </div>
               )}
 
-              {required.length > 0 && <Section title="Required peers">{required.map(dependencyChip)}</Section>}
+              {required.length > 0 && <Section title={t.ui.requiredPeers}>{required.map(dependencyChip)}</Section>}
               {optional.length > 0 && (
-                <Section title="Optional peers (install the ones your app uses)">
-                  {optional.map(dependencyChip)}
-                </Section>
+                <Section title={t.ui.optionalPeersHeading}>{optional.map(dependencyChip)}</Section>
               )}
               {details.includes.length > 0 && (
-                <Section title="Includes (re-exported)">{details.includes.map(dependencyChip)}</Section>
+                <Section title={t.ui.includesHeading}>{details.includes.map(dependencyChip)}</Section>
               )}
               {details.usedBy.length > 0 && (
-                <Section title="Used by">{details.usedBy.map((user) => packageChip(user))}</Section>
+                <Section title={t.ui.usedBy}>{details.usedBy.map((user) => packageChip(user))}</Section>
               )}
               {details.guides.length > 0 && (
-                <Section title="Guides">
-                  {details.guides.map((guide) => (
-                    <a
-                      key={guide.route}
-                      href={guide.route}
-                      className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-2.5 py-1 text-xs text-[var(--tuwa-text-primary)] transition-colors hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-text-accent)]/10"
-                    >
-                      <BookOpenIcon className="w-3.5 h-3.5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
-                      {guide.title}
-                    </a>
-                  ))}
+                <Section title={t.home.packageDialog.guidesHeading}>
+                  {details.guides.map((guide) => {
+                    const slug = guide.route.split('/').pop() ?? '';
+                    const localizedGuideTitle =
+                      t.nextra.sidebar[slug] ?? t.configurator.guideTitles[guide.title] ?? guide.title;
+                    return (
+                      <a
+                        key={guide.route}
+                        href={guide.route}
+                        className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-2.5 py-1 text-xs text-[var(--tuwa-text-primary)] transition-colors hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-text-accent)]/10"
+                      >
+                        <BookOpenIcon className="w-3.5 h-3.5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
+                        {localizedGuideTitle}
+                      </a>
+                    );
+                  })}
                 </Section>
               )}
 

@@ -1,3 +1,6 @@
+'use client';
+
+import { formatLabel, useI18n } from '@/i18n';
 import { AXES, CRITERIA, formatCheckDate, sourceIndex, verifiedAsOf } from '@/lib/comparisons';
 
 import { MarkIcon } from './MarkIcon';
@@ -10,84 +13,79 @@ const ISSUE_URL = 'https://github.com/TuwaIO/docs/issues/new?title=Comparisons%3
  * footnotes of the page point to.
  */
 export function Methodology() {
+  const { locale, t } = useI18n();
   const sources = [...sourceIndex()];
   const perAxis = CRITERIA.length / AXES.length;
+  const ex = t.ui.comparisonsExtra;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
       <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] sm:backdrop-blur-sm p-5 sm:p-6 flex flex-col gap-5 text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">
         <div>
           <h3 className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-2">
-            Scoring
+            {ex.scoringHeading}
           </h3>
           <p>
-            Each axis has {perAxis} yes-or-no criteria, listed in the table above. A product scores{' '}
+            {formatLabel(ex.scoringBodyPart1, { count: perAxis })}
             <code className="text-xs font-mono text-[var(--tuwa-text-primary)]">
               (met + ½ · partial) ÷ {perAxis} × 100
-            </code>{' '}
-            on the axis. Nothing is weighted or adjusted by hand: the page computes every score from the facts.
+            </code>
+            {ex.scoringBodyPart2}
           </p>
         </div>
         <ul className="flex flex-col gap-2 text-xs">
           <li className="flex items-start gap-2.5">
             <MarkIcon mark="yes" />
             <span>
-              <strong className="text-[var(--tuwa-text-primary)]">Met:</strong> the vendor documents it for the product
-              as a whole.
+              <strong className="text-[var(--tuwa-text-primary)]">{ex.markMetLead}</strong>
+              {ex.markMetBody}
             </span>
           </li>
           <li className="flex items-start gap-2.5">
             <MarkIcon mark="partial" />
             <span>
-              <strong className="text-[var(--tuwa-text-primary)]">Partial:</strong> only for some of its wallets,
-              transactions or plans, or only with an optional feature turned off.
+              <strong className="text-[var(--tuwa-text-primary)]">{ex.markPartialLead}</strong>
+              {ex.markPartialBody}
             </span>
           </li>
           <li className="flex items-start gap-2.5">
             <MarkIcon mark="no" />
             <span>
-              <strong className="text-[var(--tuwa-text-primary)]">Not met:</strong> missing, outside the product&apos;s
-              job, or not documented (we found no mention in the vendor&apos;s documentation on the check date).
+              <strong className="text-[var(--tuwa-text-primary)]">{ex.markNoLead}</strong>
+              {ex.markNoBody}
             </span>
           </li>
         </ul>
         <div>
           <h3 className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-2">
-            What we compare
+            {ex.whatWeCompareHeading}
           </h3>
-          <p>
-            A product is scored as its vendor offers it by default, optional features included. TUWA is a set of
-            packages, so each competitor faces the TUWA projects that do the same job; the radar shows the whole stack.
-            Two axes, Onboarding and Chain Coverage, favor hosted platforms by design, and we keep them so the picture
-            stays honest.
-          </p>
+          <p>{ex.whatWeCompareBody}</p>
         </div>
         <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-text-accent)]/20 bg-[var(--tuwa-text-accent)]/[0.05] p-4 text-xs">
           <p className="font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-1.5">
-            Transparency note
+            {t.comparisons.methodology.transparencyTitle}
           </p>
           <p>
-            TUWA wrote this page. Every fact was verified on {formatCheckDate(verifiedAsOf())} against primary sources:
-            vendor documentation, licenses on GitHub and npm, and pricing pages. We recheck it every quarter. The data
-            lives in{' '}
+            {formatLabel(ex.transparencyPart1, { date: formatCheckDate(verifiedAsOf(), locale) })}
             <a
               href={DATA_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[var(--tuwa-text-accent)] hover:underline"
             >
-              one typed file
+              {ex.transparencyFileLink}
             </a>
-            ; if something is outdated or wrong,{' '}
+            {ex.transparencyPart2}
             <a
               href={ISSUE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[var(--tuwa-text-accent)] hover:underline"
             >
-              open an issue
-            </a>{' '}
-            and we will fix it.
+              {ex.transparencyIssueLink}
+            </a>
+            {ex.transparencyPart3}
           </p>
         </div>
       </div>
@@ -97,7 +95,7 @@ export function Methodology() {
           id="sources"
           className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-3"
         >
-          Sources
+          {ex.sourcesHeading}
         </h3>
         <ol className="flex flex-col gap-1.5 text-xs lg:max-h-[560px] lg:overflow-y-auto lg:pr-2 [scrollbar-width:thin]">
           {sources.map(([url, index]) => {

@@ -11,32 +11,32 @@ Web3 engineering fails when distributed ledger realities meet naive frontend ass
 
 ---
 
-> [!IMPORTANT]
+> [!NOTE]
 >
 > **Authoritative Specification for Developers & AI Agents**  
 > For the ground-truth system design rules, strict package isolation boundaries, inter-layer contracts, and agent behavior constraints across the entire ecosystem, consult [`workflows/TUWA_AGENTS.md`](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md). It serves as the single source of architectural truth for human engineers and autonomous agents alike.
 
 ---
 
-## Deep-Dive Guides
+## Deep-Dive Guides [#deep-dive-guides]
 
 Comprehensive engineering breakdowns focused on solving systemic vulnerabilities in modern dApps:
 
-### 🔐 [Multi-Chain Authentication with SIWX (CAIP-122 Beyond EVM Silos)](/guides/multi-chain-auth-siwx-caip122)
+### 🔐 [Multi-Chain Authentication with SIWX (CAIP-122 Beyond EVM Silos)](/guides/multi-chain-auth-siwx-caip122) [#multi-chain-authentication-with-siwx-caip-122-beyond-evm-silos]
 
 Why EIP-4361 limits modern multi-chain applications, how CAIP-122 unifies EVM and Solana authentication into a single cryptographic boundary, and how to implement stateless, cryptographically verified sessions with anti-replay protection.
 
 - **Focus:** CAIP-122 protocol, cross-chain session synchronization, EIP-191/1271 & ed25519 signature verification.
 - **Key Solution:** Universal multi-chain authentication powered by `@tuwaio/siwx`.
 
-### ⚡ [Why Web3 Transaction State Management is Broken (And Why useState is an Anti-Pattern)](/guides/why-web3-transaction-state-is-broken)
+### ⚡ [Why Web3 Transaction State Management is Broken (And Why useState is an Anti-Pattern)](/guides/why-web3-transaction-state-is-broken) [#why-web3-transaction-state-management-is-broken-and-why-usestate-is-an-anti-pattern]
 
 An in-depth investigation into why modeling blockchain writes with React `useState` leads to component unmount bugs, orphaned speed-up transactions, and desynchronized user sessions. Demonstrates how to decouple execution from the UI tree using headless state machines and nonce-aware lifecycle tracking.
 
 - **Focus:** Mempool mechanics, transaction replacements, cross-tab synchronization.
 - **Key Solution:** Decoupled transaction lifecycles powered by `@tuwaio/pulsar-core`.
 
-### 🛡️ [Demystifying ERC-4337: Sovereign Account Abstraction Without Proprietary WaaS](/guides/erc-4337-sovereign-account-abstraction)
+### 🛡️ [Demystifying ERC-4337: Sovereign Account Abstraction Without Proprietary WaaS](/guides/erc-4337-sovereign-account-abstraction) [#demystifying-erc-4337-sovereign-account-abstraction-without-proprietary-waas]
 
 Why Account Abstraction does not require a proprietary WaaS platform, how the alternative mempool and `userOpHash` vs `txHash` lifecycle works, and how to build gas-optimized, sovereign smart accounts with Solady, Orbit EVM, Pulsar, and Quasar.
 
@@ -45,47 +45,47 @@ Why Account Abstraction does not require a proprietary WaaS platform, how the al
 
 ---
 
-## Step-by-Step Guides
+## Step-by-Step Guides [#step-by-step-guides]
 
 Hands-on setups that combine several TUWA packages:
 
-### 🧭 [Track Transactions in React with Pulsar](/guides/react-transaction-tracking)
+### 🧭 [Track Transactions in React with Pulsar](/guides/react-transaction-tracking) [#track-transactions-in-react-with-pulsar]
 
 Add Pulsar to a React app for an EVM or a Solana wallet: a transaction store saved to `localStorage`, the chain adapter, tracking that resumes after a reload, and a button that sends a tracked contract or program call, with an optional ERC-4337 smart account variant.
 
 - **Packages:** `@tuwaio/pulsar-core`, `@tuwaio/pulsar-evm` or `@tuwaio/pulsar-solana`, `@tuwaio/pulsar-react`, Nova Connect.
 
-### 🧱 [Build a Full-Stack React App with the TUWA SDK](/guides/full-stack-react)
+### 🧱 [Build a Full-Stack React App with the TUWA SDK](/guides/full-stack-react) [#build-a-full-stack-react-app-with-the-tuwa-sdk]
 
 A Next.js app on `@tuwaio/sdk` for EVM or Solana: wallet connection with the Nova Connect modals, SIWX sign-in with server sessions, a Pulsar transaction store with the Nova Transactions modals and toasts, and a Server Action that knows which wallet is signed in.
 
 - **Packages:** `@tuwaio/sdk`, `@tuwaio/evm-sdk` or `@tuwaio/solana-sdk`.
 
-### ☁️ [Sync Transactions to Quasar](/guides/quasar-transaction-sync)
+### ☁️ [Sync Transactions to Quasar](/guides/quasar-transaction-sync) [#sync-transactions-to-quasar]
 
 Continues the full-stack app: Server Actions that call Quasar after checking the SIWX session, a Pulsar store that syncs every new transaction, and the history of every device in the Nova modals.
 
 - **Packages:** `@tuwaio/quasar-sdk`, `@tuwaio/sdk`. Quasar itself is described in the [Quasar docs](/quasar).
 
-### 🔑 [Hand a SIWX Sign-In to External Auth with JWT and JWKS](/guides/siwx-jwt-external-auth)
+### 🔑 [Hand a SIWX Sign-In to External Auth with JWT and JWKS](/guides/siwx-jwt-external-auth) [#hand-a-siwx-sign-in-to-external-auth-with-jwt-and-jwks]
 
 Continues the full-stack app: a short-lived JWT for the wallet signed in with SIWX and the public keys that verify it, so Coinbase CDP custom authentication, other embedded wallet providers and your own services trust the same sign-in.
 
 - **Packages:** `@tuwaio/sdk` (`/siwx/server`, `/siwx/server-next`), `@coinbase/cdp-hooks` for the CDP example.
 
-### 🗄️ [Use a SIWX Sign-In with Supabase Row Level Security](/guides/siwx-supabase)
+### 🗄️ [Use a SIWX Sign-In with Supabase Row Level Security](/guides/siwx-supabase) [#use-a-siwx-sign-in-with-supabase-row-level-security]
 
 Continues the external auth setup: Supabase trusts the SIWX token as third-party auth, Row Level Security policies on the wallet address give each wallet only its own rows, and supabase-js sends the token from the browser and from Server Actions.
 
 - **Packages:** `@tuwaio/sdk` (`/siwx`, `/siwx/server`, `/siwx/server-next`), `@supabase/supabase-js`.
 
-### 🚀 [Starter Templates](/guides/starter-templates)
+### 🚀 [Starter Templates](/guides/starter-templates) [#starter-templates]
 
 Complete Next.js and Vite apps from Cosmos Playground — wallet connection, transaction tracking, SIWX sign-in and Quasar sync already wired together — and the CLI that creates a project from them.
 
 ---
 
-## Package API References
+## Package API References [#package-api-references]
 
 Looking for granular API references, hook signatures, type definitions, or installation instructions for individual packages?
 
@@ -95,7 +95,7 @@ Quasar — apps and keys, quotas, webhooks, self-hosting the Community Edition a
 
 ---
 
-## Architectural Principles
+## Architectural Principles [#architectural-principles]
 
 Every blueprint in this repository adheres to three non-negotiable engineering principles:
 

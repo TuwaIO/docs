@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 
+import { useI18n } from '@/i18n';
 import {
   AXES,
   type AxisId,
@@ -111,6 +112,7 @@ function ScoreBar({ value, color }: { value: number; color?: string }) {
  * grouped by segment, and the criteria of the selected axis with the fact and source of each product.
  */
 export function ComparisonRadar() {
+  const { t } = useI18n();
   const [selectedId, setSelectedId] = useState(COMPETITORS[0].id);
   const [activeAxis, setActiveAxis] = useState<AxisId>('custody');
   const gradientId = useId();
@@ -125,7 +127,8 @@ export function ComparisonRadar() {
   const axisCriteria = CRITERIA.filter((criterion) => criterion.axis === activeAxis);
 
   const summary = AXES.map(
-    (item, index) => `${item.label}: TUWA ${tuwaScores[index]}, ${selected.name} ${selectedScores[index]}`,
+    (item, index) =>
+      `${t.comparisons.axes[item.id]?.label ?? item.label}: TUWA ${tuwaScores[index]}, ${selected.name} ${selectedScores[index]}`,
   ).join('; ');
 
   return (
@@ -151,7 +154,7 @@ export function ComparisonRadar() {
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
             className="w-full h-auto max-w-[600px] mx-auto select-none"
             role="img"
-            aria-label={`Radar of TUWA and ${selected.name}. ${summary}.`}
+            aria-label={`${t.comparisons.radar.chartLabel}: TUWA & ${selected.name}. ${summary}.`}
           >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
@@ -263,8 +266,9 @@ export function ComparisonRadar() {
             {AXES.map((item, index) => {
               const { x, y, anchor } = labelPlacement(index);
               const isActive = item.id === activeAxis;
+              const axisLabel = t.comparisons.axes[item.id]?.label ?? item.label;
               // Only the side labels need two lines: the top and bottom ones have the whole width
-              const lines = anchor === 'middle' ? [item.label] : labelLines(item.label);
+              const lines = anchor === 'middle' ? [axisLabel] : labelLines(axisLabel);
               const sin = Math.sin(angleOf(index));
               // Bottom labels grow down, the top one up, side ones around their anchor point
               const shift = sin > 0.9 ? 0 : sin < -0.9 ? lines.length - 1 : (lines.length - 1) / 2;
@@ -292,13 +296,13 @@ export function ComparisonRadar() {
         <div className="p-4 sm:p-6 flex flex-col gap-5 border-t lg:border-t-0 border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)] mb-3">
-              Compare TUWA with
+              {t.ui.comparisonsExtra.compareTuwaWith}
             </p>
             <div className="flex lg:flex-col gap-2 lg:gap-3 overflow-x-auto lg:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 pb-1 [scrollbar-width:none]">
               {SEGMENTS.map((group) => (
                 <div key={group.id} className="flex lg:flex-col gap-2 lg:gap-1.5 shrink-0">
                   <span className="hidden lg:block text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
-                    {group.label}
+                    {t.comparisons.segments[group.id]?.label ?? group.label}
                   </span>
                   <div className="flex flex-nowrap lg:flex-wrap gap-2">
                     {COMPETITORS.filter((product) => product.segment === group.id).map((product) => {
@@ -332,7 +336,7 @@ export function ComparisonRadar() {
       <div className="border-t border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
         <div
           role="tablist"
-          aria-label="Radar axes"
+          aria-label={t.ui.comparisonsExtra.radarAxesAria}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-b border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]"
         >
           {AXES.map((item, index) => {
@@ -354,7 +358,7 @@ export function ComparisonRadar() {
                 <span
                   className={`block text-xs font-semibold font-geist-mono uppercase tracking-wide ${isActive ? 'text-[var(--tuwa-text-primary)]' : 'text-[var(--tuwa-text-secondary)]'}`}
                 >
-                  {item.label}
+                  {t.comparisons.axes[item.id]?.label ?? item.label}
                 </span>
                 <span className="mt-2 grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 text-[10px] font-mono text-[var(--tuwa-text-tertiary)]">
                   <span>TUWA</span>
@@ -369,7 +373,9 @@ export function ComparisonRadar() {
 
         <div id="axis-panel" role="tabpanel" aria-labelledby={`axis-tab-${activeAxis}`} className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-4">
-            <p className="text-sm text-[var(--tuwa-text-primary)] font-medium">{axis.question}</p>
+            <p className="text-sm text-[var(--tuwa-text-primary)] font-medium">
+              {t.comparisons.axes[axis.id]?.question ?? axis.question}
+            </p>
             <p className="text-xs font-mono text-[var(--tuwa-text-tertiary)]">
               TUWA {tuwaScores[AXES.indexOf(axis)]} · {selected.name} {selectedScores[AXES.indexOf(axis)]}
             </p>
@@ -377,38 +383,44 @@ export function ComparisonRadar() {
           {axis.favorsHosted && (
             <p className="mb-4 text-xs leading-relaxed text-[var(--tuwa-text-secondary)] rounded-[var(--tuwa-rounded-corners)] border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2">
               {axis.id === 'onboarding'
-                ? 'Hosted platforms lead here by design: TUWA connects the wallets users already have and never creates or holds wallets for them.'
-                : 'Embedded-wallet services reach more chain families today. TUWA covers EVM and Solana; Starknet, Tron, Bitcoin and TON are next on the roadmap.'}
+                ? t.ui.comparisonsExtra.favorsHostedOnboarding
+                : t.ui.comparisonsExtra.favorsHostedChains}
             </p>
           )}
 
           <div className="divide-y divide-[var(--tuwa-border-primary)]/25 dark:divide-white/[0.05]">
-            {axisCriteria.map((criterion) => (
-              <div
-                key={criterion.id}
-                className="py-3 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 gap-y-2"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{criterion.label}</p>
-                  <p className="text-xs text-[var(--tuwa-text-secondary)] mt-0.5 leading-relaxed">
-                    {criterion.description}
-                  </p>
+            {axisCriteria.map((criterion) => {
+              const criterionTranslation = t.comparisons.criteria[criterion.id];
+              return (
+                <div
+                  key={criterion.id}
+                  className="py-3 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 gap-y-2"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--tuwa-text-primary)]">
+                      {criterionTranslation?.label ?? criterion.label}
+                    </p>
+                    <p className="text-xs text-[var(--tuwa-text-secondary)] mt-0.5 leading-relaxed">
+                      {criterionTranslation?.description ?? criterion.description}
+                    </p>
+                  </div>
+                  {[TUWA, selected].map((product) => {
+                    const item = product.facts[criterion.id];
+                    const localizedNote = t.comparisons.products[product.id]?.facts[criterion.id] ?? item.note;
+                    return (
+                      <div key={product.id} className="flex items-start gap-2.5">
+                        <MarkIcon mark={item.mark} className="w-[18px] h-[18px] mt-px" />
+                        <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
+                          <span className="font-semibold text-[var(--tuwa-text-primary)]">{product.name}: </span>
+                          {localizedNote}
+                          <SourceRef index={sources.get(item.sourceUrl) ?? 0} url={item.sourceUrl} />
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
-                {[TUWA, selected].map((product) => {
-                  const item = product.facts[criterion.id];
-                  return (
-                    <div key={product.id} className="flex items-start gap-2.5">
-                      <MarkIcon mark={item.mark} className="w-[18px] h-[18px] mt-px" />
-                      <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
-                        <span className="font-semibold text-[var(--tuwa-text-primary)]">{product.name}: </span>
-                        {item.note}
-                        <SourceRef index={sources.get(item.sourceUrl) ?? 0} url={item.sourceUrl} />
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -417,6 +429,8 @@ export function ComparisonRadar() {
 }
 
 function ProductProfile({ product, counterpart, color }: { product: Product; counterpart?: string; color: string }) {
+  const { t } = useI18n();
+  const productTranslation = t.comparisons.products[product.id];
   return (
     <div className="flex flex-col gap-3 text-xs">
       <div className="flex flex-col items-start">
@@ -432,21 +446,27 @@ function ProductProfile({ product, counterpart, color }: { product: Product; cou
           className="mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-mono"
           style={{ borderColor: `${color}66`, color }}
         >
-          {product.license}
+          {productTranslation?.license ?? product.license}
         </span>
-        <p className="mt-1.5 leading-relaxed text-[var(--tuwa-text-secondary)]">{product.summary}</p>
+        <p className="mt-1.5 leading-relaxed text-[var(--tuwa-text-secondary)]">
+          {productTranslation?.summary ?? product.summary}
+        </p>
       </div>
       <dl className="grid gap-2.5">
         <div>
-          <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">Pricing</dt>
+          <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
+            {t.comparisons.matrix.pricingRow}
+          </dt>
           <dd className="mt-0.5 leading-relaxed text-[var(--tuwa-text-primary)]">
-            {product.pricing.text}
+            {productTranslation?.pricingText ?? product.pricing.text}
             <SourceRef index={sources.get(product.pricing.sourceUrl) ?? 0} url={product.pricing.sourceUrl} />
           </dd>
         </div>
         {counterpart && (
           <div>
-            <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">TUWA counterpart</dt>
+            <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
+              {t.ui.comparisonsExtra.tuwaCounterpartLabel}
+            </dt>
             <dd className="mt-0.5 font-semibold text-[var(--tuwa-text-accent)]">{counterpart}</dd>
           </div>
         )}

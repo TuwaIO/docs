@@ -9,6 +9,7 @@ import type { TxInMemoryPagination } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import { arbitrum, base, mainnet } from 'viem/chains';
 
+import { useI18n } from '@/i18n';
 import { SIMULATED_RPC_URL } from '@/lib/playground/satelliteAdapters';
 
 import { ActionButtons } from './ActionButtons';
@@ -35,6 +36,7 @@ function useHistoryPagination(): TxInMemoryPagination {
  * histories outside `NovaTransactionsProvider` (on the stage and in the connected modal).
  */
 export function NovaStage() {
+  const { t } = useI18n();
   const { settings, device, novaSiwx } = usePlayground();
   const nova = useNovaCustomization();
   const transactionsPool = device.useStagePool();
@@ -80,18 +82,20 @@ export function NovaStage() {
               <ConnectButton customization={nova.connectButtonCustomization} />
             </header>
             <div>
-              <h3 className="text-lg font-bold">Mint, swap and stake on a simulated chain</h3>
+              <h3 className="text-lg font-bold">{t.playground.stage.novaHeaderSubtitle}</h3>
               <p className="mt-1 text-sm text-[var(--tuwa-text-secondary)]">
                 {connectedWalletAddress
-                  ? 'Send a transaction and watch Pulsar track it in the toasts, the tracking modal and the history.'
-                  : `Connect a wallet${settings.siwx ? ' and sign in' : ''} to send transactions.`}
+                  ? t.playground.stage.novaConnectedHint
+                  : settings.siwx
+                    ? t.playground.stage.novaConnectAndSignInHint
+                    : t.playground.stage.novaConnectHint}
               </p>
             </div>
             <ActionButtons withTrackedModal />
             {connectedWalletAddress && (
-              <section aria-label="Transaction history">
+              <section aria-label={t.playground.stage.historyAria}>
                 <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-secondary)]">
-                  History
+                  {t.playground.stage.historyHeading}
                 </h4>
                 <TransactionsHistory
                   customization={nova.historyCustomization}

@@ -5,6 +5,118 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Cosmic Dark Background (#0a0e27) for Nextra Layouts */
+html.dark,
+.dark {
+  --nextra-bg: 10 14 39;
+  --tuwa-bg-dark: #0a0e27;
+}
+
+/* Heading links in dark mode: soft refined accent blue (#38bdf8), never pure white or blinding saturated blue */
+.dark h1 a,
+.dark h2 a,
+.dark h3 a,
+.dark h4 a,
+.dark h5 a,
+.dark h6 a,
+html.dark h1 a,
+html.dark h2 a,
+html.dark h3 a,
+html.dark h4 a,
+html.dark h5 a,
+html.dark h6 a {
+  color: #38bdf8 !important;
+  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.dark h1 a:hover,
+.dark h2 a:hover,
+.dark h3 a:hover,
+.dark h4 a:hover,
+.dark h5 a:hover,
+.dark h6 a:hover,
+html.dark h1 a:hover,
+html.dark h2 a:hover,
+html.dark h3 a:hover,
+html.dark h4 a:hover,
+html.dark h5 a:hover,
+html.dark h6 a:hover {
+  color: #7dd3fc !important;
+  text-decoration-color: #7dd3fc !important;
+}
+
+/* Sidebar footer (theme switcher & collapse button container) in dark mode: matches dark background */
+.dark .nextra-sidebar-footer,
+html.dark .nextra-sidebar-footer {
+  background-color: #0a0e27 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .nextra-sidebar,
+html.dark .nextra-sidebar {
+  background-color: #0a0e27 !important;
+}
+
+/* Subtle, light hover state on code block copy button in light mode */
+.nextra-code button:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: var(--tuwa-primary, #0052ff) !important;
+}
+
+.dark .nextra-code button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #38bdf8 !important;
+}
+
+/* Soft accent color for dark mode links and interactive elements (pagination, feedback, edit links) */
+.dark article a {
+  color: #38bdf8 !important;
+  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.dark article a:hover {
+  color: #7dd3fc !important;
+  text-decoration-color: #7dd3fc !important;
+}
+
+.dark .x\:text-primary-600,
+.dark [class*='text-primary-600'] {
+  color: #38bdf8 !important;
+}
+
+/* Override Nextra purple callouts & borders with TUWA signature blue */
+.nextra-callout.x\:border-purple-600,
+.nextra-callout[class*='border-purple'],
+.x\:border-purple-600,
+.x\:dark\:border-purple-600,
+[class*='border-purple'] {
+  border-color: #0052ff !important;
+}
+.nextra-callout.x\:border-purple-600 svg,
+.nextra-callout[class*='border-purple'] svg,
+.x\:text-purple-600,
+.x\:dark\:text-purple-400,
+[class*='text-purple'] {
+  color: #38bdf8 !important;
+  fill: #38bdf8 !important;
+}
+.nextra-callout.x\:border-purple-600,
+.nextra-callout[class*='bg-purple'],
+.x\:bg-purple-100 {
+  background-color: rgba(0, 82, 255, 0.08) !important;
+}
+.dark .nextra-callout.x\:border-purple-600,
+.dark .nextra-callout[class*='dark:bg-purple'],
+.dark .x\:dark\:bg-purple-900\/30,
+[class*='dark:bg-purple'] {
+  background-color: rgba(0, 82, 255, 0.12) !important;
+}
+
+.dark hr.nextra-border,
+html.dark hr.nextra-border {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Responsive base font-size scaling to fit content beautifully on larger displays */
 html {
   font-size: 16px;

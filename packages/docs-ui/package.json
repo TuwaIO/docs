@@ -23,6 +23,16 @@
       "import": "./dist/policies.js",
       "require": "./dist/policies.cjs"
     },
+    "./locale": {
+      "types": "./dist/locale.d.ts",
+      "import": "./dist/locale.js",
+      "require": "./dist/locale.cjs"
+    },
+    "./i18n": {
+      "types": "./dist/i18n.d.ts",
+      "import": "./dist/i18n.js",
+      "require": "./dist/i18n.cjs"
+    },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
   },

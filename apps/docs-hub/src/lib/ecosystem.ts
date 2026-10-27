@@ -102,16 +102,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 2 — State & Connection',
     subtitle: 'Transaction tracking & wallet connectivity',
-    accentClass: 'text-indigo-400',
-    dotGradient: 'from-indigo-500 to-amber-500',
+    accentClass: 'text-blue-400',
+    dotGradient: 'from-blue-500 to-amber-500',
     entries: [
       {
         id: 'satellite',
         name: 'Satellite Connect',
         tagline: 'Headless wallet connection store for EVM & Solana',
         icon: CpuChipIcon,
-        gradientFrom: 'from-indigo-500',
-        gradientTo: 'to-blue-600',
+        gradientFrom: 'from-blue-600',
+        gradientTo: 'to-cyan-500',
         docsUrl: 'https://satellite.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/satellite-connect',
         packages: [
@@ -144,7 +144,7 @@ export const layers: EcosystemLayer[] = [
     label: 'Stage 3 — Backend & Sync',
     subtitle: 'Managed cloud or self-hosted Quasar engine',
     accentClass: 'text-cyan-400',
-    dotGradient: 'from-cyan-500 to-indigo-600',
+    dotGradient: 'from-cyan-500 to-blue-600',
     entries: [
       {
         id: 'quasar',
@@ -152,7 +152,7 @@ export const layers: EcosystemLayer[] = [
         tagline: 'Managed cloud · Transaction indexing & sync',
         icon: CloudIcon,
         gradientFrom: 'from-cyan-500',
-        gradientTo: 'to-indigo-600',
+        gradientTo: 'to-blue-600',
         docsUrl: '/quasar',
         githubUrl: 'https://github.com/TuwaIO/sdk/tree/main/packages/quasar-sdk',
         packages: [
@@ -180,16 +180,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 4 — User Interface',
     subtitle: 'React components for Satellite & Pulsar',
-    accentClass: 'text-violet-400',
-    dotGradient: 'from-violet-500 to-purple-600',
+    accentClass: 'text-sky-400',
+    dotGradient: 'from-sky-500 to-blue-600',
     entries: [
       {
         id: 'nova',
         name: 'Nova UI Kit',
         tagline: 'Design system & component library',
         icon: CubeIcon,
-        gradientFrom: 'from-violet-500',
-        gradientTo: 'to-purple-600',
+        gradientFrom: 'from-sky-500',
+        gradientTo: 'to-blue-600',
         docsUrl: 'https://stories.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/nova-uikit',
         packages: [
@@ -203,16 +203,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 5 — SDK Integration Layer',
     subtitle: 'Core SDK & network-specific adapters',
-    accentClass: 'text-blue-400',
-    dotGradient: 'from-blue-500 to-purple-600',
+    accentClass: 'text-cyan-400',
+    dotGradient: 'from-blue-600 to-cyan-400',
     entries: [
       {
         id: 'sdk',
         name: 'TUWA SDK',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
         icon: CodeBracketSquareIcon,
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-purple-600',
+        gradientFrom: 'from-blue-600',
+        gradientTo: 'to-cyan-400',
         docsUrl: 'https://sdk.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/sdk',
         packages: [

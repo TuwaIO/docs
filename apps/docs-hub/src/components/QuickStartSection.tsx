@@ -10,9 +10,11 @@ import {
 import { useCopyToClipboard } from '@tuwaio/nova-core';
 import Link from 'next/link';
 
+import { useI18n } from '../i18n';
 import { CompactConfigurator } from './configurator/CompactConfigurator';
 
 export function QuickStartSection() {
+  const { t } = useI18n();
   const { isCopied, copy } = useCopyToClipboard(2000);
   const command = 'npx @tuwaio/create-cosmos-playground';
 
@@ -25,18 +27,17 @@ export function QuickStartSection() {
       <div className="mx-auto max-w-4xl 2xl:max-w-5xl">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-12 h-12 2xl:w-14 2xl:h-14 mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg opacity-90">
+          <div className="w-12 h-12 2xl:w-14 2xl:h-14 mb-4 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center shadow-lg opacity-90">
             <RocketLaunchIcon className="w-6 h-6 2xl:w-7 2xl:h-7 text-white" aria-hidden="true" />
           </div>
           <h2 className="text-xl sm:text-2xl 2xl:text-3xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
-            Quick Start{' '}
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+            {t.home.quickStart.titlePrefix}{' '}
+            <span className="bg-gradient-to-r from-blue-500 to-cyan-400 bg-clip-text text-transparent">
               Cosmos Playground
             </span>
           </h2>
           <p className="text-xs sm:text-sm 2xl:text-base text-[var(--tuwa-text-secondary)] mt-2 max-w-lg 2xl:max-w-xl">
-            Run the command below in your terminal to bootstrap a ready-to-use Web3 project template pre-configured with
-            the TUWA stack.
+            {t.home.quickStart.subtitle}
           </p>
         </div>
 
@@ -55,7 +56,7 @@ export function QuickStartSection() {
               type="button"
               disabled={isCopied}
               onClick={handleCopyCommand}
-              title="Copy terminal command"
+              title={t.common.copyCommand}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 2xl:px-4 2xl:py-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)] dark:bg-white/5 border border-[var(--tuwa-border-primary)]/60 text-xs 2xl:text-sm font-sans text-[var(--tuwa-text-secondary)] transition-all duration-200 ${
                 isCopied
                   ? 'cursor-not-allowed opacity-90'
@@ -65,12 +66,12 @@ export function QuickStartSection() {
               {isCopied ? (
                 <>
                   <CheckIcon className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-emerald-400" />
-                  <span className="text-emerald-400 font-medium">Copied!</span>
+                  <span className="text-emerald-400 font-medium">{t.common.copied}</span>
                 </>
               ) : (
                 <>
                   <ClipboardDocumentIcon className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />
-                  <span>Copy</span>
+                  <span>{t.common.copy}</span>
                 </>
               )}
             </button>
@@ -104,10 +105,10 @@ export function QuickStartSection() {
               href="https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md"
               target="_blank"
               rel="noopener noreferrer"
-              title="Integration guide for AI coding agents"
+              title={t.ui.quickStartSteps.aiAgentsTitle}
               className="inline-flex items-center gap-1.5 px-3 py-1 2xl:px-3.5 2xl:py-1.5 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 text-[11px] 2xl:text-xs font-mono text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 transition-all duration-200"
             >
-              <span className="font-bold text-[var(--tuwa-text-accent)]">AI agents</span>
+              <span className="font-bold text-[var(--tuwa-text-accent)]">{t.ui.quickStartSteps.aiAgentsBadge}</span>
               <span className="truncate">TUWA_AGENTS.md</span>
               <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
             </a>
@@ -117,49 +118,49 @@ export function QuickStartSection() {
         {/* 3 Numbered Steps */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-left">
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               1
             </div>
             <div>
               <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                Run command
+                {t.ui.quickStartSteps.step1Title}
               </h3>
               <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                Execute the interactive CLI command in your project directory.
+                {t.ui.quickStartSteps.step1Desc}
               </p>
             </div>
           </div>
 
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               2
             </div>
             <div>
               <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                Select template
+                {t.ui.quickStartSteps.step2Title}
               </h3>
               <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                Choose React or Next.js templates for EVM, Solana, or Multi-chain.{' '}
+                {t.ui.quickStartSteps.step2Desc}{' '}
                 <Link
                   href="/guides/starter-templates"
                   className="text-[var(--tuwa-text-accent)] underline-offset-2 hover:underline"
                 >
-                  Compare templates
+                  {t.ui.quickStartSteps.compareTemplates}
                 </Link>
               </p>
             </div>
           </div>
 
           <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
+            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
               3
             </div>
             <div>
               <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                Start building
+                {t.ui.quickStartSteps.step3Title}
               </h3>
               <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                Run local dev server and start creating self-custodial Web3 dApps.
+                {t.ui.quickStartSteps.step3Desc}
               </p>
             </div>
           </div>

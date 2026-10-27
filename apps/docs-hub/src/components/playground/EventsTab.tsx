@@ -4,6 +4,7 @@ import { cn } from '@tuwaio/nova-core/utils';
 import { useState } from 'react';
 import { useStore } from 'zustand';
 
+import { useI18n } from '@/i18n';
 import { clearEvents, eventLog, type EventSource } from '@/lib/playground/eventLog';
 
 import { JsonTree } from './JsonTree';
@@ -13,10 +14,10 @@ const SOURCE_CLASS: Record<EventSource, string> = {
   Chain: 'bg-zinc-500/15 text-zinc-700 dark:text-zinc-300',
   Satellite: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
   Pulsar: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  SIWX: 'bg-violet-500/15 text-violet-700 dark:text-violet-300',
+  SIWX: 'bg-teal-500/15 text-teal-700 dark:text-teal-300',
   Quasar: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
   Webhook: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-  Nova: 'bg-fuchsia-500/15 text-fuchsia-700 dark:text-fuchsia-300',
+  Nova: 'bg-cyan-500/15 text-cyan-700 dark:text-cyan-300',
 };
 
 const SOURCES = Object.keys(SOURCE_CLASS) as EventSource[];
@@ -31,6 +32,7 @@ function time(value: number): string {
  * calls, the SIWX and Quasar requests and the webhooks. Sources can be hidden; an entry opens to its data.
  */
 export function EventsTab() {
+  const { t } = useI18n();
   const events = useStore(eventLog, (state) => state.events);
   const [hidden, setHidden] = useState<ReadonlySet<EventSource>>(new Set());
   const visible = events.filter((event) => !hidden.has(event.source));
@@ -66,14 +68,12 @@ export function EventsTab() {
           onClick={clearEvents}
           className="ml-auto text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
         >
-          Clear
+          {t.playground.inspector.events.clear}
         </button>
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-sm text-[var(--tuwa-text-tertiary)]">
-          Nothing yet: connect a wallet on the stage and send a transaction.
-        </p>
+        <p className="text-sm text-[var(--tuwa-text-tertiary)]">{t.playground.inspector.events.empty}</p>
       ) : (
         // No live region: a transaction logs several events a second, too many to read aloud
         <ol className="@container flex flex-col gap-1 font-mono text-xs">

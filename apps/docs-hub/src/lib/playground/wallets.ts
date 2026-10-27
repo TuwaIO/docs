@@ -23,7 +23,7 @@ export const SIMULATED_WALLETS: readonly SimulatedWallet[] = [
     family: OrbitAdapter.EVM,
     address: '0x5749709c988f81d815681592ab2d8a851f04392e',
     displayName: 'orbit-demo.eth',
-    icon: walletIcon('#6366f1', '#22d3ee', 'O'),
+    icon: walletIcon('#2563eb', '#22d3ee', 'O'),
   },
   {
     name: 'Nebula Wallet',
@@ -37,7 +37,7 @@ export const SIMULATED_WALLETS: readonly SimulatedWallet[] = [
     family: OrbitAdapter.SOLANA,
     address: '2pFzb4FwBwpucK9rtweHLvEFPpP38Po5chPhJwEGLEVz',
     displayName: 'comet-demo.sol',
-    icon: walletIcon('#14b8a6', '#a855f7', 'C'),
+    icon: walletIcon('#14b8a6', '#00d2ff', 'C'),
   },
 ];
 

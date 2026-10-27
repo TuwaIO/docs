@@ -17,7 +17,7 @@ To eliminate this fragmentation, the Web3 ecosystem established **CAIP-122 (Sign
 
 ---
 
-## 1. The Architectural Problem: Single-Chain Silos
+## 1. The Architectural Problem: Single-Chain Silos [#1-the-architectural-problem-single-chain-silos]
 
 The core limitation of EIP-4361 is its rigid binding to Ethereum-specific primitives: `secp256k1` recovery, hex encoding, and integer EVM chain IDs (`eip155:1`). When developers attempt to support Solana alongside EVM, they typically build two parallel, disconnected authentication stacks:
 
@@ -34,7 +34,7 @@ The core limitation of EIP-4361 is its rigid binding to Ethereum-specific primit
 └───────────────────────────┴────────────────────────────┘
 ```
 
-### Critical Security Pitfalls of Fragmented Auth
+### Critical Security Pitfalls of Fragmented Auth [#critical-security-pitfalls-of-fragmented-auth]
 
 1. **Broken Authorization Guards:** A backend route cannot reliably assert whether an active session wallet is authorized to dispatch transactions or invoke sensitive RPC actions across chains.
 2. **Cross-Chain Nonce Poisoning:** Without namespace-isolated challenge tracking, nonces issued for Ethereum can be replayed or conflated with nonces signed by Solana wallets.
@@ -42,7 +42,7 @@ The core limitation of EIP-4361 is its rigid binding to Ethereum-specific primit
 
 ---
 
-## 2. Enter CAIP-122 (Sign-In with X)
+## 2. Enter CAIP-122 (Sign-In with X) [#2-enter-caip-122-sign-in-with-x]
 
 CAIP-122 standardizes multi-chain wallet authentication using **Chain Agnostic Identifiers (CAIP-2 / CAIP-10)**. Instead of hardcoding Ethereum assumptions into message parsers, CAIP-122 parameterizes both the chain namespace and the account address:
 
@@ -53,7 +53,7 @@ solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp:9WzDXwBbmkg...  <-- Solana Mainnet (CAIP
 
 Every CAIP-122 message includes standard CAIP-2 identifiers, server-issued cryptographic nonces, URIs, timestamps, and optional capability scopes.
 
-### The Authentication Lifecycle
+### The Authentication Lifecycle [#the-authentication-lifecycle]
 
 Below is the complete end-to-end authentication lifecycle—from challenge issuance to multi-chain cryptographic verification and atomic anti-replay session minting:
 
@@ -101,7 +101,7 @@ sequenceDiagram
 
 ---
 
-## 3. The SIWX Modular Architecture: Packages & Adapters
+## 3. The SIWX Modular Architecture: Packages & Adapters [#3-the-siwx-modular-architecture-packages--adapters]
 
 In the TUWA ecosystem, multi-chain authentication is partitioned into modular, highly decoupled packages across **Layer 1 (L1 - Core Engine)** and **Layer 2 (L2 - Network Adapters & Bindings)**:
 
@@ -124,7 +124,7 @@ In the TUWA ecosystem, multi-chain authentication is partitioned into modular, h
 
 ---
 
-## 4. Multi-Chain Network Adapter Comparison
+## 4. Multi-Chain Network Adapter Comparison [#4-multi-chain-network-adapter-comparison]
 
 The table below contrasts how SIWX adapters unify divergent blockchain cryptography into a single standard:
 
@@ -145,13 +145,13 @@ The table below contrasts how SIWX adapters unify divergent blockchain cryptogra
 
 ---
 
-## 5. End-to-End Implementation in the TUWA Ecosystem
+## 5. End-to-End Implementation in the TUWA Ecosystem [#5-end-to-end-implementation-in-the-tuwa-ecosystem]
 
-### Step 1: Client-Side Multi-Chain Sign-In
+### Step 1: Client-Side Multi-Chain Sign-In [#step-1-client-side-multi-chain-sign-in]
 
 With Nova UI Kit, sign-in is declarative: pass `siwx` to `NovaConnectProvider` and it asks every connected account to sign in (see the watcher pattern below). Without Nova, call `useSiwx().signIn` for the active Satellite Connect connection.
 
-#### Programmatic Sign-In Button with Satellite Connect
+#### Programmatic Sign-In Button with Satellite Connect [#programmatic-sign-in-button-with-satellite-connect]
 
 The button below signs in the active wallet, EVM or Solana. `getSatelliteSiwxFields` turns the connection into the CAIP-2 chain ID and the CAIP-10 address. EVM wallets sign through the wagmi config with `createEvmSiwxSigner`, so the app needs neither `wagmi` React hooks nor `WagmiProvider`; Solana wallets sign with the `signMessage` of their Wallet Standard connection: the message itself, or a Solana off-chain message (version 1) for accounts that can only sign those, as hardware wallet accounts may. The SIWX server verifies both.
 
@@ -226,7 +226,7 @@ export function SignInButton() {
 }
 ```
 
-#### Declarative Watcher Pattern with Satellite & Nova UIKit
+#### Declarative Watcher Pattern with Satellite & Nova UIKit [#declarative-watcher-pattern-with-satellite-nova-uikit]
 
 For apps using Satellite Connect and Nova UIKit, sessions and wallet connections synchronize automatically through declarative connector watchers.
 
@@ -293,11 +293,11 @@ export function SatelliteConnectProviders({ children }: { children: React.ReactN
 
 ---
 
-### Step 2: Server-Side Cryptographic Verification
+### Step 2: Server-Side Cryptographic Verification [#step-2-server-side-cryptographic-verification]
 
 While the reference implementations below demonstrate **Next.js App Router** route handlers via `@tuwaio/siwx-server/next` (`@tuwaio/sdk/siwx/server-next` in the SDK), the core `@tuwaio/siwx-server` package is **completely framework- and backend-agnostic**. You can run `@tuwaio/siwx-server` across **Express, Fastify, NestJS, Cloudflare Workers, Hono, Elysia, Bun, or any custom Node.js HTTP server** by invoking `verifySiwxPayload()` directly with your preferred session and nonce storage adapters.
 
-#### Production Route Handler (Atomic Redis Nonce & Session Store)
+#### Production Route Handler (Atomic Redis Nonce & Session Store) [#production-route-handler-atomic-redis-nonce-session-store]
 
 ```typescript
 // src/app/api/siwx/[...siwx]/route.ts
@@ -365,7 +365,7 @@ export const { GET, POST, DELETE } = handler;
 
 EOA wallets need nothing more. To accept smart contract wallets (Safe, Coinbase Smart Wallet / Base Account, ERC-4337 accounts), also pass `verifyOptions: { publicClient: (chainId) => clients.get(chainId) }` with a viem client per chain: each wallet is checked on the chain it signed on, with EIP-1271 when deployed and ERC-6492 before its first transaction (see [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server) and Step 2 of the [External Auth guide](/guides/siwx-jwt-external-auth)).
 
-#### Zero-Infrastructure Stateless Route Handler (HMAC Signed Token)
+#### Zero-Infrastructure Stateless Route Handler (HMAC Signed Token) [#zero-infrastructure-stateless-route-handler-hmac-signed-token]
 
 For prototypes or benchmark templates without a running Redis instance, use `createStatelessDemoSiwxHandler`:
 
@@ -391,7 +391,7 @@ export const { GET, POST, DELETE } = handler;
 
 ---
 
-### Step 3: Guarding Server Actions & Backend Dispatches
+### Step 3: Guarding Server Actions & Backend Dispatches [#step-3-guarding-server-actions--backend-dispatches]
 
 Before executing sensitive state changes, invoking RPC actions, or syncing data with a Quasar engine (Cloud or self-hosted), verify the active session:
 
@@ -443,13 +443,13 @@ export async function submitProtectedOperation({
 }
 ```
 
-> [!IMPORTANT]
+> [!NOTE]
 >
 > `isSessionMatchingTarget` provides cross-chain address equivalence. It normalizes raw EVM hex strings (`0x1234...`), checksummed representations, Solana Base58 strings, and fully qualified CAIP-10 strings (`eip155:1:0x1234...` or `solana:5eykt4Us...`). If an account or network switch occurred in the user's wallet without a subsequent re-sign (`resign`), this validation will reject the request, ensuring unauthenticated or drifted connections never execute protected state transitions. A Solana chain matches under its cluster name and its genesis-hash chain ID, so `tx.chainId` of Pulsar 0.9 (`solana:EtWTRABZ…`) matches a session signed for `solana:devnet`.
 
 ---
 
-## 6. Technical Comparison: EIP-4361 vs. CAIP-122 (SIWX)
+## 6. Technical Comparison: EIP-4361 vs. CAIP-122 (SIWX) [#6-technical-comparison-eip-4361-vs-caip-122-siwx]
 
 | Architectural Dimension     | EIP-4361 (SIWE)                          | CAIP-122 (@tuwaio/siwx)                                             |
 | :-------------------------- | :--------------------------------------- | :------------------------------------------------------------------ |
@@ -464,7 +464,7 @@ export async function submitProtectedOperation({
 
 ---
 
-## Conclusion
+## Conclusion [#conclusion]
 
 Building bespoke authentication silos for EVM and non-EVM runtimes creates architectural fragility, fragments session state, and introduces serious authorization vulnerabilities.
 
@@ -472,7 +472,7 @@ By adopting **CAIP-122 via `@tuwaio/siwx`**, dApps establish a non-custodial ide
 
 ---
 
-## Next Steps
+## Next Steps [#next-steps]
 
 - **API Documentation:** Explore hook signatures and types on the [@tuwaio/siwx Documentation Space](https://siwx.docs.tuwa.io/).
 - **External Auth:** Hand the sign-in to Coinbase CDP, other embedded wallet providers or your own services as a JWT in [External Auth with SIWX JWT](/guides/siwx-jwt-external-auth).

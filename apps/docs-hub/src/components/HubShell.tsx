@@ -1,4 +1,4 @@
-import { RemoteLogo } from '@tuwaio/docs-ui';
+import { SiteLogo } from '@tuwaio/docs-ui';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -7,7 +7,7 @@ import { Header } from './Header';
 
 const navbarLogo = (
   <Link href="/" className="hover:opacity-80 transition-opacity duration-200" aria-label="TUWA Docs">
-    <RemoteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
+    <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
   </Link>
 );
 
