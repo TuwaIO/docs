@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.3...docs-ui-v0.5.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* added localization ([08fd2d0](https://github.com/TuwaIO/docs/commit/08fd2d0a8cc2ea2f394231ffc54f96776363aee8))
+
 ## [0.5.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.2...docs-ui-v0.5.3) (2026-10-26)
 
 
