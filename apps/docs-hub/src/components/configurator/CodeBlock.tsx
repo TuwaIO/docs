@@ -5,6 +5,7 @@ import { useCopyToClipboard } from '@tuwaio/nova-core';
 import { useEffect, useState } from 'react';
 import type { HighlighterCore } from 'shiki/core';
 
+import { useI18n } from '@/i18n';
 import type { FileLanguage } from '@/lib/configurator/generate';
 
 // Shiki with only the grammars and themes the configurator needs, loaded on the first code block
@@ -38,6 +39,7 @@ const SHIKI_LANGUAGES: Record<FileLanguage, string> = { ts: 'typescript', tsx: '
  * @param props.label - Accessible name of the code, for example the file path.
  */
 export function CodeBlock({ code, language, label }: { code: string; language: FileLanguage; label: string }) {
+  const { t } = useI18n();
   const { isCopied, copy } = useCopyToClipboard(2000);
   const [highlighted, setHighlighted] = useState<{ code: string; html: string } | null>(null);
 
@@ -63,7 +65,7 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
         type="button"
         onClick={() => copy(code)}
         disabled={isCopied}
-        title="Copy the code"
+        title={t.common.copyCode}
         className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)] dark:bg-[#0d1117] px-2 py-1 text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer disabled:cursor-default transition-colors"
       >
         {isCopied ? (
@@ -71,7 +73,7 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
         ) : (
           <ClipboardDocumentIcon className="w-3.5 h-3.5" />
         )}
-        {isCopied ? 'Copied' : 'Copy'}
+        {isCopied ? t.common.copied : t.common.copy}
       </button>
       {highlighted?.code === code ? (
         <div

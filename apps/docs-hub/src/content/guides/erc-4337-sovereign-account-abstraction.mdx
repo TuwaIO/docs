@@ -13,7 +13,7 @@ This guide provides an exhaustive architectural audit of ERC-4337 v0.7. It decon
 
 ---
 
-## 1. The Account Abstraction Spectrum: Signer vs. Account
+## 1. The Account Abstraction Spectrum: Signer vs. Account [#1-the-account-abstraction-spectrum-signer-vs-account]
 
 The foundational concept of ERC-4337 is the strict decoupling of the **Signer** from the **Smart Account**:
 
@@ -34,7 +34,7 @@ The foundational concept of ERC-4337 is the strict decoupling of the **Signer** 
 - **The Signer (Key Management):** An entity that holds cryptographic credentials and generates signatures over arbitrary byte arrays. In self-custodial setups, this is an EOA private key or hardware wallet. In embedded WaaS setups (such as Privy or Dynamic), this is typically implemented using **2-of-3 Shamir's Secret Sharing (SSS)** combined with **Trusted Execution Environments (AWS Nitro Enclaves / TEE)** with client-side key export capabilities.
 - **The Account (Execution Engine):** A smart contract deployed on-chain that validates incoming signatures (`validateUserOp`), verifies 2D nonce sequences, holds assets, and executes batched contract calls against target protocols.
 
-### Deconstructing the WaaS Trade-Off
+### Deconstructing the WaaS Trade-Off [#deconstructing-the-waas-trade-off]
 
 Embedded wallet providers (Privy, Dynamic) are often mislabeled as custodial exchanges. In reality, modern WaaS architectures use non-custodial threshold cryptography where the provider never possesses the full private key on disk.
 
@@ -45,7 +45,7 @@ The authentic trade-off of WaaS is **operational infrastructure dependency**:
 
 ---
 
-## 2. The Two-Phase Lifecycle: `userOpHash` vs `txHash`
+## 2. The Two-Phase Lifecycle: `userOpHash` vs `txHash` [#2-the-two-phase-lifecycle-userophash-vs-txhash]
 
 Standard EVM frontends interact with standard transactions synchronously: serialize a transaction, sign it with an EOA, submit it to a node via `eth_sendRawTransaction`, and poll for the resulting `txHash`.
 
@@ -88,7 +88,7 @@ sequenceDiagram
   Note over Core,Explorer: Stage 2: Settled On-Chain via txHash (etherscan.io/tx/{txHash})
 ```
 
-### The Dual-Identifier Dilemma
+### The Dual-Identifier Dilemma [#the-dual-identifier-dilemma]
 
 Frontend architectures must treat `userOpHash` and `txHash` as complementary identifiers operating at different stages of execution:
 
@@ -101,19 +101,19 @@ Frontend architectures must treat `userOpHash` and `txHash` as complementary ide
    - **Definition:** The transaction hash of the Ethereum transaction broadcast by the **Bundler's EOA** calling `EntryPoint.handleOps()`.
    - **Scope:** Exists on the canonical EVM blockchain. A single `txHash` can contain dozens of UserOperations from completely independent users.
 
-### Three Production Failure Modes of Naive Frontends
+### Three Production Failure Modes of Naive Frontends [#three-production-failure-modes-of-naive-frontends]
 
 When engineering teams attempt to integrate ERC-4337 using standard EOA transaction workflows, frontends fail across three specific failure modes:
 
-#### 1. RPC Node Polling vs. Bundler Mempool Mismatch
+#### 1. RPC Node Polling vs. Bundler Mempool Mismatch [#1-rpc-node-polling-vs-bundler-mempool-mismatch]
 
 Naive frontends take the `userOpHash` returned by `sendUserOperation` and pass it to standard node RPCs via `publicClient.waitForTransactionReceipt({ hash: userOpHash })`. Because the UserOp lives in the alternative mempool and not the execution node's transaction pool, the RPC node returns `TransactionNotFoundError`. Applications must poll `eth_getUserOperationReceipt` specifically on a Bundler RPC endpoint.
 
-#### 2. Bundle Calldata Obfuscation
+#### 2. Bundle Calldata Obfuscation [#2-bundle-calldata-obfuscation]
 
 Once bundled, the outer `txHash` points to `EntryPoint.handleOps()`. If the frontend discards the `userOpHash` and only preserves the outer `txHash`, users inspecting their history on block explorers are presented with an aggregated batch containing other users' contract interactions, obscuring their own transfer amounts, recipient addresses, and isolated gas costs.
 
-#### 3. Silent Execution Reverts inside `EntryPoint.handleOps`
+#### 3. Silent Execution Reverts inside `EntryPoint.handleOps` [#3-silent-execution-reverts-inside-entrypointhandleops]
 
 In standard transactions, `receipt.status === 1` guarantees that all internal calls succeeded. In ERC-4337, bundlers require financial protection against gas exhaustion caused by user contract errors. If an inner UserOp reverts (e.g., Uniswap slippage exceeded or insufficient token balance):
 
@@ -127,7 +127,7 @@ In standard transactions, `receipt.status === 1` guarantees that all internal ca
 
 ---
 
-## 3. Smart Account Architectures: Solady vs. ERC-7579 Modular Accounts
+## 3. Smart Account Architectures: Solady vs. ERC-7579 Modular Accounts [#3-smart-account-architectures-solady-vs-erc-7579-modular-accounts]
 
 When selecting an on-chain account architecture, developers face a direct trade-off between **gas efficiency** and **extensibility**:
 
@@ -145,7 +145,7 @@ When selecting an on-chain account architecture, developers face a direct trade-
 └───────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### The Cryptographic Reality of Solady & Passkeys
+### The Cryptographic Reality of Solady & Passkeys [#the-cryptographic-reality-of-solady--passkeys]
 
 A common misconception is that Solady's base contracts natively support WebAuthn / TouchID Passkeys:
 
@@ -160,11 +160,11 @@ A common misconception is that Solady's base contracts natively support WebAuthn
 
 ---
 
-## 4. Implementation: Canonical Viem AA vs. TUWA Open-Source Stack
+## 4. Implementation: Canonical Viem AA vs. TUWA Open-Source Stack [#4-implementation-canonical-viem-aa-vs-tuwa-open-source-stack]
 
 Developers can implement sovereign ERC-4337 flows using either canonical, unbundled Viem primitives or TUWA's ergonomic open-source toolkit.
 
-### 4.1 Implementation A: Canonical Native Viem (`viem/account-abstraction`)
+### 4.1 Implementation A: Canonical Native Viem (`viem/account-abstraction`) [#41-implementation-a-canonical-native-viem-viemaccount-abstraction]
 
 This implementation relies exclusively on standard `viem` packages with zero additional framework dependencies:
 
@@ -316,7 +316,7 @@ export async function executeCanonicalTransfer({
 
 ---
 
-### 4.2 Implementation B: Ergonomic TUWA Stack (`@tuwaio/orbit-evm` & `@tuwaio/pulsar-evm`)
+### 4.2 Implementation B: Ergonomic TUWA Stack (`@tuwaio/orbit-evm` & `@tuwaio/pulsar-evm`) [#42-implementation-b-ergonomic-tuwa-stack-tuwaioorbit-evm--tuwaiopulsar-evm]
 
 TUWA's core libraries are **100% open-source (MIT/Apache-2)** modular packages designed to eliminate the boilerplate of client caching, salt padding, Wagmi synchronization, and reactive multi-phase state management:
 
@@ -331,7 +331,7 @@ TUWA's core libraries are **100% open-source (MIT/Apache-2)** modular packages d
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Step 1: Orchestrating the Smart Account with Orbit EVM
+#### Step 1: Orchestrating the Smart Account with Orbit EVM [#step-1-orchestrating-the-smart-account-with-orbit-evm]
 
 `@tuwaio/orbit-evm` automatically calculates Solady-compliant salt padding (`pad(ownerAddress, { dir: 'right', size: 32 })`), prices UserOps at Pimlico's own gas price (`pimlico_getUserOperationGasPrice`, version 0.3.4 and later) and caches Bundler and Paymaster instances in memory:
 
@@ -355,7 +355,7 @@ export async function getOrbitSmartAccountClient(wagmiConfig: Config) {
 }
 ```
 
-#### Step 2: Reactive Two-Stage Tracking with Pulsar
+#### Step 2: Reactive Two-Stage Tracking with Pulsar [#step-2-reactive-two-stage-tracking-with-pulsar]
 
 > [!NOTE]
 >
@@ -367,7 +367,7 @@ In standard UI code, managing transitions between `userOpHash` and `txHash` acro
 
 Production implementations in [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground/tree/main/examples/nextjs-tuwa-quasar) cleanly separate the headless execution logic from the reactive React component dispatch:
 
-##### Part A: Pure Transaction Action (`incrementPimlico.ts`)
+##### Part A: Pure Transaction Action (`incrementPimlico.ts`) [#part-a-pure-transaction-action-incrementpimlicots]
 
 The action function remains completely headless, pure, and decoupled from UI state. It initializes the smart client via Orbit, encodes the calldata, and dispatches the UserOperation to the bundler:
 
@@ -418,7 +418,7 @@ export async function incrementPimlico({ wagmiConfig }: { wagmiConfig?: Config }
 }
 ```
 
-##### Part B: Reactive UI Component Dispatch (`CounterButton.tsx`)
+##### Part B: Reactive UI Component Dispatch (`CounterButton.tsx`) [#part-b-reactive-ui-component-dispatch-counterbuttontsx]
 
 In the React layer, the component connects to the central Pulsar store using a hook selector (`usePulsarStore((state) => state.executeTxAction)`). It dispatches the action with lifecycle metadata, automatic tracker selection (`TransactionTracker.ERC4337`), and 4-state user notifications:
 
@@ -483,7 +483,7 @@ export const CounterButton = () => {
 };
 ```
 
-#### How Pulsar's Two-Stage Pipeline Executes Under the Hood:
+#### How Pulsar's Two-Stage Pipeline Executes Under the Hood: [#how-pulsars-two-stage-pipeline-executes-under-the-hood]
 
 1. **Stage 1 (Bundler Alt-Mempool Polling):**
    - Pulsar stores the transaction record with `txKey = userOpHash`.
@@ -495,7 +495,7 @@ export const CounterButton = () => {
 
 ---
 
-## 5. Cross-Device Persistence: Build Your Own Indexer or Use Quasar
+## 5. Cross-Device Persistence: Build Your Own Indexer or Use Quasar [#5-cross-device-persistence-build-your-own-indexer-or-use-quasar]
 
 A persistent challenge in frontend engineering is the **Tab-Close Dilemma**: users frequently close their browser tab immediately after approving a transaction prompt, terminating all client-side JavaScript polling.
 
@@ -515,7 +515,7 @@ Engineering teams have two paths for solving persistence:
 └───────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### Option A: Build Your Own Indexer (Ponder / Envio)
+### Option A: Build Your Own Indexer (Ponder / Envio) [#option-a-build-your-own-indexer-ponder--envio]
 
 Teams that want a fully custom data model can deploy a lightweight open-source indexer (such as [Ponder](https://ponder.sh) or [Envio](https://envio.dev)) listening to the canonical EntryPoint v0.7 contract:
 
@@ -534,7 +534,7 @@ Teams that want a fully custom data model can deploy a lightweight open-source i
    ```
 3. When `UserOperationEvent` is emitted, Ponder updates the transaction status in your PostgreSQL database and dispatches Server-Sent Events (SSE) or WebSockets to connected client sessions.
 
-### Option B: Non-Custodial Sync with Quasar (Cloud or Self-Hosted)
+### Option B: Non-Custodial Sync with Quasar (Cloud or Self-Hosted) [#option-b-non-custodial-sync-with-quasar-cloud-or-self-hosted]
 
 > [!NOTE]
 >
@@ -650,7 +650,7 @@ export async function syncTransaction(tx: Transaction) {
 
 ---
 
-## 6. Comprehensive Architectural Comparison Matrix
+## 6. Comprehensive Architectural Comparison Matrix [#6-comprehensive-architectural-comparison-matrix]
 
 | Dimension                       | Classic EOA (Viem / Wagmi)           | Embedded WaaS (Privy / Dynamic)                       | Canonical Open Source (Viem AA + ERC-7579 / Solady)    | TUWA Modular Stack (Orbit + Pulsar + opt. Quasar)                         |
 | :------------------------------ | :----------------------------------- | :---------------------------------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------------ |
@@ -668,7 +668,7 @@ export async function syncTransaction(tx: Transaction) {
 
 ---
 
-## Summary: Designing Sovereign Smart Accounts
+## Summary: Designing Sovereign Smart Accounts [#summary-designing-sovereign-smart-accounts]
 
 Account Abstraction represents a major leap forward for Web3 UX, but building robust production frontends requires clear architectural choices:
 
@@ -680,7 +680,7 @@ Account Abstraction represents a major leap forward for Web3 UX, but building ro
 
 ---
 
-## Next Steps
+## Next Steps [#next-steps]
 
 - **Orbit EVM Documentation:** Explore Solady smart account utilities, EntryPoint v0.7 configurations, and Pimlico RPC helpers on the [@tuwaio/orbit Documentation Space](https://orbit.docs.tuwa.io/).
 - **Transaction Lifecycle Engine:** Read [Why Web3 Transaction State is Broken](/guides/why-web3-transaction-state-is-broken) and explore how [Pulsar](https://pulsar.docs.tuwa.io/) orchestrates Two-Stage UserOperation state machines.

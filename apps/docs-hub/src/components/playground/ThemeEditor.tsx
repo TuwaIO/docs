@@ -3,6 +3,7 @@
 import { CheckIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
 
+import { useI18n } from '@/i18n';
 import { LENGTH_VARIABLES, THEME_GROUPS, THEME_PRESETS, themeCss, type ThemeVariable } from '@/lib/playground/themes';
 
 import { usePlayground } from './PlaygroundContext';
@@ -17,9 +18,11 @@ const LENGTH_LIMITS: Partial<Record<ThemeVariable, number>> = {
  * styles. Edits apply to the stage at once and are dropped when another preset is picked.
  */
 export function ThemeEditor() {
+  const { t } = useI18n();
   const { settings, theme, themeEdited, changeSettings, editTheme, resetThemeEdits } = usePlayground();
   const { isCopied, copy } = useCopyToClipboard(2000);
   const preset = THEME_PRESETS[settings.theme];
+  const cust = t.playground.inspector.customize;
 
   return (
     <div className="flex flex-col gap-5">
@@ -53,8 +56,12 @@ export function ThemeEditor() {
                 />
               ))}
             </span>
-            <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{option.label}</span>
-            <span className="text-xs text-[var(--tuwa-text-secondary)]">{option.description}</span>
+            <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">
+              {cust.themePresets[option.id]?.label ?? option.label}
+            </span>
+            <span className="text-xs text-[var(--tuwa-text-secondary)]">
+              {cust.themePresets[option.id]?.description ?? option.description}
+            </span>
           </button>
         ))}
       </div>
@@ -62,7 +69,7 @@ export function ThemeEditor() {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => copy(themeCss(theme, themeEdited ? `${preset.label} (edited)` : preset.label))}
+          onClick={() => copy(themeCss(theme, themeEdited ? `${preset.label} ${cust.editedSuffix}` : preset.label))}
           disabled={isCopied}
           className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 cursor-pointer disabled:cursor-default"
         >
@@ -71,7 +78,7 @@ export function ThemeEditor() {
           ) : (
             <ClipboardDocumentIcon className="h-4 w-4" />
           )}
-          {isCopied ? 'CSS copied' : 'Copy CSS'}
+          {isCopied ? cust.cssCopied : cust.copyCss}
         </button>
         {themeEdited && (
           <button
@@ -79,7 +86,7 @@ export function ThemeEditor() {
             onClick={resetThemeEdits}
             className="text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
           >
-            Reset edits
+            {cust.resetEdits}
           </button>
         )}
       </div>
@@ -87,7 +94,7 @@ export function ThemeEditor() {
       {THEME_GROUPS.map((group) => (
         <fieldset key={group.label} className="min-w-0">
           <legend className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
-            {group.label}
+            {cust.themeGroups[group.label] ?? group.label}
           </legend>
           {/* Label and control side by side when the panel is wide enough, stacked on narrow screens */}
           <div className="@container flex flex-col gap-2">

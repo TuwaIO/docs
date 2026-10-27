@@ -62,16 +62,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 1 — Core Auth & Primitives',
     subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
-    accentClass: 'text-emerald-400',
-    dotGradient: 'from-emerald-500 to-teal-600',
+    accentClass: 'text-emerald-600 dark:text-emerald-400',
+    dotGradient: 'from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-500',
     entries: [
       {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         tagline: 'CAIP-122 authentication engine & adapters',
         icon: KeyIcon,
-        gradientFrom: 'from-emerald-500',
-        gradientTo: 'to-green-600',
+        gradientFrom: 'from-emerald-600 dark:from-emerald-400',
+        gradientTo: 'to-teal-600 dark:to-emerald-500',
         docsUrl: 'https://siwx.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/siwx',
         packages: [
@@ -87,8 +87,8 @@ export const layers: EcosystemLayer[] = [
         name: 'Orbit Utils',
         tagline: 'Multi-chain utilities for EVM & Solana',
         icon: GlobeAltIcon,
-        gradientFrom: 'from-emerald-500',
-        gradientTo: 'to-teal-600',
+        gradientFrom: 'from-emerald-600 dark:from-emerald-400',
+        gradientTo: 'to-teal-700 dark:to-teal-500',
         docsUrl: 'https://orbit.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/orbit',
         packages: [
@@ -102,16 +102,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 2 — State & Connection',
     subtitle: 'Transaction tracking & wallet connectivity',
-    accentClass: 'text-indigo-400',
-    dotGradient: 'from-indigo-500 to-amber-500',
+    accentClass: 'text-[#0052ff] dark:text-blue-400',
+    dotGradient: 'from-[#0052ff] to-amber-500 dark:from-blue-500 dark:to-amber-400',
     entries: [
       {
         id: 'satellite',
         name: 'Satellite Connect',
         tagline: 'Headless wallet connection store for EVM & Solana',
         icon: CpuChipIcon,
-        gradientFrom: 'from-indigo-500',
-        gradientTo: 'to-blue-600',
+        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
+        gradientTo: 'to-sky-600 dark:to-sky-400',
         docsUrl: 'https://satellite.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/satellite-connect',
         packages: [
@@ -127,8 +127,8 @@ export const layers: EcosystemLayer[] = [
         name: 'Pulsar',
         tagline: 'Transaction tracking that survives reloads',
         icon: BoltIcon,
-        gradientFrom: 'from-amber-500',
-        gradientTo: 'to-orange-600',
+        gradientFrom: 'from-amber-500 dark:from-amber-400',
+        gradientTo: 'to-orange-600 dark:to-orange-500',
         docsUrl: 'https://pulsar.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/pulsar-core',
         packages: [
@@ -143,16 +143,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 3 — Backend & Sync',
     subtitle: 'Managed cloud or self-hosted Quasar engine',
-    accentClass: 'text-cyan-400',
-    dotGradient: 'from-cyan-500 to-indigo-600',
+    accentClass: 'text-blue-700 dark:text-sky-400',
+    dotGradient: 'from-[#0052ff] to-sky-600 dark:from-blue-500 dark:to-sky-400',
     entries: [
       {
         id: 'quasar',
         name: 'Quasar Cloud',
         tagline: 'Managed cloud · Transaction indexing & sync',
         icon: CloudIcon,
-        gradientFrom: 'from-cyan-500',
-        gradientTo: 'to-indigo-600',
+        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
+        gradientTo: 'to-blue-800 dark:to-sky-300',
         docsUrl: '/quasar',
         githubUrl: 'https://github.com/TuwaIO/sdk/tree/main/packages/quasar-sdk',
         packages: [
@@ -166,8 +166,8 @@ export const layers: EcosystemLayer[] = [
         name: 'Quasar Community',
         tagline: 'Self-hosted engine & admin · Apache-2.0',
         icon: ServerStackIcon,
-        gradientFrom: 'from-emerald-500',
-        gradientTo: 'to-cyan-600',
+        gradientFrom: 'from-teal-600 dark:from-teal-400',
+        gradientTo: 'to-blue-700 dark:to-sky-400',
         docsUrl: '/quasar/self-hosting',
         githubUrl: 'https://github.com/TuwaIO/quasar-community',
         packages: [
@@ -180,16 +180,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 4 — User Interface',
     subtitle: 'React components for Satellite & Pulsar',
-    accentClass: 'text-violet-400',
-    dotGradient: 'from-violet-500 to-purple-600',
+    accentClass: 'text-[#0052ff] dark:text-sky-400',
+    dotGradient: 'from-[#0052ff] to-sky-600 dark:from-blue-500 dark:to-sky-400',
     entries: [
       {
         id: 'nova',
         name: 'Nova UI Kit',
         tagline: 'Design system & component library',
         icon: CubeIcon,
-        gradientFrom: 'from-violet-500',
-        gradientTo: 'to-purple-600',
+        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
+        gradientTo: 'to-sky-600 dark:to-sky-300',
         docsUrl: 'https://stories.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/nova-uikit',
         packages: [
@@ -203,16 +203,16 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 5 — SDK Integration Layer',
     subtitle: 'Core SDK & network-specific adapters',
-    accentClass: 'text-blue-400',
-    dotGradient: 'from-blue-500 to-purple-600',
+    accentClass: 'text-blue-700 dark:text-blue-400',
+    dotGradient: 'from-blue-700 to-[#0052ff] dark:from-blue-500 dark:to-sky-300',
     entries: [
       {
         id: 'sdk',
         name: 'TUWA SDK',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
         icon: CodeBracketSquareIcon,
-        gradientFrom: 'from-blue-500',
-        gradientTo: 'to-purple-600',
+        gradientFrom: 'from-blue-700 dark:from-blue-500',
+        gradientTo: 'to-[#0052ff] dark:to-sky-300',
         docsUrl: 'https://sdk.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/sdk',
         packages: [

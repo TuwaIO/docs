@@ -5,6 +5,7 @@ import { useSiwxSession } from '@tuwaio/sdk/siwx';
 import type { ReactNode } from 'react';
 import { useStore } from 'zustand';
 
+import { useI18n } from '@/i18n';
 import { quasarCloud } from '@/lib/playground/quasar';
 import { walletSessions } from '@/lib/playground/wallets';
 
@@ -27,6 +28,7 @@ function Section({ title, source, children }: { title: string; source: string; c
 
 /** The live state of the stores the stage uses: Satellite, Pulsar, SIWX, the simulated Quasar and wallet extension. */
 export function StateTab() {
+  const { t } = useI18n();
   const { settings, device } = usePlayground();
   const activeConnection = useSatelliteConnectStore((state) => state.activeConnection);
   const connections = useSatelliteConnectStore((state) => state.connections);
@@ -51,11 +53,11 @@ export function StateTab() {
         </Section>
       )}
       {settings.quasar && (
-        <Section title="Quasar" source="cloud history (simulated)">
+        <Section title="Quasar" source={t.playground.inspector.state.quasarSource}>
           <JsonTree value={cloud} />
         </Section>
       )}
-      <Section title="Wallet extension" source="simulated">
+      <Section title={t.playground.inspector.state.walletTitle} source={t.playground.inspector.state.walletSource}>
         <JsonTree value={wallets} />
       </Section>
     </div>

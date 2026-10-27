@@ -18,58 +18,74 @@ html {
 }
 
 :root {
-  --tuwa-primary: #6366f1;
-  --tuwa-secondary: #8b5cf6;
+  --tuwa-primary: #0052ff;
+  --tuwa-secondary: #0284c7;
   --tuwa-success: #10b981;
   --tuwa-warning: #f59e0b;
   --tuwa-error: #ef4444;
-  --tuwa-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --tuwa-gradient: linear-gradient(135deg, #0052ff 0%, #1d4ed8 50%, #0284c7 100%);
+  --tuwa-hero-gradient-from: #0052ff;
+  --tuwa-hero-gradient-via: #1d4ed8;
+  --tuwa-hero-gradient-to: #0284c7;
+  /* --tuwa-button-gradient-* are left to @tuwaio/nova-core, so the Connect Button keeps Nova's colors */
 
-  --nextra-primary-hue: 240;
+  --nextra-primary-hue: 212;
   --nextra-primary-saturation: 100%;
 
-  --x-color-primary-50: rgb(238 242 255);
-  --x-color-primary-100: rgb(224 231 255);
-  --x-color-primary-200: rgb(199 210 254);
-  --x-color-primary-300: rgb(165 180 252);
-  --x-color-primary-400: rgb(129 140 248);
-  --x-color-primary-500: #6366f1;
-  --x-color-primary-600: rgb(79 70 229);
-  --x-color-primary-700: rgb(67 56 202);
-  --x-color-primary-800: rgb(55 48 163);
-  --x-color-primary-900: rgb(49 46 129);
-  --x-color-primary-950: rgb(30 27 75);
+  --x-color-primary-50: rgb(239 246 255);
+  --x-color-primary-100: rgb(219 234 254);
+  --x-color-primary-200: rgb(191 219 254);
+  --x-color-primary-300: rgb(147 197 253);
+  --x-color-primary-400: rgb(96 165 250);
+  --x-color-primary-500: #0052ff;
+  --x-color-primary-600: #2563eb;
+  --x-color-primary-700: #1d4ed8;
+  --x-color-primary-800: #1e40af;
+  --x-color-primary-900: #1e3a8a;
+  --x-color-primary-950: #172554;
 
   --tuwa-footer-border: rgb(229 231 235);
   --tuwa-footer-text-primary: rgb(75 85 99);
   --tuwa-footer-text-secondary: rgb(107 114 128);
   --tuwa-footer-text-muted: rgb(156 163 175);
   --tuwa-footer-link-color: rgb(107 114 128);
-  --tuwa-footer-link-hover: rgb(55 65 81);
+  --tuwa-footer-link-hover: #0052ff;
   --tuwa-footer-npm-hover: rgb(220 38 38);
   --tuwa-footer-discord-hover: var(--tuwa-primary);
   --tuwa-footer-github-hover: rgb(31 41 55);
 }
 
 .dark {
-  --x-color-primary-50: rgb(30 27 75);
-  --x-color-primary-100: rgb(49 46 129);
-  --x-color-primary-200: rgb(55 48 163);
-  --x-color-primary-300: rgb(67 56 202);
-  --x-color-primary-400: rgb(79 70 229);
-  --x-color-primary-500: var(--tuwa-secondary);
-  --x-color-primary-600: rgb(129 140 248);
-  --x-color-primary-700: rgb(165 180 252);
-  --x-color-primary-800: rgb(199 210 254);
-  --x-color-primary-900: rgb(224 231 255);
-  --x-color-primary-950: rgb(238 242 255);
+  --tuwa-primary: #38bdf8;
+  --tuwa-secondary: #7dd3fc;
+  --nextra-bg: 10 14 39;
+  --tuwa-bg-dark: #0a0e27;
 
-  --tuwa-footer-border: rgb(55 65 81);
+  --tuwa-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #7dd3fc 100%);
+  --tuwa-hero-gradient-from: #2563eb;
+  --tuwa-hero-gradient-via: #3b82f6;
+  --tuwa-hero-gradient-to: #7dd3fc;
+
+  --x-color-primary-50: rgb(15 23 42);
+  --x-color-primary-100: rgb(23 37 84);
+  --x-color-primary-200: rgb(30 58 138);
+  --x-color-primary-300: rgb(30 64 175);
+  --x-color-primary-400: #38bdf8;
+  --x-color-primary-500: #38bdf8;
+  --x-color-primary-600: #38bdf8;
+  --x-color-primary-700: #7dd3fc;
+  --x-color-primary-800: rgb(191 219 254);
+  --x-color-primary-900: rgb(219 234 254);
+  --x-color-primary-950: rgb(239 246 255);
+
+  --x-color-neutral-900: #0a0e27;
+
+  --tuwa-footer-border: rgba(255, 255, 255, 0.08);
   --tuwa-footer-text-primary: rgb(209 213 219);
   --tuwa-footer-text-secondary: rgb(156 163 175);
   --tuwa-footer-text-muted: rgb(107 114 128);
   --tuwa-footer-link-color: rgb(156 163 175);
-  --tuwa-footer-link-hover: rgb(243 244 246);
+  --tuwa-footer-link-hover: #38bdf8;
   --tuwa-footer-npm-hover: rgb(248 113 113);
   --tuwa-footer-discord-hover: var(--tuwa-secondary);
   --tuwa-footer-github-hover: rgb(243 244 246);
@@ -105,6 +121,53 @@ html {
 .tuwa-footer-border {
   border-color: var(--tuwa-footer-border);
   border-top-width: 1px;
+}
+
+/* Nextra sidebar footer (theme switcher & collapse button container) in dark mode */
+.dark .nextra-sidebar-footer,
+html.dark .nextra-sidebar-footer {
+  background-color: #0a0e27 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .nextra-sidebar,
+html.dark .nextra-sidebar {
+  background-color: #0a0e27 !important;
+}
+
+/* Override Nextra purple callouts & borders with TUWA signature blue */
+.nextra-callout.x\:border-purple-600,
+.nextra-callout[class*='border-purple'],
+.x\:border-purple-600,
+.x\:dark\:border-purple-600,
+[class*='border-purple'] {
+  border-color: #0052ff !important;
+}
+.nextra-callout.x\:border-purple-600 svg,
+.nextra-callout[class*='border-purple'] svg,
+.x\:text-purple-600,
+.x\:dark\:text-purple-400,
+[class*='text-purple'] {
+  color: #38bdf8 !important;
+  fill: #38bdf8 !important;
+}
+.nextra-callout.x\:border-purple-600,
+.nextra-callout[class*='bg-purple'],
+.x\:bg-purple-100 {
+  background-color: rgba(0, 82, 255, 0.08) !important;
+}
+.dark .nextra-callout.x\:border-purple-600,
+.dark .nextra-callout[class*='dark:bg-purple'],
+.dark .x\:dark\:bg-purple-900\/30,
+[class*='dark:bg-purple'] {
+  background-color: rgba(0, 82, 255, 0.12) !important;
+}
+
+.dark hr.nextra-border,
+html.dark hr.nextra-border,
+.dark .nextra-border,
+html.dark .nextra-border {
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .tuwa-footer-description {
@@ -158,11 +221,11 @@ html {
 
 .tuwa-badge:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgb(99 102 241 / 0.25);
+  box-shadow: 0 2px 8px rgb(0 82 255 / 0.25);
 }
 
 .tuwa-badge--secondary {
-  background: linear-gradient(135deg, var(--tuwa-secondary) 0%, #a855f7 100%);
+  background: linear-gradient(135deg, var(--tuwa-primary) 0%, var(--tuwa-secondary) 100%);
 }
 
 .tuwa-badge--success {
@@ -171,13 +234,24 @@ html {
 
 .nextra-sidebar a[data-active] {
   color: var(--tuwa-primary) !important;
-  background-color: rgb(99 102 241 / 0.1) !important;
+  background-color: rgb(0 82 255 / 0.1) !important;
+  border-color: var(--tuwa-primary) !important;
+}
+
+.dark .nextra-sidebar a[data-active] {
+  color: var(--tuwa-primary) !important;
+  background-color: rgb(56 189 248 / 0.1) !important;
   border-color: var(--tuwa-primary) !important;
 }
 
 .nextra-sidebar a:hover {
   color: var(--tuwa-primary) !important;
-  background-color: rgb(99 102 241 / 0.05) !important;
+  background-color: rgb(0 82 255 / 0.05) !important;
+}
+
+.dark .nextra-sidebar a:hover {
+  color: var(--tuwa-primary) !important;
+  background-color: rgb(56 189 248 / 0.05) !important;
 }
 
 .nextra-search input {
@@ -188,7 +262,12 @@ html {
 
 .nextra-search input:focus {
   border-color: var(--tuwa-primary) !important;
-  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1) !important;
+  box-shadow: 0 0 0 3px rgb(0 82 255 / 0.15) !important;
+}
+
+.dark .nextra-search input:focus {
+  border-color: var(--tuwa-primary) !important;
+  box-shadow: 0 0 0 3px rgb(56 189 248 / 0.15) !important;
 }
 
 .nextra-breadcrumb,
@@ -238,23 +317,53 @@ article h6 {
 }
 
 .nextra-code button:hover {
-  background-color: var(--tuwa-primary) !important;
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: var(--tuwa-primary) !important;
+}
+
+.dark .nextra-code button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #38bdf8 !important;
 }
 
 article a {
   color: var(--tuwa-primary) !important;
-  text-decoration-color: rgb(99 102 241 / 0.3);
+  text-decoration-color: rgba(0, 82, 255, 0.3);
   transition: all 0.2s ease;
 }
 
 article a:hover {
   color: var(--tuwa-secondary) !important;
-  text-decoration-color: var(--tuwa-primary);
+  text-decoration-color: var(--tuwa-secondary);
+}
+
+.dark article a {
+  color: #38bdf8 !important;
+  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.dark article a:hover {
+  color: #7dd3fc !important;
+  text-decoration-color: #7dd3fc !important;
+}
+
+.dark .nextra-toc a:hover {
+  color: #38bdf8 !important;
+}
+
+.dark .nextra-toc a[data-active] {
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+
+.dark .x\:text-primary-600,
+.dark [class*='text-primary-600'] {
+  color: #38bdf8 !important;
 }
 
 .nextra-callout[class*='border-blue-'] {
   border-color: var(--tuwa-primary) !important;
-  background: rgb(99 102 241 / 0.05) !important;
+  background: rgb(0 82 255 / 0.05) !important;
 }
 
 .nextra-callout[class*='border-yellow-'] {
@@ -294,7 +403,7 @@ article .nextra-border a:hover {
 }
 
 .nextra-hamburger:hover {
-  background-color: rgb(99 102 241 / 0.1) !important;
+  background-color: rgb(0 82 255 / 0.1) !important;
 }
 
 .nextra-toc .nextra-border a {
@@ -420,7 +529,7 @@ article .nextra-border a:hover {
 
 .tuwa-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgb(99 102 241 / 0.3);
+  box-shadow: 0 4px 12px rgb(0 82 255 / 0.3);
 }
 
 @keyframes slideToDark {
@@ -475,13 +584,17 @@ article a[href^='http']:after {
     background: white;
   }
 
-  .dark .nextra-navbar {
-    background: rgb(15 23 42);
-  }
-
   .tuwa-footer-link span {
     display: none;
   }
+}
+
+html.dark {
+  background-color: #0a0e27;
+}
+
+html.dark body {
+  background-color: #0a0e27;
 }
 
 @keyframes tuwa-float {

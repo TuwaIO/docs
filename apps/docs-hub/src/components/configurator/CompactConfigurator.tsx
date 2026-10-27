@@ -4,6 +4,7 @@ import { AdjustmentsHorizontalIcon, ArrowRightIcon } from '@heroicons/react/24/o
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { formatLabel, useI18n } from '@/i18n';
 import { DEFAULT_STACK_OPTIONS, generateStack, stackQuery } from '@/lib/configurator/generate';
 import { installCommand, usePackageManager } from '@/lib/packageManager';
 
@@ -15,6 +16,7 @@ import { StackOptionsForm } from './StackOptionsForm';
  * link to `/configurator` with the same options for the setup files.
  */
 export function CompactConfigurator() {
+  const { t } = useI18n();
   const [options, setOptions] = useState(DEFAULT_STACK_OPTIONS);
   const [packageManager, choosePackageManager] = usePackageManager();
   const stack = generateStack(options);
@@ -28,10 +30,10 @@ export function CompactConfigurator() {
         />
         <div>
           <h3 className="text-sm sm:text-base font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
-            Already have an app? Configure your stack
+            {t.home.compactConfigurator.title}
           </h3>
           <p className="text-xs sm:text-sm text-[var(--tuwa-text-secondary)] mt-1">
-            Pick the pieces you need and get the install command; the setup files are one click away.
+            {t.home.compactConfigurator.description}
           </p>
         </div>
       </div>
@@ -41,18 +43,21 @@ export function CompactConfigurator() {
       <div className="mt-5 flex flex-col gap-2">
         <div className="flex items-center justify-between gap-3">
           <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
-            Install
+            {t.home.compactConfigurator.install}
           </span>
           <PackageManagerSwitch value={packageManager} onChange={choosePackageManager} />
         </div>
-        <CommandLine command={installCommand(packageManager, stack.packages)} copyTitle="Copy the install command" />
+        <CommandLine
+          command={installCommand(packageManager, stack.packages)}
+          copyTitle={t.home.packageDialog.copyInstallTitle}
+        />
       </div>
 
       <Link
         href={`/configurator?${stackQuery(stack.options)}`}
         className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--tuwa-text-accent)] hover:underline"
       >
-        See the {stack.files.length} setup files
+        {formatLabel(t.home.compactConfigurator.openWithFiles, { count: stack.files.length })}
         <ArrowRightIcon className="w-4 h-4" aria-hidden="true" />
       </Link>
     </div>

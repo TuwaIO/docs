@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.5.6](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.5...docs-ui-v0.5.6) (2026-10-27)
+
+
+### Bug Fixes
+
+* colors in docs-ui ([83ecca0](https://github.com/TuwaIO/docs/commit/83ecca0aa2bef59181ff95a406ef7ce8b45385b7))
+* updated nova core ([845369b](https://github.com/TuwaIO/docs/commit/845369bd9c0f13526f3304a4d7fc21b3d8b86a92))
+
+## [0.5.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.4...docs-ui-v0.5.5) (2026-10-27)
+
+
+### Bug Fixes
+
+* updated colors ([651998b](https://github.com/TuwaIO/docs/commit/651998becaa4f7bac2f818c0f048d692979905b1))
+
+## [0.5.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.3...docs-ui-v0.5.4) (2026-10-27)
+
+
+### Bug Fixes
+
+* added localization ([08fd2d0](https://github.com/TuwaIO/docs/commit/08fd2d0a8cc2ea2f394231ffc54f96776363aee8))
+
+## [0.5.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.2...docs-ui-v0.5.3) (2026-10-26)
+
+
+### Bug Fixes
+
+* updated packages and fonts ([9762246](https://github.com/TuwaIO/docs/commit/9762246896f40bc8e03dcd50415f50163bf0a4ac))
+
 ## [0.5.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.1...docs-ui-v0.5.2) (2026-10-26)
 
 

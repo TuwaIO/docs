@@ -6,9 +6,10 @@ import '@tuwaio/solana-sdk/nova-connect';
 import '@tuwaio/sdk/styles/nova-transactions.css';
 import '@tuwaio/sdk/styles/nova-connect.css';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { DEFAULT_CUSTOMIZATION, type NovaCustomization } from '@/lib/playground/customization';
+import { useI18n } from '@/i18n';
+import { DEFAULT_CUSTOMIZATION, type NovaCustomization, type NovaLanguage } from '@/lib/playground/customization';
 import {
   DEFAULT_SETTINGS,
   normalizeSettings,
@@ -22,6 +23,10 @@ import { replaceQuery, useQueryString } from '@/lib/queryState';
 
 import { PlaygroundSession } from './PlaygroundSession';
 
+function toNovaLanguage(locale: 'en' | 'uk' | 'zh-CN'): NovaLanguage {
+  return locale === 'zh-CN' ? 'zh' : locale;
+}
+
 /**
  * The Playground of `/playground`. It runs only in the browser (`PlaygroundLoader` imports it with `ssr: false`), so
  * the TUWA packages load on this page only. The settings live in the query string; a change of chains, UI or features
@@ -29,14 +34,22 @@ import { PlaygroundSession } from './PlaygroundSession';
  * one style kit (Isometric) and that kit are picked together: see `pickTheme` and `pickStyle`.
  */
 export default function PlaygroundStudio() {
+  const { locale } = useI18n();
   const query = useQueryString();
   const settings = useMemo(() => parseSettings(new URLSearchParams(query)), [query]);
   const [generation, setGeneration] = useState(0);
   const [themeEdits, setThemeEdits] = useState<Partial<ThemeValues>>({});
   const [customization, setCustomization] = useState<NovaCustomization>(() => ({
     ...DEFAULT_CUSTOMIZATION,
+    language: toNovaLanguage(locale),
     style: pickTheme(settings.theme, DEFAULT_CUSTOMIZATION.style).style,
   }));
+
+  useEffect(() => {
+    const nextLang = toNovaLanguage(locale);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCustomization((current) => (current.language === nextLang ? current : { ...current, language: nextLang }));
+  }, [locale]);
 
   const changeSettings = (patch: Partial<PlaygroundSettings>) => {
     if (patch.theme) {

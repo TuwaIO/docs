@@ -22,14 +22,14 @@ Everything is imported from `@tuwaio/sdk` and its chain add-on. The [Quasar tran
 
 ---
 
-## Before You Start
+## Before You Start [#before-you-start]
 
 - **Next.js 16 with the App Router and React 19.2 or newer.** The examples use `'use client'` modules and the `@/` import alias for `src/`.
 - **The URL of your app** in `NEXT_PUBLIC_APP_URL` (for example `http://localhost:3000`): the server accepts sign-in messages for this domain only.
 
 ---
 
-## Step 1: Install the Packages
+## Step 1: Install the Packages [#step-1-install-the-packages]
 
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
@@ -58,7 +58,7 @@ pnpm (8 and later), npm (7 and later) and Bun also install the Wallet Standard p
 
 ---
 
-## Step 2: Configure the Network
+## Step 2: Configure the Network [#step-2-configure-the-network]
 
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
@@ -98,7 +98,7 @@ export const solanaRPCUrls = {
 
 ---
 
-## Step 3: Add the SIWX Routes
+## Step 3: Add the SIWX Routes [#step-3-add-the-siwx-routes]
 
 The server issues the nonces, verifies the signed messages and keeps the sessions. For development, keep them in memory:
 
@@ -136,7 +136,7 @@ For production stores, `allowedChainIds` and the session lifetime, see [`@tuwaio
 
 ---
 
-## Step 4: Create the Transaction Store
+## Step 4: Create the Transaction Store [#step-4-create-the-transaction-store]
 
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
@@ -179,7 +179,7 @@ The store saves the transactions to `localStorage` and tracks each one in the ba
 
 ---
 
-## Step 5: Render the Providers
+## Step 5: Render the Providers [#step-5-render-the-providers]
 
 Create the Satellite adapter and the SIWX options outside the component, so they are created once. `NovaConnectProvider` receives `siwx`: it asks every connected wallet to sign in, disconnects a wallet that refuses, and signs out when the wallet disconnects. Do not pass `siwx` to the watcher as well.
 
@@ -400,7 +400,7 @@ Satellite Connect reconnects the last wallet after a reload. With the default `r
 
 ---
 
-## Step 6: Send a Tracked Transaction
+## Step 6: Send a Tracked Transaction [#step-6-send-a-tracked-transaction]
 
 Sending a transaction is the same as without the SDK: build the contract (EVM) or program (Solana) call and pass it to `executeTxAction` of the store. Follow Steps 2, 3, 6 and 7 of the [React transaction tracking guide](/guides/react-transaction-tracking#step-2-describe-the-contract-or-program) and change the import paths:
 
@@ -422,7 +422,7 @@ The transaction appears in the Nova toasts and in the connected wallet modal, an
 
 ---
 
-## Step 7: Read the Session on the Server
+## Step 7: Read the Session on the Server [#step-7-read-the-session-on-the-server]
 
 A Server Action or route handler can check who is signed in before it acts for a wallet. `isSessionMatchingTarget` compares the address of the session with the address the request is about:
 
@@ -449,7 +449,7 @@ Never trust a session object sent by the browser: the SIWX state of `@tuwaio/sdk
 
 ---
 
-## 🌐 EVM and Solana Together
+## 🌐 EVM and Solana Together [#evm-and-solana-together]
 
 An app with both networks installs both add-ons and combines the two tabs: both configs in `appConfig.ts`, both Pulsar adapters in the `adapter` array of the store, and in `Providers.tsx` both Satellite adapters, both watchers, and both `appChains` and `solanaRPCUrls`:
 
@@ -481,7 +481,7 @@ The `nextjs-tuwa-quasar` [starter template](/guides/starter-templates) is this s
 
 ---
 
-## 📚 Next Steps
+## 📚 Next Steps [#next-steps]
 
 - Sync the transactions to Quasar and show the history of every device: [Quasar transaction sync guide](/guides/quasar-transaction-sync).
 - Hand the sign-in to Coinbase CDP or your own services as a JWT: [External Auth with SIWX JWT](/guides/siwx-jwt-external-auth).

@@ -4,12 +4,13 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import { cn } from '@tuwaio/nova-core/utils';
 import { type ReactNode, useId } from 'react';
 
+import { useI18n } from '@/i18n';
 import { type Framework, normalizeStackOptions, type StackOptions } from '@/lib/configurator/generate';
 
-const FRAMEWORKS: { id: Framework; label: string; hint: string }[] = [
-  { id: 'next', label: 'Next.js', hint: 'App Router, with route handlers for the server' },
-  { id: 'vite', label: 'Vite + React', hint: 'A client app; the server parts run on any Fetch API runtime' },
-  { id: 'vanilla', label: 'Vanilla TS', hint: 'No React: the TUWA stores and your own DOM code' },
+const FRAMEWORKS: { id: Framework; label: string }[] = [
+  { id: 'next', label: 'Next.js' },
+  { id: 'vite', label: 'Vite + React' },
+  { id: 'vanilla', label: 'Vanilla TS' },
 ];
 
 /**
@@ -128,13 +129,17 @@ export function StackOptionsForm({
   onChange: (options: StackOptions) => void;
   compact?: boolean;
 }) {
+  const { t } = useI18n();
   const set = (patch: Partial<StackOptions>) => onChange(normalizeStackOptions({ ...options, ...patch }));
-  const framework = FRAMEWORKS.find(({ id }) => id === options.framework)!;
   const vanilla = options.framework === 'vanilla';
 
   return (
     <div className={cn('grid', compact ? 'grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4' : 'grid-cols-1 gap-6')}>
-      <Group label="Framework" hint={framework.hint} compact={compact}>
+      <Group
+        label={t.configurator.form.framework}
+        hint={t.ui.configuratorExtra.frameworkHints[options.framework]}
+        compact={compact}
+      >
         {FRAMEWORKS.map(({ id, label }) => (
           <Choice key={id} pressed={options.framework === id} onClick={() => set({ framework: id })} compact={compact}>
             {label}
@@ -142,11 +147,7 @@ export function StackOptionsForm({
         ))}
       </Group>
 
-      <Group
-        label="Chains"
-        hint="Each chain family adds its own add-on; an app never bundles the other."
-        compact={compact}
-      >
+      <Group label={t.configurator.form.chains} hint={t.ui.configuratorExtra.chainsHintFull} compact={compact}>
         <Choice
           pressed={options.evm}
           // At least one family stays selected
@@ -167,13 +168,13 @@ export function StackOptionsForm({
       </Group>
 
       <Group
-        label="UI"
+        label={t.configurator.form.ui}
         hint={
           vanilla
-            ? 'Nova UI Kit is made of React components; with Vanilla TS the UI is yours.'
+            ? t.ui.configuratorExtra.uiHintVanilla
             : options.ui === 'nova'
-              ? 'Nova Connect modals and Nova Transactions toasts, themed with CSS variables.'
-              : 'Your own components on the Satellite and Pulsar stores.'
+              ? t.ui.configuratorExtra.uiHintNova
+              : t.ui.configuratorExtra.uiHintHeadless
         }
         compact={compact}
       >
@@ -183,20 +184,16 @@ export function StackOptionsForm({
           onClick={() => set({ ui: 'nova' })}
           compact={compact}
         >
-          Nova UI Kit
+          {t.configurator.form.uiNova}
         </Choice>
         <Choice pressed={options.ui === 'headless'} onClick={() => set({ ui: 'headless' })} compact={compact}>
-          Headless
+          {t.configurator.form.uiHeadless}
         </Choice>
       </Group>
 
       <Group
-        label="Features"
-        hint={
-          options.quasar
-            ? 'Quasar syncs the transactions of a signed-in wallet, so it turns on SIWX.'
-            : 'SIWX signs users in with their wallet (CAIP-122); Quasar adds history across devices and webhooks.'
-        }
+        label={t.ui.configuratorExtra.featuresLabel}
+        hint={options.quasar ? t.ui.configuratorExtra.featuresHintQuasar : t.ui.configuratorExtra.featuresHintDefault}
         compact={compact}
       >
         <Choice
@@ -205,10 +202,10 @@ export function StackOptionsForm({
           onClick={() => set({ siwx: !options.siwx })}
           compact={compact}
         >
-          SIWX sign-in
+          {t.ui.configuratorExtra.siwxChoice}
         </Choice>
         <Choice pressed={options.quasar} onClick={() => set({ quasar: !options.quasar })} compact={compact}>
-          Quasar sync
+          {t.ui.configuratorExtra.quasarChoice}
         </Choice>
       </Group>
     </div>

@@ -22,7 +22,7 @@ The wallet signs one CAIP-122 message; Supabase only receives a token it can che
 
 ---
 
-## How It Works
+## How It Works [#how-it-works]
 
 ```text
 Wallet ──signs CAIP-122──▶ POST /api/siwx/verify ──▶ session cookie
@@ -32,7 +32,7 @@ Supabase ──keys of /api/siwx/jwks──▶ checks the signature ──▶ Po
 RLS policies ──auth.jwt() ->> 'sub'──▶ rows of this wallet only
 ```
 
-## SIWX or the Supabase Web3 Sign-In?
+## SIWX or the Supabase Web3 Sign-In? [#siwx-or-the-supabase-web3-sign-in]
 
 Supabase has its own [Web3 wallet sign-in](https://supabase.com/docs/guides/auth/auth-web3), which creates Supabase Auth users. Both work; they keep the user in different places:
 
@@ -49,7 +49,7 @@ Pick the Supabase sign-in when Supabase Auth is all your auth and you want to li
 
 ---
 
-## Before You Start
+## Before You Start [#before-you-start]
 
 - **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `src/lib/authStores.ts` of Step 3.
 - **A JWT signing key** from Step 1 of the [External Auth guide](/guides/siwx-jwt-external-auth) in `SIWX_JWT_PRIVATE_KEY`.
@@ -62,7 +62,7 @@ pnpm add @supabase/supabase-js
 
 ---
 
-## Step 1: Add the Role Claim to the Token
+## Step 1: Add the Role Claim to the Token [#step-1-add-the-role-claim-to-the-token]
 
 Supabase takes the Postgres role of a request from the `role` claim of its JWT: `authenticated` for signed-in users. A token without it runs as `anon`, and the policies of Step 3 then return nothing. Set the claim with `jwt.claims`, and the audience to `authenticated`, the `aud` of the tokens Supabase issues itself:
 
@@ -141,7 +141,7 @@ The handler keeps `/api/siwx/token` and `/api/siwx/jwks` of the External Auth gu
 
 ---
 
-## Step 2: Register Your JWKS with Supabase
+## Step 2: Register Your JWKS with Supabase [#step-2-register-your-jwks-with-supabase]
 
 Supabase checks third-party tokens against the public keys of their issuer. The Third-Party Auth page of the dashboard lists ready-made providers (Clerk, Firebase Auth, Auth0, AWS Cognito, WorkOS); your own issuer is added with the [Management API](https://supabase.com/docs/reference/api/introduction). Create a personal access token in [Account → Access Tokens](https://supabase.com/dashboard/account/tokens), take the project ref from the URL of your project, and register the JWKS URL of your app:
 
@@ -163,7 +163,7 @@ Supabase stores the keys and checks the URL for changes periodically, so a new k
 
 ---
 
-## Step 3: Create a Table with Row Level Security
+## Step 3: Create a Table with Row Level Security [#step-3-create-a-table-with-row-level-security]
 
 The `sub` claim of the token is the wallet: `solana:<address>` for Solana and `eip155:0x…` (lowercase) for an EVM wallet that signs with its own key, the same on every network. A smart contract wallet keeps its chain (`eip155:8453:0x…`), because its owners are set on each chain separately. Keep it in a `wallet` column that the database fills in from the token, and compare it in every policy. Apply the migration with the Supabase CLI or paste it into the SQL Editor:
 
@@ -206,7 +206,7 @@ create policy "Wallets delete their notes" on public.notes
 
 ---
 
-## Step 4: Create the Supabase Client
+## Step 4: Create the Supabase Client [#step-4-create-the-supabase-client]
 
 The `accessToken` option gives supabase-js the token of each request. supabase-js calls it often and in parallel, and Realtime calls it on every heartbeat, so the client keeps the token in memory and fetches a new one a minute before it expires:
 
@@ -252,7 +252,7 @@ With `accessToken` set, `supabase.auth` cannot be used: the sign-in belongs to S
 
 ---
 
-## Step 5: Read and Write Rows
+## Step 5: Read and Write Rows [#step-5-read-and-write-rows]
 
 A component that shows the notes of the signed-in wallet and adds new ones. It drops the cached token whenever the SIWX session changes, so a sign-out or another wallet never reuses the previous token:
 
@@ -320,7 +320,7 @@ Render `WalletNotes` inside the providers of Step 5 of the Full-Stack React guid
 
 ---
 
-## Step 6: Query as the Wallet from a Server Action
+## Step 6: Query as the Wallet from a Server Action [#step-6-query-as-the-wallet-from-a-server-action]
 
 A Server Action can act for the signed-in wallet under the same policies. It reads the session cookie and signs a token for this request with the same key, instead of using the secret (service role) key, which bypasses RLS:
 
@@ -365,7 +365,7 @@ export async function countMyNotes(): Promise<number> {
 
 ---
 
-## What Supabase Reads from the Token
+## What Supabase Reads from the Token [#what-supabase-reads-from-the-token]
 
 | Claim      | Used for                                                                                        |
 | :--------- | :---------------------------------------------------------------------------------------------- |
@@ -379,13 +379,13 @@ Every claim is available in SQL through `auth.jwt()`. All claims of the token ar
 
 ---
 
-## 🌐 EVM and Solana Together
+## 🌐 EVM and Solana Together [#evm-and-solana-together]
 
 One table serves both networks: `sub` starts with `eip155:` or `solana:`, and the same policies apply. One person's EVM and Solana wallets are two different subjects. To give them one set of rows, bind your own user ID to both sessions with `sessionStore.bindSubject(id, userId)` after sign-in: `sub` then becomes that ID.
 
 ---
 
-## Security and Key Rotation
+## Security and Key Rotation [#security-and-key-rotation]
 
 - **Enable RLS on every table you grant to `authenticated`.** Without it, every signed-in wallet reads every row. Keep the secret (service role) key on the server.
 - **Supabase trusts whoever holds the signing key.** Anyone with `SIWX_JWT_PRIVATE_KEY` can sign a token for any wallet, so keep it a server secret. For sensitive actions, such as withdrawals or account settings, ask the wallet to sign that exact action instead of trusting the session alone.
@@ -395,13 +395,13 @@ One table serves both networks: `sub` starts with `eip155:` or `solana:`, and th
 
 ---
 
-## Local Development
+## Local Development [#local-development]
 
 Supabase downloads the JWKS from the internet, so `http://localhost:3000/api/siwx/jwks` is out of its reach. Use a preview deployment or a tunnel URL, as in the External Auth guide, or register the keys themselves: send `custom_jwks` with the JSON of your local `/api/siwx/jwks` instead of `jwks_url`. Supabase does not refresh a custom JWKS, so register the URL in production.
 
 ---
 
-## 📚 Next Steps
+## 📚 Next Steps [#next-steps]
 
 - Every option of the handler and the JWT functions: [`@tuwaio/siwx-server`](https://siwx.docs.tuwa.io/packages/siwx-server).
 - Writing policies: [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) in the Supabase docs.

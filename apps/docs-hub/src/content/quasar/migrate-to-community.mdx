@@ -18,7 +18,7 @@ An organization moves from Quasar Cloud to your [Community Edition node](/quasar
 
 ---
 
-## 📦 Export the Organization
+## 📦 Export the Organization [#export-the-organization]
 
 Only an **owner** can export. On the organization page of the [Quasar Dashboard](https://quasar.tuwa.io), choose **Export Organization** and confirm with your password and, if it is on, your 2FA code.
 
@@ -28,7 +28,7 @@ The `.qex` file is encrypted with the key (AES-256-GCM), because it holds every 
 
 ---
 
-## 📥 Import It into Your Node
+## 📥 Import It into Your Node [#import-it-into-your-node]
 
 You need Community Edition **0.2** or later. In the `/admin` panel of your node, choose **Import data from Quasar Cloud** on the dashboard:
 
@@ -45,7 +45,7 @@ What the node leaves out, and lists:
 
 ---
 
-## 🔁 Switch Over
+## 🔁 Switch Over [#switch-over]
 
 1. Import the organization into your node.
 2. Point your apps at the node: set `baseUrl` of `@tuwaio/quasar-sdk`, the URL of `preFlightTxCheck`, and `--api-url` of the webhook relay (see [Self-Hosting](/quasar/self-hosting)). The secret keys stay the same.
@@ -54,7 +54,7 @@ What the node leaves out, and lists:
 
 ---
 
-## 🧯 When the Import Stops
+## 🧯 When the Import Stops [#when-the-import-stops]
 
 | Message                                                         | What to do                                                                                              |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |

@@ -2,17 +2,11 @@ import './globals.css';
 
 import { PreferenceExpiry } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
-import { Geist } from 'next/font/google';
 import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
 
 import { SITE_URL, X_HANDLE } from '../lib/site';
 import { Providers } from './providers';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -78,15 +72,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
-          The background colors are those of the body below. */}
-      <Head backgroundColor={{ light: '#ffffff', dark: '#030303' }}>
-        {/* Before the theme script of next-themes and the tabs of Nextra: the theme and the guide tab are kept 30 days
+          The background colors are those of the body below. Dark mode uses the TUWA cosmic midnight blue (#0a0e27). */}
+      <Head backgroundColor={{ light: '#ffffff', dark: '#0a0e27' }}>
+        {/* Before the theme script of next-themes and the tabs of Nextra: the theme, guide tab and locale are kept 30 days
             after they are chosen (Cookie Policy) */}
-        <PreferenceExpiry keys={['theme', 'tuwa-guide-network']} />
+        <PreferenceExpiry keys={['theme', 'tuwa-guide-network', 'tuwa-locale']} />
       </Head>
-      <body
-        className={`${geistSans.variable} font-sans antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#030303] text-[var(--tuwa-text-primary)]`}
-      >
+      <body className={`antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#0a0e27] text-[var(--tuwa-text-primary)]`}>
         <Providers>{children}</Providers>
       </body>
     </html>

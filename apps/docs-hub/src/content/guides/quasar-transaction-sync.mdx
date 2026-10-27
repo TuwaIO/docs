@@ -21,14 +21,14 @@ The **`nextjs-tuwa-quasar`** [starter template](/guides/starter-templates) is a 
 
 ---
 
-## Before You Start
+## Before You Start [#before-you-start]
 
 - **The app of the [Full-Stack React guide](/guides/full-stack-react)**, with the SIWX routes and `sessionStore` of Step 3. The browser never sees the Quasar key: it calls your Server Actions, and they check the SIWX session cookie.
 - **A Quasar app and its secret key** ([Apps & Keys](/quasar/apps-and-keys)), in `QUASAR_SECRET_KEY` on the server. In Quasar Cloud, also add your RPC provider to the app: Quasar Cloud tracks transactions only through it. For a [self-hosted node](/quasar/self-hosting), put the URL of its API in `NEXT_PUBLIC_QUASAR_BASE_URL`; without it, the code uses Quasar Cloud.
 
 ---
 
-## Step 1: Install the Quasar Client
+## Step 1: Install the Quasar Client [#step-1-install-the-quasar-client]
 
 ```bash
 pnpm add @tuwaio/quasar-sdk
@@ -38,7 +38,7 @@ Its peer dependency `@tuwaio/pulsar-core` comes with `@tuwaio/sdk`.
 
 ---
 
-## Step 2: Add the Server Actions
+## Step 2: Add the Server Actions [#step-2-add-the-server-actions]
 
 Both actions read the SIWX session from the cookie and refuse to act for another wallet: without this check, any visitor could spend the quota of your app or read the history of any address.
 
@@ -95,7 +95,7 @@ export async function getHistory(params: { walletAddress: string; page?: number 
 
 ---
 
-## Step 3: Sync From the Transaction Store
+## Step 3: Sync From the Transaction Store [#step-3-sync-from-the-transaction-store]
 
 Replace the store of the full-stack guide. `beforeTxProcess` runs `preFlightTxCheck` before the wallet is asked to sign: it stops the transaction when the user is not signed in or Quasar does not respond. `onRemoteCreate` sends each new transaction to the Server Action; throw when the action fails, so Pulsar keeps the transaction marked as unsynced and sends it again later (`reconcileUnsyncedTransactions`). The history store keeps the pages loaded from Quasar together with the local transactions.
 
@@ -178,7 +178,7 @@ export const useHistoryStore = createBoundedUseStore(historyStore);
 
 `preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
 
-### Batches of Calls (EIP-5792)
+### Batches of Calls (EIP-5792) [#eip-5792-batches]
 
 A batch sent with `wallet_sendCalls` (`tracker: TransactionTracker.EIP5792`) is synced by its batch ID, which only the wallet can resolve. Once Pulsar learns the hash of the transaction that executed the batch, send it to Quasar: Quasar then tracks the batch on-chain and sends its webhook. Without a hash, Quasar marks the batch `Failed` one hour after it was synced. This needs `@tuwaio/quasar-sdk` 0.6 or later.
 
@@ -216,7 +216,7 @@ watchBatchHashes(pulsarStore, async (tx) => {
 
 ---
 
-## Step 4: Show the History
+## Step 4: Show the History [#step-4-show-the-history]
 
 Feed Nova from the history store instead of the local pool, pass its pagination, and load the first page once the connected wallet is signed in. Only the parts that change from Step 5 of the full-stack guide are new: `HistoryLoader`, `pagination` and `useHistoryStore`.
 
@@ -455,7 +455,95 @@ Send a transaction, open the app in another browser with the same wallet, and si
 
 ---
 
-## 📚 Next Steps
+## Server-Signed Transactions (Withdrawals & Payouts) [#server-signed-transactions-withdrawals--payouts]
+
+When your server signs and broadcasts a transaction itself — such as a withdrawal from a server wallet, an automated payout or a backend relayer — no browser Pulsar store or `localStorage` is involved. Call `quasar.pulsar.syncCreate` directly from the backend after broadcasting: syncing is idempotent by `txKey` (retrying or rebroadcasting the same signed transaction returns `duplicate: true`), and Quasar delivers a signed [webhook](/quasar/webhooks) once the transaction reaches its terminal state ([Finality, Expiry and Reconciliation](/quasar#finality-expiry-and-reconciliation)).
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/server/syncServerPayout.ts"
+import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { OrbitAdapter } from '@tuwaio/sdk/orbit';
+
+const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL,
+});
+
+export async function syncServerPayout(params: {
+  hash: `0x${string}`;
+  chainId: number;
+  from: `0x${string}`;
+  to: `0x${string}`;
+  operationId: string;
+}) {
+  return quasar.pulsar.syncCreate(
+    {
+      adapter: OrbitAdapter.EVM,
+      tracker: TransactionTracker.Ethereum,
+      txKey: params.hash,
+      hash: params.hash,
+      chainId: params.chainId,
+      from: params.from,
+      to: params.to,
+      connectorType: 'evm:server',
+      type: 'WITHDRAWAL',
+      title: 'Withdrawal',
+      pending: true,
+      localTimestamp: Math.floor(Date.now() / 1000),
+      payload: { operationId: params.operationId },
+    },
+    'my-app',
+  );
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/server/syncServerPayout.ts"
+import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { OrbitAdapter, SOLANA_CHAIN_IDS } from '@tuwaio/sdk/orbit';
+
+const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL,
+});
+
+export async function syncServerPayout(params: {
+  signature: string;
+  from: string;
+  lastValidBlockHeight: number;
+  operationId: string;
+}) {
+  return quasar.pulsar.syncCreate(
+    {
+      adapter: OrbitAdapter.SOLANA,
+      tracker: TransactionTracker.Solana,
+      txKey: params.signature,
+      chainId: SOLANA_CHAIN_IDS.devnet,
+      from: params.from,
+      connectorType: 'solana:server',
+      type: 'WITHDRAWAL',
+      title: 'Withdrawal',
+      pending: true,
+      localTimestamp: Math.floor(Date.now() / 1000),
+      // Once the cluster passes this block height without seeing the signature, Quasar marks it Failed (expired).
+      lastValidBlockHeight: params.lastValidBlockHeight,
+      payload: { operationId: params.operationId },
+    },
+    'my-app',
+  );
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## 📚 Next Steps [#next-steps]
 
 - Receive a signed request on your backend when a transaction succeeds, fails or is replaced — also on `localhost`: [Webhooks](/quasar/webhooks).
 - Understand what the syncs cost and what happens when the quota is used up: [Quotas & Limits](/quasar/quotas-and-limits).

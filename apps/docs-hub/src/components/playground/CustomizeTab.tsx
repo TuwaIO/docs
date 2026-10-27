@@ -3,6 +3,7 @@
 import { cn } from '@tuwaio/nova-core/utils';
 import type { ReactNode } from 'react';
 
+import { useI18n } from '@/i18n';
 import {
   CONNECT_LABEL_MAX_LENGTH,
   DEFAULT_CUSTOMIZATION,
@@ -55,6 +56,7 @@ function Layer({ title, api, open, children }: { title: string; api: string; ope
 }
 
 function Toggles({ items }: { items: { flag: Flag; label: string; api: string }[] }) {
+  const { t } = useI18n();
   const { customization, changeCustomization } = usePlayground();
 
   return (
@@ -68,7 +70,9 @@ function Toggles({ items }: { items: { flag: Flag; label: string; api: string }[
             className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--tuwa-text-accent)]"
           />
           <span className="flex min-w-0 flex-col">
-            <span className="text-[var(--tuwa-text-primary)]">{label}</span>
+            <span className="text-[var(--tuwa-text-primary)]">
+              {t.playground.inspector.customize.flags[flag] ?? label}
+            </span>
             <code className="font-mono text-[11px] text-[var(--tuwa-text-tertiary)]">{api}</code>
           </span>
         </label>
@@ -82,26 +86,25 @@ function Toggles({ items }: { items: { flag: Flag; label: string; api: string }[
  * provider options. Changes apply to the stage at once; the Code tab shows them as files for an app.
  */
 export function CustomizeTab() {
+  const { t } = useI18n();
   const { settings, customization, changeCustomization, resetCustomization } = usePlayground();
   const customized = JSON.stringify(customization) !== JSON.stringify(DEFAULT_CUSTOMIZATION);
+  const cust = t.playground.inspector.customize;
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">
-        Nova UI Kit is customized in layers, from CSS variables to your own components. Each control names the prop it
-        sets; the Code tab has the files.
-      </p>
+      <p className="text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">{cust.intro}</p>
       {settings.ui === 'headless' && (
         <p className="rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-pending-bg)] px-3 py-2 text-xs text-[var(--tuwa-pending-text)]">
-          The headless stage uses the theme only. Switch the UI to Nova UI Kit to see the other layers.
+          {cust.headlessNotice}
         </p>
       )}
 
-      <Layer title="Theme" api="--tuwa-* variables" open>
+      <Layer title={cust.themeLayer} api="--tuwa-* variables" open>
         <ThemeEditor />
       </Layer>
 
-      <Layer title="Style" api="customization.classNames">
+      <Layer title={cust.styleLayer} api="customization.classNames">
         <div className="grid grid-cols-2 gap-2">
           {(Object.keys(STYLE_KITS) as StyleKit[]).map((kit) => (
             <button
@@ -117,19 +120,23 @@ export function CustomizeTab() {
                 kit === 'mono' && 'font-mono',
               )}
             >
-              <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{STYLE_KITS[kit].label}</span>
-              <span className="text-xs text-[var(--tuwa-text-secondary)]">{STYLE_KITS[kit].description}</span>
+              <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">
+                {cust.styleKits[kit]?.label ?? STYLE_KITS[kit].label}
+              </span>
+              <span className="text-xs text-[var(--tuwa-text-secondary)]">
+                {cust.styleKits[kit]?.description ?? STYLE_KITS[kit].description}
+              </span>
             </button>
           ))}
         </div>
       </Layer>
 
-      <Layer title="Components" api="customization.components">
+      <Layer title={cust.componentsLayer} api="customization.components">
         <Toggles items={COMPONENTS} />
       </Layer>
 
-      <Layer title="Texts" api="labels">
-        <Group label="Language" compact>
+      <Layer title={cust.textsLayer} api="labels">
+        <Group label={cust.languageLabel} compact>
           <Choice
             pressed={customization.language === 'en'}
             onClick={() => changeCustomization({ language: 'en' })}
@@ -154,7 +161,7 @@ export function CustomizeTab() {
         </Group>
         <label className="flex flex-col gap-1.5 text-xs text-[var(--tuwa-text-secondary)]">
           <span>
-            Connect button text <code className="font-mono text-[11px]">connectWallet</code>
+            {cust.connectTextLabel} <code className="font-mono text-[11px]">connectWallet</code>
           </span>
           <input
             type="text"
@@ -173,11 +180,11 @@ export function CustomizeTab() {
         </label>
       </Layer>
 
-      <Layer title="Behavior" api="provider props, handlers">
+      <Layer title={cust.behaviorLayer} api="provider props, handlers">
         <Toggles items={BEHAVIOR} />
         <label className="flex flex-col gap-1.5 text-xs text-[var(--tuwa-text-secondary)]">
           <span>
-            Toast position <code className="font-mono text-[11px]">position</code>
+            {cust.toastPositionLabel} <code className="font-mono text-[11px]">position</code>
           </span>
           <select
             value={customization.toastPosition}
@@ -202,7 +209,7 @@ export function CustomizeTab() {
           onClick={resetCustomization}
           className="self-start text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
         >
-          Reset to Nova as it ships
+          {cust.resetNova}
         </button>
       )}
     </div>

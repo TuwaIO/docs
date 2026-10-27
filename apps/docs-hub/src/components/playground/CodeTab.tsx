@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import playgroundSources from '@/generated/playground-sources.json';
+import { useI18n } from '@/i18n';
 import { generateStack, stackQuery } from '@/lib/configurator/generate';
 import { customizationFiles } from '@/lib/playground/customization';
 import { stackOptionsFor } from '@/lib/playground/settings';
@@ -26,6 +27,7 @@ const headingClass = 'text-[11px] font-bold uppercase tracking-widest text-[var(
  * simulated.
  */
 export function CodeTab() {
+  const { t } = useI18n();
   const { settings, theme, themeEdited, customization } = usePlayground();
   const [framework, setFramework] = useState<'next' | 'vite'>('next');
   const options = stackOptionsFor(settings, framework);
@@ -41,10 +43,9 @@ export function CodeTab() {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">
-        The stage runs these TUWA stores and Nova components with simulated adapters in place of{' '}
-        <code className="font-mono text-xs">satelliteEVMAdapter</code>,{' '}
-        <code className="font-mono text-xs">pulsarEvmAdapter</code> and their Solana versions. Here is the same stack
-        for your app, with real wallets.
+        {t.playground.inspector.code.introPart1} <code className="font-mono text-xs">satelliteEVMAdapter</code>
+        {t.playground.inspector.code.introPart2} <code className="font-mono text-xs">pulsarEvmAdapter</code>
+        {t.playground.inspector.code.introPart3}
       </p>
       <div className="flex flex-wrap gap-2">
         <Choice pressed={framework === 'next'} onClick={() => setFramework('next')} compact>
@@ -54,22 +55,25 @@ export function CodeTab() {
           Vite + React
         </Choice>
       </div>
-      <h4 className={headingClass}>Stack setup</h4>
+      <h4 className={headingClass}>{t.playground.inspector.code.stackSetup}</h4>
       <div className={frameClass}>
-        <FileTabs files={stack.files} label="Setup files" />
+        <FileTabs files={stack.files} label={t.playground.inspector.code.setupFilesAria} />
       </div>
-      <h4 className={headingClass}>{settings.ui === 'nova' ? 'Nova customization' : 'Theme'}</h4>
+      <h4 className={headingClass}>
+        {settings.ui === 'nova'
+          ? t.playground.inspector.code.novaCustomization
+          : t.playground.inspector.code.themeHeading}
+      </h4>
       <p className="-mt-2 text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
-        Import the theme after the Nova styles.{' '}
-        {settings.ui === 'nova' &&
-          'Pass the objects of customization.tsx to the Nova providers and components, as its first lines show.'}
+        {t.playground.inspector.code.importThemeNote}{' '}
+        {settings.ui === 'nova' && t.playground.inspector.code.passObjectsNote}
       </p>
       <div className={frameClass}>
-        <FileTabs files={customizationSetup} label="Customization files" />
+        <FileTabs files={customizationSetup} label={t.playground.inspector.code.customizationFilesAria} />
       </div>
       <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
         <Link href={`/configurator?${stackQuery(options)}`} className="text-[var(--tuwa-text-accent)] hover:underline">
-          Open in the Stack Configurator →
+          {t.playground.inspector.code.openInConfigurator}
         </Link>
         <a
           href={STACKBLITZ_URL}
@@ -77,7 +81,7 @@ export function CodeTab() {
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-[var(--tuwa-text-accent)] hover:underline"
         >
-          Open the Vite template in StackBlitz
+          {t.playground.inspector.code.openInStackblitz}
           <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
         </a>
       </div>

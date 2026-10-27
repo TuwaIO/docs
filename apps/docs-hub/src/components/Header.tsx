@@ -1,6 +1,6 @@
 'use client';
 
-import { ThemeSwitcher } from '@tuwaio/docs-ui';
+import { LocaleSwitcher, ThemeSwitcher } from '@tuwaio/docs-ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -8,28 +8,30 @@ import { setMenu } from 'nextra-theme-docs';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-// The same sections as the navbar of the Nextra pages (`src/content/_meta.tsx`)
-const navLinks = [
-  { href: '/guides', label: 'Guides' },
-  { href: '/quasar', label: 'Quasar' },
-  { href: '/comparisons', label: 'Comparisons' },
-  { href: '/configurator', label: 'Configurator' },
-  { href: '/playground', label: 'Playground' },
-];
+import { type Locale, useI18n } from '@/i18n';
 
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);
 
 /**
- * Glassmorphic fixed header with logo slot, links and theme toggle. Below `md` the links and the toggle move to a
- * menu that slides in from the right, as on tuwa.io; it closes on a link click, the backdrop, Escape or a wider window,
- * and locks the page scroll while open.
+ * Glassmorphic fixed header with logo slot, links, locale switcher and theme toggle. Below `md` the links and the
+ * controls move to a menu that slides in from the right, as on tuwa.io; it closes on a link click, the backdrop, Escape
+ * or a wider window, and locks the page scroll while open.
  * @param props.logo - Server-rendered logo element passed from layout.
  */
 export function Header({ logo }: { logo: ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme();
+  const { locale, setLocale, t } = useI18n();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const navLinks = [
+    { href: '/guides', label: t.nav.guides },
+    { href: '/quasar', label: t.nav.quasar },
+    { href: '/comparisons', label: t.nav.comparisons },
+    { href: '/configurator', label: t.nav.configurator },
+    { href: '/playground', label: t.nav.playground },
+  ];
 
   useEffect(() => {
     // eslint-disable-next-line
@@ -79,7 +81,14 @@ export function Header({ logo }: { logo: ReactNode }) {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
-            {mounted && <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} />}
+            <LocaleSwitcher
+              locale={locale}
+              onSelect={(code) => setLocale(code as Locale)}
+              ariaLabel={t.nav.selectLanguage}
+            />
+            {mounted && (
+              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
+            )}
           </div>
 
           {/* Mobile menu button: two bars that turn into a cross */}
@@ -90,7 +99,7 @@ export function Header({ logo }: { logo: ReactNode }) {
             aria-controls="mobile-menu"
             aria-expanded={isMenuOpen}
           >
-            <span className="sr-only">{isMenuOpen ? 'Close menu' : 'Open menu'}</span>
+            <span className="sr-only">{isMenuOpen ? t.nav.closeMenu : t.nav.openMenu}</span>
             <span className="absolute top-1/2 left-1/2 flex w-6 -translate-x-1/2 -translate-y-1/2 flex-col items-center">
               <span
                 aria-hidden="true"
@@ -122,7 +131,7 @@ export function Header({ logo }: { logo: ReactNode }) {
             type="button"
             onClick={closeMenu}
             className="p-2 rounded-[var(--tuwa-rounded-corners)] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:bg-[var(--tuwa-bg-secondary)] transition-colors cursor-pointer"
-            aria-label="Close menu"
+            aria-label={t.nav.closeMenu}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -131,7 +140,7 @@ export function Header({ logo }: { logo: ReactNode }) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-6">
-          <nav aria-label="Mobile navigation" className="space-y-2">
+          <nav aria-label={t.nav.mobileNavAria} className="space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -146,8 +155,18 @@ export function Header({ logo }: { logo: ReactNode }) {
           </nav>
 
           <div className="mt-4 border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
-            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">Theme</span>
-            {mounted && <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} />}
+            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.theme}</span>
+            {mounted && (
+              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
+            )}
+          </div>
+          <div className="border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
+            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.language}</span>
+            <LocaleSwitcher
+              locale={locale}
+              onSelect={(code) => setLocale(code as Locale)}
+              ariaLabel={t.nav.selectLanguage}
+            />
           </div>
         </div>
       </div>

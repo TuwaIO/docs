@@ -255,3 +255,47 @@ export async function loadPolicy(
     languages: languages.length > 0 ? languages : ['en'],
   };
 }
+
+const MONTH_MAP: Record<string, number> = {
+  january: 0,
+  february: 1,
+  march: 2,
+  april: 3,
+  may: 4,
+  june: 5,
+  july: 6,
+  august: 7,
+  september: 8,
+  october: 9,
+  november: 10,
+  december: 11,
+};
+
+/**
+ * Formats a policy date string (e.g. `'October 14, 2026'`) according to the active locale or policy language.
+ *
+ * @param dateStr - The date string from the policy document.
+ * @param locale - The target locale (`'uk'`, `'zh-CN'`, `'en'`, or BCP 47 tag).
+ * @returns The formatted date, or the original string if parsing fails.
+ */
+export function formatPolicyDate(dateStr: string, locale?: string): string {
+  let parsed: Date | undefined;
+  const match = dateStr.trim().match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/);
+  if (match) {
+    const monthIndex = MONTH_MAP[match[1].toLowerCase()];
+    if (monthIndex !== undefined) {
+      parsed = new Date(Date.UTC(Number(match[3]), monthIndex, Number(match[2])));
+    }
+  }
+  if (!parsed || Number.isNaN(parsed.getTime())) {
+    parsed = new Date(dateStr.includes('UTC') ? dateStr : `${dateStr} UTC`);
+  }
+  if (Number.isNaN(parsed.getTime())) return dateStr;
+  const bcp47 = locale === 'uk' ? 'uk-UA' : locale === 'zh-CN' ? 'zh-CN' : 'en-US';
+  return parsed.toLocaleDateString(bcp47, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+}

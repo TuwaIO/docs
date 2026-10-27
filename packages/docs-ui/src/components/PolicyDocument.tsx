@@ -3,6 +3,7 @@ import { cn } from '@tuwaio/nova-core/utils';
 import parse, { type DOMNode, Element } from 'html-react-parser';
 
 import {
+  formatPolicyDate,
   getPolicyFileUrl,
   POLICY_DOCUMENT_LABELS,
   POLICY_LANGUAGE_NAMES,
@@ -145,7 +146,7 @@ export function PolicyDocument({
           </h1>
           <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-3">
             <p className={cn('tuwadocs:text-sm tuwadocs:text-[var(--tuwa-text-secondary)]', classNames?.updated)}>
-              {texts.updated} {content.updated}
+              {texts.updated} {formatPolicyDate(content.updated, language)}
             </p>
             <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:gap-2">
               {languages.length > 1 && (

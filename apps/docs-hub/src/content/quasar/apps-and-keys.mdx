@@ -9,7 +9,7 @@ Every integration with Quasar starts with an **app**: it owns the synced transac
 
 ---
 
-## 🛠️ Create an App
+## 🛠️ Create an App [#create-an-app]
 
 In the [Quasar dashboard](https://quasar.tuwa.io/) (or the `/admin` panel of your node), open **Apps** and create one. Choose its **environment**:
 
@@ -20,7 +20,7 @@ Both environments track transactions the same way.
 
 ---
 
-## 🔑 Secret Key and Public Key
+## 🔑 Secret Key and Public Key [#secret-key-and-public-key]
 
 | Key        | Prefix                 | Sent in             | Allows                                                                          |
 | ---------- | ---------------------- | ------------------- | ------------------------------------------------------------------------------- |
@@ -41,7 +41,7 @@ Both environments track transactions the same way.
 
 ---
 
-## 🛡️ App Settings That Restrict Requests
+## 🛡️ App Settings That Restrict Requests [#app-settings-that-restrict-requests]
 
 | Setting              | Effect                                                                                                                                                                                                                                                       |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -55,6 +55,6 @@ The app settings also hold your own RPC endpoints and provider keys (Alchemy, Qu
 
 ---
 
-## 🏢 Isolation Between Apps
+## 🏢 Isolation Between Apps [#isolation-between-apps]
 
 Quasar resolves the app from the key of every request, and reads and writes only the transactions of that app: the history of one app never contains transactions of another, even in the same organization. Webhook deliveries are checked against the organization and app of the endpoint before they are sent.

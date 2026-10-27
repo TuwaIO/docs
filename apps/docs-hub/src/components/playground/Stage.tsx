@@ -3,6 +3,7 @@
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 import type { CSSProperties } from 'react';
 
+import { useI18n } from '@/i18n';
 import { THEME_VARIABLES, themeCss } from '@/lib/playground/themes';
 
 import { HeadlessStage } from './HeadlessStage';
@@ -25,11 +26,12 @@ const TOP_TOASTS = `body:has(.tuwa-playground-stage) :is(.Toastify__toast-contai
  * the fixed Nova toasts stay fixed to the viewport.
  */
 export function Stage() {
+  const { t } = useI18n();
   const { settings, theme } = usePlayground();
   const style = Object.fromEntries(THEME_VARIABLES.map((variable) => [variable, theme[variable]])) as CSSProperties;
 
   return (
-    <section aria-label="Simulated dApp" className="min-w-0">
+    <section aria-label={t.playground.stage.stageBadge} className="min-w-0">
       <style>{`${themeCss(theme, 'Playground stage', PORTALS)}\n${TOP_TOASTS}`}</style>
       <div className="overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.08] shadow-xl shadow-black/10 [--playground-frame-radius:var(--tuwa-rounded-corners)]">
         <div className="tuwa-playground-stage" style={style}>
@@ -44,7 +46,7 @@ export function Stage() {
               <span className="truncate">your-dapp.app</span>
             </div>
             <span className="shrink-0 rounded-[var(--playground-frame-radius)] border border-[var(--tuwa-pending-icon)]/40 bg-[var(--tuwa-pending-bg)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[var(--tuwa-pending-text)]">
-              Simulated
+              {t.playground.stage.simulatedLabel}
             </span>
           </div>
           <div className="min-h-[560px] bg-[var(--tuwa-bg-primary)] p-4 text-[var(--tuwa-text-primary)] sm:p-6">

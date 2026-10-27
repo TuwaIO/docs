@@ -23,7 +23,7 @@ The guide installs the Pulsar packages one by one. The **`nextjs-tuwa-not-sdk`**
 
 ---
 
-## Before You Start
+## Before You Start [#before-you-start]
 
 - **React 19.2 or newer.** The examples use the Next.js App Router: `'use client'` modules and the `@/` import alias for `src/`.
 - **A wallet connection.** This guide uses [Nova Connect](https://stories.tuwa.io/?path=/docs/packages-nova-connect-overview--docs) on Satellite Connect: follow its README to render `SatelliteConnectProvider`, the watcher of your network and `NovaConnectProvider`. Pulsar does not require Nova: the EVM adapter works with any `@wagmi/core` config, and the Solana adapter reads the connection that Satellite Connect saves.
@@ -42,7 +42,7 @@ Pulsar validates the metadata of every transaction before anything else runs: ea
 
 ---
 
-## Step 1: Install the Packages
+## Step 1: Install the Packages [#step-1-install-the-packages]
 
 Install the Pulsar packages of your network and their peer dependencies:
 
@@ -68,7 +68,7 @@ pnpm add @tuwaio/pulsar-core @tuwaio/pulsar-solana @tuwaio/pulsar-react \
 
 ---
 
-## Step 2: Describe the Contract or Program
+## Step 2: Describe the Contract or Program [#step-2-describe-the-contract-or-program]
 
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
@@ -173,7 +173,7 @@ The command writes the builders to `src/programs/solanatest/generated`. Re-expor
 
 ---
 
-## Step 3: Create an Action
+## Step 3: Create an Action [#step-3-create-an-action]
 
 An action is a function that asks the wallet to sign and submit the transaction and returns its key. Pulsar calls it inside `executeTxAction` and tracks the transaction under the returned key. Keep actions in their own files to reuse them from several components.
 
@@ -265,7 +265,7 @@ export function increment({ client, signer }: { client: SolanaClient; signer: Tr
 
 ---
 
-## Step 4: Create the Transaction Store
+## Step 4: Create the Transaction Store [#step-4-create-the-transaction-store]
 
 Create the store once, in a client module. `createPulsarStore` connects Pulsar to your network through its adapter and saves the transactions to `localStorage` under `name`. `createBoundedUseStore` turns the vanilla store into a React hook. `beforeTxProcess` is an optional check that runs before the wallet is asked to sign: throw to block the transaction.
 
@@ -340,7 +340,7 @@ An app with EVM and Solana wallets passes both adapters in an array: `adapter: [
 
 ---
 
-## Step 5: Resume Tracking After a Reload
+## Step 5: Resume Tracking After a Reload [#step-5-resume-tracking-after-a-reload]
 
 The store restores its transactions from `localStorage`, but their trackers are not running after a reload. `useInitializeTransactionsPool` from `@tuwaio/pulsar-react` starts them again for every pending transaction. Each call starts new trackers, so render this component only once, in a component that stays mounted (for example next to your providers in the root layout):
 
@@ -363,7 +363,7 @@ export function PulsarInitializer() {
 
 ---
 
-## Step 6: Send and Track the Transaction
+## Step 6: Send and Track the Transaction [#step-6-send-and-track-the-transaction]
 
 Call `executeTxAction` with the action and the metadata of the transaction. Pulsar validates the title, description and payload, checks the network of the wallet, runs `beforeTxProcess`, calls the action, adds the transaction to the pool and starts its tracker. From then on the store updates the status on its own: components read it with selectors, so it stays correct after navigation or a reload. A `beforeTxProcess` passed to `executeTxAction` replaces the one of the store for that transaction. The `onSuccess`, `onError` and `onReplaced` callbacks of the call run only in the page session that sent it; refresh your data in the event of [Step 7](#step-7-react-to-finished-transactions).
 
@@ -519,7 +519,7 @@ export const Increment = () => {
 
 ---
 
-## Step 7: React to Finished Transactions
+## Step 7: React to Finished Transactions [#step-7-react-to-finished-transactions]
 
 Functions cannot be saved to `localStorage`, so a transaction still pending at a reload finishes without the callbacks of its `executeTxAction`. Refresh the data a transaction changes (a balance, a list, the counter) in the "transaction finished" event of the store instead. It fires once for every transaction that reaches `Success`, `Failed` or `Replaced`, whatever finished it: the tracker started by `executeTxAction`, one restarted by `useInitializeTransactionsPool` after a reload, or the history of [Quasar](/guides/quasar-transaction-sync).
 
@@ -551,7 +551,7 @@ Reactions that need no component, such as analytics or a cache that lives outsid
 
 ---
 
-## Next Steps
+## Next Steps [#next-steps]
 
 - **Show the transactions.** `withTrackedModal: true` only has an effect with [Nova Transactions](https://stories.tuwa.io/?path=/docs/packages-nova-transactions-overview--docs): render `NovaTransactionsProvider` with the state of your Pulsar store to get the tracking modal, toasts and the transaction history.
 - **Track Safe multisig transactions** with the Safe tracker of `@tuwaio/pulsar-evm`: Nova shows the owner confirmations as `x / y`, and the `@tuwaio/pulsar-evm/safe` entry has the tracker without wagmi. See [`pulsar-evm`](https://pulsar.docs.tuwa.io/packages/pulsar-evm).

@@ -1,21 +1,16 @@
-import { Footer, Navbar, RemoteLogo } from '@tuwaio/docs-ui';
+import { SiteLogo } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import NextTopLoader from 'nextjs-toploader';
 import { getPageMap } from 'nextra/page-map';
 import { generateStaticParamsFor, importPage } from 'nextra/pages';
-import { Layout } from 'nextra-theme-docs';
 import type { ReactNode } from 'react';
 
 import { JsonLd } from '../components/JsonLd';
-import { useMDXComponents as getMDXComponents } from '../mdx-components';
+import { NextraLocalizedShell, NextraPageWrapper } from '../components/NextraLocalizedShell';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
-const LOGO_URL = 'https://tuwa.io/brand/logo_v2.svg';
-
-const logo = (
-  <RemoteLogo url={LOGO_URL} width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
-);
+const logo = <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
 
 /** Route params of the `[[...mdxPath]]` page of a section. */
 export type SectionPageProps = {
@@ -48,7 +43,6 @@ function isAssetOrInternal(mdxPath?: string[]): boolean {
  * @returns `generateStaticParams`, `generateMetadata` and `Page`.
  */
 export function createSectionPage(section: string, sectionTitle: string) {
-  const Wrapper = getMDXComponents().wrapper;
   const routeOf = (mdxPath?: string[]) => `/${[section, ...(mdxPath ?? [])].join('/')}`;
 
   async function generateStaticParams() {
@@ -117,9 +111,14 @@ export function createSectionPage(section: string, sectionTitle: string) {
             ],
           }}
         />
-        <Wrapper toc={toc} metadata={metadata} sourceCode={sourceCode}>
+        <NextraPageWrapper
+          toc={toc}
+          metadata={metadata}
+          sourceCode={sourceCode}
+          routeKey={`${section}/${params.mdxPath?.join('/') || 'index'}`}
+        >
           <MDXContent {...props} params={params} />
-        </Wrapper>
+        </NextraPageWrapper>
       </>
     );
   }
@@ -141,17 +140,10 @@ export async function SectionLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <Layout
-        navbar={<Navbar logo={logo} />}
-        footer={<Footer logo={logo} />}
-        pageMap={pageMap}
-        docsRepositoryBase="https://github.com/TuwaIO/docs/tree/main/apps/docs-hub"
-        navigation={{ prev: true, next: true }}
-        sidebar={{ defaultMenuCollapseLevel: 1 }}
-      >
-        <NextTopLoader color="#6366f1" showSpinner={false} />
+      <NextraLocalizedShell logo={logo} pageMap={pageMap}>
+        <NextTopLoader color="#0052ff" shadow="0 0 10px #0052ff,0 0 5px #0052ff" showSpinner={false} />
         {children}
-      </Layout>
+      </NextraLocalizedShell>
     </div>
   );
 }

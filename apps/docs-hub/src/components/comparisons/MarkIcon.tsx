@@ -1,6 +1,7 @@
-import type { Mark } from '@/lib/comparisons';
+'use client';
 
-const LABELS: Record<Mark, string> = { yes: 'Yes', partial: 'Partial', no: 'No' };
+import { useI18n } from '@/i18n';
+import type { Mark } from '@/lib/comparisons';
 
 /**
  * A comparison mark: a check for `yes`, a half-filled circle for `partial`, a dash for `no`, with the mark as text for
@@ -9,6 +10,12 @@ const LABELS: Record<Mark, string> = { yes: 'Yes', partial: 'Partial', no: 'No' 
  * @param props.className - Size classes.
  */
 export function MarkIcon({ mark, className = 'w-4 h-4' }: { mark: Mark; className?: string }) {
+  const { t } = useI18n();
+  const labels: Record<Mark, string> = {
+    yes: t.common.yes,
+    partial: t.common.partial,
+    no: t.common.no,
+  };
   return (
     <span className="inline-flex shrink-0 align-middle">
       <svg viewBox="0 0 20 20" className={className} aria-hidden="true">
@@ -44,7 +51,7 @@ export function MarkIcon({ mark, className = 'w-4 h-4' }: { mark: Mark; classNam
           </>
         )}
       </svg>
-      <span className="sr-only">{LABELS[mark]}</span>
+      <span className="sr-only">{labels[mark]}</span>
     </span>
   );
 }

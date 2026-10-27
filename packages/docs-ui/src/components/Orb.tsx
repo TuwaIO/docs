@@ -24,22 +24,22 @@ export interface OrbProps extends React.HTMLAttributes<HTMLDivElement> {
 const packageColors: Record<PackageType, string> = {
   siwx: '#10b981',
   orbit: '#0d9488',
-  satellite: '#6366f1',
+  satellite: '#0052ff',
   pulsar: '#f59e0b',
-  quasar: '#06b6d4',
-  nova: '#8b5cf6',
-  sdk: '#3b82f6',
+  quasar: '#2563eb',
+  nova: '#0284c7',
+  sdk: '#1d4ed8',
 };
 
 /** Lighter tint for the sphere base background */
 const packageTints: Record<PackageType, string> = {
   siwx: 'rgba(16,185,129,0.12)',
   orbit: 'rgba(13,148,136,0.12)',
-  satellite: 'rgba(99,102,241,0.12)',
+  satellite: 'rgba(0,82,255,0.12)',
   pulsar: 'rgba(245,158,11,0.12)',
-  quasar: 'rgba(6,182,212,0.12)',
-  nova: 'rgba(139,92,246,0.12)',
-  sdk: 'rgba(59,130,246,0.12)',
+  quasar: 'rgba(37,99,235,0.12)',
+  nova: 'rgba(2,132,199,0.12)',
+  sdk: 'rgba(29,78,216,0.12)',
 };
 
 const getCosmicFilter = (type: PackageType, id: string) => {

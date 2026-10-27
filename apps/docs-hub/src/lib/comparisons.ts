@@ -804,9 +804,10 @@ export function sourceIndex(): Map<string, number> {
   return index;
 }
 
-/** Formats an ISO date as `October 1, 2026` */
-export function formatCheckDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', {
+/** Formats an ISO date according to the active locale (default: `en-US`) */
+export function formatCheckDate(iso: string, locale?: string): string {
+  const bcp47 = locale === 'uk' ? 'uk-UA' : locale === 'zh-CN' ? 'zh-CN' : 'en-US';
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString(bcp47, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

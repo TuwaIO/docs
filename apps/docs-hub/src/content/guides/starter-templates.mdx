@@ -9,7 +9,7 @@ The fastest way to try TUWA is a template from [Cosmos Playground](https://githu
 
 ---
 
-## 🚀 Templates
+## 🚀 Templates [#templates]
 
 | Template              | What it shows                                                                                                                                                      | Stack                                                   | Level        |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- | ------------ |
@@ -27,9 +27,9 @@ No template renders `WagmiProvider` or uses React Query: Satellite Connect and P
 
 ---
 
-## 🛠️ Create a Project
+## 🛠️ Create a Project [#create-a-project]
 
-### 1. Run the CLI
+### 1. Run the CLI [#1-run-the-cli]
 
 ```bash
 npx @tuwaio/create-cosmos-playground
@@ -37,7 +37,7 @@ npx @tuwaio/create-cosmos-playground
 
 The CLI asks for a template and a project name, downloads the template from GitHub, and installs its dependencies with pnpm (or bun, yarn or npm when pnpm is not installed).
 
-### 2. Configure and Start
+### 2. Configure and Start [#2-configure-and-start]
 
 Every template has a `.env.example` file. The variables a template needs are empty there: the Quasar keys of `nextjs-tuwa-quasar`, and the SIWX signing secret that `pnpm build` of the SIWX templates requires. The optional ones, such as your WalletConnect project ID or Alchemy and Pimlico keys, are commented out and have working defaults for development. Copy it to `.env`, fill in what you need, and start the dev server from the project folder (Node.js 20.19+, 22.13+ or 24+, the `engines` range of every template):
 
@@ -48,13 +48,13 @@ pnpm dev
 
 To receive Quasar webhooks on `localhost` in `nextjs-tuwa-quasar`, run `pnpm webhooks` next to `pnpm dev`: the Quasar SDK CLI relays the deliveries to your local endpoint.
 
-### 3. Build with an AI Agent
+### 3. Build with an AI Agent [#3-build-with-an-ai-agent]
 
 Each template has an `AGENTS.md` with the rules of the template for AI coding agents. It points to [`TUWA_AGENTS.md`](https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md): the packages, the wiring of the providers and the security rules of TUWA in one file, with code that compiles against the current packages.
 
 ---
 
-## 📚 Next Steps
+## 📚 Next Steps [#next-steps]
 
 - Follow the [React transaction tracking guide](/guides/react-transaction-tracking) to add Pulsar to an existing app.
 - Browse the components and their customization options in the [Nova UI Kit Storybook](https://stories.tuwa.io/).

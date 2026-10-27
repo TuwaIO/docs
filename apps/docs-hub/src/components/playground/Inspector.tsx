@@ -5,6 +5,7 @@ import { cn } from '@tuwaio/nova-core/utils';
 import { useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
+import { useI18n } from '@/i18n';
 import { eventLog } from '@/lib/playground/eventLog';
 
 import { CodeTab } from './CodeTab';
@@ -20,18 +21,26 @@ type Tab = (typeof TABS)[number];
  * grows with its content; "Scroll" keeps it at a fixed height with a scroll bar, and its corner then resizes it.
  */
 export function Inspector() {
+  const { t } = useI18n();
   const [tab, setTab] = useState<Tab>('Events');
   const [scroll, setScroll] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const eventCount = useStore(eventLog, (state) => state.events.length);
 
+  const tabLabel = (name: Tab) => {
+    if (name === 'Events') return t.playground.inspector.tabs.events;
+    if (name === 'State') return t.playground.inspector.tabs.state;
+    if (name === 'Code') return t.playground.inspector.tabs.code;
+    return t.playground.inspector.tabs.customize;
+  };
+
   return (
     <section
-      aria-label="Inspector"
+      aria-label={t.playground.inspector.tabsAria}
       className="flex min-w-0 flex-col rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm"
     >
       <div className="flex items-center gap-1 border-b border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06] p-2">
-        <div role="tablist" aria-label="Inspector tabs" className="flex flex-1 gap-1">
+        <div role="tablist" aria-label={t.playground.inspector.tabsAria} className="flex flex-1 gap-1">
           {TABS.map((name) => (
             <button
               key={name}
@@ -48,7 +57,7 @@ export function Inspector() {
                   : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]',
               )}
             >
-              {name}
+              {tabLabel(name)}
               {name === 'Events' && eventCount > 0 && (
                 <span className="ml-1 font-mono text-[10px] text-[var(--tuwa-text-tertiary)]">{eventCount}</span>
               )}
@@ -63,7 +72,7 @@ export function Inspector() {
             if (scroll) panel.current?.style.removeProperty('height');
             setScroll(!scroll);
           }}
-          title="A fixed height with a scroll bar; drag the bottom corner to resize"
+          title={t.ui.playgroundExtra.scrollTitle}
           className={cn(
             'inline-flex shrink-0 items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer',
             scroll
@@ -72,7 +81,7 @@ export function Inspector() {
           )}
         >
           <ArrowsUpDownIcon className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="sr-only sm:not-sr-only">Scroll</span>
+          <span className="sr-only sm:not-sr-only">{t.ui.playgroundExtra.scrollButton}</span>
         </button>
       </div>
       <div

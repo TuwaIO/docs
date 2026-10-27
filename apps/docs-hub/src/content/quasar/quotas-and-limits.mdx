@@ -9,7 +9,7 @@ Quasar Cloud meters usage per organization in **quota units**. The Community Edi
 
 ---
 
-## 🧪 Public Beta
+## 🧪 Public Beta [#public-beta]
 
 Quasar Cloud is in public beta and free of charge:
 
@@ -19,7 +19,7 @@ Quasar Cloud is in public beta and free of charge:
 
 ---
 
-## 🧮 What Costs Quota
+## 🧮 What Costs Quota [#what-costs-quota]
 
 | Operation                                                    | Units                         |
 | ------------------------------------------------------------ | ----------------------------- |
@@ -33,7 +33,7 @@ Every sync request is counted, also one that Quasar answers with `duplicate: tru
 
 ---
 
-## 📉 When the Quota Is Used Up
+## 📉 When the Quota Is Used Up [#when-the-quota-is-used-up]
 
 - **Syncs are still accepted** so that no transaction of your users is lost: the response has `mode: "lazy"` (HTTP `202` instead of `200`), and the transaction waits in a queue instead of being tracked right away.
 - **Other requests with a key**, including the history, are rejected with `402 Payment Required` until the organization has quota again.
@@ -42,15 +42,16 @@ Watch the usage of your organization in the dashboard; Quasar Cloud emails the o
 
 ---
 
-## 🚦 Other Limits
+## 🚦 Other Limits [#other-limits]
 
-| Limit                         | Value                                                                       |
-| ----------------------------- | --------------------------------------------------------------------------- |
-| Requests per second           | Per organization (5 in Quasar Cloud); more requests are rejected with `429` |
-| Transactions per history page | `limit` up to 100 (default 10)                                              |
-| Apps per organization         | 30                                                                          |
-| Webhook endpoints per app     | 500                                                                         |
-| `localhost` webhook endpoints | 1 per organization (see [Webhooks](/quasar/webhooks#-local-development))    |
-| Webhook response time         | 10 seconds per delivery attempt                                             |
+| Limit                         | Value                                                                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Requests per second           | Per organization (5 in Quasar Cloud); more requests are rejected with `429`                                                        |
+| Transactions per history page | `limit` up to 100 (default 10)                                                                                                     |
+| History depth                 | Pages reach 10,000 transactions back; deeper pages answer `400 page_too_deep` (filter by status, chain, wallet or `txKey` instead) |
+| Apps per organization         | 30                                                                                                                                 |
+| Webhook endpoints per app     | 20                                                                                                                                 |
+| `localhost` webhook endpoints | 1 per organization (see [Webhooks](/quasar/webhooks#-local-development))                                                           |
+| Webhook response time         | 10 seconds per delivery attempt                                                                                                    |
 
 A synced transaction must also pass the safety limits of Pulsar (sizes of the text fields and of `payload`); a transaction that does not is rejected with `400`.
