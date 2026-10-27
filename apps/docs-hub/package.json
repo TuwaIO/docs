@@ -19,7 +19,7 @@
     "@solana/kit": "^8.5.0",
     "@tuwaio/docs-ui": "workspace:*",
     "@tuwaio/evm-sdk": "^0.6.2",
-    "@tuwaio/nova-core": "^0.10.3",
+    "@tuwaio/nova-core": "^0.10.5",
     "@tuwaio/orbit-core": "^0.6.0",
     "@tuwaio/satellite-core": "^0.11.0",
     "@tuwaio/satellite-react": "^0.10.0",
