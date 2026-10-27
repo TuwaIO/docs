@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.6](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.5...docs-ui-v0.5.6) (2026-10-27)
+
+
+### Bug Fixes
+
+* colors in docs-ui ([83ecca0](https://github.com/TuwaIO/docs/commit/83ecca0aa2bef59181ff95a406ef7ce8b45385b7))
+* updated nova core ([845369b](https://github.com/TuwaIO/docs/commit/845369bd9c0f13526f3304a4d7fc21b3d8b86a92))
+
 ## [0.5.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.4...docs-ui-v0.5.5) (2026-10-27)
 
 
