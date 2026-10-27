@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.4...docs-ui-v0.5.5) (2026-10-27)
+
+
+### Bug Fixes
+
+* updated colors ([651998b](https://github.com/TuwaIO/docs/commit/651998becaa4f7bac2f818c0f048d692979905b1))
+
 ## [0.5.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.3...docs-ui-v0.5.4) (2026-10-27)
 
 
