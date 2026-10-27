@@ -439,6 +439,94 @@ Send a transaction, open the app in another browser with the same wallet, and si
 
 ---
 
+## Server-Signed Transactions (Withdrawals & Payouts)
+
+When your server signs and broadcasts a transaction itself — such as a withdrawal from a server wallet, an automated payout or a backend relayer — no browser Pulsar store or `localStorage` is involved. Call `quasar.pulsar.syncCreate` directly from the backend after broadcasting: syncing is idempotent by `txKey` (retrying or rebroadcasting the same signed transaction returns `duplicate: true`), and Quasar delivers a signed [webhook](/quasar/webhooks) once the transaction reaches its terminal state ([Finality, Expiry and Reconciliation](/quasar#finality-expiry-and-reconciliation)).
+
+<Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
+  <Tabs.Tab>
+
+```ts filename="src/server/syncServerPayout.ts"
+import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { OrbitAdapter } from '@tuwaio/sdk/orbit';
+
+const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL,
+});
+
+export async function syncServerPayout(params: {
+  hash: `0x${string}`;
+  chainId: number;
+  from: `0x${string}`;
+  to: `0x${string}`;
+  operationId: string;
+}) {
+  return quasar.pulsar.syncCreate(
+    {
+      adapter: OrbitAdapter.EVM,
+      tracker: TransactionTracker.Ethereum,
+      txKey: params.hash,
+      hash: params.hash,
+      chainId: params.chainId,
+      from: params.from,
+      to: params.to,
+      connectorType: 'evm:server',
+      type: 'WITHDRAWAL',
+      title: 'Withdrawal',
+      pending: true,
+      localTimestamp: Math.floor(Date.now() / 1000),
+      payload: { operationId: params.operationId },
+    },
+    'my-app',
+  );
+}
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```ts filename="src/server/syncServerPayout.ts"
+import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { OrbitAdapter, SOLANA_CHAIN_IDS } from '@tuwaio/sdk/orbit';
+
+const quasar = new Quasar({
+  secretKey: process.env.QUASAR_SECRET_KEY ?? '',
+  baseUrl: process.env.NEXT_PUBLIC_QUASAR_BASE_URL,
+});
+
+export async function syncServerPayout(params: {
+  signature: string;
+  from: string;
+  lastValidBlockHeight: number;
+  operationId: string;
+}) {
+  return quasar.pulsar.syncCreate(
+    {
+      adapter: OrbitAdapter.SOLANA,
+      tracker: TransactionTracker.Solana,
+      txKey: params.signature,
+      chainId: SOLANA_CHAIN_IDS.devnet,
+      from: params.from,
+      connectorType: 'solana:server',
+      type: 'WITHDRAWAL',
+      title: 'Withdrawal',
+      pending: true,
+      localTimestamp: Math.floor(Date.now() / 1000),
+      // Once the cluster passes this block height without seeing the signature, Quasar marks it Failed (expired).
+      lastValidBlockHeight: params.lastValidBlockHeight,
+      payload: { operationId: params.operationId },
+    },
+    'my-app',
+  );
+}
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+---
+
 ## 📚 Next Steps
 
 - Receive a signed request on your backend when a transaction succeeds, fails or is replaced — also on `localhost`: [Webhooks](/quasar/webhooks).

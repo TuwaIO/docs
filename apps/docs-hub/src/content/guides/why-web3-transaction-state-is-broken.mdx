@@ -145,7 +145,7 @@ Transactions take anywhere from 12 seconds (Ethereum) to several minutes under n
 
 Component state lives exclusively in ephemeral RAM. A single refresh obliterates all in-flight tracking state. The transaction is still active in the mempool, but your frontend has forgotten it entirely, and any code chained to its promise, such as refetching balances, never runs.
 
-### Failure Mode 4: Soft Confirmations vs. Finality
+### Failure Mode 4: Soft Confirmations, Finality & Blockhash Expiry
 
 On high-throughput chains like Solana or optimistic rollups (Arbitrum, Base), a transaction passes through distinct consensus stages:
 
@@ -156,6 +156,12 @@ On high-throughput chains like Solana or optimistic rollups (Arbitrum, Base), a 
 | **Immutable**      | `finalized`   | L1 Finalized State   | 🔒 Mathematically irreversible |
 
 A boolean `isLoading` cannot represent these transitions, resulting in premature cache invalidation and race conditions where frontend queries fetch stale blockchain state.
+
+On Solana, naive polling also mishandles **dropped transactions**:
+
+- **Commitment separation (`confirmed` vs. `finalized`):** `@tuwaio/pulsar-solana` and [Quasar](/quasar#finality-expiry-and-reconciliation) update `confirmationStatus` as the signature advances (`processed` → `confirmed`, once a supermajority has voted on the block, so the UI can show optimistic progress; if an on-chain execution error `err` is present at `confirmed`, the tracker fails immediately). **Terminal `TransactionStatus.Success` (`confirmations: 'MAX'`) and Quasar webhooks only fire on `finalized`.**
+- **Deterministic blockhash expiry (`lastValidBlockHeight`):** Every Solana transaction carries a recent blockhash valid up to `lastValidBlockHeight` (`signAndSendSolanaTx` records it automatically). Instead of spinning on an arbitrary timer when a signature never lands, `solanaFetcher` compares the cluster's current block height (`getBlockHeight`) against `lastValidBlockHeight` and marks an unknown signature past that height as `Failed` (expired) immediately.
+- **Standalone & server-side reconciliation:** When your database — not the browser — is the source of truth (such as server-signed withdrawals or payouts), use the headless [`solanaFetcher`](https://pulsar.docs.tuwa.io/solanaStandalone) / [`evmFetcher`](https://pulsar.docs.tuwa.io/evmStandalone) directly in a worker, or sync the transaction from your backend to [Quasar](/guides/quasar-transaction-sync#server-signed-transactions-withdrawals--payouts) (`POST /v1/engine/pulsar/sync`) and settle on the signed webhook.
 
 ---
 
