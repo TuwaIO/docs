@@ -217,7 +217,7 @@ export interface CheckSiteTranslationsOptions {
   contentDir?: string;
   /** The translations, one folder per language, relative to `cwd` (default: `src/i18n`). */
   i18nDir?: string;
-  /** The heading slugger (default: {@link loadNextraSlugger}). */
+  /** The heading slugger (default: {@link loadNextraSlugger}; the check fails when it cannot be loaded). */
   createSlugger?: HeadingSlugger;
 }
 
@@ -228,7 +228,8 @@ export interface CheckSiteTranslationsOptions {
  *
  * @param options - See {@link CheckSiteTranslationsOptions}.
  * @returns The number of translated files and the issues found.
- * @throws When `contentDir` does not exist (the check runs from the wrong directory).
+ * @throws When `contentDir` does not exist (the check runs from the wrong directory), or when no `createSlugger` is
+ *   given and the slugger of Nextra cannot be loaded from `cwd` (the heading ids would go unchecked).
  */
 export async function checkSiteTranslations(
   options: CheckSiteTranslationsOptions = {},
@@ -238,6 +239,12 @@ export async function checkSiteTranslations(
     throw new Error(`No ${contentDir} in ${cwd}: run the check from the docs app of the site`);
   }
   const createSlugger = options.createSlugger ?? (await loadNextraSlugger(cwd));
+  if (!createSlugger) {
+    // Without the slugger the heading ids could not be compared, and broken anchors would pass the check
+    throw new Error(
+      `Cannot load github-slugger through nextra from ${cwd}: the heading ids of the translations cannot be checked`,
+    );
+  }
   const locales = TUWA_LOCALES.filter((locale) => locale !== DEFAULT_LOCALE);
   const filesByLocale = new Map(locales.map((locale) => [locale, pageFiles(join(cwd, i18nDir, locale))]));
   const pages = [...new Set([...filesByLocale.values()].flat().map(withoutExtension))].sort();

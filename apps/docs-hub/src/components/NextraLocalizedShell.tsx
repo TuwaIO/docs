@@ -1,12 +1,12 @@
 'use client';
 
-import { Footer, LocaleSwitcher, Navbar } from '@tuwaio/docs-ui';
+import { docsLabels, localizePageMap } from '@tuwaio/docs-ui';
+import { NextraDocsLayout } from '@tuwaio/docs-ui/nextra';
 import type { $NextraMetadata, Heading, PageMapItem } from 'nextra';
-import { Callout, Search } from 'nextra/components';
-import { LastUpdated, Layout } from 'nextra-theme-docs';
+import { Callout } from 'nextra/components';
 import { type ReactNode, useMemo } from 'react';
 
-import { type DocsHubLabels, type Locale, policyLanguageOf, useI18n } from '@/i18n';
+import { type DocsHubLabels, useI18n } from '@/i18n';
 import { useMDXComponents } from '@/mdx-components';
 
 import { CodeSnippet, MdxCodeBlocksProvider } from './localized/CodeSnippet';
@@ -24,50 +24,6 @@ import { MigrateCommunityLocalized } from './localized/quasar/MigrateCommunityLo
 import { QuotasLimitsLocalized } from './localized/quasar/QuotasLimitsLocalized';
 import { SelfHostingLocalized } from './localized/quasar/SelfHostingLocalized';
 import { WebhooksLocalized } from './localized/quasar/WebhooksLocalized';
-
-function localizeMetaValue(value: unknown, translatedTitle: string | undefined): unknown {
-  if (!translatedTitle) return value;
-  if (typeof value === 'string') return translatedTitle;
-  if (value && typeof value === 'object' && 'title' in value) {
-    return { ...(value as Record<string, unknown>), title: translatedTitle };
-  }
-  return value;
-}
-
-function localizePageMapItems(
-  items: PageMapItem[],
-  sidebar: Record<string, string>,
-  parentName?: string,
-): PageMapItem[] {
-  return items.map((item) => {
-    if ('data' in item) {
-      const nextData: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(item.data)) {
-        const routeKey = parentName ? `${parentName}/${key}` : key;
-        const translatedTitle = sidebar[routeKey] ?? sidebar[key];
-        nextData[key] = localizeMetaValue(value, translatedTitle);
-      }
-      return { ...item, data: nextData } as PageMapItem;
-    }
-
-    const routeKey = parentName ? `${parentName}/${item.name}` : item.name;
-    const translatedTitle = sidebar[routeKey] ?? sidebar[item.name];
-    const cloned: Record<string, unknown> = { ...item };
-
-    if (translatedTitle) {
-      cloned.title = translatedTitle;
-      if ('frontMatter' in item && item.frontMatter && typeof item.frontMatter === 'object') {
-        cloned.frontMatter = { ...item.frontMatter, title: translatedTitle };
-      }
-    }
-
-    if ('children' in item && Array.isArray(item.children)) {
-      cloned.children = localizePageMapItems(item.children, sidebar, routeKey);
-    }
-
-    return cloned as PageMapItem;
-  });
-}
 
 const GUIDE_HEADING_IDS: Record<string, string> = {
   '/guides/multi-chain-auth-siwx-caip122': 'multi-chain-authentication-with-siwx-caip-122-beyond-evm-silos',
@@ -515,8 +471,9 @@ export function NextraPageWrapper({ toc, metadata, sourceCode = '', routeKey, ch
 }
 
 /**
- * Client wrapper around the Nextra `Layout` that localizes the navbar, `<LocaleSwitcher />`, sidebar `pageMap`,
- * search bar, table of contents, edit/feedback links, theme switcher, and footer.
+ * Client wrapper around the Nextra `Layout`: `NextraDocsLayout` of `@tuwaio/docs-ui` (the layout of every TUWA
+ * documentation site) in the language of the reader, with the sidebar `pageMap` translated by route
+ * (`localizePageMap` with `nextra.sidebar` of the hub dictionaries).
  * @param props.logo - Server-rendered `<RemoteLogo />` element.
  * @param props.pageMap - Raw Nextra `PageMapItem[]` from `getPageMap()`.
  * @param props.children - Section children.
@@ -533,61 +490,21 @@ export function NextraLocalizedShell({
   const { locale, setLocale, t } = useI18n();
 
   const localizedPageMap = useMemo(
-    () => (locale === 'en' ? pageMap : localizePageMapItems(pageMap, t.nextra.sidebar)),
+    () => (locale === 'en' ? pageMap : localizePageMap(pageMap, {}, { routes: t.nextra.sidebar })),
     [locale, pageMap, t.nextra.sidebar],
   );
 
   return (
-    <Layout
-      navbar={
-        <Navbar logo={logo}>
-          <LocaleSwitcher
-            locale={locale}
-            onSelect={(code) => setLocale(code as Locale)}
-            ariaLabel={t.nav.selectLanguage}
-          />
-        </Navbar>
-      }
-      footer={
-        <Footer
-          logo={logo}
-          labels={{
-            description: t.footer.description,
-            license: t.footer.license,
-            policiesAriaLabel: t.footer.policiesAriaLabel,
-            allPolicies: t.footer.allPolicies,
-            copyright: t.footer.copyright,
-            policyTitles: t.footer.policyTitles,
-          }}
-          policyLanguage={policyLanguageOf(locale)}
-        />
-      }
+    <NextraDocsLayout
+      logo={logo}
       pageMap={localizedPageMap}
       docsRepositoryBase="https://github.com/TuwaIO/docs/tree/main/apps/docs-hub"
-      navigation={{ prev: true, next: true }}
+      locale={locale}
+      onLocaleChange={setLocale}
+      labels={docsLabels[locale]}
       sidebar={{ defaultMenuCollapseLevel: 1 }}
-      editLink={t.nextra.editThisPage}
-      feedback={{ content: t.nextra.feedback }}
-      lastUpdated={<LastUpdated locale={locale}>{t.nextra.lastUpdated}</LastUpdated>}
-      toc={{
-        title: t.nextra.onThisPage,
-        backToTop: t.nextra.scrollToTop,
-      }}
-      themeSwitch={{
-        light: t.nextra.themeLight,
-        dark: t.nextra.themeDark,
-        system: t.nextra.themeSystem,
-      }}
-      search={
-        <Search
-          placeholder={t.nextra.searchPlaceholder}
-          emptyResult={t.nextra.searchEmpty}
-          errorText={t.nextra.searchError}
-          loading={t.nextra.searchLoading}
-        />
-      }
     >
       {children}
-    </Layout>
+    </NextraDocsLayout>
   );
 }

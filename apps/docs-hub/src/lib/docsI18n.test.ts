@@ -1,13 +1,14 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
 import type { PageMapItem } from 'nextra';
-import { createElement, type ReactNode } from 'react';
+import { createElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DocsLayout } from '../../../../packages/docs-ui/src/components/DocsLayout';
+import { DocsLayout, NextraDocsLayout } from '../../../../packages/docs-ui/src/components/DocsLayout';
+import { Footer } from '../../../../packages/docs-ui/src/components/Footer';
 import { LocalizedPage, type LocalizedPageVariant } from '../../../../packages/docs-ui/src/components/LocalizedPage';
 import { DocsI18nProvider } from '../../../../packages/docs-ui/src/docsI18n';
 import { docsLabels } from '../../../../packages/docs-ui/src/docsLabels';
@@ -74,14 +75,15 @@ vi.mock('../../../../packages/docs-ui/src/components/LocaleSwitcher', () => ({
 
 /** The props of the Nextra `Layout` that the language changes, as JSON-friendly values. */
 function layoutPropsOf(props: Record<string, unknown>) {
-  const { editLink, feedback, toc, themeSwitch, pageMap } = props as {
+  const { editLink, feedback, toc, themeSwitch, pageMap, sidebar } = props as {
     editLink: string;
     feedback: { content: string };
     toc: { title: string; backToTop: string };
     themeSwitch: Record<string, string>;
     pageMap: PageMapItem[];
+    sidebar?: Record<string, unknown>;
   };
-  return { editLink, feedback: feedback.content, toc, themeSwitch, pageMap };
+  return { editLink, feedback: feedback.content, toc, themeSwitch, pageMap, sidebar };
 }
 
 /** Collects every key path of an object, so dictionaries of different languages can be compared. */
@@ -130,6 +132,21 @@ describe('the interface texts of the documentation sites', () => {
     expect(docsLabels['zh-CN'].englishOnly).toContain('README');
   });
 
+  it('never use the word «рушій» or the typo «基语» on the hub either', () => {
+    // The Ukrainian and Chinese texts of the hub: its dictionaries and the translated guides and Quasar pages
+    const hub = resolve(__dirname, '..');
+    const localized = readdirSync(join(hub, 'components/localized'), { recursive: true, encoding: 'utf8' })
+      .filter((file) => file.endsWith('.tsx'))
+      .map((file) => join(hub, 'components/localized', file));
+    expect(localized.length).toBeGreaterThan(10);
+    for (const file of [join(hub, 'i18n/locales/uk.ts'), join(hub, 'i18n/locales/zhCN.ts'), ...localized]) {
+      const source = readFileSync(file, 'utf8');
+      expect(source, file).not.toMatch(/руші/i);
+      expect(source, file).not.toContain('基语');
+    }
+    expect(JSON.stringify(docsLabels['zh-CN'])).not.toContain('基语');
+  });
+
   it('are the texts of the docs hub, kept in one place', () => {
     for (const [locale, hub] of [
       ['en', en],
@@ -170,6 +187,55 @@ describe('localizePageMap', () => {
     localizePageMap(pageMap, docsLabels['zh-CN'].sidebar);
     expect(JSON.stringify(pageMap)).toBe(before);
     expect(localizePageMap(pageMap, {})).toBe(pageMap);
+    expect(localizePageMap(pageMap, {}, { routes: {} })).toBe(pageMap);
+  });
+
+  it('translates the titles of the hub by route, the way the hub sidebar keys them', () => {
+    // The hub keys its sidebar by `<folder>/<name>` or `<name>` (src/i18n/locales/*.ts, `nextra.sidebar`)
+    const hubPageMap: PageMapItem[] = [
+      { data: { index: { title: 'Main', href: '/' }, guides: { title: 'Guides' }, '--': { type: 'separator' } } },
+      {
+        name: 'guides',
+        route: '/guides',
+        title: 'Guides',
+        children: [
+          { data: { index: 'Overview', 'full-stack-react': 'Full-Stack React App', api: { title: 'API', theme: {} } } },
+          { name: 'index', route: '/guides', frontMatter: { title: 'Guides' }, title: 'Overview' } as PageMapItem,
+          {
+            name: 'full-stack-react',
+            route: '/guides/full-stack-react',
+            frontMatter: { title: 'Build a Full-Stack React App' },
+            title: 'Full-Stack React App',
+          } as PageMapItem,
+        ],
+      } as PageMapItem,
+    ];
+    const localized = localizePageMap(hubPageMap, {}, { routes: { ...uk.nextra.sidebar, main: 'Головна' } });
+    const [meta, guides] = localized as [
+      { data: Record<string, unknown> },
+      { title: string; children: [{ data: Record<string, unknown> }, ...{ title: string; frontMatter: object }[]] },
+    ];
+    expect(meta.data.index).toEqual({ title: 'Огляд', href: '/' });
+    expect(meta.data.guides).toEqual({ title: uk.nextra.sidebar.guides });
+    expect(meta.data['--']).toEqual({ type: 'separator' });
+    expect(guides.title).toBe(uk.nextra.sidebar.guides);
+    expect(guides.children[0].data).toEqual({
+      index: 'Огляд',
+      'full-stack-react': uk.nextra.sidebar['full-stack-react'],
+      api: { title: uk.nextra.sidebar.api, theme: {} },
+    });
+    expect(guides.children[1]).toMatchObject({ title: 'Огляд', frontMatter: { title: 'Огляд' } });
+    expect(guides.children[2]).toMatchObject({
+      title: uk.nextra.sidebar['full-stack-react'],
+      frontMatter: { title: uk.nextra.sidebar['full-stack-react'] },
+    });
+  });
+
+  it('prefers a route title over an English title', () => {
+    const [meta] = localizePageMap(pageMap, { Introduction: 'Вступ' }, { routes: { index: 'Головна' } }) as [
+      { data: Record<string, { title?: string }> },
+    ];
+    expect(meta.data.index.title).toBe('Головна');
   });
 });
 
@@ -243,6 +309,28 @@ describe('DocsLayout', () => {
     expect(JSON.stringify(props.pageMap)).toContain('"title":"Вступ"');
   });
 
+  it('renders the controlled layout the docs hub uses, with its texts and Nextra sidebar options', () => {
+    const html = renderToStaticMarkup(
+      createElement(NextraDocsLayout, {
+        logo: createElement('img', { alt: 'TUWA' }),
+        pageMap,
+        docsRepositoryBase: 'https://github.com/TuwaIO/docs/tree/main/apps/docs-hub',
+        locale: 'zh-CN',
+        onLocaleChange: () => undefined,
+        labels: docsLabels['zh-CN'],
+        sidebar: { defaultMenuCollapseLevel: 1 },
+        children: createElement('main', null, 'page'),
+      }),
+    );
+    expect(html).toContain(`aria-label="${docsLabels['zh-CN'].selectLanguage}"`);
+    expect(html).toContain(docsLabels['zh-CN'].footer.description);
+    const props = propsOf(html);
+    expect(props.editLink).toBe(docsLabels['zh-CN'].nextra.editThisPage);
+    expect(props.sidebar).toEqual({ defaultMenuCollapseLevel: 1 });
+    // The page map is passed as it is: the caller localizes it
+    expect(props.pageMap).toEqual(JSON.parse(JSON.stringify(pageMap)));
+  });
+
   it('adds the sidebar titles of the site and keeps English untouched', () => {
     const zh = propsOf(render('zh-CN', { 'zh-CN': { Overview: '总览' } }));
     expect(JSON.stringify(zh.pageMap)).toContain('"index":"总览"');
@@ -250,6 +338,27 @@ describe('DocsLayout', () => {
     const english = propsOf(render('en', { uk: { Introduction: 'Вступ' } }));
     expect(english.pageMap).toEqual(JSON.parse(JSON.stringify(pageMap)));
     expect(english.editLink).toBe('Edit this page');
+  });
+});
+
+/** The elements of a React element tree, depth first (the components are not rendered). */
+function elementsOf(node: ReactNode): ReactElement<Record<string, unknown>>[] {
+  if (Array.isArray(node)) return node.flatMap(elementsOf);
+  if (!isValidElement<Record<string, unknown>>(node)) return [];
+  return [node, ...elementsOf(node.props.children as ReactNode)];
+}
+
+describe('Footer', () => {
+  it('keeps the copyright year of the prerendered page while it hydrates in a later year', () => {
+    // DocsLayout renders the footer on the client: a page built in one year and opened in the next would render
+    // another year than its HTML. The year is one text node whose mismatch React accepts during hydration.
+    const copyright = elementsOf(Footer({ logo: null, labels: docsLabels.uk.footer })).find(
+      (element) => element.props.className === 'tuwa-footer-copyright',
+    );
+    expect(copyright?.props.suppressHydrationWarning).toBe(true);
+    expect(copyright?.props.children).toBe(
+      `© 2025 - ${new Date().getFullYear()} TUWA. ${docsLabels.uk.footer.copyright}`,
+    );
   });
 });
 
@@ -342,6 +451,17 @@ describe('the translation check', () => {
           message: 'is missing: every translated page exists in every language',
         },
       ]);
+    });
+
+    it('fails when the heading slugger of Nextra cannot be loaded, instead of skipping the heading ids', async () => {
+      // The site's `nextra` resolves a `github-slugger` that fails to load (pnpm bin shims add the hoisted packages
+      // to NODE_PATH, so a missing package would still be found there)
+      write('node_modules/nextra/package.json', '{ "name": "nextra", "version": "4.6.1" }');
+      write('node_modules/github-slugger/package.json', '{ "name": "github-slugger", "main": "index.js" }');
+      write('node_modules/github-slugger/index.js', "throw new Error('broken');\n");
+      write('src/i18n/uk/index.mdx', english);
+      write('src/i18n/zh-CN/index.mdx', english);
+      await expect(checkSiteTranslations({ cwd: site })).rejects.toThrow('github-slugger');
     });
 
     it('fails outside a docs app', async () => {

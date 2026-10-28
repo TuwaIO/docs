@@ -52,7 +52,7 @@ export const zhCN: DocsHubLabels = {
       subtitle: '每一层都建立在前一层之上。可通过 @tuwaio/sdk 一次性引入全栈，也可按需安装单个独立包。',
       stages: {
         1: {
-          label: '第 1 阶段 — 核心认证与底层基语',
+          label: '第 1 阶段 — 核心认证与底层原语',
           subtitle: '面向 EVM 与 Solana 的 CAIP-122 登录与多链基础工具',
         },
         2: {

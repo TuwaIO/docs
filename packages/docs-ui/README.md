@@ -197,7 +197,7 @@ declare module '*.mdx' {
 }
 ```
 
-A translation keeps the structure of its English page: the same code blocks in the same order, the same heading levels with the English heading ids written as `## Встановлення [#-installation]` (so anchors work in every language) and the same links. `tuwa-docs-i18n-check`, run from the docs app, checks it and that every translated page exists in every language; add it to the build and to the pre-commit hook:
+A translation keeps the structure of its English page: the same code blocks in the same order, the same heading levels with the English heading ids written as `## Встановлення [#-installation]` (so anchors work in every language) and the same links. `tuwa-docs-i18n-check`, run from the docs app, checks it and that every translated page exists in every language (it gives headings their ids with the `github-slugger` of the site's `nextra` and fails when that cannot be loaded); add it to the build and to the pre-commit hook:
 
 ```json
 {
@@ -209,6 +209,8 @@ A translation keeps the structure of its English page: the same code blocks in t
 ```
 
 Client components inside `DocsLayout` read the language and the interface texts with `useDocsI18n()`.
+
+`NextraDocsLayout` is the same layout without state: the language, its texts (`docsLabels[locale]`) and the page map come from props. The docs hub renders it with its own dictionaries and translates its sidebar by route with `localizePageMap(pageMap, {}, { routes })`.
 
 ### Search index
 
