@@ -45,7 +45,7 @@
     "react-dom": "^19.3.1",
     "shiki": "^4.5.0",
     "tailwind-merge": "^3.7.0",
-    "viem": "^2.57.11",
+    "viem": "^2.57.12",
     "zustand": "^5.0.16"
   },
   "dependenciesMeta": {
@@ -58,7 +58,7 @@
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "postcss": "^8.5.31",
+    "postcss": "^8.5.32",
     "tailwindcss": "^4.3.3",
     "typescript": "6.0.3",
     "vitest": "^5.0.5"
