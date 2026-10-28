@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.0...docs-ui-v0.7.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** docs-ui on Nova Core 0.10.6 ([7e3ba4e](https://github.com/TuwaIO/docs/commit/7e3ba4e1695dc55f06706f70b626d0fe979fe213))
+
 ## [0.7.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.6.0...docs-ui-v0.7.0) (2026-10-28)
 
 
