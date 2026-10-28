@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.6.0...docs-ui-v0.7.0) (2026-10-28)
+
+
+### Features
+
+* **docs-ui:** one Nextra docs layout for the hub and the project sites; the translation check fails loudly ([683d333](https://github.com/TuwaIO/docs/commit/683d333e8f7e36f2dac5cb4b353fa00472bf519d))
+
 ## [0.6.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.7...docs-ui-v0.6.0) (2026-10-28)
 
 
