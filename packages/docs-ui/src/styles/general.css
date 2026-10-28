@@ -578,12 +578,18 @@ article a[href^='http']:after {
   filter: hue-rotate(210deg) saturate(1.5);
 }
 
-@media (max-width: 768px) {
+/* Phones: the sticky Nextra header is opaque in the theme background (--nextra-bg, set by the `Head` of Nextra; white
+   without it), so the page never shows through it while it scrolls under the header. Its blur layer, 70% of the same
+   color, adds nothing on top. It covers portrait phones (below 768px, where the desktop navbar of Nextra begins) and
+   touch screens up to 1024px (phones in landscape, tablets); a desktop window keeps the glass look at every width. */
+@media (max-width: 767.98px), (pointer: coarse) and (max-width: 1023.98px) {
   .nextra-navbar {
     backdrop-filter: none;
-    background: white;
+    background: rgb(var(--nextra-bg, 255 255 255));
   }
+}
 
+@media (max-width: 768px) {
   .tuwa-footer-link span {
     display: none;
   }
