@@ -1,10 +1,13 @@
+import bundleSizes from '../generated/bundle-sizes.json';
 import npmPackages from '../generated/npm-packages.json';
 import packageGuides from '../generated/package-guides.json';
+import type { BundleSizes, PackageSize } from './bundleSize';
 import { packageLayers } from './ecosystem';
 
 interface NpmManifest {
   version: string;
   description?: string;
+  license?: string;
   deprecated?: string;
   dependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
@@ -63,6 +66,12 @@ export interface PackageDetails {
   description: string;
   /** Deprecation message of the latest version */
   deprecated?: string;
+  /** SPDX licence of the latest version */
+  license?: string;
+  /** Own code loaded with the import, measured at build time by `scripts/build-data.mjs` */
+  size?: PackageSize;
+  /** YYYY-MM-DD of that measurement */
+  sizeMeasuredAt?: string;
   /** Reference page of the package (a package site, or the Packages section of the Nova Storybook) */
   docsUrl?: string;
   /** Source folder of the package on GitHub */
@@ -214,6 +223,7 @@ function getInstallPackages(name: string, manifests: Record<string, NpmManifest>
 export function getPackageDetails(): Record<string, PackageDetails> {
   const manifests = (npmPackages as { packages: Record<string, NpmManifest> }).packages;
   const guides = (packageGuides as { guides: Record<string, PackageGuide[]> }).guides;
+  const sizes = bundleSizes as BundleSizes;
   const details: Record<string, PackageDetails> = {};
 
   for (const [name, manifest] of Object.entries(manifests)) {
@@ -229,6 +239,9 @@ export function getPackageDetails(): Record<string, PackageDetails> {
       version: manifest.version,
       description: describe(manifest.description),
       deprecated: manifest.deprecated,
+      license: manifest.license,
+      size: sizes.packages[name],
+      sizeMeasuredAt: sizes.packages[name] ? sizes.measuredAt : undefined,
       docsUrl: manifest.deprecated ? undefined : project.reference?.(short),
       sourceUrl: manifest.deprecated
         ? undefined

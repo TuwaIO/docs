@@ -7,6 +7,7 @@ import React, { type FocusEvent, type MouseEvent, type ReactNode, useRef, useSta
 import { useI18n } from '../i18n';
 import type { DocEntry } from '../lib/ecosystem';
 import type { PackageDetails } from '../lib/packages';
+import { PackageBadges } from './PackageBadges';
 import { PackagePreview } from './PackagePreview';
 
 export interface DocCardProps extends DocEntry {
@@ -137,6 +138,8 @@ export function DocCard({
         <div className="rounded-b-[inherit] border-t border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-muted)]/10 dark:bg-black/10 px-4 py-3 sm:px-5 2xl:px-6 2xl:py-4 flex flex-col gap-2 2xl:gap-2.5">
           {packages.map((pkg) => {
             const isNpmPkg = pkg.name.startsWith('@tuwaio/');
+            // An npm package with details opens them in a dialog; the other rows are links
+            const details = isNpmPkg ? packageDetails?.[pkg.name] : undefined;
             const rowClass =
               'group/badge flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.015] px-3 py-2 2xl:px-4 2xl:py-2.5 text-xs border border-[var(--tuwa-border-primary)]/40 transition-all duration-200 hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-bg-primary)]/80';
             const content = (
@@ -161,11 +164,12 @@ export function DocCard({
                     </span>
                   )}
                 </div>
+
+                {/* Right: version, licence and size, measured at build time */}
+                {details && !details.deprecated && <PackageBadges details={details} />}
               </>
             );
 
-            // An npm package with details opens them in a dialog; the other rows are links
-            const details = isNpmPkg ? packageDetails?.[pkg.name] : undefined;
             return details && onOpenPackage ? (
               <PackageRow key={pkg.name} details={details} className={rowClass} onOpen={() => onOpenPackage(pkg.name)}>
                 {content}

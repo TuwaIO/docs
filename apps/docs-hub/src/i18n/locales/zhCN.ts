@@ -41,6 +41,7 @@ export const zhCN: DocsHubLabels = {
       titleHighlight: '文档',
       description:
         '面向 EVM 与 Solana 的开源 TypeScript 工具包：钱包连接、CAIP-122 签名登录与交易生命周期追踪，配以可选 React 组件库以及托管云或自部署后端。',
+      license: '所有 TUWA 软件包及 Quasar Community Edition 均采用 Apache-2.0 许可证，并将始终保持 Apache-2.0。',
       searchAria: '搜索全部 TUWA 文档',
       searchButton: '搜索全部文档…',
       explorePackages: '浏览软件包',
@@ -1017,6 +1018,12 @@ export const zhCN: DocsHubLabels = {
     latestReleasePrefix: '最新版本',
     documentationTitle: '文档',
     deprecatedBadge: '已弃用',
+    packageBadges: {
+      version: 'npm 上的最新版本',
+      license: '许可证',
+      size: '随导入一起加载：软件包自身代码，经压缩与 gzip，不含依赖。测量于 {date}。',
+      sizeLazy: '另有 {size} 按需稍后加载。',
+    },
     moreCount: '+{count} 项更多',
     requiredPeers: '必需对等依赖',
     optionalPeersHeading: '可选对等依赖（按应用实际使用情况安装）',
@@ -1059,6 +1066,23 @@ export const zhCN: DocsHubLabels = {
       chooseInsteadIntro:
         '没有任何工具包适合所有应用。以下列出了每款竞品更优的适用场景，以及 TUWA 在同类任务中的架构差异。',
       methodologyIntro: '评分计算公式、各标记的含义以及每项事实数据的来源说明。',
+      bundleTitle: '打包体积',
+      bundleIntro:
+        'TUWA 为页面增加的体积：每个软件包自身的代码，经压缩与 gzip，不含 React、viem、wagmi、@solana/kit 以及应用中已有的其他依赖。一个组合等于其软件包体积之和。',
+      bundleSetColumn: '组合',
+      bundlePackagesColumn: '软件包数',
+      bundleSizeColumn: 'Gzip',
+      bundleIncomplete: '上次构建中此组合并非所有软件包都已测量',
+      bundleMeasured:
+        '于 {date} 使用 esbuild 对 npm 最新版本测量。按需加载的动态导入代码不计入。主页上每个软件包行显示其自身体积。',
+      bundleSets: {
+        pulsarEvm: '交易追踪，EVM（Pulsar）',
+        pulsarSolana: '交易追踪，Solana（Pulsar）',
+        siwxEvm: '登录，EVM（SIWX 与 React）',
+        siwxSolana: '登录，Solana（SIWX 与 React）',
+        connect: '钱包连接，EVM 与 Solana（Satellite 与 React）',
+        sdkWithNova: '全部：@tuwaio/sdk（EVM 与 Solana）及 Nova 界面',
+      },
       readyHeading: '准备好亲自体验了吗？',
       startFromTemplate: '从启动模板开始',
       fullStackGuide: '全栈开发指南',

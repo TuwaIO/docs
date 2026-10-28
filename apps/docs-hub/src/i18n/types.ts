@@ -250,6 +250,8 @@ export interface DocsHubLabels {
       titlePrefix: string;
       titleHighlight: string;
       description: string;
+      /** the licence promise under the description */
+      license: string;
       searchAria: string;
       searchButton: string;
       explorePackages: string;
@@ -582,6 +584,13 @@ export interface DocsHubLabels {
     latestReleasePrefix: string;
     documentationTitle: string;
     deprecatedBadge: string;
+    /** Badges of a package row on the main page; `{date}` is the measurement date, `{size}` a size in kB */
+    packageBadges: {
+      version: string;
+      license: string;
+      size: string;
+      sizeLazy: string;
+    };
     moreCount: string;
     requiredPeers: string;
     optionalPeersHeading: string;
@@ -619,6 +628,15 @@ export interface DocsHubLabels {
       criteriaIntro: string;
       chooseInsteadIntro: string;
       methodologyIntro: string;
+      bundleTitle: string;
+      bundleIntro: string;
+      bundleSetColumn: string;
+      bundlePackagesColumn: string;
+      bundleSizeColumn: string;
+      bundleIncomplete: string;
+      bundleMeasured: string;
+      /** Labels of `BUNDLE_SETS` in lib/bundleSize.ts, by set id */
+      bundleSets: Record<string, string>;
       readyHeading: string;
       startFromTemplate: string;
       fullStackGuide: string;

@@ -25,3 +25,13 @@ describe('package install commands', () => {
     expect(details.lighterEntries).toEqual([]);
   });
 });
+
+describe('package badges', () => {
+  it('carries the licence and the measured size of a package', () => {
+    const details = getPackageDetails()['@tuwaio/pulsar-core'];
+
+    expect(details.license).toBe('Apache-2.0');
+    expect(details.size?.gzip).toBeGreaterThan(0);
+    expect(details.sizeMeasuredAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+});

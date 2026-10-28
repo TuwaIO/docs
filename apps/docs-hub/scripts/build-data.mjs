@@ -5,17 +5,34 @@
 // - releases.json: the latest vX.Y.Z tag of the repositories in RELEASES (git ls-remote, no GitHub API limit);
 // - package-guides.json: the hub pages that mention each package, most mentions first;
 // - playground-sources.json: the Nova customization files of the Playground (components/playground/nova), shown by
-//   its Code tab as they run on the stage.
+//   its Code tab as they run on the stage;
+// - bundle-sizes.json: the own code of each package (its main entry, or all subpaths of an SDK package), minified and
+//   gzipped, measured from its latest npm tarball with every dependency left out (the badges of the main page and the
+//   table of the comparisons page).
 // A step that fails keeps its last saved file (or saves an empty one), so an outage never fails the build.
 import { execFile } from 'node:child_process';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
+import { gzipSync } from 'node:zlib';
+
+import { entryPoints, staticClosure, tarballUrl } from '../src/lib/bundleSize.ts';
 
 const GENERATED = new URL('../src/generated/', import.meta.url);
 const ECOSYSTEM = new URL('../src/lib/ecosystem.ts', import.meta.url);
 const CONTENT = new URL('../src/content/', import.meta.url);
 const PLAYGROUND_NOVA = new URL('../src/components/playground/nova/', import.meta.url);
-const FIELDS = ['version', 'description', 'deprecated', 'dependencies', 'peerDependencies', 'peerDependenciesMeta'];
+const FIELDS = [
+  'version',
+  'description',
+  'license',
+  'deprecated',
+  'dependencies',
+  'peerDependencies',
+  'peerDependenciesMeta',
+];
 
 // Entry id in src/lib/ecosystem.ts → GitHub repository whose latest tag the card shows
 const RELEASES = { 'quasar-community': 'TuwaIO/quasar-community' };
@@ -136,6 +153,98 @@ async function readPlaygroundSources() {
   return { files };
 }
 
+// esbuild comes with tsup, the build tool of packages/docs-ui; the hub does not depend on it directly
+function loadEsbuild() {
+  const fromDocsUi = createRequire(new URL('../../../packages/docs-ui/package.json', import.meta.url));
+  return createRequire(fromDocsUi.resolve('tsup/package.json'))('esbuild');
+}
+
+async function measurePackage(esbuild, name, version, dir) {
+  const res = await fetch(tarballUrl(name, version));
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for the ${name}@${version} tarball`);
+  const archive = join(dir, 'package.tgz');
+  await writeFile(archive, Buffer.from(await res.arrayBuffer()));
+  await promisify(execFile)('tar', ['-xzf', archive, '-C', dir]);
+  const root = join(dir, 'package');
+  const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+  // One bundle of all entries (namespace re-exports keep every export), so code they share is counted once; with
+  // code splitting, chunks behind dynamic imports stay separate and are counted as loaded later
+  const entry = join(root, 'measure-entry.js');
+  await writeFile(
+    entry,
+    entryPoints(manifest)
+      .map((file, index) => `export * as e${index} from ${JSON.stringify(file.startsWith('.') ? file : `./${file}`)};`)
+      .join('\n'),
+  );
+  const outdir = join(dir, 'out');
+  const result = await esbuild.build({
+    entryPoints: [entry],
+    bundle: true,
+    splitting: true,
+    minify: true,
+    format: 'esm',
+    platform: 'browser',
+    // The own code only: dependencies and peers are other packages, the app may already have them
+    packages: 'external',
+    loader: { '.css': 'empty' },
+    outdir,
+    metafile: true,
+    write: false,
+    logLevel: 'silent',
+  });
+  const files = new Map(
+    result.outputFiles.filter((file) => file.path.endsWith('.js')).map((file) => [file.path, file.contents]),
+  );
+  const outputs = Object.fromEntries(
+    Object.entries(result.metafile.outputs).map(([path, output]) => [join(process.cwd(), path), output]),
+  );
+  const imports = Object.fromEntries(
+    Object.entries(outputs).map(([path, output]) => [
+      path,
+      { imports: output.imports.map((i) => ({ ...i, path: join(process.cwd(), i.path) })) },
+    ]),
+  );
+  const entryOutput = Object.keys(outputs).find((path) => outputs[path].entryPoint);
+  if (!entryOutput || !files.has(entryOutput)) throw new Error('esbuild returned no entry file');
+  const upfront = new Set(staticClosure(imports, entryOutput));
+  let minified = 0;
+  let gzip = 0;
+  let lazyGzip = 0;
+  for (const [path, contents] of files) {
+    const zipped = gzipSync(contents).byteLength;
+    if (upfront.has(path)) {
+      minified += contents.byteLength;
+      gzip += zipped;
+    } else lazyGzip += zipped;
+  }
+  return { version, minified, gzip, ...(lazyGzip > 0 ? { lazyGzip } : {}) };
+}
+
+async function measureBundleSizes(packages) {
+  const esbuild = loadEsbuild();
+  const root = await mkdtemp(join(tmpdir(), 'tuwa-bundle-'));
+  try {
+    const entries = await Promise.all(
+      Object.entries(packages).map(async ([name, { version }], index) => {
+        const dir = join(root, String(index));
+        await mkdir(dir);
+        return measurePackage(esbuild, name, version, dir).then(
+          (size) => [name, size],
+          (error) => {
+            console.warn(`build-data: ${name}@${version} not measured (${error.message})`);
+            return null;
+          },
+        );
+      }),
+    );
+    const sizes = Object.fromEntries(entries.filter(Boolean));
+    if (Object.keys(sizes).length === 0) throw new Error('no package could be measured');
+    return { measuredAt: new Date().toISOString().slice(0, 10), packages: sizes };
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+}
+
 async function save(file, label, produce, empty) {
   const target = new URL(file, GENERATED);
   try {
@@ -161,4 +270,5 @@ await Promise.all([
   save('releases.json', 'release tags', fetchReleases, { releases: {} }),
   save('package-guides.json', 'guide mentions', () => findGuides(names), { guides: {} }),
   save('playground-sources.json', 'Playground sources', readPlaygroundSources, { files: {} }),
+  save('bundle-sizes.json', 'bundle sizes', () => measureBundleSizes(packages), { packages: {} }),
 ]);

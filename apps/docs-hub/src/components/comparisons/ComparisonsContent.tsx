@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { formatLabel, useI18n } from '@/i18n';
 import { COMPETITORS, CRITERIA, formatCheckDate, SEGMENTS, verifiedAsOf } from '@/lib/comparisons';
 
+import { BundleSizes } from './BundleSizes';
 import { ChooseInstead } from './ChooseInstead';
 import { ComparisonRadar } from './ComparisonRadar';
 import { CriteriaMatrix } from './CriteriaMatrix';
@@ -94,6 +95,14 @@ export function ComparisonsContent() {
             {t.ui.comparisonsExtra.chooseInsteadIntro}
           </SectionHeading>
           <ChooseInstead />
+        </section>
+
+        {/* Bundle size */}
+        <section aria-labelledby="bundle-size">
+          <SectionHeading id="bundle-size" title={t.ui.comparisonsExtra.bundleTitle}>
+            {t.ui.comparisonsExtra.bundleIntro}
+          </SectionHeading>
+          <BundleSizes />
         </section>
 
         {/* Methodology */}

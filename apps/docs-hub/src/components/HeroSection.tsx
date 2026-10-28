@@ -17,6 +17,7 @@ export function HeroSection() {
       <p className="text-lg sm:text-xl text-[var(--tuwa-text-secondary)] leading-relaxed max-w-2xl mx-auto">
         {t.home.hero.description}
       </p>
+      <p className="mt-4 text-sm text-[var(--tuwa-text-tertiary)] max-w-2xl mx-auto">{t.home.hero.license}</p>
     </div>
   );
 }
