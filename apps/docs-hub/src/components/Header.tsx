@@ -13,9 +13,12 @@ import { type Locale, useI18n } from '@/i18n';
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);
 
 /**
- * Glassmorphic fixed header with logo slot, links, locale switcher and theme toggle. Below `md` the links and the
- * controls move to a menu that slides in from the right, as on tuwa.io; it closes on a link click, the backdrop, Escape
- * or a wider window, and locks the page scroll while open.
+ * Glassmorphic fixed header with logo slot, links, locale switcher and theme toggle. Below `lg` (1024px) the links and
+ * the controls move to a menu that slides in from the right, as on tuwa.io (at 768px the five links and both switchers
+ * need the whole row in Ukrainian). The menu closes on a link click, the backdrop, Escape or a wider window, and locks
+ * the page scroll while open. The header blurs what scrolls under it at every width; below `lg` its background is
+ * nearly opaque, so the page does not show through the logo and the menu button on phones, in portrait and landscape.
+ * The controls follow one order everywhere: the language, then the theme.
  * @param props.logo - Server-rendered logo element passed from layout.
  */
 export function Header({ logo }: { logo: ReactNode }) {
@@ -44,7 +47,7 @@ export function Header({ logo }: { logo: ReactNode }) {
   useEffect(() => {
     if (!isMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && setIsMenuOpen(false);
-    const desktop = window.matchMedia('(min-width: 768px)');
+    const desktop = window.matchMedia('(min-width: 64rem)');
     const closeOnDesktop = (event: MediaQueryListEvent) => event.matches && setIsMenuOpen(false);
 
     document.body.style.overflow = 'hidden';
@@ -62,11 +65,11 @@ export function Header({ logo }: { logo: ReactNode }) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/80 dark:bg-[#030303]/60 sm:bg-[var(--tuwa-bg-primary)]/50 sm:dark:bg-[#030303]/30 sm:backdrop-blur-xl">
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/90 dark:bg-[#0a0e27]/90 lg:bg-[var(--tuwa-bg-primary)]/50 lg:dark:bg-[#030303]/30 backdrop-blur-xl">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8">
             {logo}
-            <nav aria-label="Main navigation" className="hidden md:flex items-center gap-6">
+            <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -80,7 +83,7 @@ export function Header({ logo }: { logo: ReactNode }) {
             </nav>
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             <LocaleSwitcher
               locale={locale}
               onSelect={(code) => setLocale(code as Locale)}
@@ -95,7 +98,7 @@ export function Header({ logo }: { logo: ReactNode }) {
           <button
             type="button"
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="md:hidden relative h-8 w-8 cursor-pointer"
+            className="lg:hidden relative h-8 w-8 cursor-pointer"
             aria-controls="mobile-menu"
             aria-expanded={isMenuOpen}
           >
@@ -118,12 +121,12 @@ export function Header({ logo }: { logo: ReactNode }) {
       <div
         aria-hidden="true"
         onClick={closeMenu}
-        className={`md:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
       <div
         id="mobile-menu"
         inert={!isMenuOpen}
-        className={`md:hidden fixed top-0 right-0 z-[70] h-full w-80 max-w-[85vw] flex flex-col border-l border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)]/90 dark:bg-[var(--tuwa-bg-primary)]/85 backdrop-blur-xl shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`lg:hidden fixed top-0 right-0 z-[70] h-full w-80 max-w-[85vw] flex flex-col border-l border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)]/90 dark:bg-[var(--tuwa-bg-primary)]/85 backdrop-blur-xl shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <div className="flex items-center justify-between p-4 border-b border-[var(--tuwa-border-primary)]">
           <div onClick={closeMenu}>{logo}</div>
@@ -155,18 +158,18 @@ export function Header({ logo }: { logo: ReactNode }) {
           </nav>
 
           <div className="mt-4 border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
-            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.theme}</span>
-            {mounted && (
-              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
-            )}
-          </div>
-          <div className="border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
             <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.language}</span>
             <LocaleSwitcher
               locale={locale}
               onSelect={(code) => setLocale(code as Locale)}
               ariaLabel={t.nav.selectLanguage}
             />
+          </div>
+          <div className="border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
+            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.theme}</span>
+            {mounted && (
+              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
+            )}
           </div>
         </div>
       </div>
