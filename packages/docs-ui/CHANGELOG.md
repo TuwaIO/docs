@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.7...docs-ui-v0.6.0) (2026-10-28)
+
+
+### Features
+
+* **docs-ui:** the project documentation sites in English, Ukrainian and Simplified Chinese ([8c471f2](https://github.com/TuwaIO/docs/commit/8c471f23d66911892c344ee73ef8942b46a65731))
+
 ## [0.5.7](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.6...docs-ui-v0.5.7) (2026-10-28)
 
 
