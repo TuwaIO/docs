@@ -1,3 +1,5 @@
+import { docsLabels } from '@tuwaio/docs-ui';
+
 import type { DocsHubLabels } from '../types';
 
 /**
@@ -13,28 +15,14 @@ export const uk: DocsHubLabels = {
     playground: 'Пісочниця',
     theme: 'Тема',
     language: 'Мова',
-    selectLanguage: 'Оберіть мову',
+    selectLanguage: docsLabels.uk.selectLanguage,
     toggleTheme: 'Перемкнути тему',
     openMenu: 'Відкрити меню навігації',
     closeMenu: 'Закрити меню навігації',
     mobileNavAria: 'Розділи документації',
   },
-  footer: {
-    description:
-      'Модульна, headless-first Web3-інфраструктура. Будуйте self-custodial застосунки на базі відкритих компонентів.',
-    license: 'Ліцензовано під Apache 2.0. Відкритий код та безкоштовне використання.',
-    policiesAriaLabel: 'Політики',
-    allPolicies: 'Усі політики',
-    copyright: 'Усі права захищено.',
-    policyTitles: {
-      terms: 'Умови використання',
-      privacy: 'Політика конфіденційності',
-      cookie: 'Політика файлів cookie',
-      refund: 'Політика повернення коштів',
-      security: 'Політика безпеки',
-      dpa: 'Доповнення щодо обробки даних',
-    },
-  },
+  // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
+  footer: docsLabels.uk.footer,
   common: {
     packageManager: 'Пакетний менеджер',
     copy: 'Копіювати',
@@ -1271,18 +1259,7 @@ export const uk: DocsHubLabels = {
     },
   },
   nextra: {
-    onThisPage: 'На цій сторінці',
-    scrollToTop: 'Прокрутити вгору',
-    editThisPage: 'Редагувати цю сторінку',
-    feedback: 'Є запитання? Залиште відгук',
-    lastUpdated: 'Востаннє оновлено',
-    searchPlaceholder: 'Пошук у документації…',
-    searchEmpty: 'Нічого не знайдено.',
-    searchError: 'Не вдалося завантажити пошуковий індекс.',
-    searchLoading: 'Завантаження…',
-    themeLight: 'Світла',
-    themeDark: 'Темна',
-    themeSystem: 'Системна',
+    ...docsLabels.uk.nextra,
     sidebar: {
       main: 'Головна',
       guides: 'Посібники',

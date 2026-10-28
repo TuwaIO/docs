@@ -4,12 +4,13 @@
   "private": false,
   "author": "Oleksandr Tkach",
   "license": "Apache-2.0",
-  "description": "Shared UI of the TUWA documentation sites: Nextra navbar and footer, remote logo, theme switcher, background effects, policy pages and styles.",
+  "description": "Shared UI of the TUWA documentation sites: Nextra navbar, footer and layout in English, Ukrainian and Simplified Chinese, remote logo, theme and language switches, background effects, policy pages and styles.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "tuwa-docs-search-index": "./bin/search-index.js"
+    "tuwa-docs-search-index": "./bin/search-index.js",
+    "tuwa-docs-i18n-check": "./bin/i18n-check.js"
   },
   "type": "module",
   "exports": {
@@ -32,6 +33,16 @@
       "types": "./dist/i18n.d.ts",
       "import": "./dist/i18n.js",
       "require": "./dist/i18n.cjs"
+    },
+    "./nextra": {
+      "types": "./dist/nextra.d.ts",
+      "import": "./dist/nextra.js",
+      "require": "./dist/nextra.cjs"
+    },
+    "./nextra/page": {
+      "types": "./dist/docsPage.d.ts",
+      "import": "./dist/docsPage.js",
+      "require": "./dist/docsPage.cjs"
     },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
@@ -82,6 +93,7 @@
   "peerDependencies": {
     "@heroicons/react": ">=2",
     "next": ">=16.1",
+    "nextra": ">=4.6",
     "nextra-theme-docs": ">=4.6",
     "react": ">=19.2.3"
   },

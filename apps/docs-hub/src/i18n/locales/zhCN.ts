@@ -1,3 +1,5 @@
+import { docsLabels } from '@tuwaio/docs-ui';
+
 import type { DocsHubLabels } from '../types';
 
 /**
@@ -13,27 +15,14 @@ export const zhCN: DocsHubLabels = {
     playground: '演练场',
     theme: '主题',
     language: '语言',
-    selectLanguage: '选择语言',
+    selectLanguage: docsLabels['zh-CN'].selectLanguage,
     toggleTheme: '切换主题',
     openMenu: '打开导航菜单',
     closeMenu: '关闭导航菜单',
     mobileNavAria: '文档分区',
   },
-  footer: {
-    description: '模块化、无头优先的 Web3 基础设施。借助开源且高度可移植的底层构建块，打造真正的自托管应用。',
-    license: '基于 Apache 2.0 协议开源。完全免费使用。',
-    policiesAriaLabel: '法律与安全政策',
-    allPolicies: '全部政策',
-    copyright: '保留所有权利。',
-    policyTitles: {
-      terms: '服务条款',
-      privacy: '隐私政策',
-      cookie: 'Cookie 政策',
-      refund: '退款政策',
-      security: '安全政策',
-      dpa: '数据处理附录 (DPA)',
-    },
-  },
+  // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
+  footer: docsLabels['zh-CN'].footer,
   common: {
     packageManager: '包管理器',
     copy: '复制',
@@ -1201,18 +1190,7 @@ export const zhCN: DocsHubLabels = {
     },
   },
   nextra: {
-    onThisPage: '本页目录',
-    scrollToTop: '返回顶部',
-    editThisPage: '编辑此页',
-    feedback: '有疑问？向我们反馈',
-    lastUpdated: '最后更新于',
-    searchPlaceholder: '搜索文档…',
-    searchEmpty: '未找到匹配结果。',
-    searchError: '加载搜索索引失败。',
-    searchLoading: '正在加载…',
-    themeLight: '浅色',
-    themeDark: '深色',
-    themeSystem: '跟随系统',
+    ...docsLabels['zh-CN'].nextra,
     sidebar: {
       main: '主屏幕',
       guides: '指南',

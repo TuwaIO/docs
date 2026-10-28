@@ -13,6 +13,7 @@
 - **Logo:** `RemoteLogo` is an async React Server Component that fetches an SVG (by default the TUWA logo) and renders it as React elements, so it takes `className` and `currentColor`.
 - **Theme switch:** `ThemeSwitcher` is a light/dark switch for any theme state (for example `next-themes`).
 - **Language select:** `LocaleSwitcher` is an accessible glassmorphic select dropdown for switching languages (English, Українська, 简体中文, etc.), styled to match `ThemeSwitcher`. Features zero layout shift, Nova UI Kit animated directional chevron, collision detection with auto-flip (`placement="auto"`), multi-layout Latin typeahead navigation (independent of user OS keyboard language), and an invisible native `<select>` overlay on touch devices (`pointer: coarse`) for native mobile system pickers (iOS wheel, Android sheet). Full WCAG 2.1/2.2 AA/AAA compliance. It renders an invisible placeholder during SSR to avoid hydration shifts.
+- **Three languages (project sites):** `@tuwaio/docs-ui/nextra` and `@tuwaio/docs-ui/nextra/page` turn a Nextra site into an English, Ukrainian and Simplified Chinese site with one URL per page, as on the [docs hub](https://docs.tuwa.io). `DocsLayout` is the Nextra layout with the navbar (the language switch after the links; the theme switch stays in the Nextra sidebar and the mobile menu), the footer, the search, the table of contents, the edit, feedback and last-updated texts and the sidebar titles in the language of the reader (`docsLabels`, `localizePageMap`). `createDocsPage` creates the `[[...mdxPath]]` route: each page is prerendered in English and in the languages it is translated into, and `LocalizedPage` shows the reader's language without a request; pages without a translation (package READMEs, the generated API reference) show English with a note in the reader's language. The language is detected after mount (`tuwa-locale`, then the browser languages and the time zone; no cookie, no request). The `tuwa-docs-i18n-check` command keeps the translations in line with their English pages.
 - **Interface settings for 30 days:** `PreferenceExpiry` is an inline script for the `<head>` of a site's root layout. It forgets the Local Storage values of the given keys (by default `theme`) 30 days after they were written, as the [Cookie Policy](https://tuwa.io/cookie) states, and dates each later write, whatever library writes it (`next-themes`, the `Tabs` of Nextra).
 - **Decoration:** `Orb` (an animated sphere in the brand color of a TUWA project), `StarryBackground` (an animated star field on a canvas) and `NoSSR` (renders its children only on the client).
 - **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy in a language, and `PolicyDocument` renders it with the date of the version, a Download PDF button, a language switch (English, Українська) when the policy is translated, anchored sections (the same anchors in every language) and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs). Code that needs only the list or `loadPolicy` (footers, sitemaps, route handlers) imports them from `@tuwaio/docs-ui/policies`, which has no React, Next.js or Nextra imports.
@@ -27,7 +28,7 @@
 pnpm add @tuwaio/docs-ui next nextra nextra-theme-docs react react-dom @heroicons/react
 ```
 
-`nextra-theme-docs` (and its peer `nextra`) is needed by `Navbar` and `Footer`, `next` by `RemoteLogo` (a Server Component that uses the `fetch` cache of Next.js) and `@heroicons/react` by `ThemeSwitcher`.
+`nextra-theme-docs` is needed by `Navbar`, `Footer` and `DocsLayout`, `nextra` by `DocsLayout`, `LocalizedPage` and `createDocsPage`, `next` by `RemoteLogo` (a Server Component that uses the `fetch` cache of Next.js) and `createDocsPage`, and `@heroicons/react` by `ThemeSwitcher`.
 
 Import the stylesheet after the Nextra theme:
 
@@ -122,6 +123,93 @@ export function PolicyLinks() {
 
 Sections have stable anchors (`/refund#how-to-request-a-refund`), so hints and FAQ answers can link to a section.
 
+### Languages of a project site
+
+A TUWA project site (Orbit, SIWX, Satellite Connect, Pulsar, SDK) in English, Ukrainian and Simplified Chinese. The root layout renders `DocsLayout` around the page and keeps the language for 30 days:
+
+```tsx
+import { PreferenceExpiry, SiteLogo } from '@tuwaio/docs-ui';
+import { DocsLayout } from '@tuwaio/docs-ui/nextra';
+import { Head } from 'nextra/components';
+import { getPageMap } from 'nextra/page-map';
+import type { ReactNode } from 'react';
+
+const logo = <SiteLogo width={126} height={40} />;
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en" dir="ltr" suppressHydrationWarning>
+      <Head>
+        <PreferenceExpiry keys={['theme', 'tuwa-locale']} />
+      </Head>
+      <body>
+        <DocsLayout
+          logo={logo}
+          pageMap={await getPageMap()}
+          docsRepositoryBase="https://github.com/TuwaIO/pulsar-core/tree/main/apps/docs"
+          sidebarTitles={{ uk: { 'EVM Trackers Standalone': 'EVM-трекери окремо' } }}
+        >
+          {children}
+        </DocsLayout>
+      </body>
+    </html>
+  );
+}
+```
+
+`src/app/[[...mdxPath]]/page.tsx` renders every page of `src/content` with its translations:
+
+```tsx
+import { createDocsPage } from '@tuwaio/docs-ui/nextra/page';
+
+import { localizedPages } from '@/i18n/pages';
+
+const { generateStaticParams, generateMetadata, Page } = createDocsPage({ localizedPages });
+
+export { generateMetadata, generateStaticParams };
+export default Page;
+```
+
+The translations are MDX files with the path of their English page under `src/i18n/<language>` (`src/i18n/uk/index.mdx` translates `src/content/index.mdx`), listed by route in `src/i18n/pages.ts`:
+
+```ts
+import type { LocalizedPageLoaders } from '@tuwaio/docs-ui/nextra/page';
+
+export const localizedPages: Record<string, LocalizedPageLoaders> = {
+  '/': {
+    uk: () => import('./uk/index.mdx'),
+    'zh-CN': () => import('./zh-CN/index.mdx'),
+  },
+};
+```
+
+TypeScript types the imported MDX files with a declaration next to it (`src/i18n/mdx.d.ts`):
+
+```ts
+declare module '*.mdx' {
+  import type { EvaluateResult } from 'nextra';
+
+  const MDXContent: EvaluateResult['default'];
+  export default MDXContent;
+  export const toc: EvaluateResult['toc'];
+  export const metadata: EvaluateResult['metadata'];
+  export const sourceCode: EvaluateResult['sourceCode'];
+}
+```
+
+A translation keeps the structure of its English page: the same code blocks in the same order, the same heading levels with the English heading ids written as `## Встановлення [#-installation]` (so anchors work in every language) and the same links. `tuwa-docs-i18n-check`, run from the docs app, checks it and that every translated page exists in every language; add it to the build and to the pre-commit hook:
+
+```json
+{
+  "scripts": {
+    "build": "tuwa-docs-i18n-check && next build && pnpm postbuild",
+    "i18n:check": "tuwa-docs-i18n-check"
+  }
+}
+```
+
+Client components inside `DocsLayout` read the language and the interface texts with `useDocsI18n()`.
+
 ### Search index
 
 Run the command after `next build`. It uses the `pagefind` package of the site, so add it to the site's dependencies:
@@ -144,11 +232,11 @@ It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) 
 
 ## 🗄️ Browser Storage
 
-`LocaleSwitcher` and `ThemeSwitcher` store nothing; they only call `onSelect` / `onToggle`, and the site keeps the choice. `PreferenceExpiry` stores `<key>:expires` (the time in epoch milliseconds) next to each key it is given, removes both once that time has passed, and wraps `Storage.prototype.setItem` on the page to date later writes of those keys.
+`LocaleSwitcher` and `ThemeSwitcher` store nothing; they only call `onSelect` / `onToggle`, and the site keeps the choice. `DocsLayout`, `useLocaleState` and the providers of `createI18n` save the language the reader picks to `tuwa-locale` (`en`, `uk` or `zh-CN`) and read it on the next visit; list the key in `PreferenceExpiry` to forget it after 30 days. `PreferenceExpiry` stores `<key>:expires` (the time in epoch milliseconds) next to each key it is given, removes both once that time has passed, and wraps `Storage.prototype.setItem` on the page to date later writes of those keys.
 
 ## 🌐 External Services
 
-`RemoteLogo` requests its `url` on the server (by default `tuwa.io/brand/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. The other components send no requests.
+`RemoteLogo` requests its `url` on the server (by default `tuwa.io/brand/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. `createDocsPage` and `LocalizedPage` send no requests: the translations are part of the page. The other components send no requests.
 
 ---
 

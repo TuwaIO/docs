@@ -1,3 +1,5 @@
+import { docsLabels } from '@tuwaio/docs-ui';
+
 import type { DocsHubLabels } from '../types';
 
 /**
@@ -13,28 +15,14 @@ export const en: DocsHubLabels = {
     playground: 'Playground',
     theme: 'Theme',
     language: 'Language',
-    selectLanguage: 'Select language',
+    selectLanguage: docsLabels.en.selectLanguage,
     toggleTheme: 'Toggle theme',
     openMenu: 'Open navigation menu',
     closeMenu: 'Close navigation menu',
     mobileNavAria: 'Documentation sections',
   },
-  footer: {
-    description:
-      'The modular, headless-first Web3 infrastructure. Build self-custodial applications on open-source, portable building blocks.',
-    license: 'Licensed under Apache 2.0. Open source and free to use.',
-    policiesAriaLabel: 'Policies',
-    allPolicies: 'All policies',
-    copyright: 'All rights reserved.',
-    policyTitles: {
-      terms: 'Terms of Service',
-      privacy: 'Privacy Policy',
-      cookie: 'Cookie Policy',
-      refund: 'Refund Policy',
-      security: 'Security Policy',
-      dpa: 'Data Processing Addendum',
-    },
-  },
+  // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
+  footer: docsLabels.en.footer,
   common: {
     packageManager: 'Package manager',
     copy: 'Copy',
@@ -1237,18 +1225,7 @@ export const en: DocsHubLabels = {
     },
   },
   nextra: {
-    onThisPage: 'On This Page',
-    scrollToTop: 'Scroll to top',
-    editThisPage: 'Edit this page',
-    feedback: 'Question? Give us feedback',
-    lastUpdated: 'Last updated on',
-    searchPlaceholder: 'Search documentation…',
-    searchEmpty: 'No results found.',
-    searchError: 'Failed to load search index.',
-    searchLoading: 'Loading…',
-    themeLight: 'Light',
-    themeDark: 'Dark',
-    themeSystem: 'System',
+    ...docsLabels.en.nextra,
     sidebar: {
       main: 'Main Screen',
       guides: 'Guides',
