@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.7](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.6...docs-ui-v0.5.7) (2026-10-28)
+
+
+### Bug Fixes
+
+* **docs-ui:** the docs header never covers the page on phones ([25bf214](https://github.com/TuwaIO/docs/commit/25bf2145b0c47cc0821e2fceed7bd93c48cd810d))
+
 ## [0.5.6](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.5...docs-ui-v0.5.6) (2026-10-27)
 
 
