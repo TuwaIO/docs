@@ -39,7 +39,7 @@ The CLI asks for a template and a project name, downloads the template from GitH
 
 ### 2. Configure and Start [#2-configure-and-start]
 
-Every template has a `.env.example` file. The variables a template needs are empty there: the Quasar keys of `nextjs-tuwa-quasar`, and the SIWX signing secret that `pnpm build` of the SIWX templates requires. The optional ones, such as your WalletConnect project ID or Alchemy and Pimlico keys, are commented out and have working defaults for development. Copy it to `.env`, fill in what you need, and start the dev server from the project folder (Node.js 20.19+, 22.13+ or 24+, the `engines` range of every template):
+Every template has a `.env.example` file. The variables a template needs are empty there: the Quasar keys of `nextjs-tuwa-quasar`, and the SIWX signing secret that `pnpm build` of the SIWX templates requires. The optional ones, such as your WalletConnect project ID or Alchemy and Pimlico keys, are commented out and have working defaults for development. Copy it to `.env`, fill in what you need, and start the dev server from the project folder (Node.js 24 LTS, 24.22.1 or newer, the `engines` range of every template):
 
 ```bash
 cp .env.example .env
