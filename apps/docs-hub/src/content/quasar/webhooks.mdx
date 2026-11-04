@@ -118,4 +118,4 @@ Quasar Cloud cannot reach `localhost`. For development, add one endpoint per org
 npx @tuwaio/quasar-sdk listen --forward-to http://localhost:3000/api/webhooks/quasar
 ```
 
-The CLI sends the signing secret in a header, reconnects when the stream drops and stops on a wrong secret. Its flags are listed on the [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk) page. A self-hosted node can instead post to private and loopback addresses directly when it runs with `ALLOW_INTERNAL_WEBHOOKS=true`; use that on development nodes only.
+The CLI sends the signing secret in a header, reconnects when the stream drops and stops on a wrong secret. Its flags are listed on the [`@tuwaio/quasar-sdk`](https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs) page. A self-hosted node can instead post to private and loopback addresses directly when it runs with `ALLOW_INTERNAL_WEBHOOKS=true`; use that on development nodes only.

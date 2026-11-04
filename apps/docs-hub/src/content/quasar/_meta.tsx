@@ -17,6 +17,6 @@ export default {
   },
   sdk: {
     title: '@tuwaio/quasar-sdk',
-    href: 'https://sdk.docs.tuwa.io/packages/quasar-sdk',
+    href: 'https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs',
   },
 };

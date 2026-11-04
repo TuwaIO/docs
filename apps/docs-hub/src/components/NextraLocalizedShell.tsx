@@ -204,7 +204,7 @@ function QuasarIndexLocalized({ labels }: { labels: DocsHubLabels['nextra']['qua
       <H1>{labels.title}</H1>
       <P>
         <strong>Quasar</strong> {labels.introPart1}
-        <A href="https://sdk.docs.tuwa.io/packages/quasar-sdk">
+        <A href="https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs">
           <Code>@tuwaio/quasar-sdk</Code>
         </A>
         {labels.introPart2}
@@ -347,7 +347,10 @@ function QuasarIndexLocalized({ labels }: { labels: DocsHubLabels['nextra']['qua
           {labels.nextSteps.apiPrefix}
           <A href="/quasar/api">{labels.nextSteps.apiLink1}</A>
           {labels.nextSteps.apiMiddle}
-          <A href="https://sdk.docs.tuwa.io/packages/quasar-sdk">{labels.nextSteps.apiLink2}</A>.
+          <A href="https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs">
+            {labels.nextSteps.apiLink2}
+          </A>
+          .
         </Li>
       </Ul>
     </>

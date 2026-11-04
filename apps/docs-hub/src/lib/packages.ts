@@ -86,8 +86,16 @@ export interface PackageDetails {
   install: { packages: string[]; frameworkPeers: PackageDependency[] };
 }
 
+const quasarClient = {
+  reference: (short: string) => `https://payments.docs.tuwa.io/?path=/docs/packages-${short}-overview--docs`,
+  repo: 'quasar-client',
+};
+
 // The site of the reference and the repository of each project, by the prefix of the package name
 const projects: { prefix: string; reference?: (short: string) => string; repo: string }[] = [
+  { prefix: 'quasar-sdk', ...quasarClient },
+  { prefix: 'payments-sdk', ...quasarClient },
+  { prefix: 'nova-payments', ...quasarClient },
   { prefix: 'orbit-', reference: (short) => `https://orbit.docs.tuwa.io/packages/${short}`, repo: 'orbit' },
   { prefix: 'siwx-', reference: (short) => `https://siwx.docs.tuwa.io/packages/${short}`, repo: 'siwx' },
   {

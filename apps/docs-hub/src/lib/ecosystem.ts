@@ -154,7 +154,7 @@ export const layers: EcosystemLayer[] = [
         gradientFrom: 'from-[#0052ff] dark:from-blue-500',
         gradientTo: 'to-blue-800 dark:to-sky-300',
         docsUrl: '/quasar',
-        githubUrl: 'https://github.com/TuwaIO/sdk/tree/main/packages/quasar-sdk',
+        githubUrl: 'https://github.com/TuwaIO/quasar-client',
         packages: [
           { name: '@tuwaio/quasar-sdk', layer: 'L5' },
           { name: 'Quasar Dashboard', url: QUASAR_DASHBOARD_URL },

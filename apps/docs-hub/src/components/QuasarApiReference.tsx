@@ -11,7 +11,7 @@ const ApiReferenceReact = dynamic(() => import('@scalar/api-reference-react').th
 
 /**
  * The interactive reference of the Quasar API (Scalar), rendered in the browser only. It loads
- * `public/quasar-openapi.yaml`, which `pnpm openapi:gen` of the `TuwaIO/sdk` repository writes, and follows the
+ * `public/quasar-openapi.yaml`, which `pnpm openapi:gen` of the `TuwaIO/quasar-client` repository writes, and follows the
  * light or dark theme of the site, with the fonts of the system (no requests to fonts.scalar.com). Side effect:
  * requests that the reader sends with the built-in client go to the Quasar API.
  *
