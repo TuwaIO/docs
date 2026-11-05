@@ -15,6 +15,8 @@ export interface FinalUpdate {
   finishedTimestamp: number;
   /** For `Replaced`: the transaction mined instead. */
   replacedTxHash?: `0x${string}`;
+  /** For `Replaced`: what replaced it. Pulsar follows a `repriced` one to its result under the new hash. */
+  replacedReason?: 'repriced' | 'cancelled' | 'replaced';
   /** For `Failed`: why the transaction failed. */
   error?: string;
 }
@@ -105,14 +107,18 @@ async function runEvm(hash: `0x${string}`, tx: ChainTransaction) {
   }
   if (tx.replacement) {
     await wait(1000);
-    finish(hash, tx, { status: TransactionStatus.Replaced, replacedTxHash: tx.replacement.hash });
+    finish(hash, tx, {
+      status: TransactionStatus.Replaced,
+      replacedTxHash: tx.replacement.hash,
+      replacedReason: tx.replacement.reason === 'speed-up' ? 'repriced' : 'cancelled',
+    });
   } else if (tx.outcome === 'revert') {
     finish(hash, tx, {
       status: TransactionStatus.Failed,
       error: 'Execution reverted: the simulated contract rejected the call.',
     });
   } else if (tx.outcome === 'replaced') {
-    finish(hash, tx, { status: TransactionStatus.Replaced, replacedTxHash: randomHex(32) });
+    finish(hash, tx, { status: TransactionStatus.Replaced, replacedTxHash: randomHex(32), replacedReason: 'replaced' });
   } else {
     finish(hash, tx, { status: TransactionStatus.Success });
   }
@@ -201,6 +207,17 @@ export function replaceTransaction(hash: string, reason: ReplacementReason): `0x
   if (tx.final || tx.replacement) throw new Error('The transaction is no longer pending.');
   tx.replacement = { hash: randomHex(32), reason };
   logEvent('Chain', `${reason} of ${shortId(hash)} sent as ${shortId(tx.replacement.hash)}`, tx.replacement);
+  // A speed-up goes on under its new hash, as on a real chain: Pulsar adds a record of it and tracks it to its result. A cancel
+  // sends nothing that anybody follows
+  if (reason === 'speed-up') {
+    const next: ChainTransaction = {
+      family: tx.family,
+      outcome: tx.outcome === 'replaced' ? 'success' : tx.outcome,
+      listeners: new Set(),
+    };
+    transactions.set(tx.replacement.hash, next);
+    void runEvm(tx.replacement.hash, next);
+  }
   tx.onReplaced?.();
   return tx.replacement.hash;
 }

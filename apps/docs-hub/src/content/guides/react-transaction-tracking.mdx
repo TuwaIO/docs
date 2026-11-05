@@ -342,7 +342,7 @@ An app with EVM and Solana wallets passes both adapters in an array: `adapter: [
 
 ## Step 5: Resume Tracking After a Reload [#step-5-resume-tracking-after-a-reload]
 
-The store restores its transactions from `localStorage`, but their trackers are not running after a reload. `useInitializeTransactionsPool` from `@tuwaio/pulsar-react` starts them again for every pending transaction. Each call starts new trackers, so render this component only once, in a component that stays mounted (for example next to your providers in the root layout):
+The store restores its transactions from `localStorage`, but their trackers are not running after a reload. `useInitializeTransactionsPool` from `@tuwaio/pulsar-react` starts them again for every pending transaction, one tracker per transaction: a later call starts none for a transaction already tracked. Render it in a component that stays mounted (for example next to your providers in the root layout):
 
 ```tsx filename="src/components/PulsarInitializer.tsx"
 'use client';
@@ -370,7 +370,7 @@ Call `executeTxAction` with the action and the metadata of the transaction. Puls
 <Tabs items={['EVM', 'Solana']} storageKey="tuwa-guide-network">
   <Tabs.Tab>
 
-Pulsar asks the wallet to switch to `desiredChainID` when needed. For standard EVM transactions the promise of `executeTxAction` resolves only after tracking has finished, so render the status from the store rather than from the promise.
+Pulsar asks the wallet to switch to `desiredChainID` when needed. The promise of `executeTxAction` resolves once the transaction is sent and its tracker has started, not when it has a result, so render the status from the store rather than from the promise. A transaction sped up in the wallet goes on under a new record, which the store follows to its result.
 
 ```tsx filename="src/components/Increment.tsx"
 'use client';

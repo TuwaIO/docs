@@ -78,14 +78,18 @@ export function createDevice({ families, quasar }: { families: SimulatedFamily[]
     useHistoryStore,
     getStagePool: () => (quasar ? historyStore : pulsarStore).getState().transactionsPool,
     useStagePool: quasar ? useHistoryPool : useLocalPool,
+    // Stops tracking a transaction, in both stores: the history keeps showing a record that only the Pulsar store forgot
+    removeTx: (txKey: string) => {
+      pulsarStore.getState().removeTxFromPool(txKey);
+      historyStore.getState().removeTxFromPool(txKey);
+    },
     start: () => {
       const stopHistorySync = pulsarStore.subscribe((state) =>
         historyStore.getState().syncWithLocalPool(state.transactionsPool),
       );
-      return () => {
-        stopHistorySync();
-        stopTrackers();
-      };
+      // The trackers stay: Strict Mode runs this effect twice, and the store would not start a tracker it already has again, so a
+      // restored transaction would stay pending for ever. They end with their transactions, and `halt` stops them for a new device
+      return stopHistorySync;
     },
     halt,
   };

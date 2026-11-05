@@ -19,7 +19,7 @@ const LIFECYCLE_FLOWCHART_UK = `flowchart TD
     Mempool -->|Скасування: Переказ 0 ETH<br/>на власну адресу| Cancelled([Скасовано: Nonce використано])
 
     Mempool -->|Стрибок Base Fee<br/>або розрив Nonce| Dropped[Випало: Dropped]
-    Dropped --> Failed([Невдача: Видалено з мемпулу])
+    Dropped --> Waits([Очікує, доки nonce не буде витрачено])
 
     Mempool ==>|Включено до блоку| Processed[Оброблено: Оптимістичний блок 0]
 
@@ -51,7 +51,7 @@ const LIFECYCLE_FLOWCHART_ZH = `flowchart TD
     Mempool -->|取消交易: 0金额<br/>自转账| Cancelled([已取消: Nonce 已消耗])
 
     Mempool -->|Base Fee 暴涨<br/>或 Nonce 空缺| Dropped[已掉包: Dropped]
-    Dropped --> Failed([失败: 被逐出内存池])
+    Dropped --> Waits([等待中，直到 nonce 被消耗])
 
     Mempool ==>|被区块打包| Processed[已处理: 乐观区块 0]
 
@@ -140,8 +140,10 @@ export function WhyWeb3StateBrokenLocalized({ locale }: { locale: Locale }) {
         <CodeSnippet index={3} />
         <P>
           Ваш компонент продовжує очікувати старий хеш, якого більше ніколи не буде включено в блок, і назавжди зависає
-          в нескінченному завантаженні. Pulsar вирішує це, перехоплюючи подію <Code>onReplaced</Code> на рівні адаптера
-          та оновлюючи запис у центральному сховищі.
+          в нескінченному завантаженні. Pulsar вирішує це в трекері: між спробами отримати квитанцію він читає nonce
+          відправника, тож бачить заміну навіть тоді, коли вузол уже забув старий хеш. Старий запис стає{' '}
+          <Code>Replaced</Code> із <Code>replacedTxHash</Code> та <Code>replacedReason</Code>. Після прискорення Pulsar
+          додає запис нового хешу й веде його до результату, а скасування на цьому завершується.
         </P>
 
         <H3 id="failure-mode-3-cross-tab--browser-reload-amnesia">Збій 3: Амнезія вкладок та перезавантаження</H3>
@@ -220,8 +222,8 @@ export function WhyWeb3StateBrokenLocalized({ locale }: { locale: Locale }) {
             мережі.
           </Li>
           <Li>
-            <strong>Відстеження заміни за нонсом:</strong> перехоплення <Code>onReplaced</Code> та збереження нового
-            хешу.
+            <strong>Відстеження заміни за нонсом:</strong> трекер читає nonce відправника і веде прискорену транзакцію
+            до результату новим записом.
           </Li>
           <Li>
             <strong>Автоматичне відновлення пулу:</strong> підхоплення незавершених транзакцій після перезавантаження
@@ -287,8 +289,7 @@ export function WhyWeb3StateBrokenLocalized({ locale }: { locale: Locale }) {
               </Td>
               <Td>❌ Зависає або викидає помилку на новому хеші</Td>
               <Td>
-                ✅ Перехоплює <Code>onReplaced</Code>, фіксує <Code>Replaced</Code>, зберігає{' '}
-                <Code>replacedTxHash</Code>
+                ✅ Читає nonce відправника, фіксує <Code>Replaced</Code> із причиною і веде прискорення до результату
               </Td>
             </Tr>
             <Tr>
@@ -417,7 +418,9 @@ export function WhyWeb3StateBrokenLocalized({ locale }: { locale: Locale }) {
       <P>而在简单的组件代码中，开发者仅等待初始哈希的收据：</P>
       <CodeSnippet index={3} />
       <P>
-        组件仍苦等旧 Hash 陷入永久加载。Pulsar 在适配器层拦截 <Code>onReplaced</Code> 事件并持久化替换哈希。
+        组件仍苦等旧 Hash 陷入永久加载。Pulsar 在跟踪器中解决这一问题：在两次获取收据之间读取发送方的
+        nonce，即使节点已忘记旧哈希也能发现替换。旧记录变为 <Code>Replaced</Code>，并带有 <Code>replacedTxHash</Code> 和{' '}
+        <Code>replacedReason</Code>。加速后 Pulsar 添加新哈希的记录并跟踪到最终结果；取消则到此结束。
       </P>
 
       <H3 id="failure-mode-3-cross-tab--browser-reload-amnesia">故障 3：多标签页与刷新健忘症</H3>
@@ -524,7 +527,7 @@ export function WhyWeb3StateBrokenLocalized({ locale }: { locale: Locale }) {
             </Td>
             <Td>❌ 停留在旧 Hash 挂起或报错</Td>
             <Td>
-              ✅ 拦截 <Code>onReplaced</Code>，标记 <Code>Replaced</Code> 并持久化新 Hash
+              ✅ 读取发送方的 nonce，标记 <Code>Replaced</Code> 及原因，并将加速交易跟踪到最终结果
             </Td>
           </Tr>
           <Tr>
