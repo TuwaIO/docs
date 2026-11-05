@@ -24,7 +24,7 @@ function finalFields(tx: PlaygroundTransaction, update: FinalUpdate): UpdatableT
       isError: true,
       error: normalizeError(new Error(update.error)),
     }),
-    ...(update.replacedTxHash && { replacedTxHash: update.replacedTxHash }),
+    ...(update.replacedTxHash && { replacedTxHash: update.replacedTxHash, replacedReason: update.replacedReason }),
     ...(tx.adapter === OrbitAdapter.SOLANA &&
       update.status === TransactionStatus.Success && { confirmations: 'MAX', confirmationStatus: 'finalized' }),
   };
