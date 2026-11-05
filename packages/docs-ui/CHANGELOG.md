@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.1...docs-ui-v0.7.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **deps:** TUWA SDK 0.6.10, Nova 0.11, and the guides as Pulsar works now ([#61](https://github.com/TuwaIO/docs/issues/61)) ([f3a0c8d](https://github.com/TuwaIO/docs/commit/f3a0c8d79b2692f245ad0054502dc313e0721b31))
+
 ## [0.7.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.0...docs-ui-v0.7.1) (2026-10-28)
 
 
