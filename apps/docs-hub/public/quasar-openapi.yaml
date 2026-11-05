@@ -3422,9 +3422,9 @@ components:
                   required:
                     - methodId
                     - request
-                  description: What another wallet asks for to take over, when the last charge under the permission failed and moved
-                    nothing, or it expired; only on an open invoice of a scheduled subscription. It confirms the invoice
-                    and gives its own.
+                  description: What another wallet asks for to take over, when this wallet cannot pay, when nothing under the permission
+                    has moved money and its last charge failed, or when it expired; only on an open invoice of a
+                    scheduled subscription. It confirms the invoice and gives its own.
               required:
                 - status
                 - permission
@@ -6893,9 +6893,9 @@ paths:
                         required:
                           - methodId
                           - request
-                        description: What another wallet asks for to take over, when the last charge under the permission failed and moved
-                          nothing, or it expired; only on an open invoice of a scheduled subscription. It confirms the
-                          invoice and gives its own.
+                        description: What another wallet asks for to take over, when this wallet cannot pay, when nothing under the permission
+                          has moved money and its last charge failed, or when it expired; only on an open invoice of a
+                          scheduled subscription. It confirms the invoice and gives its own.
                     required:
                       - status
                       - permission
@@ -6906,7 +6906,9 @@ paths:
         "400":
           description: "`invalid_request` with `issues`, `payer_chain_mismatch`, `permission_invalid`: the context does not grant
             the requested terms, or the wallet is not one of the delegation framework's (`details.reason`:
-            `wallet_unknown`), or this delegation was ended (`details.reason`: `delegation_ended`: give a new one)."
+            `wallet_unknown`), this delegation was ended (`details.reason`: `delegation_ended`: give a new one), or
+            charges of this wallet kept failing on this invoice (`details.reason`: `too_many_failed_charges`: use
+            another wallet)."
           content:
             application/json:
               schema:
@@ -6925,8 +6927,8 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
           description: "`subscription_not_active`, `auto_charge_unavailable`, `payer_proof_required`, `permission_active`: a
-            permission stays with its wallet, unless the last charge under it failed and moved nothing, or it expired
-            (`replacement` in the offer)."
+            permission stays with its wallet, unless that wallet cannot pay, nothing under it has moved money and its
+            last charge failed, or it expired (`replacement` in the offer)."
           content:
             application/json:
               schema:
