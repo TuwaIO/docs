@@ -215,7 +215,7 @@ components:
               type: boolean
               enum:
                 - true
-              description: "On `refund.failed` and `invoice.expired`: nothing proves that the money stayed, as a transaction was lost sight of and may still land. Check it before sending the money again or selling the goods on."
+              description: "On `refund.failed` and `invoice.expired`: nothing proves that the money stayed: a transaction was lost sight of and may still land, or money may have moved in what spent its nonce, or inside a Safe's or a sponsor's call. Check it before sending the money again or selling the goods on."
             heldTransfer:
               anyOf:
                 - type: object
