@@ -139,6 +139,24 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
             </Tr>
             <Tr>
               <Td>
+                <Code>replacedTxHash</Code>
+              </Td>
+              <Td>
+                Для <Code>Replaced</Code>: транзакція, яка зайняла nonce цієї, якщо її знайдено.
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
+                <Code>replacedReason</Code>
+              </Td>
+              <Td>
+                Для <Code>Replaced</Code>: <Code>repriced</Code> (та сама транзакція з вищою комісією, Speed up у
+                гаманці), <Code>cancelled</Code>, <Code>replaced</Code> (інша транзакція) або <Code>unknown</Code> (її
+                nonce зайняла транзакція, яку не вдалося знайти, тож кошти могли піти).
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
                 <Code>metadata</Code>
               </Td>
               <Td>
@@ -188,6 +206,11 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
           </Li>
           <Li>
             Ви можете вручну повторити невдалу доставку прямо зі списку записів у панелі, не частіше разу на хвилину.
+          </Li>
+          <Li>
+            Трекер може втратити транзакцію з поля зору, а вузол забуває замінений хеш. Коли Quasar згодом знаходить, що
+            її включено в блок або замінено, запис виправляється, і ендпоінт отримує ще один вебхук із новим{' '}
+            <Code>status</Code>: вважайте результатом останній.
           </Li>
           <Li>
             Журнали доставок зберігаються до 3 місяців. Для довшого аудиту зберігайте події, які отримує ваш ендпоінт.
@@ -324,6 +347,24 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
           </Tr>
           <Tr>
             <Td>
+              <Code>replacedTxHash</Code>
+            </Td>
+            <Td>
+              <Code>Replaced</Code> 时：占用此交易 nonce 的交易（如已找到）。
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
+              <Code>replacedReason</Code>
+            </Td>
+            <Td>
+              <Code>Replaced</Code> 时：<Code>repriced</Code>（相同交易、更高手续费，即钱包的 Speed up）、
+              <Code>cancelled</Code>、<Code>replaced</Code>（另一笔交易）或 <Code>unknown</Code>
+              （其 nonce 被无法找到的交易占用，款项可能已转出）。
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
               <Code>metadata</Code>
             </Td>
             <Td>Pulsar 客户端在发起交易时携带的完整业务 Payload。</Td>
@@ -360,6 +401,11 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
         <Li>因网络超时或返回非 2xx 状态码失败的投递，系统将进行最多 5 次指数退避重试（起始间隔 1 分钟）。</Li>
         <Li>控制台 Webhook Deliveries 页面记录全量请求流水，敏感关键词（如 secret, key, token）将自动脱敏。</Li>
         <Li>在调试或故障恢复后，可在控制台日志条目上点击一键重新投递，同一投递每分钟最多一次。</Li>
+        <Li>
+          追踪器可能跟丢交易，节点也会忘记被替换的哈希。当 Quasar
+          之后发现它已被打包或被替换时，记录会被更正，端点会再收到一个带有新 <Code>status</Code> 的
+          webhook：请以最后一个为准。
+        </Li>
         <Li>投递日志最多保留 3 个月。如需更长的审计记录，请保存您的端点收到的事件。</Li>
         <Li>
           每次投递仅在首次尝试时消耗 1 个配额点数，后续重试完全免费（参见{' '}

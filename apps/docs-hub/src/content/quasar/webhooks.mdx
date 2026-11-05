@@ -55,6 +55,8 @@ x-quasar-event: Success
 | `chainId`          | Chain of the transaction, as a string: the EVM chain ID (`"1"`), or for Solana the CAIP-2 chain ID with the genesis hash (`"solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"` for mainnet, `"solana:EtWTRABZaYq6iMfeYKouRu166VU2xqa1"` for devnet). Deliveries sent before October 2026 used the cluster name (`solana:mainnet`); `getSolanaCluster` of `@tuwaio/orbit-core` reads both forms |
 | `timestamp`        | Unix time in seconds when the webhook was created                                                                                                                                                                                                                                                                                                                                     |
 | `metadata`         | The `payload` of the Pulsar transaction                                                                                                                                                                                                                                                                                                                                               |
+| `replacedTxHash`   | On `Replaced`: the transaction that took the nonce of this one, when it was found                                                                                                                                                                                                                                                                                                     |
+| `replacedReason`   | On `Replaced`: `repriced` (the same transaction with a higher fee, a wallet's Speed up), `cancelled`, `replaced` (another transaction) or `unknown` (its nonce is spent by a transaction that could not be found, so money may have moved)                                                                                                                                            |
 
 ---
 
@@ -102,6 +104,7 @@ Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at 
 - A delivery that fails (network error, timeout or a non-`2xx` status) is retried, up to 5 attempts in total, with an exponential backoff that starts at one minute.
 - Every attempt is logged under **Webhook Deliveries** in the dashboard, with the status code and the response. Keys that look like secrets (`secret`, `token`, `password`, `key`, `privatekey`, `secretkey`, `apikey`, `signingsecret`, `credential`) are masked in the logs.
 - A failed delivery can be sent again from its log entry, at most once a minute.
+- A tracker can lose sight of a transaction, and a node forgets a replaced hash. When Quasar later finds that it was mined or replaced, the row is corrected and the endpoint gets another webhook with the new `status`: treat the last one as the result.
 - Delivery logs are kept for up to 3 months. For a longer audit trail, keep the events your endpoint receives.
 - Each delivery uses 1 quota unit, counted for the first attempt only (see [Quotas & Limits](/quasar/quotas-and-limits)).
 
