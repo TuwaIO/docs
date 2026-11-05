@@ -50,7 +50,9 @@ function startTracking(tx: PlaygroundTransaction) {
   const onReplaced = vi.fn();
   void adapter.checkAndInitializeTrackerInStore({
     tx,
-    updateTxParams: (_txKey, fields) => updates.push(fields),
+    updateTxParams: (_txKey, fields) => {
+      updates.push(fields);
+    },
     removeTxFromPool: () => {},
     transactionsPool: { [tx.txKey]: tx },
     onSuccess,
