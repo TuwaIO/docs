@@ -628,6 +628,10 @@ components:
           type: string
           description: Refunded so far.
           example: "49.00"
+        refundShort:
+          type: string
+          description: "What refunds that arrived short delivered, of those nothing completes yet: a new refund has that much less
+            to return. With `GET /invoices/{id}` only."
         replaces:
           type:
             - string
@@ -3356,6 +3360,70 @@ components:
                     - to
                     - data
                   description: The transaction that revokes the permission, for the wallet that granted it to send and pay for.
+                replacement:
+                  type: object
+                  properties:
+                    methodId:
+                      type: string
+                    request:
+                      type: object
+                      properties:
+                        chainId:
+                          type: string
+                        to:
+                          type: string
+                        permission:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              enum:
+                                - erc20-token-periodic
+                            isAdjustmentAllowed:
+                              type: boolean
+                            data:
+                              type: object
+                              properties:
+                                tokenAddress:
+                                  type: string
+                                periodAmount:
+                                  type: string
+                                periodDuration:
+                                  type: number
+                                startTime:
+                                  type: number
+                                justification:
+                                  type: string
+                              required:
+                                - tokenAddress
+                                - periodAmount
+                                - periodDuration
+                                - startTime
+                                - justification
+                          required:
+                            - type
+                            - isAdjustmentAllowed
+                            - data
+                        rules:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              type:
+                                type: string
+                              data: {}
+                            required:
+                              - type
+                      required:
+                        - chainId
+                        - to
+                        - permission
+                        - rules
+                  required:
+                    - methodId
+                    - request
+                  description: "What another wallet asks for to take over, when the permission never charged anything or its wallet ran
+                    out of funds: it confirms the invoice and gives its own."
               required:
                 - status
                 - permission
@@ -4645,7 +4713,7 @@ paths:
       summary: Ask for a refund
       description: "Prices the refund; send the amount from your wallet to the payer, then submit the transaction. A refund
         limit is the value of what arrived: a short payment you released never returns more than it brought. A retry
-        with the same `Idempotency-Key` returns the refund the first call created."
+        with the same `Idempotency-Key` returns the refund the first call created while it waits for its transaction."
       security: *a1
       parameters:
         - schema:
@@ -4717,7 +4785,9 @@ paths:
         "409":
           description: "`invoice_not_refundable`, `exact_refund_needs_whole_invoice`, `payment_unknown`: the payment to refund is
             not known; `sender_blocked`: the AML check blocks the wallet the refund would go to;
-            `refund_top_up_waiting`: a top-up of a short refund waits for its transaction; `idempotency_key_reused`."
+            `refund_top_up_waiting`: a top-up of a short refund waits for its transaction; `idempotency_key_reused`: the
+            key was used for another invoice, mode or amount; `refund_not_waiting`: the key was used for a refund
+            already sent, finished, failed or taken back (`details.refund`): a new refund needs a new key."
           content:
             application/json:
               schema:
@@ -5903,6 +5973,59 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "429":
           description: The rate limit of the organization.
+  /v1/payments/subscriptions/{id}/permission/end:
+    post:
+      tags:
+        - Subscriptions
+      summary: End the automatic-charge permission
+      description: "For a buyer who lost the wallet: Quasar charges it no more (`subscription.permission_revoked`), and the
+        buyer pays from the invoice links or gives a new permission. The delegation stays valid on chain until its
+        wallet revokes it, but Quasar does not use it again."
+      security: *a1
+      parameters:
+        - schema:
+            type: string
+            description: Subscription ID.
+          required: true
+          description: Subscription ID.
+          name: id
+          in: path
+      responses:
+        "200":
+          description: The subscription.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyRefusal"
+        "403":
+          description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
+            Payments for the organization); or a `KeyRefusal` of the key or the app."
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/PaymentsError"
+                  - $ref: "#/components/schemas/KeyRefusal"
+        "404":
+          description: "`subscription_not_found`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "409":
+          description: "`permission_not_active`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "429":
+          description: The rate limit of the organization.
   /v1/payments/checkout/{token}:
     get:
       tags:
@@ -6012,7 +6135,9 @@ paths:
             `payer_proof_required` (the EVM wallet has not confirmed the invoice: `payer-proof` first; `payer` names
             it), `invoice_expired`, `invoice_processing`, `invoice_not_payable`, `amount_out_of_range`,
             `method_not_priced`, `payment_on_its_way` (a payment of the invoice is being followed: wait for it, the
-            quote it pays stays), `native_from_contract` (a smart wallet cannot pay in this coin: choose a token)."
+            quote it pays stays), `native_from_contract` (a smart wallet cannot pay in this coin: choose a token),
+            `too_many_payments` (the invoice was handed 50 transactions already: the buyer contacts the seller, before
+            any money moves)."
           content:
             application/json:
               schema:
@@ -6340,7 +6465,9 @@ paths:
           description: "`quote_required`; `too_many_pending`: the invoice already has 3 unconfirmed transactions, wait until one
             is confirmed or fails; `tx_already_used`: Quasar tracks the transaction for another invoice of the app (this
             invoice's claim is recorded, see above): not a refusal of the payment, so never offer a second one for it;
-            `too_many_payments`: the invoice was handed 50 transactions already, the buyer contacts the seller."
+            `too_many_payments`: the invoice was handed 50 transactions already: Quasar keeps the hash in the ledger for
+            the merchant (`payment.handover_refused`) and follows it no more, so never offer a second payment; the buyer
+            contacts the seller."
           content:
             application/json:
               schema:
@@ -6703,6 +6830,70 @@ paths:
                           - to
                           - data
                         description: The transaction that revokes the permission, for the wallet that granted it to send and pay for.
+                      replacement:
+                        type: object
+                        properties:
+                          methodId:
+                            type: string
+                          request:
+                            type: object
+                            properties:
+                              chainId:
+                                type: string
+                              to:
+                                type: string
+                              permission:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    enum:
+                                      - erc20-token-periodic
+                                  isAdjustmentAllowed:
+                                    type: boolean
+                                  data:
+                                    type: object
+                                    properties:
+                                      tokenAddress:
+                                        type: string
+                                      periodAmount:
+                                        type: string
+                                      periodDuration:
+                                        type: number
+                                      startTime:
+                                        type: number
+                                      justification:
+                                        type: string
+                                    required:
+                                      - tokenAddress
+                                      - periodAmount
+                                      - periodDuration
+                                      - startTime
+                                      - justification
+                                required:
+                                  - type
+                                  - isAdjustmentAllowed
+                                  - data
+                              rules:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                    data: {}
+                                  required:
+                                    - type
+                            required:
+                              - chainId
+                              - to
+                              - permission
+                              - rules
+                        required:
+                          - methodId
+                          - request
+                        description: "What another wallet asks for to take over, when the permission never charged anything or its wallet ran
+                          out of funds: it confirms the invoice and gives its own."
                     required:
                       - status
                       - permission
@@ -6712,7 +6903,8 @@ paths:
                   - autoCharge
         "400":
           description: "`invalid_request` with `issues`, `payer_chain_mismatch`, `permission_invalid`: the context does not grant
-            the requested terms."
+            the requested terms, or the wallet is not one of the delegation framework's (`details.reason`:
+            `wallet_unknown`)."
           content:
             application/json:
               schema:
@@ -6730,7 +6922,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`subscription_not_active`, `auto_charge_unavailable`."
+          description: "`subscription_not_active`, `auto_charge_unavailable`, `payer_proof_required`, `permission_active`: a
+            permission that pays stays with its wallet, unless it never charged anything or ran out of funds
+            (`replacement` in the offer)."
           content:
             application/json:
               schema:
