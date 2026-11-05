@@ -3422,8 +3422,9 @@ components:
                   required:
                     - methodId
                     - request
-                  description: "What another wallet asks for to take over, when the permission never charged anything or its wallet ran
-                    out of funds: it confirms the invoice and gives its own."
+                  description: What another wallet asks for to take over, when the last charge under the permission failed and moved
+                    nothing, or it expired; only on an open invoice of a scheduled subscription. It confirms the invoice
+                    and gives its own.
               required:
                 - status
                 - permission
@@ -6892,8 +6893,9 @@ paths:
                         required:
                           - methodId
                           - request
-                        description: "What another wallet asks for to take over, when the permission never charged anything or its wallet ran
-                          out of funds: it confirms the invoice and gives its own."
+                        description: What another wallet asks for to take over, when the last charge under the permission failed and moved
+                          nothing, or it expired; only on an open invoice of a scheduled subscription. It confirms the
+                          invoice and gives its own.
                     required:
                       - status
                       - permission
@@ -6904,7 +6906,7 @@ paths:
         "400":
           description: "`invalid_request` with `issues`, `payer_chain_mismatch`, `permission_invalid`: the context does not grant
             the requested terms, or the wallet is not one of the delegation framework's (`details.reason`:
-            `wallet_unknown`)."
+            `wallet_unknown`), or this delegation was ended (`details.reason`: `delegation_ended`: give a new one)."
           content:
             application/json:
               schema:
@@ -6923,7 +6925,7 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
           description: "`subscription_not_active`, `auto_charge_unavailable`, `payer_proof_required`, `permission_active`: a
-            permission that pays stays with its wallet, unless it never charged anything or ran out of funds
+            permission stays with its wallet, unless the last charge under it failed and moved nothing, or it expired
             (`replacement` in the offer)."
           content:
             application/json:
