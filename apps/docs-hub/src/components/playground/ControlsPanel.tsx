@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { cn } from '@tuwaio/nova-core/utils';
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
+import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
 
@@ -16,8 +17,9 @@ import { useI18n } from '@/i18n';
 import type { ReplacementReason } from '@/lib/playground/chain';
 import { type NovaLanguage, STYLE_KITS, type StyleKit } from '@/lib/playground/customization';
 import { logEvent } from '@/lib/playground/eventLog';
-import { scenarioStore, type TxOutcome } from '@/lib/playground/scenario';
+import { nextTxFamily, outcomeHintOf, outcomeLabelOf, scenarioStore, type TxOutcome } from '@/lib/playground/scenario';
 import { THEME_PRESETS, type ThemePreset } from '@/lib/playground/themes';
+import { familyOf } from '@/lib/playground/wallets';
 
 import { Choice, Group } from '../configurator/StackOptionsForm';
 import { usePlayground } from './PlaygroundContext';
@@ -327,12 +329,20 @@ function useLatestPendingEvmTx() {
     .sort((a, b) => b.localTimestamp - a.localTimestamp)[0];
 }
 
+/** The chain family the next transaction goes to, which decides what the `replaced` outcome is called. */
+function useNextTxFamily() {
+  const { families } = usePlayground();
+  const connectorType = useSatelliteConnectStore((state) => state.activeConnection?.connectorType);
+  return nextTxFamily(connectorType ? familyOf(connectorType) : undefined, families);
+}
+
 /** The simulation: the next transaction (in the panel; the phone bar has its own), speed, signatures, Quasar, EVM. */
 function SimulationGroups({ compact }: { compact: boolean }) {
   const { t } = useI18n();
   const { settings, families, device } = usePlayground();
   const scenario = useStore(scenarioStore);
   const pendingEvmTx = useLatestPendingEvmTx();
+  const nextFamily = useNextTxFamily();
 
   const replace = async (reason: ReplacementReason) => {
     if (!pendingEvmTx) return;
@@ -364,7 +374,7 @@ function SimulationGroups({ compact }: { compact: boolean }) {
               onClick={() => scenarioStore.setState({ outcome: id })}
               compact
             >
-              {t.ui.playgroundExtra.outcomeLabels[id]}
+              {t.ui.playgroundExtra.outcomeLabels[outcomeLabelOf(id, nextFamily)]}
             </Choice>
           ))}
         </Group>
@@ -469,9 +479,10 @@ function SessionActions({ className, short }: { className?: string; short?: bool
 function OutcomeHint() {
   const { t } = useI18n();
   const outcome = useStore(scenarioStore, (state) => state.outcome);
+  const nextFamily = useNextTxFamily();
   return (
     <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
-      {t.ui.playgroundExtra.outcomeHints[outcome]}
+      {t.ui.playgroundExtra.outcomeHints[outcomeHintOf(outcome, nextFamily)]}
     </p>
   );
 }
@@ -484,6 +495,7 @@ export function ControlsPanel() {
   const { t } = useI18n();
   const { settings } = usePlayground();
   const outcome = useStore(scenarioStore, (state) => state.outcome);
+  const nextFamily = useNextTxFamily();
   const sheet = useRef<HTMLDialogElement>(null);
   const chains = [settings.evm && 'EVM', settings.solana && 'Solana'].filter(Boolean).join(', ');
   const presetLabel =
@@ -531,7 +543,7 @@ export function ControlsPanel() {
             >
               {OUTCOMES.map((id) => (
                 <option key={id} value={id}>
-                  {t.ui.playgroundExtra.outcomeLabels[id]}
+                  {t.ui.playgroundExtra.outcomeLabels[outcomeLabelOf(id, nextFamily)]}
                 </option>
               ))}
             </select>

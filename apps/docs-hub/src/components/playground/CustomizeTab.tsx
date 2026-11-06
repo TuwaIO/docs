@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '@/i18n';
 import {
   CONNECT_LABEL_MAX_LENGTH,
-  DEFAULT_CUSTOMIZATION,
+  defaultCustomizationFor,
   type NovaCustomization,
   STYLE_KITS,
   type StyleKit,
@@ -86,9 +86,9 @@ function Toggles({ items }: { items: { flag: Flag; label: string; api: string }[
  * provider options. Changes apply to the stage at once; the Code tab shows them as files for an app.
  */
 export function CustomizeTab() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { settings, customization, changeCustomization, resetCustomization } = usePlayground();
-  const customized = JSON.stringify(customization) !== JSON.stringify(DEFAULT_CUSTOMIZATION);
+  const customized = JSON.stringify(customization) !== JSON.stringify(defaultCustomizationFor(locale));
   const cust = t.playground.inspector.customize;
 
   return (

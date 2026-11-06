@@ -1170,12 +1170,16 @@ export const zhCN: DocsHubLabels = {
         success: '成功 (Success)',
         revert: '回滚 (Revert)',
         replaced: '替换 (Replaced)',
+        expired: '过期 (Expired)',
         rejected: '拒绝 (Rejected)',
       },
       outcomeHints: {
         success: '在 EVM 上打包成功；在 Solana 上先于 1 秒内达到 confirmed，随后达到 finalized。',
         revert: '智能合约 (EVM) 或链上程序 (Solana) 执行回滚并报错。',
-        replaced: 'EVM：相同 Nonce 的另一笔交易先被打包。Solana：区块哈希 (blockhash) 过期。',
+        replaced: '相同 Nonce 的另一笔交易先被打包。',
+        expired: 'Solana 没有交易替换：区块哈希 (blockhash) 过期，交易不会上链并以失败结束。',
+        replacedOrExpired:
+          'EVM：相同 Nonce 的另一笔交易先被打包。Solana 没有交易替换：区块哈希 (blockhash) 过期，交易以失败结束。',
         rejected: '用户在钱包弹窗中点击拒绝。',
       },
       info: {
@@ -1194,7 +1198,7 @@ export const zhCN: DocsHubLabels = {
         signatures: '决定模拟钱包是批准还是拒绝下一次消息签名请求（例如 SIWX 登录签名）。',
         quasar: '离线模式：同步请求失败，Pulsar 会将交易保留在未同步队列中，并在 Quasar 恢复在线时自动补发。',
         pendingEvm:
-          '模拟钱包使用相同 Nonce 替换最新一笔挂起的 EVM 交易：“加速”会重发原交易，“取消”会发送一笔空转账，原交易终态变为 Replaced。',
+          '模拟钱包使用相同 Nonce 替换最新一笔挂起的 EVM 交易：“加速”会重发原交易，“取消”会发送一笔空转账，原交易终态变为 Replaced。Nova 仅在使用 MetaMask 时才在提示和弹窗中显示这两个按钮；模拟钱包并非 MetaMask，因此在这里放在此面板中。',
       },
     },
     policiesExtra: {

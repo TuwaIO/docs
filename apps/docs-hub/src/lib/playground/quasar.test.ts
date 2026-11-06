@@ -2,7 +2,7 @@ import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { TransactionStatus, TransactionTracker } from '@tuwaio/sdk/pulsar';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { resetChain, submitTransaction } from './chain';
+import { replaceTransaction, resetChain, submitTransaction } from './chain';
 import { clearEvents, eventLog } from './eventLog';
 import { createQuasarHistory, quasarCloud, quasarPreflight, resetQuasar, syncToQuasar } from './quasar';
 import { DEFAULT_SCENARIO, scenarioStore } from './scenario';
@@ -60,6 +60,32 @@ describe('simulated Quasar', () => {
         metadata: { amount: 1 },
       }),
     );
+  });
+
+  // Without the reason a cancel read as a plain Replaced on another device, whose history comes from here
+  it('keeps what replaced a transaction, as the history of another device shows it', async () => {
+    const hash = submitTransaction(OrbitAdapter.EVM, 'success');
+    const syncing = syncToQuasar(tx(hash));
+    await vi.advanceTimersByTimeAsync(1000);
+    await syncing;
+    const replacement = replaceTransaction(hash, 'cancel');
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(quasarCloud.getState().transactions[hash]).toEqual(
+      expect.objectContaining({
+        status: TransactionStatus.Replaced,
+        replacedTxHash: replacement,
+        replacedReason: 'cancelled',
+      }),
+    );
+  });
+
+  // The store hands over a record still marked as pending: another device read it back as waiting for a sync, from the server
+  it('keeps a synced transaction as synced, as the history of another device shows it', async () => {
+    const hash = submitTransaction(OrbitAdapter.EVM, 'success');
+    const syncing = syncToQuasar({ ...tx(hash), syncStatus: 'pending-sync' });
+    await vi.advanceTimersByTimeAsync(600);
+    await syncing;
+    expect(quasarCloud.getState().transactions[hash]?.syncStatus).toBe('synced');
   });
 
   it('notifies at once about a transaction synced after it ended, as after an offline period', async () => {
