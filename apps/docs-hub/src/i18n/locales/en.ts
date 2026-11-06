@@ -1200,12 +1200,16 @@ export const en: DocsHubLabels = {
         success: 'Success',
         revert: 'Revert',
         replaced: 'Replaced',
+        expired: 'Expired',
         rejected: 'Rejected',
       },
       outcomeHints: {
         success: 'Mined on EVM. On Solana, confirmed in a second, then finalized.',
         revert: 'The contract (EVM) or the program (Solana) fails the transaction.',
-        replaced: 'EVM: another transaction with the same nonce is mined. Solana: the blockhash expires.',
+        replaced: 'Another transaction with the same nonce is mined instead.',
+        expired: 'Solana has no replacements: the blockhash expires, the transaction never lands and ends as Failed.',
+        replacedOrExpired:
+          'EVM: another transaction with the same nonce is mined. Solana, which has no replacements: the blockhash expires and the transaction ends as Failed.',
         rejected: 'The user rejects the transaction in the wallet.',
       },
       info: {
@@ -1228,7 +1232,7 @@ export const en: DocsHubLabels = {
         quasar:
           "Offline: the sync fails, Pulsar keeps the transaction unsynced and resends it when Quasar is back. A real app's preFlightTxCheck also stops new transactions while Quasar is unreachable.",
         pendingEvm:
-          'Replaces the latest pending EVM transaction with one of the same nonce, as a wallet does: Speed up resends it, Cancel sends an empty one. The original ends as Replaced.',
+          'Replaces the latest pending EVM transaction with one of the same nonce, as a wallet does: Speed up resends it, Cancel sends an empty one. The original ends as Replaced. Nova shows these two in its toast and window only for MetaMask; the simulated wallets are not MetaMask, so here they are in this panel.',
       },
     },
     policiesExtra: {

@@ -9,7 +9,7 @@ import '@tuwaio/sdk/styles/nova-connect.css';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useI18n } from '@/i18n';
-import { DEFAULT_CUSTOMIZATION, type NovaCustomization, type NovaLanguage } from '@/lib/playground/customization';
+import { DEFAULT_CUSTOMIZATION, defaultCustomizationFor, type NovaCustomization } from '@/lib/playground/customization';
 import {
   DEFAULT_SETTINGS,
   normalizeSettings,
@@ -22,10 +22,6 @@ import { pickStyle, pickTheme, THEME_PRESETS, type ThemeId, type ThemeValues } f
 import { replaceQuery, useQueryString } from '@/lib/queryState';
 
 import { PlaygroundSession } from './PlaygroundSession';
-
-function toNovaLanguage(locale: 'en' | 'uk' | 'zh-CN'): NovaLanguage {
-  return locale === 'zh-CN' ? 'zh' : locale;
-}
 
 /**
  * The Playground of `/playground`. It runs only in the browser (`PlaygroundLoader` imports it with `ssr: false`), so
@@ -40,13 +36,12 @@ export default function PlaygroundStudio() {
   const [generation, setGeneration] = useState(0);
   const [themeEdits, setThemeEdits] = useState<Partial<ThemeValues>>({});
   const [customization, setCustomization] = useState<NovaCustomization>(() => ({
-    ...DEFAULT_CUSTOMIZATION,
-    language: toNovaLanguage(locale),
+    ...defaultCustomizationFor(locale),
     style: pickTheme(settings.theme, DEFAULT_CUSTOMIZATION.style).style,
   }));
 
   useEffect(() => {
-    const nextLang = toNovaLanguage(locale);
+    const nextLang = defaultCustomizationFor(locale).language;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCustomization((current) => (current.language === nextLang ? current : { ...current, language: nextLang }));
   }, [locale]);
@@ -85,7 +80,7 @@ export default function PlaygroundStudio() {
       customization={customization}
       changeCustomization={changeCustomization}
       resetCustomization={() => {
-        setCustomization(DEFAULT_CUSTOMIZATION);
+        setCustomization(defaultCustomizationFor(locale));
         switchTheme(pickStyle(DEFAULT_CUSTOMIZATION.style, settings.theme).theme);
       }}
       restart={() => setGeneration((value) => value + 1)}

@@ -710,8 +710,8 @@ export interface DocsHubLabels {
       closeSetup: string;
       scrollButton: string;
       scrollTitle: string;
-      outcomeLabels: Record<'success' | 'revert' | 'replaced' | 'rejected', string>;
-      outcomeHints: Record<'success' | 'revert' | 'replaced' | 'rejected', string>;
+      outcomeLabels: Record<'success' | 'revert' | 'replaced' | 'expired' | 'rejected', string>;
+      outcomeHints: Record<'success' | 'revert' | 'replaced' | 'expired' | 'replacedOrExpired' | 'rejected', string>;
       info: {
         chains: string;
         ui: string;
