@@ -71,6 +71,16 @@ export const DEFAULT_CUSTOMIZATION: NovaCustomization = {
   logButtonClicks: false,
 };
 
+/**
+ * What a fresh Playground starts from and a reset goes back to: Nova as it ships, in the language of the site. A reset to the
+ * English texts would leave them next to the page's own titles in another language.
+ * @param locale - The language of the site.
+ * @returns The customization.
+ */
+export function defaultCustomizationFor(locale: 'en' | 'uk' | 'zh-CN'): NovaCustomization {
+  return { ...DEFAULT_CUSTOMIZATION, language: locale === 'zh-CN' ? 'zh' : locale };
+}
+
 /** The style kits of the Customize tab. */
 export const STYLE_KITS: Record<StyleKit, { label: string; description: string }> = {
   nova: { label: 'Nova', description: 'The class names Nova UI Kit ships with.' },

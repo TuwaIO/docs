@@ -1,3 +1,5 @@
+import { docsLabels } from '@tuwaio/docs-ui';
+
 import type { DocsHubLabels } from '../types';
 
 /**
@@ -13,28 +15,14 @@ export const uk: DocsHubLabels = {
     playground: 'Пісочниця',
     theme: 'Тема',
     language: 'Мова',
-    selectLanguage: 'Оберіть мову',
+    selectLanguage: docsLabels.uk.selectLanguage,
     toggleTheme: 'Перемкнути тему',
     openMenu: 'Відкрити меню навігації',
     closeMenu: 'Закрити меню навігації',
     mobileNavAria: 'Розділи документації',
   },
-  footer: {
-    description:
-      'Модульна, headless-first Web3-інфраструктура. Будуйте self-custodial застосунки на базі відкритих компонентів.',
-    license: 'Ліцензовано під Apache 2.0. Відкритий код та безкоштовне використання.',
-    policiesAriaLabel: 'Політики',
-    allPolicies: 'Усі політики',
-    copyright: 'Усі права захищено.',
-    policyTitles: {
-      terms: 'Умови використання',
-      privacy: 'Політика конфіденційності',
-      cookie: 'Політика файлів cookie',
-      refund: 'Політика повернення коштів',
-      security: 'Політика безпеки',
-      dpa: 'Доповнення щодо обробки даних',
-    },
-  },
+  // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
+  footer: docsLabels.uk.footer,
   common: {
     packageManager: 'Пакетний менеджер',
     copy: 'Копіювати',
@@ -53,6 +41,7 @@ export const uk: DocsHubLabels = {
       titleHighlight: 'Документація',
       description:
         'Open-source TypeScript пакети для EVM і Solana: підключення гаманців, вхід за стандартом CAIP-122 та відстеження транзакцій, з опціональними React-компонентами та хмарним або self-hosted бекендом.',
+      license: 'Усі пакети TUWA і Quasar Community Edition мають ліцензію Apache-2.0, і так залишиться.',
       searchAria: 'Пошук по всій документації TUWA',
       searchButton: 'Пошук по всій документації…',
       explorePackages: 'Огляд пакетів',
@@ -1087,6 +1076,12 @@ export const uk: DocsHubLabels = {
     latestReleasePrefix: 'Останній реліз',
     documentationTitle: 'Документація',
     deprecatedBadge: 'Застарілий',
+    packageBadges: {
+      version: 'Остання версія на npm',
+      license: 'Ліцензія',
+      size: 'Завантажується разом з імпортом: власний код пакета, мініфікований і стиснутий gzip, без залежностей. Виміряно {date}.',
+      sizeLazy: 'Ще {size} завантажується пізніше, за потреби.',
+    },
     moreCount: '+{count} ще',
     requiredPeers: 'Обов’язкові peer-залежності',
     optionalPeersHeading: 'Опціональні peer-залежності (встановіть ті, які використовує ваш застосунок)',
@@ -1131,6 +1126,23 @@ export const uk: DocsHubLabels = {
       chooseInsteadIntro:
         'Жоден інструментарій не підходить для кожного застосунку. Ось випадки, коли інший продукт є кращим вибором, і чим TUWA відрізняється у виконанні тієї самої задачі.',
       methodologyIntro: 'Як обчислюються бали, що означають позначки та звідки походить кожен факт.',
+      bundleTitle: 'Розмір бандла',
+      bundleIntro:
+        'Скільки TUWA додає до сторінки: власний код кожного пакета, мініфікований і стиснутий gzip, без React, viem, wagmi, @solana/kit та інших залежностей, які у вашому застосунку вже є. Набір — це сума його пакетів.',
+      bundleSetColumn: 'Набір',
+      bundlePackagesColumn: 'Пакетів',
+      bundleSizeColumn: 'Gzip',
+      bundleIncomplete: 'не всі пакети цього набору виміряно в останній збірці',
+      bundleMeasured:
+        'Виміряно {date} для останніх версій на npm за допомогою esbuild. Код за динамічними імпортами, що завантажується за потреби, не враховано. Власний розмір кожного пакета показано в його рядку на головній.',
+      bundleSets: {
+        pulsarEvm: 'Відстеження транзакцій, EVM (Pulsar)',
+        pulsarSolana: 'Відстеження транзакцій, Solana (Pulsar)',
+        siwxEvm: 'Вхід, EVM (SIWX з React)',
+        siwxSolana: 'Вхід, Solana (SIWX з React)',
+        connect: 'Підключення гаманців, EVM і Solana (Satellite з React)',
+        sdkWithNova: 'Усе разом: @tuwaio/sdk для EVM і Solana з інтерфейсом Nova',
+      },
       readyHeading: 'Готові спробувати?',
       startFromTemplate: 'Почати з шаблону',
       fullStackGuide: 'Full-Stack посібник',
@@ -1222,12 +1234,17 @@ export const uk: DocsHubLabels = {
         success: 'Успіх',
         revert: 'Реверт',
         replaced: 'Замінено',
+        expired: 'Термін сплив',
         rejected: 'Відхилено',
       },
       outcomeHints: {
         success: 'Замайнено на EVM. На Solana — confirmed за секунду, потім finalized.',
         revert: 'Смарт-контракт (EVM) або програма (Solana) завершує транзакцію помилкою.',
-        replaced: 'EVM: майниться інша транзакція з тим самим nonce. Solana: спливає термін дії blockhash.',
+        replaced: 'Замість неї майниться інша транзакція з тим самим nonce.',
+        expired:
+          'У Solana немає заміни транзакцій: термін дії blockhash спливає, транзакція не потрапляє в мережу й завершується помилкою.',
+        replacedOrExpired:
+          'EVM: майниться інша транзакція з тим самим nonce. Solana, де заміни немає: термін дії blockhash спливає, і транзакція завершується помилкою.',
         rejected: 'Користувач відхиляє транзакцію у вікні гаманця.',
       },
       info: {
@@ -1250,7 +1267,7 @@ export const uk: DocsHubLabels = {
         quasar:
           'Офлайн: синхронізація завершується помилкою, Pulsar зберігає транзакцію несинхронізованою і повторно надсилає її, коли Quasar знову онлайн.',
         pendingEvm:
-          'Замінює останню очікувану EVM-транзакцію новою з тим самим nonce, як це робить гаманець: Пришвидшити надсилає її повторно, Скасувати відправляє порожню транзакцію. Оригінал отримує статус Replaced.',
+          'Замінює останню очікувану EVM-транзакцію новою з тим самим nonce, як це робить гаманець: Пришвидшити надсилає її повторно, Скасувати відправляє порожню транзакцію. Оригінал отримує статус Replaced. У тості та вікні Nova показує ці кнопки лише для MetaMask; симульовані гаманці — не MetaMask, тому тут вони на цій панелі.',
       },
     },
     policiesExtra: {
@@ -1271,18 +1288,7 @@ export const uk: DocsHubLabels = {
     },
   },
   nextra: {
-    onThisPage: 'На цій сторінці',
-    scrollToTop: 'Прокрутити вгору',
-    editThisPage: 'Редагувати цю сторінку',
-    feedback: 'Є запитання? Залиште відгук',
-    lastUpdated: 'Востаннє оновлено',
-    searchPlaceholder: 'Пошук у документації…',
-    searchEmpty: 'Нічого не знайдено.',
-    searchError: 'Не вдалося завантажити пошуковий індекс.',
-    searchLoading: 'Завантаження…',
-    themeLight: 'Світла',
-    themeDark: 'Темна',
-    themeSystem: 'Системна',
+    ...docsLabels.uk.nextra,
     sidebar: {
       main: 'Головна',
       guides: 'Посібники',

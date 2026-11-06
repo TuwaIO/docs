@@ -1,3 +1,5 @@
+import { docsLabels } from '@tuwaio/docs-ui';
+
 import type { DocsHubLabels } from '../types';
 
 /**
@@ -13,28 +15,14 @@ export const en: DocsHubLabels = {
     playground: 'Playground',
     theme: 'Theme',
     language: 'Language',
-    selectLanguage: 'Select language',
+    selectLanguage: docsLabels.en.selectLanguage,
     toggleTheme: 'Toggle theme',
     openMenu: 'Open navigation menu',
     closeMenu: 'Close navigation menu',
     mobileNavAria: 'Documentation sections',
   },
-  footer: {
-    description:
-      'The modular, headless-first Web3 infrastructure. Build self-custodial applications on open-source, portable building blocks.',
-    license: 'Licensed under Apache 2.0. Open source and free to use.',
-    policiesAriaLabel: 'Policies',
-    allPolicies: 'All policies',
-    copyright: 'All rights reserved.',
-    policyTitles: {
-      terms: 'Terms of Service',
-      privacy: 'Privacy Policy',
-      cookie: 'Cookie Policy',
-      refund: 'Refund Policy',
-      security: 'Security Policy',
-      dpa: 'Data Processing Addendum',
-    },
-  },
+  // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
+  footer: docsLabels.en.footer,
   common: {
     packageManager: 'Package manager',
     copy: 'Copy',
@@ -53,6 +41,7 @@ export const en: DocsHubLabels = {
       titleHighlight: 'Docs',
       description:
         'Open-source TypeScript packages for EVM and Solana: wallet connection, CAIP-122 sign-in and transaction tracking, with optional React components and a cloud or self-hosted backend.',
+      license: 'Every TUWA package and Quasar Community Edition is Apache-2.0, and it will stay Apache-2.0.',
       searchAria: 'Search all TUWA documentation',
       searchButton: 'Search all documentation…',
       explorePackages: 'Explore Packages',
@@ -1055,6 +1044,12 @@ export const en: DocsHubLabels = {
     latestReleasePrefix: 'Latest Release',
     documentationTitle: 'Documentation',
     deprecatedBadge: 'Deprecated',
+    packageBadges: {
+      version: 'Latest version on npm',
+      license: 'Licence',
+      size: 'Loaded with the import: the own code of the package, minified and gzipped, without its dependencies. Measured {date}.',
+      sizeLazy: '{size} more loads later, on demand.',
+    },
     moreCount: '+{count} more',
     requiredPeers: 'Required peers',
     optionalPeersHeading: 'Optional peers (install the ones your app uses)',
@@ -1097,6 +1092,23 @@ export const en: DocsHubLabels = {
       chooseInsteadIntro:
         'No toolkit fits every app. Here is where each product is the better pick, and what TUWA does differently in the same job.',
       methodologyIntro: 'How the scores are computed, what the marks mean and where every fact comes from.',
+      bundleTitle: 'Bundle Size',
+      bundleIntro:
+        'What TUWA adds to a page: the own code of each package, minified and gzipped, without React, viem, wagmi, @solana/kit and the other dependencies your app already has. A set is the sum of its packages.',
+      bundleSetColumn: 'Set',
+      bundlePackagesColumn: 'Packages',
+      bundleSizeColumn: 'Gzip',
+      bundleIncomplete: 'not every package of this set was measured in the last build',
+      bundleMeasured:
+        'Measured {date} from the latest npm versions with esbuild. Code behind dynamic imports, which loads on demand, is not counted. Each package row on the main page shows its own size.',
+      bundleSets: {
+        pulsarEvm: 'Transaction tracking, EVM (Pulsar)',
+        pulsarSolana: 'Transaction tracking, Solana (Pulsar)',
+        siwxEvm: 'Sign-in, EVM (SIWX with React)',
+        siwxSolana: 'Sign-in, Solana (SIWX with React)',
+        connect: 'Wallet connection, EVM and Solana (Satellite with React)',
+        sdkWithNova: 'Everything: @tuwaio/sdk for EVM and Solana with the Nova UI',
+      },
       readyHeading: 'Ready to try it?',
       startFromTemplate: 'Start From a Template',
       fullStackGuide: 'Full-Stack Guide',
@@ -1188,12 +1200,16 @@ export const en: DocsHubLabels = {
         success: 'Success',
         revert: 'Revert',
         replaced: 'Replaced',
+        expired: 'Expired',
         rejected: 'Rejected',
       },
       outcomeHints: {
         success: 'Mined on EVM. On Solana, confirmed in a second, then finalized.',
         revert: 'The contract (EVM) or the program (Solana) fails the transaction.',
-        replaced: 'EVM: another transaction with the same nonce is mined. Solana: the blockhash expires.',
+        replaced: 'Another transaction with the same nonce is mined instead.',
+        expired: 'Solana has no replacements: the blockhash expires, the transaction never lands and ends as Failed.',
+        replacedOrExpired:
+          'EVM: another transaction with the same nonce is mined. Solana, which has no replacements: the blockhash expires and the transaction ends as Failed.',
         rejected: 'The user rejects the transaction in the wallet.',
       },
       info: {
@@ -1216,7 +1232,7 @@ export const en: DocsHubLabels = {
         quasar:
           "Offline: the sync fails, Pulsar keeps the transaction unsynced and resends it when Quasar is back. A real app's preFlightTxCheck also stops new transactions while Quasar is unreachable.",
         pendingEvm:
-          'Replaces the latest pending EVM transaction with one of the same nonce, as a wallet does: Speed up resends it, Cancel sends an empty one. The original ends as Replaced.',
+          'Replaces the latest pending EVM transaction with one of the same nonce, as a wallet does: Speed up resends it, Cancel sends an empty one. The original ends as Replaced. Nova shows these two in its toast and window only for MetaMask; the simulated wallets are not MetaMask, so here they are in this panel.',
       },
     },
     policiesExtra: {
@@ -1237,18 +1253,7 @@ export const en: DocsHubLabels = {
     },
   },
   nextra: {
-    onThisPage: 'On This Page',
-    scrollToTop: 'Scroll to top',
-    editThisPage: 'Edit this page',
-    feedback: 'Question? Give us feedback',
-    lastUpdated: 'Last updated on',
-    searchPlaceholder: 'Search documentation…',
-    searchEmpty: 'No results found.',
-    searchError: 'Failed to load search index.',
-    searchLoading: 'Loading…',
-    themeLight: 'Light',
-    themeDark: 'Dark',
-    themeSystem: 'System',
+    ...docsLabels.en.nextra,
     sidebar: {
       main: 'Main Screen',
       guides: 'Guides',

@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.7.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.1...docs-ui-v0.7.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **deps:** TUWA SDK 0.6.10, Nova 0.11, and the guides as Pulsar works now ([#61](https://github.com/TuwaIO/docs/issues/61)) ([f3a0c8d](https://github.com/TuwaIO/docs/commit/f3a0c8d79b2692f245ad0054502dc313e0721b31))
+
+## [0.7.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.0...docs-ui-v0.7.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** docs-ui on Nova Core 0.10.6 ([7e3ba4e](https://github.com/TuwaIO/docs/commit/7e3ba4e1695dc55f06706f70b626d0fe979fe213))
+
+## [0.7.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.6.0...docs-ui-v0.7.0) (2026-10-28)
+
+
+### Features
+
+* **docs-ui:** one Nextra docs layout for the hub and the project sites; the translation check fails loudly ([683d333](https://github.com/TuwaIO/docs/commit/683d333e8f7e36f2dac5cb4b353fa00472bf519d))
+
+## [0.6.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.7...docs-ui-v0.6.0) (2026-10-28)
+
+
+### Features
+
+* **docs-ui:** the project documentation sites in English, Ukrainian and Simplified Chinese ([8c471f2](https://github.com/TuwaIO/docs/commit/8c471f23d66911892c344ee73ef8942b46a65731))
+
+## [0.5.7](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.6...docs-ui-v0.5.7) (2026-10-28)
+
+
+### Bug Fixes
+
+* **docs-ui:** the docs header never covers the page on phones ([25bf214](https://github.com/TuwaIO/docs/commit/25bf2145b0c47cc0821e2fceed7bd93c48cd810d))
+
 ## [0.5.6](https://github.com/TuwaIO/docs/compare/docs-ui-v0.5.5...docs-ui-v0.5.6) (2026-10-27)
 
 

@@ -244,7 +244,7 @@ export function MultiChainAuthLocalized({ locale }: { locale: Locale }) {
             </Tr>
             <Tr>
               <Td>
-                <strong>Рушій верифікації</strong>
+                <strong>Механізм верифікації</strong>
               </Td>
               <Td>
                 Viem <Code>recoverAddress</Code> (EIP-191) + <Code>verifyMessage</Code> (EIP-1271 / ERC-6492)

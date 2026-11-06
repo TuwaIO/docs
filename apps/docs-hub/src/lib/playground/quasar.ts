@@ -39,7 +39,7 @@ function settleInCloud(txKey: string, update: FinalUpdate) {
     pending: false,
     status: update.status,
     finishedTimestamp: update.finishedTimestamp,
-    ...(update.replacedTxHash && { replacedTxHash: update.replacedTxHash }),
+    ...(update.replacedTxHash && { replacedTxHash: update.replacedTxHash, replacedReason: update.replacedReason }),
   };
   quasarCloud.setState(({ transactions }) => ({ transactions: { ...transactions, [txKey]: settled } }));
   sendWebhook(settled);
@@ -64,7 +64,10 @@ export async function syncToQuasar(tx: PlaygroundTransaction): Promise<void> {
     logEvent('Quasar', `POST /api/transactions/sync ${shortId(tx.txKey)} → network error`);
     throw new Error('Quasar is offline');
   }
-  quasarCloud.setState(({ transactions }) => ({ transactions: { ...transactions, [tx.txKey]: tx } }));
+  // Marked as synced here: the record handed over is still pending in the store, and another device reads this one back
+  quasarCloud.setState(({ transactions }) => ({
+    transactions: { ...transactions, [tx.txKey]: { ...tx, syncStatus: 'synced' } },
+  }));
   logEvent('Quasar', `POST /api/transactions/sync ${shortId(tx.txKey)} → 201`, tx);
   if (!tx.pending) {
     // Synced after it ended, for example after Quasar was offline: Quasar confirms the final status at once

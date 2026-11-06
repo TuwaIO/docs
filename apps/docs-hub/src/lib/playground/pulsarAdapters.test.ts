@@ -50,7 +50,9 @@ function startTracking(tx: PlaygroundTransaction) {
   const onReplaced = vi.fn();
   void adapter.checkAndInitializeTrackerInStore({
     tx,
-    updateTxParams: (_txKey, fields) => updates.push(fields),
+    updateTxParams: (_txKey, fields) => {
+      updates.push(fields);
+    },
     removeTxFromPool: () => {},
     transactionsPool: { [tx.txKey]: tx },
     onSuccess,
@@ -155,6 +157,27 @@ describe('simulated Pulsar adapter', () => {
       expect.objectContaining({ status: TransactionStatus.Replaced, replacedTxHash: newHash }),
     );
     expect(onReplaced).toHaveBeenCalledOnce();
+  });
+
+  it('says what replaced it: a speed-up goes on under its new hash, a cancel ends there', async () => {
+    const sped = evmTx(submitTransaction(OrbitAdapter.EVM, 'success'));
+    const first = startTracking(sped);
+    await vi.advanceTimersByTimeAsync(1000);
+    const newHash = await first.adapter.speedUpTxAction!(sped);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(first.updates.at(-1)).toEqual(expect.objectContaining({ replacedReason: 'repriced' }));
+
+    // The chain knows the new hash, so its record has a tracker of its own and a result
+    const next = startTracking(evmTx(newHash));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(next.updates.at(-1)).toEqual(expect.objectContaining({ status: TransactionStatus.Success }));
+
+    const stopped = evmTx(submitTransaction(OrbitAdapter.EVM, 'success'));
+    const second = startTracking(stopped);
+    await vi.advanceTimersByTimeAsync(1000);
+    await second.adapter.cancelTxAction!(stopped);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(second.updates.at(-1)).toEqual(expect.objectContaining({ replacedReason: 'cancelled' }));
   });
 
   it('settles a transaction the chain no longer knows (restored after a reload) as mined', async () => {

@@ -68,7 +68,7 @@ flowchart TD
     Mempool -->|Cancel: Zero-Value<br/>Self-Transfer| Cancelled([Cancelled: Nonce Consumed])
 
     Mempool -->|Base Fee Spike<br/>or Nonce Gap| Dropped[Dropped]
-    Dropped --> Failed([Failed: Evicted from Mempool])
+    Dropped --> Waits([Pending until its nonce is spent])
 
     %% Phase 3: Block Inclusion & Execution (Main Highway)
     Mempool ==>|Included in Block| Processed[Processed: Optimistic Block 0]
@@ -133,7 +133,7 @@ Although modern lower-level libraries like `viem` provide internal replacement d
 2. **Component Isolation:** Even if an inline `onReplaced` callback intercepts $H_2$, an isolated button component cannot propagate the replacement hash to global navigation bars, activity drawers, or notification feeds.
 3. **Premature Error Rejection:** If the wallet user submits a cancellation or the RPC poll times out before the replacement is mined, the promise rejects with an unhandled exception—displaying a failure modal even though the replacement transaction $T_2$ was mined successfully.
 
-Pulsar solves this by intercepting Viem's `onReplaced` event at the adapter level, updating the transaction record in the central persistent store (`status = TransactionStatus.Replaced`, `replacedTxHash = H2`, `pending: false`), and emitting the replacement hash via the `onReplaced` callback for application-level handling.
+Pulsar solves this in the tracker, not in a component. It reads the nonce of the sender between receipt attempts, so it sees a replacement even after a node has forgotten $H_1$; viem's `onReplaced` only adds to that. The old record in the central persistent store becomes `status = TransactionStatus.Replaced`, with `replacedTxHash = H2`, `replacedReason` and `pending: false`. After a speed-up (`replacedReason: 'repriced'`) Pulsar adds a record of $H_2$ with `replaces = H1` and follows it to its result, so the operation goes on and the application follows nothing itself. After a cancel (`'cancelled'`) it ends there.
 
 ### Failure Mode 3: Cross-Tab & Browser Reload Amnesia [#failure-mode-3-cross-tab--browser-reload-amnesia]
 
@@ -179,7 +179,7 @@ To build resilient Web3 frontends, transaction tracking must **never live in Rea
 ┌──────────────────────────────┴──────────────────────────────┐
 │              Headless Engine (@tuwaio/pulsar-core)          │
 │  • Local-first Indexed/LocalStorage Persistence (Immer)     │
-│  • Nonce-aware Mempool Replacement Watcher (onReplaced)     │
+│  • Nonce-aware Replacement Detection (sender nonce)         │
 │  • Auto-reconnection & Polling Resumption after Reload      │
 └──────────────────────────────┬──────────────────────────────┘
                                │ (Passive Subscriptions)
@@ -193,7 +193,7 @@ To build resilient Web3 frontends, transaction tracking must **never live in Rea
 A production-grade Web3 transaction architecture enforces four non-negotiable rules:
 
 1. **Persistent Store as Single Source of Truth:** Broadcasted transactions must be synchronously serialized and saved to persistent storage (`localStorage` / `IndexedDB`) before awaiting network confirmation.
-2. **Nonce-Aware Replacement Detection:** The tracker detects when a transaction with hash `H1` is replaced in the mempool (e.g., speed-up or cancel via identical nonce). The store transitions `H1` to `TransactionStatus.Replaced`, records `replacedTxHash` (`H2`), sets `pending: false`, and fires the `onReplaced(newTx, oldTx)` callback. Pulsar stops tracking the superseded record and hands off the replacement hash to the consuming application layer.
+2. **Nonce-Aware Replacement Detection:** The tracker reads the nonce of the sender between receipt attempts, so it detects when a transaction with hash `H1` is replaced (a speed-up or cancel with the same nonce), even after a node has forgotten `H1`. The store transitions `H1` to `TransactionStatus.Replaced`, records `replacedTxHash` (`H2`) and `replacedReason`, sets `pending: false`, and fires the `onReplaced(newTx, oldTx)` callback. After a speed-up Pulsar adds a record of `H2` and follows it to its result, so the consuming application follows nothing itself. Time alone never fails a transaction: a dropped one stays pending until its nonce is spent, and the application can stop tracking it with `removeTxFromPool`.
 3. **Resilient Session Resumption:** When a user refreshes or reopens the application, a bootstrap routine scans the pool and concurrently resumes polling for all transactions still marked as `pending: true`.
 4. **Passive UI Binding:** Components do not manage transaction promises. They merely read state slices via selectors (`selectPendingTransactions`, `selectTxByKey`).
 
@@ -401,7 +401,7 @@ export function SwapActionButton({
         console.log('[Pulsar] Transaction finalized:', tx.txKey);
       },
       onReplaced: (newTx, oldTx) => {
-        // Pulsar flags oldTx as Replaced (pending: false), persists replacedTxHash, and fires callback
+        // Pulsar flags oldTx as Replaced and, after a speed-up, already follows the new record: this is only a notice
         console.warn(`[Pulsar] Transaction ${oldTx.txKey} was replaced by: ${newTx.replacedTxHash}`);
       },
       onError: (err, tx) => {
@@ -505,7 +505,7 @@ export function BalanceRefresher({ refetchBalances }: { refetchBalances: () => v
 | Scenario                         | Naive `useState` Pattern                                             | TUWA Pulsar                                                                                              |
 | :------------------------------- | :------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------- |
 | **Route Navigation**             | ❌ Component unmounts; tracking promise destroyed.                   | ✅ Outlives DOM; updates persist in central store.                                                       |
-| **User Speeds Up / Cancels**     | ❌ Naive promise rejects or desyncs from replaced hash.              | ✅ Intercepts Viem `onReplaced`; marks `Replaced`, persists `replacedTxHash`, and emits callback.        |
+| **User Speeds Up / Cancels**     | ❌ Naive promise rejects or desyncs from replaced hash.              | ✅ Reads the sender's nonce; marks `Replaced` with its reason and follows a speed-up to its result.      |
 | **Browser Refresh**              | ❌ In-flight state obliterated; reset to idle.                       | ✅ Resumes tracking pending pool automatically upon mount.                                               |
 | **Reaction After a Refresh**     | ❌ Code chained to the lost promise never runs; balances stay stale. | ✅ `onTxFinished` and `useTxFinished` run once for every finished transaction, also after a reload.      |
 | **Multi-Tab Consistency**        | ❌ Tabs are completely desynchronized.                               | ✅ Storage event synchronization reflects states across tabs.                                            |

@@ -42,8 +42,9 @@ export interface FooterProps extends NavProps {
 /**
  * The footer of a TUWA documentation site: the `Footer` of `nextra-theme-docs` with the logo, external links, the
  * TUWA description and the license on the left, links to the policies in force on tuwa.io (`footerPolicies`) and to
- * the list of all policies on the docs hub on the right, and the copyright line (the current year is read on render)
- * centered below; on narrow screens everything is centered. Render it in the `footer` prop of the Nextra `Layout`.
+ * the list of all policies on the docs hub on the right, and the copyright line (the current year is read on render;
+ * while a prerendered page hydrates, the year of its HTML stays without a hydration error) centered below; on narrow
+ * screens everything is centered. Render it in the `footer` prop of the Nextra `Layout`.
  *
  * @param props - See {@link FooterProps}.
  * @returns The footer.
@@ -110,8 +111,10 @@ export function Footer({ links, logo, labels, policyLanguage = 'en' }: FooterPro
           </div>
 
           <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-center tuwadocs:gap-3 tuwadocs:mt-4 tuwadocs:pt-4 tuwa-footer-border">
-            <div className="tuwa-footer-copyright">
-              © 2025 - {new Date().getFullYear()} TUWA. {labels?.copyright ?? 'All rights reserved.'}
+            {/* The year is read on render: a page prerendered in one year and hydrated in the next keeps the year of
+                its HTML instead of failing hydration (one text node, so React accepts the difference) */}
+            <div className="tuwa-footer-copyright" suppressHydrationWarning>
+              {`© 2025 - ${new Date().getFullYear()} TUWA. ${labels?.copyright ?? 'All rights reserved.'}`}
             </div>
           </div>
         </div>

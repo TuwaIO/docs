@@ -27,6 +27,9 @@ export interface SiteLogoProps {
  * Using standalone <img> tags isolates each SVG document context, completely avoiding
  * WebKit/Safari SVG ID collision and gradient-rendering bugs.
  * Pure presentation element with no event handlers, ensuring it can safely cross Server/Client component boundaries.
+ *
+ * The logo keeps its `width` in a narrow flex row: the images opt out of the `max-width: 100%` of Tailwind's base
+ * styles, which let the logo link of the Nextra navbar shrink below the logo, so the logo painted over the next items.
  */
 export function SiteLogo({
   width = 126,
@@ -45,7 +48,7 @@ export function SiteLogo({
         alt="TUWA"
         width={width}
         height={height}
-        className="tuwadocs:block tuwadocs:dark:hidden tuwadocs:h-auto tuwadocs:transition-opacity tuwadocs:duration-300"
+        className="tuwadocs:block tuwadocs:dark:hidden tuwadocs:h-auto tuwadocs:max-w-none tuwadocs:transition-opacity tuwadocs:duration-300"
         style={{ width: `${width}px`, height: 'auto' }}
         loading="eager"
         decoding="async"
@@ -56,7 +59,7 @@ export function SiteLogo({
         alt="TUWA"
         width={width}
         height={height}
-        className="tuwadocs:hidden tuwadocs:dark:block tuwadocs:h-auto tuwadocs:transition-opacity tuwadocs:duration-300"
+        className="tuwadocs:hidden tuwadocs:dark:block tuwadocs:h-auto tuwadocs:max-w-none tuwadocs:transition-opacity tuwadocs:duration-300"
         style={{
           width: `${width}px`,
           height: 'auto',

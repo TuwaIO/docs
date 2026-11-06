@@ -10,6 +10,7 @@ import {
   customizationCode,
   customizationFiles,
   DEFAULT_CUSTOMIZATION,
+  defaultCustomizationFor,
   type NovaCustomization,
   transactionsProviderOptions,
 } from './customization';
@@ -146,5 +147,15 @@ describe('Nova customization', () => {
         expect(specifier, file).toMatch(/^(@tuwaio\/sdk\/|react$)/);
       }
     }
+  });
+});
+
+describe('defaultCustomizationFor', () => {
+  // A reset went to DEFAULT_CUSTOMIZATION, in English: on a Ukrainian page Nova then said "Connect Wallet" and "Failed" next to
+  // the page's own Ukrainian titles
+  it('keeps Nova in the language of the site', () => {
+    expect(defaultCustomizationFor('en')).toEqual(DEFAULT_CUSTOMIZATION);
+    expect(defaultCustomizationFor('uk')).toEqual({ ...DEFAULT_CUSTOMIZATION, language: 'uk' });
+    expect(defaultCustomizationFor('zh-CN')).toEqual({ ...DEFAULT_CUSTOMIZATION, language: 'zh' });
   });
 });

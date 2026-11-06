@@ -65,6 +65,7 @@ export function NovaStage() {
         connectedWalletAddress={connectedWalletAddress}
         connectedAdapterType={connectedAdapterType}
         adapter={getAdapter()}
+        removeTxFromPool={device.removeTx}
       />
       <NovaTransactionsLabelsProvider labels={nova.transactionsLabels}>
         <NovaConnectProvider
@@ -74,6 +75,7 @@ export function NovaStage() {
           transactionPool={transactionsPool}
           pagination={pagination}
           pulsarAdapter={getAdapter()}
+          removeTxFromPool={device.removeTx}
           siwx={novaSiwx}
         >
           <div className="flex flex-col gap-6">
