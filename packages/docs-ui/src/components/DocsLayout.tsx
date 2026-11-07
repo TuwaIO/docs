@@ -45,6 +45,8 @@ export interface DocsLayoutProps {
 export interface NextraDocsLayoutProps {
   /** Logo of the site, for example `SiteLogo`; rendered in the navbar and the footer. */
   logo: ReactNode;
+  /** Where the logo of the navbar leads (default: `/`), for a site with languages in its URLs. */
+  logoLink?: string;
   /** External links of the navbar (default: `baseNavLinks`). */
   links?: SocialLink[];
   /** External links of the footer (default: `baseFooterLinks`). */
@@ -81,6 +83,7 @@ export interface NextraDocsLayoutProps {
  */
 export function NextraDocsLayout({
   logo,
+  logoLink,
   links,
   footerLinks,
   pageMap,
@@ -94,7 +97,7 @@ export function NextraDocsLayout({
   return (
     <Layout
       navbar={
-        <Navbar logo={logo} links={links}>
+        <Navbar logo={logo} logoLink={logoLink} links={links}>
           <LocaleSwitcher
             locale={locale}
             onSelect={(code) => {

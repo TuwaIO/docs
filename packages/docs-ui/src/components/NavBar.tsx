@@ -12,6 +12,8 @@ export interface NavProps {
   links?: SocialLink[];
   /** Logo of the site, for example `SiteLogo` */
   logo?: ReactNode;
+  /** Where the logo of the navbar leads (default: `/`), for a site with languages in its URLs. The footer ignores it. */
+  logoLink?: string;
   /** Extra elements rendered in the navbar next to the links, for example {@link LocaleSwitcher} */
   children?: ReactNode;
 }
@@ -28,9 +30,9 @@ export interface NavProps {
  * @param props - See {@link NavProps}.
  * @returns The navbar.
  */
-export function Navbar({ links, logo, children }: NavProps) {
+export function Navbar({ links, logo, logoLink, children }: NavProps) {
   return (
-    <NextraNavbar logo={logo} className="tuwadocs:[&>:first-child]:shrink-0">
+    <NextraNavbar logo={logo} {...(logoLink && { logoLink })} className="tuwadocs:[&>:first-child]:shrink-0">
       <div className="tuwadocs:flex tuwadocs:shrink-0 tuwadocs:items-center tuwadocs:gap-3">
         {(links ?? baseNavLinks).map(({ title, href, image, className }) => (
           <a

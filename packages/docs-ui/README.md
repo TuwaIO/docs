@@ -213,6 +213,23 @@ Client components inside `DocsLayout` read the language and the interface texts 
 
 `NextraDocsLayout` is the same layout without state: the language, its texts (`docsLabels[locale]`) and the page map come from props. The docs hub renders it with its own dictionaries and translates its sidebar by route with `localizePageMap(pageMap, {}, { routes })`.
 
+### Language in the URL
+
+A site can give each translation a URL of its own: English has no prefix, `/uk/...` and `/zh-CN/...` are real pages, prerendered in their language, so search engines find every language and a reader sees no English first. `@tuwaio/docs-ui/locale` has the path helpers (`localeOfPath`, `pathWithoutLocale`, `localizedPath`, and `languageAlternates` for `hreflang`), `prefixPageMapRoutes` gives the sidebar and the navbar the links of the language, the `logoLink` prop of `NextraDocsLayout` leads the logo there, and `useLocaleRouting` of `@tuwaio/docs-ui/routing` keeps the language and the URL together:
+
+```tsx
+'use client';
+
+import { type TuwaLocale } from '@tuwaio/docs-ui/locale';
+import { useLocaleRouting } from '@tuwaio/docs-ui/routing';
+
+export function useLanguageSwitch(locale: TuwaLocale, setLocale: (locale: TuwaLocale) => void, resolved: boolean) {
+  return useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl: (route) => route.startsWith('/guides') });
+}
+```
+
+Picking a language goes to its URL with the query and the anchor. A reader with a saved or detected language who opens the English URL of such a page is taken to the URL of that language; crawlers stay where they are. The site gives the provider the language of the URL (the `[lang]` root layout) so the server renders it, and adds a route under `[lang]` for each page. The docs hub is built this way; `DocsLayout` of a project site keeps one URL per page for now.
+
 ### Search index
 
 Run the command after `next build`. It uses the `pagefind` package of the site, so add it to the site's dependencies:
@@ -229,7 +246,7 @@ Run the command after `next build`. It uses the `pagefind` package of the site, 
 }
 ```
 
-It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) with the same URLs as `pagefind --site .next/server/app`, and fails when the build has no prerendered pages.
+It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) with the same URLs as `pagefind --site .next/server/app`, and fails when the build has no prerendered pages. Pages with their language in the URL get an index of that language, by the `lang` of their HTML.
 
 ---
 

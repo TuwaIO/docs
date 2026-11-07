@@ -21,6 +21,58 @@ export const DEFAULT_LOCALE: TuwaLocale = 'en';
  */
 export const LOCALE_STORAGE_KEY = 'tuwa-locale';
 
+/** The languages whose pages have a prefix in the URL. English has none: every old link points to it. */
+export const URL_LOCALES: readonly TuwaLocale[] = TUWA_LOCALES.filter((locale) => locale !== DEFAULT_LOCALE);
+
+/**
+ * The language a path names with its prefix.
+ *
+ * @param pathname - The path, such as `/uk/quasar/webhooks`.
+ * @returns The language, or `null` for a path with no prefix (English, or a page without language URLs).
+ */
+export function localeOfPath(pathname: string): TuwaLocale | null {
+  const first = pathname.split('/')[1];
+  return URL_LOCALES.find((locale) => locale === first) ?? null;
+}
+
+/**
+ * A path without its language prefix.
+ *
+ * @param pathname - The path.
+ * @returns The path in English.
+ */
+export function pathWithoutLocale(pathname: string): string {
+  const locale = localeOfPath(pathname);
+  return locale ? pathname.slice(locale.length + 1) || '/' : pathname;
+}
+
+/**
+ * The path of a page in a language.
+ *
+ * @param pathname - The path, with or without a prefix.
+ * @param locale - The language.
+ * @returns The path: English has no prefix.
+ */
+export function localizedPath(pathname: string, locale: TuwaLocale): string {
+  const base = pathWithoutLocale(pathname);
+  if (locale === DEFAULT_LOCALE) return base;
+  return base === '/' ? `/${locale}` : `/${locale}${base}`;
+}
+
+/**
+ * The paths of a page in every language, for `alternates.languages` of the Next.js metadata (`hreflang`).
+ *
+ * @param pathname - The path, with or without a prefix.
+ * @returns The path by language tag, with English as `x-default`.
+ */
+export function languageAlternates(pathname: string): Record<string, string> {
+  const base = pathWithoutLocale(pathname);
+  return {
+    ...Object.fromEntries(TUWA_LOCALES.map((locale) => [locale, localizedPath(base, locale)])),
+    'x-default': base,
+  };
+}
+
 const UKRAINE_TIMEZONES = new Set([
   'europe/kyiv',
   'europe/kiev',

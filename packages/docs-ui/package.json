@@ -44,6 +44,11 @@
       "import": "./dist/docsPage.js",
       "require": "./dist/docsPage.cjs"
     },
+    "./routing": {
+      "types": "./dist/localeRouting.d.ts",
+      "import": "./dist/localeRouting.js",
+      "require": "./dist/localeRouting.cjs"
+    },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
   },
