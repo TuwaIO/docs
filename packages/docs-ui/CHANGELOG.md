@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.8.0...docs-ui-v0.9.0) (2026-11-07)
+
+
+### Features
+
+* **docs-ui:** language URLs for the translated pages of a project site ([#65](https://github.com/TuwaIO/docs/issues/65)) ([91bc338](https://github.com/TuwaIO/docs/commit/91bc3384bef426b0b51594b3b10bcf068d5aa118))
+
 ## [0.8.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.2...docs-ui-v0.8.0) (2026-11-07)
 
 
