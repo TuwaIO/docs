@@ -316,20 +316,17 @@ describe('DocsLayout', () => {
 
   it('gives the sidebar the links of the language at a language URL, and leaves the pages with one URL', () => {
     const html = renderToStaticMarkup(
-      createElement(
-        DocsLayout,
-        {
-          logo: createElement('img', { alt: 'TUWA' }),
-          pageMap: [
-            { name: 'index', route: '/' },
-            { name: 'orbit-core', route: '/packages/orbit-core' },
-          ] as PageMapItem[],
-          docsRepositoryBase: 'https://github.com/TuwaIO/orbit',
-          initialLocale: 'uk',
-          languageRoutes: ['/'],
-        },
-        null,
-      ),
+      createElement(DocsLayout, {
+        logo: createElement('img', { alt: 'TUWA' }),
+        pageMap: [
+          { name: 'index', route: '/' },
+          { name: 'orbit-core', route: '/packages/orbit-core' },
+        ] as PageMapItem[],
+        docsRepositoryBase: 'https://github.com/TuwaIO/orbit',
+        initialLocale: 'uk',
+        languageRoutes: ['/'],
+        children: null,
+      }),
     );
     const routes = (propsOf(html).pageMap as { route: string }[]).map((item) => item.route);
     expect(routes).toEqual(['/uk', '/packages/orbit-core']);
