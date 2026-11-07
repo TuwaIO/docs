@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
@@ -60,6 +60,20 @@ describe('search index of the documentation sites', () => {
 
     expect(urls).toEqual(['/', '/packages/orbit-core.html']);
     expect(existsSync(join(outputPath, 'pagefind.js'))).toBe(true);
+  });
+
+  it('keeps every page in one index when a site asks for it, as its reference is English', async () => {
+    const translated =
+      '<html lang="uk"><body><main data-pagefind-body><h1>Вступ</h1><p>Про TUWA.</p></main></body></html>';
+    write('app/index.html', page('Home'));
+    write('app/uk.html', translated);
+    const languagesOf = async (forceLanguage?: string) => {
+      const outputPath = join(root, `out-${forceLanguage ?? 'each'}`);
+      await buildSearchIndex({ serverDir: server, outputPath, forceLanguage });
+      return Object.keys(JSON.parse(readFileSync(join(outputPath, 'pagefind-entry.json'), 'utf8')).languages);
+    };
+    expect((await languagesOf()).sort()).toEqual(['en', 'uk']);
+    expect(await languagesOf('en')).toEqual(['en']);
   });
 
   it('fails when the build has no pages', async () => {

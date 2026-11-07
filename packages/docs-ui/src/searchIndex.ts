@@ -15,7 +15,7 @@ type PagefindIndex = {
   writeFiles(options: { outputPath: string }): Promise<{ errors: string[] }>;
 };
 type Pagefind = {
-  createIndex(): Promise<{ errors: string[]; index?: PagefindIndex }>;
+  createIndex(options?: { forceLanguage?: string }): Promise<{ errors: string[]; index?: PagefindIndex }>;
   close(): Promise<unknown>;
 };
 
@@ -78,6 +78,8 @@ async function loadPagefind(cwd: string): Promise<Pagefind> {
  * @param options.serverDir - The `.next/server` directory. Default `.next/server`.
  * @param options.outputPath - Where the index is written. Default `public/_pagefind`.
  * @param options.cwd - The directory of the site, where `pagefind` is installed. Default the current directory.
+ * @param options.forceLanguage - Puts every page into the index of this language, for a site whose translated pages are few: its
+ * reference is English, and a search from a translated page has to find it. By default each language has its own index.
  * @returns The URLs of the indexed pages.
  * @throws When the build has no prerendered pages, or when Pagefind is missing or reports an error.
  */
@@ -85,13 +87,16 @@ export async function buildSearchIndex({
   serverDir = '.next/server',
   outputPath = 'public/_pagefind',
   cwd = process.cwd(),
-}: { serverDir?: string; outputPath?: string; cwd?: string } = {}): Promise<{ urls: string[] }> {
+  forceLanguage,
+}: { serverDir?: string; outputPath?: string; cwd?: string; forceLanguage?: string } = {}): Promise<{
+  urls: string[];
+}> {
   const pages = findPrerenderedPages(resolve(cwd, serverDir));
   if (!pages.length) throw new Error(`Found no prerendered pages in ${serverDir}: run next build first`);
 
   const pagefind = await loadPagefind(cwd);
   try {
-    const { index, errors } = await pagefind.createIndex();
+    const { index, errors } = await pagefind.createIndex(forceLanguage ? { forceLanguage } : undefined);
     if (!index) throw new Error(`Pagefind: ${errors.join('; ')}`);
     const urls: string[] = [];
     for (const page of pages) {

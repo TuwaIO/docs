@@ -1183,7 +1183,6 @@ function solanaTxButtonFile(o: StackOptions): GeneratedFile {
       '        type: TxType.increment,',
       '        adapter: OrbitAdapter.SOLANA,',
       '        desiredChainID: cluster,',
-      '        rpcUrl: connection.rpcURL, // saved with the transaction: tracking resumes on the same RPC after a reload',
       "        title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],",
       "        description: 'Increment the counter by 1.',",
       '        payload: { value: 1 },',
@@ -1598,14 +1597,13 @@ function vanillaActionsFile(o: StackOptions): GeneratedFile {
       o.solana &&
         lines(
           '// `send` signs and sends the transaction with your wallet code and returns its signature; Pulsar tracks it',
-          'export function trackSolanaTransaction(send: () => Promise<string>, rpcUrl: string) {',
+          'export function trackSolanaTransaction(send: () => Promise<string>) {',
           '  return pulsarStore.getState().executeTxAction({',
           '    actionFunction: send,',
           '    params: {',
           '      type: TxType.increment,',
           '      adapter: OrbitAdapter.SOLANA,',
           "      desiredChainID: 'devnet',",
-          '      rpcUrl,',
           "      title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],",
           "      description: 'Increment the counter by 1.',",
           '      payload: { value: 1 },',
