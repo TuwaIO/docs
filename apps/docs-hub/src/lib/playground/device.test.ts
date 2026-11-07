@@ -45,14 +45,14 @@ describe('device stores', () => {
 
   it('stops saving to localStorage once halted, so a replaced device does not write over the new one', () => {
     const saved = new Map<string, string>();
-    // zustand's persist middleware reads window.localStorage
-    vi.stubGlobal('window', {
-      localStorage: {
-        getItem: (key: string) => saved.get(key) ?? null,
-        setItem: (key: string, value: string) => void saved.set(key, value),
-        removeItem: (key: string) => void saved.delete(key),
-      },
-    });
+    const localStorage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => void saved.set(key, value),
+      removeItem: (key: string) => void saved.delete(key),
+    };
+    // The persist middleware of the Pulsar store reads `localStorage`, which a browser has both ways
+    vi.stubGlobal('window', { localStorage });
+    vi.stubGlobal('localStorage', localStorage);
     const device = createDevice({ families: [OrbitAdapter.EVM], quasar: false });
     device.pulsarStore.setState({ transactionsPool: { '0x01': pending } });
     expect(saved.has(TRANSACTIONS_STORAGE_KEY)).toBe(true);

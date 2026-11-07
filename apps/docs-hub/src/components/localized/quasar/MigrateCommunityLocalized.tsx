@@ -43,9 +43,7 @@ export function MigrateCommunityLocalized({ locale }: { locale: Locale }) {
               <Td>Облікові записи учасників та способи входу (нода має одного адміністратора)</Td>
             </Tr>
             <Tr>
-              <Td>
-                Додатки: API-ключі, IP/доменні білі списки, RPC-налаштування, ключі Alchemy/QuickNode/Gelato/Pimlico
-              </Td>
+              <Td>Додатки: API-ключі, IP/доменні білі списки, RPC-налаштування, ключі Alchemy/QuickNode/Pimlico</Td>
               <Td>Історія білінгу, витрати квот та баланси</Td>
             </Tr>
             <Tr>
@@ -188,7 +186,7 @@ export function MigrateCommunityLocalized({ locale }: { locale: Locale }) {
             <Td>组织成员列表与个人登录凭据（自建版为极简单管理员模型）</Td>
           </Tr>
           <Tr>
-            <Td>应用集群：API Key、IP/域名白名单、RPC 自定义覆盖、Alchemy/QuickNode/Gelato/Pimlico 密钥</Td>
+            <Td>应用集群：API Key、IP/域名白名单、RPC 自定义覆盖、Alchemy/QuickNode/Pimlico 密钥</Td>
             <Td>云端计费历史、余额账单及扣费审计流水</Td>
           </Tr>
           <Tr>

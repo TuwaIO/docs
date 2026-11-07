@@ -157,17 +157,16 @@ export function AppsKeysLocalized({ locale }: { locale: Locale }) {
           </tbody>
         </Table>
         <P>
-          У налаштуваннях додатку також вказуються ваші власні провайдери RPC та ключі (Alchemy, QuickNode, Pimlico,
-          Gelato) для механізмів трекінгу. Quasar зберігає їх у зашифрованому вигляді та блокує будь-які приватні та
-          loopback адреси вузлів.
+          У налаштуваннях додатку також вказуються ваші власні провайдери RPC та ключі (Alchemy, QuickNode, Pimlico) для
+          механізмів трекінгу. Quasar зберігає їх у зашифрованому вигляді та блокує будь-які приватні та loopback адреси
+          вузлів.
         </P>
         <Callout type="important">
           <strong>У Quasar Cloud додайте RPC-провайдер перед початком синхронізації:</strong> RPC-ендпоінт для кожної
           мережі, ключ Alchemy або ключ QuickNode. Хмарна версія відстежує операції виключно через провайдери вашого
-          додатку (ERC-4337 через Pimlico/bundler, Gelato через ваш ключ). Транзакція в мережі, для якої у додатку немає
-          налаштованого провайдера, буде відхилена з помилкою <Code>422 Unprocessable Entity</Code> без збереження в
-          базі. Спільнотна версія (Community Edition) додатково підтримує глобальні резервні RPC оператора та
-          відстеження операцій Safe.
+          додатку (ERC-4337 через Pimlico/bundler). Транзакція в мережі, для якої у додатку немає налаштованого
+          провайдера, буде відхилена з помилкою <Code>422 Unprocessable Entity</Code> без збереження в базі. Спільнотна
+          версія (Community Edition) додатково підтримує глобальні резервні RPC оператора та відстеження операцій Safe.
         </Callout>
         <Hr />
         <H2 id="isolation-between-apps">🏢 Сувора ізоляція між додатками</H2>
@@ -309,14 +308,14 @@ export function AppsKeysLocalized({ locale }: { locale: Locale }) {
         </tbody>
       </Table>
       <P>
-        此外，应用设置中还用于登记您的链端 RPC 节点及第三方服务商凭据 (Alchemy, QuickNode, Pimlico, Gelato)。Quasar
+        此外，应用设置中还用于登记您的链端 RPC 节点及第三方服务商凭据 (Alchemy, QuickNode, Pimlico)。Quasar
         实施强加密存储，并在建立连接时严格拦截内网及本地回环 (loopback) 目标。
       </P>
       <Callout type="important">
         <strong>在 Quasar Cloud 中，必须先配置 RPC 提供商再同步交易：</strong>
         为您启用的链配置专用 RPC 节点或填入 Alchemy/QuickNode Key。云端引擎完全通过应用自身配置的节点拉取确认；ERC-4337
-        需要 Pimlico Bundler 凭证，Gelato 自动化任务需要其专用 Key。如未配置链端提供商，API 将以{' '}
-        <Code>422 Unprocessable Entity</Code> 拒绝同步且不存库。自建社区版支持运营商全局兜底 RPC 及 Safe 多签同步。
+        需要 Pimlico Bundler 凭证。如未配置链端提供商，API 将以 <Code>422 Unprocessable Entity</Code>{' '}
+        拒绝同步且不存库。自建社区版支持运营商全局兜底 RPC 及 Safe 多签同步。
       </Callout>
       <Hr />
       <H2 id="isolation-between-apps">🏢 应用间多租户严格隔离</H2>

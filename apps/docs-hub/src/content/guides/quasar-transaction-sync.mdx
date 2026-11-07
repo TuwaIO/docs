@@ -178,24 +178,40 @@ export const useHistoryStore = createBoundedUseStore(historyStore);
 
 `preFlightTxCheck` reads the SIWX session that Nova Connect keeps in `@tuwaio/sdk/siwx`; it is a check for the UI, the Server Action still verifies the cookie.
 
-### EIP-5792 batches [#eip-5792-batches]
+### Batches of Calls (EIP-5792) [#eip-5792-batches]
 
-If your app sends batches of calls with `wallet_sendCalls` and tracks them with `TransactionTracker.EIP5792`, Pulsar syncs each batch by its batch ID, and only the wallet knows the hash of the transaction that executed it. Send that hash to Quasar, which then tracks the batch on-chain; a batch whose hash never arrives is marked `Failed` an hour after the sync. Add an action next to the others, with the same session check:
+A batch sent with `wallet_sendCalls` (`tracker: TransactionTracker.EIP5792`) is synced by its batch ID, which only the wallet can resolve. Once Pulsar learns the hash of the transaction that executed the batch, send it to Quasar: Quasar then tracks the batch on-chain and sends its webhook. Without a hash, Quasar marks the batch `Failed` one hour after it was synced. This needs `@tuwaio/quasar-sdk` 0.6 or later.
+
+Add a third Server Action. It reads the batch from Quasar to check that the signed-in wallet sent it:
 
 ```ts filename="src/app/quasarActions.ts"
-export async function syncBatchHash(tx: Transaction & { hash: `0x${string}` }) {
+export async function syncBatchHash(txKey: string, hash: `0x${string}`): Promise<{ success: boolean; error?: string }> {
   const session = await getSession();
-  if (!session || !isSessionMatchingTarget(session, tx.from, tx.chainId)) return;
-  await quasar.pulsar.syncHash(tx.txKey, tx.hash);
+  const [batch] = session ? (await quasar.pulsar.getHistory({ txKey, appName: APP_NAME, limit: 1 })).docs : [];
+  if (!session || !batch || !isSessionMatchingTarget(session, batch.from, batch.chainId)) {
+    return { success: false, error: 'The signed-in wallet did not send this batch.' };
+  }
+
+  try {
+    await quasar.pulsar.syncHash(txKey, hash);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error instanceof QuasarSDKError ? error.message : 'Quasar is unavailable.' };
+  }
 }
 ```
 
-Then watch the store in the browser, once, next to where you create it (`@tuwaio/quasar-sdk` 0.6 or later):
+Then watch the store for batch hashes, next to the store of the EVM tab. `watchBatchHashes` reports each batch once, after it is synced; when the action fails, it tries again on the next change of the store:
 
-```ts
-import { watchBatchHashes } from '@tuwaio/quasar-sdk';
+```ts filename="src/hooks/pulsarStore.ts"
+import { watchBatchHashes } from '@tuwaio/quasar-sdk/pulsar';
 
-watchBatchHashes(pulsarStore, (tx) => syncBatchHash(tx));
+import { syncBatchHash } from '@/app/quasarActions';
+
+watchBatchHashes(pulsarStore, async (tx) => {
+  const result = await syncBatchHash(tx.txKey, tx.hash);
+  if (!result.success) throw new Error(result.error);
+});
 ```
 
 ---
@@ -447,7 +463,8 @@ When your server signs and broadcasts a transaction itself — such as a withdra
   <Tabs.Tab>
 
 ```ts filename="src/server/syncServerPayout.ts"
-import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { Quasar } from '@tuwaio/quasar-sdk';
+import { TransactionTracker } from '@tuwaio/quasar-sdk/pulsar';
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 
 const quasar = new Quasar({
@@ -487,7 +504,8 @@ export async function syncServerPayout(params: {
   <Tabs.Tab>
 
 ```ts filename="src/server/syncServerPayout.ts"
-import { Quasar, TransactionTracker } from '@tuwaio/quasar-sdk';
+import { Quasar } from '@tuwaio/quasar-sdk';
+import { TransactionTracker } from '@tuwaio/quasar-sdk/pulsar';
 import { OrbitAdapter, SOLANA_CHAIN_IDS } from '@tuwaio/sdk/orbit';
 
 const quasar = new Quasar({
@@ -532,4 +550,4 @@ export async function syncServerPayout(params: {
 - Receive a signed request on your backend when a transaction succeeds, fails or is replaced — also on `localhost`: [Webhooks](/quasar/webhooks).
 - Understand what the syncs cost and what happens when the quota is used up: [Quotas & Limits](/quasar/quotas-and-limits).
 - Run Quasar on your own servers: [Self-Hosting](/quasar/self-hosting).
-- Look up every export of the client: [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk), and the endpoints in the [API Reference](/quasar/api).
+- Look up every export of the client: [`@tuwaio/quasar-sdk`](https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs), and the endpoints in the [API Reference](/quasar/api).

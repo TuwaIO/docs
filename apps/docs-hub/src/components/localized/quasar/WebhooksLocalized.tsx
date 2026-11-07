@@ -101,7 +101,11 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
               <Td>
                 <Code>txKey</Code>, <Code>hash</Code>
               </Td>
-              <Td>Унікальний ключ транзакції в Pulsar та її ончейн-хеш у мережі (якщо він уже відомий).</Td>
+              <Td>
+                Унікальний ключ транзакції в Pulsar та її ончейн-хеш у мережі (якщо він уже відомий). Для пакета
+                EIP-5792 <Code>txKey</Code> — це ідентифікатор пакета, а <Code>hash</Code> — транзакція, що його
+                виконала.
+              </Td>
             </Tr>
             <Tr>
               <Td>
@@ -135,6 +139,24 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
             </Tr>
             <Tr>
               <Td>
+                <Code>replacedTxHash</Code>
+              </Td>
+              <Td>
+                Для <Code>Replaced</Code>: транзакція, яка зайняла nonce цієї, якщо її знайдено.
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
+                <Code>replacedReason</Code>
+              </Td>
+              <Td>
+                Для <Code>Replaced</Code>: <Code>repriced</Code> (та сама транзакція з вищою комісією, Speed up у
+                гаманці), <Code>cancelled</Code>, <Code>replaced</Code> (інша транзакція) або <Code>unknown</Code> (її
+                nonce зайняла транзакція, яку не вдалося знайти, тож кошти могли піти).
+              </Td>
+            </Tr>
+            <Tr>
+              <Td>
                 <Code>metadata</Code>
               </Td>
               <Td>
@@ -151,6 +173,21 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
           порівнюйте у сталий час:
         </P>
         <CodeSnippet index={2} />
+        <P>Коли транзакція завершується невдачею:</P>
+        <Ul>
+          <Li>
+            <strong>Solana</strong>: транзакція з помилкою в мережі отримує <Code>Failed</Code> одразу після
+            підтвердження, без очікування фіналізації. Підпис, який так і не потрапив у мережу, отримує{' '}
+            <Code>Failed</Code>, щойно мережа минає його <Code>lastValidBlockHeight</Code> (Pulsar зберігає його для
+            транзакцій, надісланих через <Code>signAndSendSolanaTx</Code>; помилка каже, що blockhash застарів), інакше
+            — через годину після синхронізації.
+          </Li>
+          <Li>
+            <strong>Пакети EIP-5792</strong> отримують <Code>Failed</Code> через годину після синхронізації, якщо ваш
+            застосунок так і не надіслав хеш їхньої транзакції (
+            <A href="/guides/quasar-transaction-sync#eip-5792-batches">посібник із синхронізації</A>).
+          </Li>
+        </Ul>
         <Callout type="info">
           Відповідайте успішним статусом <Code>2xx</Code> якомога швидше: Quasar очікує відповіді максимум 10 секунд.
           Тривалі операції (відправку листів, генерацію звітів) виносьте у фонові черги. Обробник повинен бути
@@ -167,7 +204,17 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
             Усі спроби фіксуються в журналі <strong>Webhook Deliveries</strong> у панелі керування. Будь-які секретні
             ключі автоматично маскуються в тілі відповідей.
           </Li>
-          <Li>Ви можете вручну повторити невдалу доставку прямо зі списку записів у панелі.</Li>
+          <Li>
+            Ви можете вручну повторити невдалу доставку прямо зі списку записів у панелі, не частіше разу на хвилину.
+          </Li>
+          <Li>
+            Трекер може втратити транзакцію з поля зору, а вузол забуває замінений хеш. Коли Quasar згодом знаходить, що
+            її включено в блок або замінено, запис виправляється, і ендпоінт отримує ще один вебхук із новим{' '}
+            <Code>status</Code>: вважайте результатом останній.
+          </Li>
+          <Li>
+            Журнали доставок зберігаються до 3 місяців. Для довшого аудиту зберігайте події, які отримує ваш ендпоінт.
+          </Li>
           <Li>
             Кожна доставка списує лише 1 одиницю квоти (лише за першу спробу, повтори безкоштовні; дивіться{' '}
             <A href="/quasar/quotas-and-limits">Квоти та ліміти</A>).
@@ -262,7 +309,11 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
             <Td>
               <Code>txKey</Code>, <Code>hash</Code>
             </Td>
-            <Td>Pulsar 交易唯一幂等键以及对应的链上交易哈希（若已产出）。</Td>
+            <Td>
+              Pulsar 交易唯一幂等键以及对应的链上交易哈希（若已产出）。对于 EIP-5792 批次，<Code>txKey</Code> 为批次
+              ID，
+              <Code>hash</Code> 为执行该批次的交易。
+            </Td>
           </Tr>
           <Tr>
             <Td>
@@ -296,6 +347,24 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
           </Tr>
           <Tr>
             <Td>
+              <Code>replacedTxHash</Code>
+            </Td>
+            <Td>
+              <Code>Replaced</Code> 时：占用此交易 nonce 的交易（如已找到）。
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
+              <Code>replacedReason</Code>
+            </Td>
+            <Td>
+              <Code>Replaced</Code> 时：<Code>repriced</Code>（相同交易、更高手续费，即钱包的 Speed up）、
+              <Code>cancelled</Code>、<Code>replaced</Code>（另一笔交易）或 <Code>unknown</Code>
+              （其 nonce 被无法找到的交易占用，款项可能已转出）。
+            </Td>
+          </Tr>
+          <Tr>
+            <Td>
               <Code>metadata</Code>
             </Td>
             <Td>Pulsar 客户端在发起交易时携带的完整业务 Payload。</Td>
@@ -309,6 +378,19 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
         之前，必须针对原始字节执行恒定时间 (Constant-Time) 比对，防止时序攻击：
       </P>
       <CodeSnippet index={2} />
+      <P>交易失败的情形：</P>
+      <Ul>
+        <Li>
+          <strong>Solana</strong>：带有链上错误的交易在确认后立即标记为 <Code>Failed</Code>
+          ，无需等待最终确认。从未上链的签名会在链高度超过其 <Code>lastValidBlockHeight</Code> 时标记为{' '}
+          <Code>Failed</Code>（Pulsar 会为通过 <Code>signAndSendSolanaTx</Code> 发送的交易保存该值；错误信息为 blockhash
+          已过期），否则在同步一小时后标记。
+        </Li>
+        <Li>
+          <strong>EIP-5792 批次</strong>：若您的应用始终未发送其交易哈希，将在同步一小时后标记为 <Code>Failed</Code>（
+          <A href="/guides/quasar-transaction-sync#eip-5792-batches">同步指南</A>）。
+        </Li>
+      </Ul>
       <Callout type="info">
         请在 10 秒超时窗口内尽快返回 <Code>2xx</Code> 确认状态；耗时任务请推入异步队列。业务处理逻辑请务必依据{' '}
         <Code>(txKey, status)</Code> 实现幂等消费。
@@ -318,7 +400,13 @@ export function WebhooksLocalized({ locale }: { locale: Locale }) {
       <Ul>
         <Li>因网络超时或返回非 2xx 状态码失败的投递，系统将进行最多 5 次指数退避重试（起始间隔 1 分钟）。</Li>
         <Li>控制台 Webhook Deliveries 页面记录全量请求流水，敏感关键词（如 secret, key, token）将自动脱敏。</Li>
-        <Li>在调试或故障恢复后，可在控制台日志条目上点击一键重新投递。</Li>
+        <Li>在调试或故障恢复后，可在控制台日志条目上点击一键重新投递，同一投递每分钟最多一次。</Li>
+        <Li>
+          追踪器可能跟丢交易，节点也会忘记被替换的哈希。当 Quasar
+          之后发现它已被打包或被替换时，记录会被更正，端点会再收到一个带有新 <Code>status</Code> 的
+          webhook：请以最后一个为准。
+        </Li>
+        <Li>投递日志最多保留 3 个月。如需更长的审计记录，请保存您的端点收到的事件。</Li>
         <Li>
           每次投递仅在首次尝试时消耗 1 个配额点数，后续重试完全免费（参见{' '}
           <A href="/quasar/quotas-and-limits">配额与速率限制</A>）。

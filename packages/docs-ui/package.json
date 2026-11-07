@@ -4,7 +4,7 @@
   "private": false,
   "author": "Oleksandr Tkach",
   "license": "Apache-2.0",
-  "description": "Shared UI of the TUWA documentation sites: Nextra navbar, footer and layout in English, Ukrainian and Simplified Chinese, remote logo, theme and language switches, background effects, policy pages and styles.",
+  "description": "Shared UI of the TUWA documentation sites: Nextra navbar, footer and layout in English, Ukrainian and Simplified Chinese, logo, theme and language switches, background effects, policy pages and styles.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -44,6 +44,11 @@
       "import": "./dist/docsPage.js",
       "require": "./dist/docsPage.cjs"
     },
+    "./routing": {
+      "types": "./dist/localeRouting.d.ts",
+      "import": "./dist/localeRouting.js",
+      "require": "./dist/localeRouting.cjs"
+    },
     "./dist/index.css": "./dist/index.css",
     "./dist/*": "./dist/*"
   },
@@ -59,7 +64,7 @@
     "*.css"
   ],
   "scripts": {
-    "build": "tsup && pnpm exec postcss src/styles/general.css -o ./dist/index.css"
+    "build": "tsup && pnpm exec postcss src/styles/general.css -o ./dist/index.css && pnpm exec postcss src/styles/site.css -o ./dist/site.css && node scripts/fonts.mjs"
   },
   "keywords": [
     "react",
@@ -85,7 +90,7 @@
     }
   ],
   "dependencies": {
-    "@tuwaio/nova-core": "^0.11.0",
+    "@tuwaio/nova-core": "^0.13.0",
     "clsx": "^2.1.1",
     "html-react-parser": "^6.1.9",
     "tailwind-merge": "^3.7.0"
@@ -97,19 +102,30 @@
     "nextra-theme-docs": ">=4.6",
     "react": ">=19.2.3"
   },
+  "peerDependenciesMeta": {
+    "next": {
+      "optional": true
+    },
+    "nextra": {
+      "optional": true
+    },
+    "nextra-theme-docs": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.6.5",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "autoprefixer": "^10.6.2",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
     "postcss": "^8.5.32",
     "postcss-cli": "^12.0.0",
     "react": "^19.3.1",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "tsup": "^9.0.0",
     "typescript": "6.0.3"
   }

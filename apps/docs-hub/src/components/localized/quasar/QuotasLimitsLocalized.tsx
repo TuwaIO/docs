@@ -129,12 +129,19 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
               <Td>Параметр limit до 100 (за замовчуванням 10)</Td>
             </Tr>
             <Tr>
+              <Td>Глибина історії</Td>
+              <Td>
+                Сторінки сягають 10 000 транзакцій назад; глибші сторінки відповідають <Code>400 page_too_deep</Code>{' '}
+                (натомість фільтруйте за статусом, мережею, гаманцем або <Code>txKey</Code>)
+              </Td>
+            </Tr>
+            <Tr>
               <Td>Додатків (Apps) в організації</Td>
               <Td>До 30 додатків</Td>
             </Tr>
             <Tr>
               <Td>Кінцевих точок вебхуків на додаток</Td>
-              <Td>До 500 ендпоінтів</Td>
+              <Td>До 20 ендпоінтів</Td>
             </Tr>
             <Tr>
               <Td>Точки вебхуків на localhost</Td>
@@ -256,12 +263,19 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
             <Td>limit 参数最大为 100 条（默认为 10 条）</Td>
           </Tr>
           <Tr>
+            <Td>历史查询深度</Td>
+            <Td>
+              分页最多可回溯 10,000 笔交易；更深的页面返回 <Code>400 page_too_deep</Code>（请改用状态、网络、钱包或{' '}
+              <Code>txKey</Code> 过滤）
+            </Td>
+          </Tr>
+          <Tr>
             <Td>单个组织可创建的应用数量</Td>
             <Td>最多 30 个 App</Td>
           </Tr>
           <Tr>
             <Td>单应用 Webhook 终端节点数量</Td>
-            <Td>最多 500 个 Endpoints</Td>
+            <Td>最多 20 个 Endpoints</Td>
           </Tr>
           <Tr>
             <Td>localhost Webhook 调试节点</Td>

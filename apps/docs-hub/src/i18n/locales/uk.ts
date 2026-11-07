@@ -153,7 +153,7 @@ export const uk: DocsHubLabels = {
         '@tuwaio/pulsar-core':
           'L3 ядро Pulsar (TUWA): headless-сховище транзакцій зі збереженням у localStorage, контрактом адаптера мережі, валідацією метаданих та хуками серверної синхронізації для EVM і Solana.',
         '@tuwaio/pulsar-evm':
-          'L4 EVM-пакет Pulsar (TUWA): адаптер і трекери для стандартних транзакцій, операцій ERC-4337, мультипідписів Safe та релеїв Gelato з підтримкою пришвидшення і скасування на базі viem і @wagmi/core.',
+          'L4 EVM-пакет Pulsar (TUWA): адаптер і трекери для стандартних транзакцій, операцій ERC-4337 та мультипідписів Safe з підтримкою пришвидшення і скасування на базі viem і @wagmi/core.',
         '@tuwaio/pulsar-react':
           'L4 React-пакет Pulsar (TUWA): хук useInitializeTransactionsPool відновлює відстеження незавершених транзакцій після перезавантаження сторінки, а useTxFinished реагує на кожну завершену транзакцію.',
         '@tuwaio/pulsar-solana':
@@ -440,7 +440,7 @@ export const uk: DocsHubLabels = {
           'email-social': 'За архітектурою: TUWA підключає гаманці, які вже є у користувачів.',
           'embedded-wallets': 'За архітектурою: жодних кастодіальних, MPC чи анклавних гаманців.',
           'gas-or-onramp':
-            'Pulsar відстежує транзакції ERC-4337 та релеїв Gelato, але TUWA не спонсорує газ і не має вбудованого онрампу.',
+            'Pulsar відстежує транзакції ERC-4337, але TUWA не спонсорує газ і не має вбудованого онрампу.',
           evm: 'Побудовано на wagmi та viem.',
           solana: 'Побудовано на @solana/kit та Wallet Standard.',
           'other-chains': 'Starknet, Tron, Bitcoin та TON заплановані в дорожній карті (Фаза 8).',

@@ -1,4 +1,7 @@
+import { languageAlternates, localeOfPath, pathWithoutLocale, type TuwaLocale } from '@tuwaio/docs-ui/locale';
 import type { Metadata } from 'next';
+
+import { hasLanguageUrl } from './languageUrls';
 
 /** Production origin of the hub: the base of canonical URLs, Open Graph, the sitemap and llms.txt */
 export const SITE_URL = 'https://docs.tuwa.io';
@@ -39,25 +42,29 @@ export const ORGANIZATION = {
 /** `@id` of the hub website in the structured data */
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 
+const OG_LOCALES: Partial<Record<TuwaLocale, string>> = { uk: 'uk_UA', 'zh-CN': 'zh_CN' };
+
 /**
  * Adds the canonical URL, Open Graph and Twitter card of a page to the metadata of its MDX file. Without them, every
  * page would share the Open Graph title of the root layout.
  *
  * @param metadata - Metadata of the page (title and description from its front matter).
- * @param route - Path of the page, for example `/guides/full-stack-react`.
+ * @param route - Path of the page, for example `/guides/full-stack-react`, with its language when it has one (`/uk/guides/...`).
  * @returns The metadata with `alternates.canonical`, `openGraph` and `twitter`.
  */
 export function withPageMetadata(metadata: Metadata, route: string): Metadata {
+  const base = pathWithoutLocale(route);
+  const locale = localeOfPath(route);
   const title = typeof metadata.title === 'string' ? metadata.title : undefined;
   const description = metadata.description ?? undefined;
   return {
     ...metadata,
-    alternates: { canonical: route },
+    alternates: { canonical: route, ...(hasLanguageUrl(base) && { languages: languageAlternates(base) }) },
     openGraph: {
       type: 'article',
       url: route,
       siteName: SITE_NAME,
-      locale: 'en_US',
+      locale: (locale && OG_LOCALES[locale]) ?? 'en_US',
       title,
       description,
       images: [OG_IMAGE],

@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 
-import { ConfiguratorHeader, StackConfigurator } from '../../../components/configurator/StackConfigurator';
-import { JsonLd } from '../../../components/JsonLd';
-import { PageBackground } from '../../../components/PageBackground';
-import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
+import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
+
+import { ConfiguratorHeader, StackConfigurator } from '../../../../components/configurator/StackConfigurator';
+import { JsonLd } from '../../../../components/JsonLd';
+import { PageBackground } from '../../../../components/PageBackground';
+import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../../lib/site';
 
 const ROUTE = '/configurator';
 const TITLE = 'Stack Configurator: Set Up TUWA in Your App';
@@ -20,6 +22,7 @@ const structuredData = {
       name: 'TUWA Stack Configurator',
       description: DESCRIPTION,
       url: `${SITE_URL}${ROUTE}`,
+      inLanguage: 'en',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
       isAccessibleForFree: true,
@@ -40,10 +43,11 @@ const structuredData = {
  * `/configurator`: the Stack Configurator. The page is static; the options are read from the query string in the
  * browser. The generated stacks are type-checked by `tools/configurator-check`.
  */
-export default function ConfiguratorPage() {
+export default async function ConfiguratorPage({ params }: LanguagePageProps) {
+  const { lang } = await params;
   return (
     <>
-      <JsonLd data={structuredData} />
+      <JsonLd data={localizedJsonLd(structuredData, '/configurator', lang)} />
       <PageBackground />
 
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">

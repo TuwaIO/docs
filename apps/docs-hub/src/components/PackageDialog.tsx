@@ -14,6 +14,7 @@ import {
 import { Fragment, type ReactNode } from 'react';
 
 import { formatLabel, useI18n } from '../i18n';
+import { hrefInLanguage } from '../lib/languageUrls';
 import { installCommand, usePackageManager } from '../lib/packageManager';
 import type { PackageDependency, PackageDetails } from '../lib/packages';
 import { CommandLine, PackageManagerSwitch } from './CommandLine';
@@ -58,7 +59,7 @@ const chipClass =
  * @param props - See {@link PackageDialogProps}.
  */
 export function PackageDialog({ open, name, packages, onSelect, onClose }: PackageDialogProps) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const [packageManager, choosePackageManager] = usePackageManager();
   const details = name ? packages[name] : undefined;
 
@@ -234,7 +235,7 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                     return (
                       <a
                         key={guide.route}
-                        href={guide.route}
+                        href={hrefInLanguage(guide.route, locale)}
                         className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-2.5 py-1 text-xs text-[var(--tuwa-text-primary)] transition-colors hover:border-[var(--tuwa-text-accent)]/40 hover:bg-[var(--tuwa-text-accent)]/10"
                       >
                         <BookOpenIcon className="w-3.5 h-3.5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />

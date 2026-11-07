@@ -44,13 +44,14 @@ Watch the usage of your organization in the dashboard; Quasar Cloud emails the o
 
 ## 🚦 Other Limits [#other-limits]
 
-| Limit                         | Value                                                                       |
-| ----------------------------- | --------------------------------------------------------------------------- |
-| Requests per second           | Per organization (5 in Quasar Cloud); more requests are rejected with `429` |
-| Transactions per history page | `limit` up to 100 (default 10)                                              |
-| Apps per organization         | 30                                                                          |
-| Webhook endpoints per app     | 500                                                                         |
-| `localhost` webhook endpoints | 1 per organization (see [Webhooks](/quasar/webhooks#-local-development))    |
-| Webhook response time         | 10 seconds per delivery attempt                                             |
+| Limit                         | Value                                                                                                                              |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Requests per second           | Per organization (5 in Quasar Cloud); more requests are rejected with `429`                                                        |
+| Transactions per history page | `limit` up to 100 (default 10)                                                                                                     |
+| History depth                 | Pages reach 10,000 transactions back; deeper pages answer `400 page_too_deep` (filter by status, chain, wallet or `txKey` instead) |
+| Apps per organization         | 30                                                                                                                                 |
+| Webhook endpoints per app     | 20                                                                                                                                 |
+| `localhost` webhook endpoints | 1 per organization (see [Webhooks](/quasar/webhooks#-local-development))                                                           |
+| Webhook response time         | 10 seconds per delivery attempt                                                                                                    |
 
 A synced transaction must also pass the safety limits of Pulsar (sizes of the text fields and of `payload`); a transaction that does not is rejected with `400`.

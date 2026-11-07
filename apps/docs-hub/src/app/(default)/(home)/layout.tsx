@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { HubShell } from '../../components/HubShell';
+import { HubShell } from '../../../components/HubShell';
 
 /**
  * Layout for the main Docs Hub landing portal.

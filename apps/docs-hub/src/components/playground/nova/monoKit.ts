@@ -218,6 +218,11 @@ export const monoConnect: NovaConnectProviderCustomization = {
       },
       childComponents: {
         connectorsSelections: {
+          disclaimer: {
+            classNames: {
+              button: ({ isPrimary }) => cn(isPrimary ? button.primary : outlined, 'min-h-9 px-3 py-1.5'),
+            },
+          },
           connectorsBlock: {
             installed: {
               classNames: { title: () => cn(text.strong, text.accent, 'text-xs uppercase tracking-wider') },
@@ -348,7 +353,8 @@ export const monoConnectButton: ConnectButtonCustomization = {
           arrowWrapper: () => '[&_svg]:text-[var(--tuwa-text-accent)]',
         },
       },
-      selectContent: { contentClassName: cn(surface.base, surface.border, corners) },
+      // On the frame of Nova's list: the scroll buttons are inside it
+      selectContent: { className: cn('w-[210px] ring-0!', surface.base, surface.border, corners) },
       chainListRenderer: chainList,
     },
   },

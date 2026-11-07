@@ -151,7 +151,7 @@ export const zhCN: DocsHubLabels = {
         '@tuwaio/pulsar-core':
           'Pulsar (TUWA) 的 L3 核心包：支持 localStorage 持久化的无头、框架无关交易状态库，定义链适配器契约、元数据校验及跨 EVM 与 Solana 的远程同步钩子。',
         '@tuwaio/pulsar-evm':
-          'Pulsar (TUWA) 的 L4 EVM 包：基于 viem 与 @wagmi/core 的交易适配器与追踪器，支持标准 EVM 交易、ERC-4337 UserOperation、Safe 多签与 Gelato 中继，并提供加速与取消操作。',
+          'Pulsar (TUWA) 的 L4 EVM 包：基于 viem 与 @wagmi/core 的交易适配器与追踪器，支持标准 EVM 交易、ERC-4337 UserOperation 与 Safe 多签，并提供加速与取消操作。',
         '@tuwaio/pulsar-react':
           'Pulsar (TUWA) 的 L4 React 包：useInitializeTransactionsPool 在页面刷新后恢复挂起交易的追踪，useTxFinished 响应每一笔完成的交易。',
         '@tuwaio/pulsar-solana':
@@ -413,7 +413,7 @@ export const zhCN: DocsHubLabels = {
           'status-webhooks': '当交易最终敲定时，Quasar 发送带 HMAC 签名的 Webhook。',
           'email-social': '架构设计使然：TUWA 专注于连接用户已有的自托管钱包。',
           'embedded-wallets': '架构设计使然：不提供托管、MPC 或硬件飞地钱包。',
-          'gas-or-onramp': 'Pulsar 可追踪 ERC-4337 和 Gelato 中继交易，但 TUWA 本身不提供 Gas 代付或法币入金服务。',
+          'gas-or-onramp': 'Pulsar 可追踪 ERC-4337 交易，但 TUWA 本身不提供 Gas 代付或法币入金服务。',
           evm: '基于 wagmi 与 viem 构建。',
           solana: '基于 @solana/kit 与 Wallet Standard 构建。',
           'other-chains': 'Starknet、Tron、Bitcoin 与 TON 已列入路线图（第 8 阶段）。',

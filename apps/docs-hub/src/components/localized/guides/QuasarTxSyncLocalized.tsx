@@ -73,14 +73,23 @@ export function QuasarTxSyncLocalized({ locale }: { locale: Locale }) {
           </Tabs.Tab>
         </Tabs>
 
-        <H3 id="eip-5792-batches">Батчі EIP-5792</H3>
+        <H3 id="eip-5792-batches">Пакети викликів (EIP-5792)</H3>
         <P>
-          Для пакетних викликів <Code>wallet_sendCalls</Code> передайте хеш фінальної транзакції через функцію{' '}
-          <Code>syncBatchHash</Code>:
+          Пакет, надісланий через <Code>wallet_sendCalls</Code> (<Code>tracker: TransactionTracker.EIP5792</Code>),
+          синхронізується за ідентифікатором пакета, який знає лише гаманець. Щойно Pulsar дізнається хеш транзакції, що
+          виконала пакет, надішліть його до Quasar: тоді Quasar відстежує пакет у мережі й надсилає його вебхук. Без
+          хешу Quasar позначає пакет як <Code>Failed</Code> через годину після синхронізації. Потрібен{' '}
+          <Code>@tuwaio/quasar-sdk</Code> 0.6 або новіший.
+        </P>
+        <P>
+          Додайте третій Server Action. Він читає пакет із Quasar, щоб перевірити, що його надіслав гаманець, з яким
+          виконано вхід:
         </P>
         <CodeSnippet index={4} />
         <P>
-          Потім підключіть спостереження за стором у браузері (<Code>@tuwaio/quasar-sdk</Code> 0.6+):
+          Потім стежте за хешами пакетів у сторі, поруч зі стором вкладки EVM. <Code>watchBatchHashes</Code> повідомляє
+          про кожен пакет один раз, після його синхронізації; якщо дія не вдалася, він повторює спробу при наступній
+          зміні стору:
         </P>
         <CodeSnippet index={5} />
 
@@ -179,13 +188,18 @@ export function QuasarTxSyncLocalized({ locale }: { locale: Locale }) {
         </Tabs.Tab>
       </Tabs>
 
-      <H3 id="eip-5792-batches">EIP-5792 批量调用同步</H3>
+      <H3 id="eip-5792-batches">批量调用（EIP-5792）</H3>
       <P>
-        针对 <Code>wallet_sendCalls</Code> 批量调用，通过 <Code>syncBatchHash</Code> 发送链上执行哈希：
+        通过 <Code>wallet_sendCalls</Code> 发送的批量调用（<Code>tracker: TransactionTracker.EIP5792</Code>
+        ）按批次 ID 同步，而该 ID 只有钱包能够解析。一旦 Pulsar 获知执行该批次的交易哈希，就把它发送给 Quasar：Quasar
+        随后在链上跟踪该批次并发送其 Webhook。若一直没有哈希，Quasar 会在同步一小时后将该批次标记为 <Code>Failed</Code>
+        。需要 <Code>@tuwaio/quasar-sdk</Code> 0.6 或更高版本。
       </P>
+      <P>添加第三个 Server Action。它会从 Quasar 读取该批次，以确认是当前登录的钱包发送了它：</P>
       <CodeSnippet index={4} />
       <P>
-        并在浏览器端初始化监听器（<Code>@tuwaio/quasar-sdk</Code> 0.6+）：
+        然后在 EVM 标签页的 store 旁边监听批次哈希。<Code>watchBatchHashes</Code>{' '}
+        会在每个批次同步后只报告一次；若操作失败，会在 store 下一次变化时重试：
       </P>
       <CodeSnippet index={5} />
 

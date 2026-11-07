@@ -5,7 +5,7 @@ description: Quasar tracks the transactions of your app on the server, keeps the
 
 # Quasar
 
-**Quasar** is the backend of TUWA (Stage 3, "Backend & Sync"). Pulsar tracks a transaction in the browser while the tab is open; Quasar tracks the same transaction on a server until it reaches a final status, keeps the history of your app for every device, and notifies your backend with signed webhooks. Your server talks to it with [`@tuwaio/quasar-sdk`](https://sdk.docs.tuwa.io/packages/quasar-sdk).
+**Quasar** is the backend of TUWA (Stage 3, "Backend & Sync"). Pulsar tracks a transaction in the browser while the tab is open; Quasar tracks the same transaction on a server until it reaches a final status, keeps the history of your app for every device, and notifies your backend with signed webhooks. Your server talks to it with [`@tuwaio/quasar-sdk`](https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs).
 
 ---
 
@@ -24,7 +24,7 @@ executeTxAction
                                         │ checks the SIWX session
                                         │ quasar.pulsar.syncCreate ──▶ POST /v1/engine/pulsar/sync
                                                                           │ tracks the transaction
-                                                                          │ (EVM, Safe, ERC-4337, Solana)
+                                                                          │ (EVM, Safe, ERC-4337, EIP-5792, Solana)
 Nova Transactions history ◀──────── quasar.pulsar.getHistory ◀─────  GET /v1/engine/pulsar/history
                                     Your webhook endpoint ◀────────── POST, signed with HMAC-SHA256
 
@@ -38,7 +38,7 @@ Your webhook endpoint ◀──────────────────�
 ```
 
 - **Your server holds the key.** The browser never calls Quasar with the secret key: for wallet-signed flows it calls your server, which checks that the user owns the wallet (with a SIWX session) and then calls Quasar; for server-signed flows your backend calls Quasar directly after broadcasting. The [Quasar transaction sync guide](/guides/quasar-transaction-sync) covers both flows.
-- **Tracking runs twice.** A fast phase follows the transaction as soon as it is synced, and a lazy queue plus an hourly sweeper check pending transactions again for reorganizations and lagging RPC nodes. Quasar tracks the transactions of the Pulsar trackers: EVM transactions, EIP-5792 batches, Safe multisig transactions, ERC-4337 user operations and Solana signatures. Quasar Cloud does not track Safe multisig transactions for now; a Community Edition node does.
+- **Tracking runs twice.** A fast phase follows the transaction as soon as it is synced, and a lazy queue plus an hourly sweeper check pending transactions again for reorganizations and lagging RPC nodes. Quasar tracks the transactions of the Pulsar trackers: EVM transactions, EIP-5792 batches of calls (by the hash of their transaction, which your app sends), Safe multisig transactions, ERC-4337 user operations and Solana signatures. Quasar Cloud does not track Safe multisig transactions for now; a Community Edition node does.
 - **Webhooks** notify your backend when a transaction reaches a terminal status (`Success`, `Failed` or `Replaced`). See [Webhooks](/quasar/webhooks).
 
 ---
@@ -56,7 +56,7 @@ Quasar and Pulsar use the same tracker rules on every chain so your database and
 
 - **Solana `lastValidBlockHeight` and `getTransaction` resilience:** `signAndSendSolanaTx` of `@tuwaio/pulsar-solana` captures `lastValidBlockHeight` automatically; when syncing a server-signed Solana transaction, pass `lastValidBlockHeight` in `quasar.pulsar.syncCreate`. Once the cluster's block height (`getBlockHeight`) passes `lastValidBlockHeight` and the signature is still unknown, the transaction can no longer land and is marked `Failed` immediately as expired instead of waiting for an arbitrary timeout. Once confirmed, the tracker fetches `fee`, `recentBlockhash` and `instructions` with `getTransaction` (legacy, v0 and v1 transactions); a `getTransaction` RPC error never fails or hides a `finalized` signature.
 - **Non-custodial boundary and rebroadcasting:** Neither Pulsar nor Quasar ever stores private keys or raw signed wire transactions. If your backend signs withdrawals and rebroadcasts the same signed transaction while it is in flight before `lastValidBlockHeight`, keep the raw signed bytes in your broadcaster; calling `quasar.pulsar.syncCreate` with the same `txKey` is idempotent (`duplicate: true`) while Quasar tracks the signature to `finalized` or blockhash expiry.
-- **Server-side recovery and retries:** An hourly sweeper re-enqueues pending transactions that were stalled by an RPC outage, and any transaction that finished in `Failed`/`Replaced` or has been pending for 60 seconds or longer can be retried from the dashboard or via `POST /v1/engine/pulsar/sync/retry/:txKey`.
+- **Server-side recovery and retries:** An hourly sweeper re-enqueues pending transactions that were stalled by an RPC outage, and any transaction that finished in `Failed`/`Replaced` or has been pending for 60 seconds or longer can be retried from the dashboard or via `POST /v1/engine/pulsar/sync/retry/:txKey`, at most once a minute per transaction (`429 retry_too_soon` otherwise).
 
 ---
 
@@ -88,4 +88,4 @@ Quasar Cloud is in **public beta and free of charge**: paid quota is not availab
 - Create an app and get its keys: [Apps & Keys](/quasar/apps-and-keys).
 - Sync the transactions of your React app: [Quasar transaction sync guide](/guides/quasar-transaction-sync), or the complete app in the [Full-Stack React guide](/guides/full-stack-react).
 - Receive webhooks, also on `localhost`: [Webhooks](/quasar/webhooks).
-- Browse the endpoints in the [API Reference](/quasar/api), and the client in the [`@tuwaio/quasar-sdk` reference](https://sdk.docs.tuwa.io/packages/quasar-sdk).
+- Browse the endpoints in the [API Reference](/quasar/api), and the client in the [`@tuwaio/quasar-sdk` reference](https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs).

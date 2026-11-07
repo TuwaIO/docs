@@ -57,6 +57,7 @@ export function NovaStage() {
     <>
       <NovaTransactionsProvider
         {...nova.transactionsProps}
+        sounds
         transactionsPool={transactionsPool}
         pagination={pagination}
         initialTx={initialTx}
@@ -70,6 +71,7 @@ export function NovaStage() {
       <NovaTransactionsLabelsProvider labels={nova.transactionsLabels}>
         <NovaConnectProvider
           {...nova.connectProps}
+          sounds
           appChains={APP_CHAINS}
           solanaRPCUrls={SOLANA_RPC_URLS}
           transactionPool={transactionsPool}

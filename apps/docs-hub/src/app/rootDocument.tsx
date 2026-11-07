@@ -1,6 +1,7 @@
 import './globals.css';
 
 import { PreferenceExpiry } from '@tuwaio/docs-ui';
+import { localeOfPath } from '@tuwaio/docs-ui/locale';
 import type { Metadata } from 'next';
 import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
@@ -8,7 +9,8 @@ import type { ReactNode } from 'react';
 import { SITE_URL, X_HANDLE } from '../lib/site';
 import { Providers } from './providers';
 
-export const metadata: Metadata = {
+/** The metadata of the whole site. */
+export const rootMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: 'TUWA Docs Hub — Modular Headless Web3 Infrastructure',
   description:
@@ -68,9 +70,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+/**
+ * The document of every page: a root layout of the site renders it with the language of its URLs, so that the prerendered HTML
+ * names its language for search engines and for the search index, before any script runs.
+ *
+ * @param props.lang - The language of the page.
+ * @param props.children - The page.
+ * @returns The document.
+ */
+export function RootDocument({ lang, children }: { lang: string; children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={lang} suppressHydrationWarning>
       {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
           The background colors are those of the body below. Dark mode uses the TUWA cosmic midnight blue (#0a0e27). */}
       <Head backgroundColor={{ light: '#ffffff', dark: '#0a0e27' }}>
@@ -79,7 +89,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <PreferenceExpiry keys={['theme', 'tuwa-guide-network', 'tuwa-locale']} />
       </Head>
       <body className={`antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#0a0e27] text-[var(--tuwa-text-primary)]`}>
-        <Providers>{children}</Providers>
+        <Providers urlLocale={localeOfPath(`/${lang}`) ?? undefined}>{children}</Providers>
       </body>
     </html>
   );

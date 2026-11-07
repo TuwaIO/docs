@@ -1,12 +1,16 @@
 'use client';
 
-import { docsLabels, localizePageMap } from '@tuwaio/docs-ui';
+import { docsLabels, localizePageMap, prefixPageMapRoutes } from '@tuwaio/docs-ui';
+import { localeOfPath, localizedPath } from '@tuwaio/docs-ui/locale';
 import { NextraDocsLayout } from '@tuwaio/docs-ui/nextra';
+import { useLocaleRouting } from '@tuwaio/docs-ui/routing';
+import { usePathname } from 'next/navigation';
 import type { $NextraMetadata, Heading, PageMapItem } from 'nextra';
 import { Callout } from 'nextra/components';
 import { type ReactNode, useMemo } from 'react';
 
 import { type DocsHubLabels, useI18n } from '@/i18n';
+import { hasLanguageUrl } from '@/lib/languageUrls';
 import { useMDXComponents } from '@/mdx-components';
 
 import { CodeSnippet, MdxCodeBlocksProvider } from './localized/CodeSnippet';
@@ -160,7 +164,7 @@ function QuasarIndexLocalized({ labels }: { labels: DocsHubLabels['nextra']['qua
       <H1>{labels.title}</H1>
       <P>
         <strong>Quasar</strong> {labels.introPart1}
-        <A href="https://sdk.docs.tuwa.io/packages/quasar-sdk">
+        <A href="https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs">
           <Code>@tuwaio/quasar-sdk</Code>
         </A>
         {labels.introPart2}
@@ -303,7 +307,10 @@ function QuasarIndexLocalized({ labels }: { labels: DocsHubLabels['nextra']['qua
           {labels.nextSteps.apiPrefix}
           <A href="/quasar/api">{labels.nextSteps.apiLink1}</A>
           {labels.nextSteps.apiMiddle}
-          <A href="https://sdk.docs.tuwa.io/packages/quasar-sdk">{labels.nextSteps.apiLink2}</A>.
+          <A href="https://payments.docs.tuwa.io/?path=/docs/packages-quasar-sdk-overview--docs">
+            {labels.nextSteps.apiLink2}
+          </A>
+          .
         </Li>
       </Ul>
     </>
@@ -474,7 +481,7 @@ export function NextraPageWrapper({ toc, metadata, sourceCode = '', routeKey, ch
  * Client wrapper around the Nextra `Layout`: `NextraDocsLayout` of `@tuwaio/docs-ui` (the layout of every TUWA
  * documentation site) in the language of the reader, with the sidebar `pageMap` translated by route
  * (`localizePageMap` with `nextra.sidebar` of the hub dictionaries).
- * @param props.logo - Server-rendered `<RemoteLogo />` element.
+ * @param props.logo - Server-rendered `<SiteLogo />` element.
  * @param props.pageMap - Raw Nextra `PageMapItem[]` from `getPageMap()`.
  * @param props.children - Section children.
  */
@@ -487,20 +494,23 @@ export function NextraLocalizedShell({
   pageMap: PageMapItem[];
   children: ReactNode;
 }) {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, setLocale, resolved, t } = useI18n();
+  const urlLocale = localeOfPath(usePathname());
+  const selectLocale = useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl });
 
-  const localizedPageMap = useMemo(
-    () => (locale === 'en' ? pageMap : localizePageMap(pageMap, {}, { routes: t.nextra.sidebar })),
-    [locale, pageMap, t.nextra.sidebar],
-  );
+  const localizedPageMap = useMemo(() => {
+    const titled = locale === 'en' ? pageMap : localizePageMap(pageMap, {}, { routes: t.nextra.sidebar });
+    return urlLocale ? prefixPageMapRoutes(titled, urlLocale, hasLanguageUrl) : titled;
+  }, [locale, pageMap, t.nextra.sidebar, urlLocale]);
 
   return (
     <NextraDocsLayout
       logo={logo}
+      logoLink={urlLocale ? localizedPath('/', urlLocale) : undefined}
       pageMap={localizedPageMap}
       docsRepositoryBase="https://github.com/TuwaIO/docs/tree/main/apps/docs-hub"
       locale={locale}
-      onLocaleChange={setLocale}
+      onLocaleChange={selectLocale}
       labels={docsLabels[locale]}
       sidebar={{ defaultMenuCollapseLevel: 1 }}
     >

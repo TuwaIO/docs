@@ -1,5 +1,7 @@
 import type { PageMapItem } from 'nextra';
 
+import { localizedPath, type TuwaLocale } from './locale';
+
 type TitledValue = { title?: unknown } & Record<string, unknown>;
 
 /** Options of {@link localizePageMap}. */
@@ -86,4 +88,40 @@ export function localizePageMap(
   const routes = options.routes ?? {};
   if (Object.keys(titles).length === 0 && Object.keys(routes).length === 0) return pageMap;
   return localizeItems(pageMap, titles, routes);
+}
+
+/**
+ * The routes of a page map in a language, for a page at its language URL: Nextra finds the active page and the sidebar by
+ * comparing these routes with the URL. The page map is not modified: changed items are copied.
+ *
+ * @param items - The page map.
+ * @param locale - The language of the URL.
+ * @param hasLanguageUrl - Whether a route without a language has a language URL: the others keep their route.
+ * @returns The page map with the routes of that language.
+ */
+export function prefixPageMapRoutes(
+  items: PageMapItem[],
+  locale: TuwaLocale,
+  hasLanguageUrl: (route: string) => boolean,
+): PageMapItem[] {
+  const inLanguage = <T>(path: T): T | string =>
+    typeof path === 'string' && path.startsWith('/') && hasLanguageUrl(path.split(/[?#]/)[0] ?? '')
+      ? localizedPath(path, locale)
+      : path;
+  // `getPageMap()` keeps the `href` of a `_meta` entry in `data` and copies it onto a flat item, which may have no route
+  const withHref = <T extends object>(value: T): T =>
+    'href' in value ? { ...value, href: inLanguage(value.href) } : value;
+
+  return items.map((item) => {
+    if ('data' in item) {
+      const entries = Object.entries(item.data).map(([name, entry]) => [
+        name,
+        entry && typeof entry === 'object' ? withHref(entry as object) : entry,
+      ]);
+      return { ...item, data: Object.fromEntries(entries) } as PageMapItem;
+    }
+    const copy = { ...withHref(item), ...('route' in item && { route: inLanguage(item.route) }) };
+    if ('children' in copy && copy.children) copy.children = prefixPageMapRoutes(copy.children, locale, hasLanguageUrl);
+    return copy as PageMapItem;
+  });
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
-import { HubShell } from '../components/HubShell';
-import { NotFoundContent } from '../components/NotFoundContent';
-import { PageBackground } from '../components/PageBackground';
+import { HubShell } from '../../components/HubShell';
+import { NotFoundContent } from '../../components/NotFoundContent';
+import { PageBackground } from '../../components/PageBackground';
 
 export const metadata: Metadata = {
   // Absolute: inside /guides and /quasar the section layouts would append their title template

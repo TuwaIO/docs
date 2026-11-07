@@ -1,4 +1,5 @@
 import { SiteLogo } from '@tuwaio/docs-ui';
+import { localizedPath, normalizeLocale } from '@tuwaio/docs-ui/locale';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import NextTopLoader from 'nextjs-toploader';
@@ -8,6 +9,7 @@ import type { ReactNode } from 'react';
 
 import { JsonLd } from '../components/JsonLd';
 import { NextraLocalizedShell, NextraPageWrapper } from '../components/NextraLocalizedShell';
+import { languageTexts } from './languageMetadata';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
 const logo = <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
@@ -15,6 +17,8 @@ const logo = <SiteLogo width={126} height={40} className="tuwadocs:transition-op
 /** Route params of the `[[...mdxPath]]` page of a section. */
 export type SectionPageProps = {
   params: Promise<{
+    /** The language of the URL; none on the English page. */
+    lang?: string;
     mdxPath?: string[];
   }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -52,11 +56,14 @@ export function createSectionPage(section: string, sectionTitle: string) {
   }
 
   async function generateMetadata(props: SectionPageProps): Promise<Metadata> {
-    const { mdxPath } = await props.params;
+    const { mdxPath, lang } = await props.params;
     if (isAssetOrInternal(mdxPath)) return {};
     try {
       const { metadata } = await importPage([section, ...(mdxPath || [])]);
-      return withPageMetadata(metadata, routeOf(mdxPath));
+      const route = routeOf(mdxPath);
+      const locale = normalizeLocale(lang);
+      if (!locale) return withPageMetadata(metadata, route);
+      return withPageMetadata(languageTexts(route, locale, metadata), localizedPath(route, locale));
     } catch {
       return {};
     }
@@ -74,11 +81,14 @@ export function createSectionPage(section: string, sectionTitle: string) {
     }
 
     const { default: MDXContent, toc, metadata, sourceCode } = result;
+    const locale = normalizeLocale(params.lang) ?? 'en';
     const route = routeOf(params.mdxPath);
+    const urlOf = (path: string) => `${SITE_URL}${localizedPath(path, locale).replace(/^\/$/, '')}`;
+    const { title, description } = languageTexts(route, locale, metadata);
     const breadcrumbs = [
-      { name: 'Docs Hub', url: SITE_URL },
-      { name: sectionTitle, url: `${SITE_URL}/${section}` },
-      ...(params.mdxPath?.length ? [{ name: metadata.title, url: `${SITE_URL}${route}` }] : []),
+      { name: 'Docs Hub', url: urlOf('/') },
+      { name: languageTexts(`/${section}`, locale, { title: sectionTitle }).title, url: urlOf(`/${section}`) },
+      ...(params.mdxPath?.length ? [{ name: title, url: urlOf(route) }] : []),
     ];
     return (
       <>
@@ -88,10 +98,10 @@ export function createSectionPage(section: string, sectionTitle: string) {
             '@graph': [
               {
                 '@type': 'TechArticle',
-                headline: metadata.title,
-                description: metadata.description,
-                url: `${SITE_URL}${route}`,
-                inLanguage: 'en',
+                headline: title,
+                description,
+                url: urlOf(route),
+                inLanguage: locale,
                 isPartOf: { '@id': WEBSITE_ID },
                 author: ORGANIZATION,
                 publisher: ORGANIZATION,
@@ -128,8 +138,7 @@ export function createSectionPage(section: string, sectionTitle: string) {
 
 /**
  * The Nextra docs layout of a section: the TUWA navbar and footer, the sidebar built from the page map of
- * `src/content` and the top loading bar. Side effect: `RemoteLogo` fetches the TUWA logo (cached by Next.js for
- * 24 hours).
+ * `src/content` and the top loading bar.
  *
  * @param props - Layout props.
  * @param props.children - The page.

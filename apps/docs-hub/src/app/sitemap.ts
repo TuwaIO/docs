@@ -1,3 +1,4 @@
+import { localizedPath, TUWA_LOCALES } from '@tuwaio/docs-ui/locale';
 import type { MetadataRoute } from 'next';
 
 import { getHubPages } from '@/lib/hubPages';
@@ -8,12 +9,8 @@ import { SITE_URL } from '@/lib/site';
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages = await getHubPages();
-  return [
-    { url: SITE_URL },
-    { url: `${SITE_URL}/comparisons` },
-    { url: `${SITE_URL}/configurator` },
-    { url: `${SITE_URL}/playground` },
-    { url: `${SITE_URL}/policies` },
-    ...pages.map((page) => ({ url: `${SITE_URL}${page.route}` })),
-  ];
+  const routes = ['/', '/comparisons', '/configurator', '/playground', '/policies', ...pages.map((page) => page.route)];
+  return routes.flatMap((route) =>
+    TUWA_LOCALES.map((locale) => ({ url: `${SITE_URL}${localizedPath(route, locale).replace(/^\/$/, '')}` })),
+  );
 }

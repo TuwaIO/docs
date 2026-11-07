@@ -8,7 +8,8 @@ import {
   RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 import { useCopyToClipboard } from '@tuwaio/nova-core';
-import Link from 'next/link';
+
+import Link from '@/components/LocaleNextLink';
 
 import { useI18n } from '../i18n';
 import { CompactConfigurator } from './configurator/CompactConfigurator';

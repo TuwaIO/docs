@@ -8,9 +8,9 @@ import {
   RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
 import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
-import Link from 'next/link';
 import { type ReactNode, useMemo } from 'react';
 
+import Link from '@/components/LocaleNextLink';
 import { formatLabel, useI18n } from '@/i18n';
 import {
   agentPrompt,

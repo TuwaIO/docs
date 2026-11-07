@@ -15,17 +15,17 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@scalar/api-reference-react": "^0.9.83",
-    "@solana/kit": "^8.5.0",
+    "@scalar/api-reference-react": "^0.9.88",
+    "@solana/kit": "^8.6.0",
     "@tuwaio/docs-ui": "workspace:*",
-    "@tuwaio/evm-sdk": "^0.6.7",
-    "@tuwaio/nova-core": "^0.11.0",
-    "@tuwaio/orbit-core": "^0.6.0",
-    "@tuwaio/satellite-core": "^0.11.2",
-    "@tuwaio/satellite-react": "^0.10.2",
-    "@tuwaio/sdk": "^0.6.11",
-    "@tuwaio/solana-sdk": "^0.6.7",
-    "@wagmi/core": "^3.6.7",
+    "@tuwaio/evm-sdk": "^0.7.0",
+    "@tuwaio/nova-core": "^0.13.0",
+    "@tuwaio/orbit-core": "^0.6.2",
+    "@tuwaio/satellite-core": "^0.12.0",
+    "@tuwaio/satellite-react": "^0.10.4",
+    "@tuwaio/sdk": "^0.7.0",
+    "@tuwaio/solana-sdk": "^0.7.0",
+    "@wagmi/core": "^3.6.9",
     "@wallet-standard/app": "^1.1.1",
     "@wallet-standard/base": "^1.1.1",
     "@wallet-standard/features": "^1.1.1",
@@ -35,18 +35,18 @@
     "clsx": "^2.1.1",
     "dayjs": "^1.11.23",
     "immer": "^11.2.9",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
     "nextra": "^4.6.1",
     "nextra-theme-docs": "^4.6.1",
-    "pagefind": "^1.5.2",
+    "pagefind": "^1.6.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "shiki": "^4.5.0",
+    "shiki": "^4.6.0",
     "tailwind-merge": "^3.7.0",
-    "viem": "^2.57.12",
-    "zustand": "^5.0.16"
+    "viem": "^2.57.16",
+    "zustand": "^5.1.0"
   },
   "dependenciesMeta": {
     "@tuwaio/docs-ui": {
@@ -54,13 +54,13 @@
     }
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.3",
-    "@types/node": "^26.6.5",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.32",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "^4.3.5",
     "typescript": "6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
