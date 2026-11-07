@@ -24,7 +24,8 @@ Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../
 - **UI Runtime:** React 19+
 - **Guides and Quasar docs:** Nextra 4 (`nextra`, `nextra-theme-docs`) — MDX pages, `_meta.tsx` navigation, Mermaid diagrams, GitHub-style callouts
 - **API reference:** `@scalar/api-reference-react`, rendered in the browser from `public/quasar-openapi.yaml`
-- **Search:** Pagefind, indexed after every production build
+- **Search:** Pagefind, indexed after every production build, with an index for each language
+- **Languages:** English, Ukrainian and Simplified Chinese at their own URLs: English without a prefix, `/uk/...` and `/zh-CN/...`
 - **Styling:** Tailwind CSS 4+ with PostCSS, plus TUWA design tokens from `@tuwaio/nova-core` and `@tuwaio/docs-ui`
 - **Icons:** `@heroicons/react`
 - **Theme:** `next-themes` for dark/light mode

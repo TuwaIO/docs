@@ -1,6 +1,7 @@
 import { SiteLogo } from '@tuwaio/docs-ui';
-import Link from 'next/link';
 import type { ReactNode } from 'react';
+
+import Link from '@/components/LocaleNextLink';
 
 import { Footer } from './Footer';
 import { Header } from './Header';

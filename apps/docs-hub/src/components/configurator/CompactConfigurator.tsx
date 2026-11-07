@@ -1,9 +1,9 @@
 'use client';
 
 import { AdjustmentsHorizontalIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { useState } from 'react';
 
+import Link from '@/components/LocaleNextLink';
 import { formatLabel, useI18n } from '@/i18n';
 import { DEFAULT_STACK_OPTIONS, generateStack, stackQuery } from '@/lib/configurator/generate';
 import { installCommand, usePackageManager } from '@/lib/packageManager';

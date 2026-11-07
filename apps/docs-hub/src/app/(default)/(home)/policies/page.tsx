@@ -1,10 +1,12 @@
 import { getPolicyPageUrl, loadPolicy, type Policy, publishedPolicies } from '@tuwaio/docs-ui';
 import type { Metadata } from 'next';
 
-import { JsonLd } from '../../../components/JsonLd';
-import { PageBackground } from '../../../components/PageBackground';
-import { PoliciesContent } from '../../../components/PoliciesContent';
-import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
+import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
+
+import { JsonLd } from '../../../../components/JsonLd';
+import { PageBackground } from '../../../../components/PageBackground';
+import { PoliciesContent } from '../../../../components/PoliciesContent';
+import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../../lib/site';
 
 const ROUTE = '/policies';
 const TITLE = 'TUWA Policies: Terms, Privacy and More';
@@ -57,12 +59,13 @@ async function versionDate(policy: Policy): Promise<string | undefined> {
  * Policy while Quota purchases are paused, is not listed. Then where to report a vulnerability and ask legal
  * questions. The dates are read at build time.
  */
-export default async function PoliciesPage() {
+export default async function PoliciesPage({ params }: LanguagePageProps) {
+  const { lang } = await params;
   const dates = await Promise.all(publishedPolicies.map(versionDate));
 
   return (
     <>
-      <JsonLd data={structuredData} />
+      <JsonLd data={localizedJsonLd(structuredData, '/policies', lang)} />
       <PageBackground />
       <PoliciesContent dates={dates} />
     </>

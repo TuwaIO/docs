@@ -1,9 +1,9 @@
 'use client';
 
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { useState } from 'react';
 
+import Link from '@/components/LocaleNextLink';
 import playgroundSources from '@/generated/playground-sources.json';
 import { useI18n } from '@/i18n';
 import { generateStack, stackQuery } from '@/lib/configurator/generate';

@@ -1,8 +1,8 @@
 'use client';
 
 import { ArrowLeftIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 
+import Link from '@/components/LocaleNextLink';
 import { useI18n } from '@/i18n';
 import { layers } from '@/lib/ecosystem';
 

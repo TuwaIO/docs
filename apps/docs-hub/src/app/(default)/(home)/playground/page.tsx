@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 
-import { JsonLd } from '../../../components/JsonLd';
-import { PageBackground } from '../../../components/PageBackground';
-import { PlaygroundHeader, PlaygroundLoader } from '../../../components/playground/PlaygroundLoader';
-import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
+import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
+
+import { JsonLd } from '../../../../components/JsonLd';
+import { PageBackground } from '../../../../components/PageBackground';
+import { PlaygroundHeader, PlaygroundLoader } from '../../../../components/playground/PlaygroundLoader';
+import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../../lib/site';
 
 const ROUTE = '/playground';
 const TITLE = 'Interactive Web3 Playground';
@@ -20,6 +22,7 @@ const structuredData = {
       name: 'TUWA Interactive Web3 Playground',
       description: DESCRIPTION,
       url: `${SITE_URL}${ROUTE}`,
+      inLanguage: 'en',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
       isAccessibleForFree: true,
@@ -40,10 +43,11 @@ const structuredData = {
  * `/playground`: the Interactive Web3 Playground. The page is static; the Playground itself loads in the browser
  * only, with its TUWA packages (`PlaygroundLoader`).
  */
-export default function PlaygroundPage() {
+export default async function PlaygroundPage({ params }: LanguagePageProps) {
+  const { lang } = await params;
   return (
     <>
-      <JsonLd data={structuredData} />
+      <JsonLd data={localizedJsonLd(structuredData, '/playground', lang)} />
       <PageBackground />
 
       {/* Above the footer (z-10): the fixed Nova toasts of the stage render inside this layer */}

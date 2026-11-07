@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 
-import { ComparisonsContent } from '../../../components/comparisons/ComparisonsContent';
-import { JsonLd } from '../../../components/JsonLd';
-import { PageBackground } from '../../../components/PageBackground';
-import { COMPETITORS, verifiedAsOf } from '../../../lib/comparisons';
-import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../lib/site';
+import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
+
+import { ComparisonsContent } from '../../../../components/comparisons/ComparisonsContent';
+import { JsonLd } from '../../../../components/JsonLd';
+import { PageBackground } from '../../../../components/PageBackground';
+import { COMPETITORS, verifiedAsOf } from '../../../../lib/comparisons';
+import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../../lib/site';
 
 const ROUTE = '/comparisons';
 const TITLE = 'TUWA vs RainbowKit, Privy, Dynamic, thirdweb & More';
@@ -42,10 +44,11 @@ const structuredData = {
  * `/comparisons`: TUWA against eight products on six axes, with the radar, every criterion with its source, when to
  * choose each product instead, and the methodology. The data is `src/lib/comparisons.ts`.
  */
-export default function ComparisonsPage() {
+export default async function ComparisonsPage({ params }: LanguagePageProps) {
+  const { lang } = await params;
   return (
     <>
-      <JsonLd data={structuredData} />
+      <JsonLd data={localizedJsonLd(structuredData, '/comparisons', lang)} />
       <PageBackground />
       <ComparisonsContent />
     </>

@@ -6,6 +6,7 @@ import React, { type FocusEvent, type MouseEvent, type ReactNode, useRef, useSta
 
 import { useI18n } from '../i18n';
 import type { DocEntry } from '../lib/ecosystem';
+import { hrefInLanguage } from '../lib/languageUrls';
 import type { PackageDetails } from '../lib/packages';
 import { PackageBadges } from './PackageBadges';
 import { PackagePreview } from './PackagePreview';
@@ -77,7 +78,7 @@ export function DocCard({
   packageDetails,
   onOpenPackage,
 }: DocCardProps) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
     // No `overflow-hidden`: the package previews float out of the card. A hovered card is raised over the next ones.
     <div className="group relative hover:z-20 focus-within:z-20 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
@@ -112,7 +113,7 @@ export function DocCard({
         {/* Action icons */}
         <div className="shrink-0 flex items-center gap-2">
           <a
-            href={docsUrl}
+            href={hrefInLanguage(docsUrl, locale)}
             // The hub's own pages (such as `/quasar`) open in the same tab
             target={docsUrl.startsWith('/') ? undefined : '_blank'}
             rel={docsUrl.startsWith('/') ? undefined : 'noopener noreferrer'}
@@ -177,7 +178,7 @@ export function DocCard({
             ) : (
               <a
                 key={pkg.name}
-                href={pkg.url || `https://www.npmjs.com/package/${pkg.name}`}
+                href={hrefInLanguage(pkg.url || `https://www.npmjs.com/package/${pkg.name}`, locale)}
                 target={pkg.url?.startsWith('/') ? undefined : '_blank'}
                 rel={pkg.url?.startsWith('/') ? undefined : 'noopener noreferrer'}
                 className={rowClass}

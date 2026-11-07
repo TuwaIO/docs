@@ -1,14 +1,17 @@
 'use client';
 
 import { LocaleSwitcher, ThemeSwitcher } from '@tuwaio/docs-ui';
-import Link from 'next/link';
+import { pathWithoutLocale } from '@tuwaio/docs-ui/locale';
+import { useLocaleRouting } from '@tuwaio/docs-ui/routing';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { setMenu } from 'nextra-theme-docs';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
-import { type Locale, useI18n } from '@/i18n';
+import Link from '@/components/LocaleNextLink';
+import { useI18n } from '@/i18n';
+import { hasLanguageUrl } from '@/lib/languageUrls';
 
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);
 
@@ -23,8 +26,9 @@ const isCurrent = (pathname: string | null, href: string) => pathname === href |
  */
 export function Header({ logo }: { logo: ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme();
-  const { locale, setLocale, t } = useI18n();
-  const pathname = usePathname();
+  const { locale, setLocale, resolved, t } = useI18n();
+  const selectLocale = useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl });
+  const pathname = pathWithoutLocale(usePathname());
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -84,11 +88,7 @@ export function Header({ logo }: { logo: ReactNode }) {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            <LocaleSwitcher
-              locale={locale}
-              onSelect={(code) => setLocale(code as Locale)}
-              ariaLabel={t.nav.selectLanguage}
-            />
+            <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
             {mounted && (
               <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
             )}
@@ -159,11 +159,7 @@ export function Header({ logo }: { logo: ReactNode }) {
 
           <div className="mt-4 border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
             <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.language}</span>
-            <LocaleSwitcher
-              locale={locale}
-              onSelect={(code) => setLocale(code as Locale)}
-              ariaLabel={t.nav.selectLanguage}
-            />
+            <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
           </div>
           <div className="border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
             <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.theme}</span>

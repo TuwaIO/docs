@@ -1,8 +1,8 @@
 'use client';
 
 import { footerPolicies, getPolicyPageUrl } from '@tuwaio/docs-ui';
-import Link from 'next/link';
 
+import Link from '@/components/LocaleNextLink';
 import { policyLanguageOf, useI18n } from '@/i18n';
 
 const linkClassName = 'hover:text-[var(--tuwa-text-primary)] transition-colors';

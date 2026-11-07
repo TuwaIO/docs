@@ -1,16 +1,19 @@
+import { languageAlternates } from '@tuwaio/docs-ui/locale';
 import type { Metadata } from 'next';
 
-import { HeroSection } from '../../components/HeroSection';
-import { JsonLd } from '../../components/JsonLd';
-import { LayerTimeline } from '../../components/LayerTimeline';
-import { PageBackground } from '../../components/PageBackground';
-import { QuickStartSection } from '../../components/QuickStartSection';
-import { getReleases } from '../../lib/github';
-import { getPackageDetails } from '../../lib/packages';
-import { ORGANIZATION, SITE_NAME, SITE_URL, TUWA_SUMMARY, WEBSITE_ID } from '../../lib/site';
+import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
+
+import { HeroSection } from '../../../components/HeroSection';
+import { JsonLd } from '../../../components/JsonLd';
+import { LayerTimeline } from '../../../components/LayerTimeline';
+import { PageBackground } from '../../../components/PageBackground';
+import { QuickStartSection } from '../../../components/QuickStartSection';
+import { getReleases } from '../../../lib/github';
+import { getPackageDetails } from '../../../lib/packages';
+import { ORGANIZATION, SITE_NAME, SITE_URL, TUWA_SUMMARY, WEBSITE_ID } from '../../../lib/site';
 
 export const metadata: Metadata = {
-  alternates: { canonical: '/' },
+  alternates: { canonical: '/', languages: languageAlternates('/') },
 };
 
 // The hub as a website of the TUWA organization, for search engines
@@ -33,10 +36,11 @@ const structuredData = {
 /**
  * Docs Hub main page, on the background of the hub pages (`PageBackground`).
  */
-export default function DocsHubPage() {
+export default async function DocsHubPage({ params }: LanguagePageProps) {
+  const { lang } = await params;
   return (
     <>
-      <JsonLd data={structuredData} />
+      <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
 
       <div className="relative z-10 pt-28 sm:pt-32 pb-16">

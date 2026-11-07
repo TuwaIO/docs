@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import Link from '@/components/LocaleNextLink';
 import { formatLabel, useI18n } from '@/i18n';
 import { COMPETITORS, CRITERIA, formatCheckDate, SEGMENTS, verifiedAsOf } from '@/lib/comparisons';
 

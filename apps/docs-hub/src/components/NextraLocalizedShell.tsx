@@ -1,12 +1,16 @@
 'use client';
 
-import { docsLabels, localizePageMap } from '@tuwaio/docs-ui';
+import { docsLabels, localizePageMap, prefixPageMapRoutes } from '@tuwaio/docs-ui';
+import { localeOfPath, localizedPath } from '@tuwaio/docs-ui/locale';
 import { NextraDocsLayout } from '@tuwaio/docs-ui/nextra';
+import { useLocaleRouting } from '@tuwaio/docs-ui/routing';
+import { usePathname } from 'next/navigation';
 import type { $NextraMetadata, Heading, PageMapItem } from 'nextra';
 import { Callout } from 'nextra/components';
 import { type ReactNode, useMemo } from 'react';
 
 import { type DocsHubLabels, useI18n } from '@/i18n';
+import { hasLanguageUrl } from '@/lib/languageUrls';
 import { useMDXComponents } from '@/mdx-components';
 
 import { CodeSnippet, MdxCodeBlocksProvider } from './localized/CodeSnippet';
@@ -490,20 +494,23 @@ export function NextraLocalizedShell({
   pageMap: PageMapItem[];
   children: ReactNode;
 }) {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, setLocale, resolved, t } = useI18n();
+  const urlLocale = localeOfPath(usePathname());
+  const selectLocale = useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl });
 
-  const localizedPageMap = useMemo(
-    () => (locale === 'en' ? pageMap : localizePageMap(pageMap, {}, { routes: t.nextra.sidebar })),
-    [locale, pageMap, t.nextra.sidebar],
-  );
+  const localizedPageMap = useMemo(() => {
+    const titled = locale === 'en' ? pageMap : localizePageMap(pageMap, {}, { routes: t.nextra.sidebar });
+    return urlLocale ? prefixPageMapRoutes(titled, urlLocale, hasLanguageUrl) : titled;
+  }, [locale, pageMap, t.nextra.sidebar, urlLocale]);
 
   return (
     <NextraDocsLayout
       logo={logo}
+      logoLink={urlLocale ? localizedPath('/', urlLocale) : undefined}
       pageMap={localizedPageMap}
       docsRepositoryBase="https://github.com/TuwaIO/docs/tree/main/apps/docs-hub"
       locale={locale}
-      onLocaleChange={setLocale}
+      onLocaleChange={selectLocale}
       labels={docsLabels[locale]}
       sidebar={{ defaultMenuCollapseLevel: 1 }}
     >
