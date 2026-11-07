@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.2...docs-ui-v0.8.0) (2026-11-07)
+
+
+### Features
+
+* the Payments docs, language URLs, and docs-ui without Nextra in its root and with one copy of Nova Core ([#63](https://github.com/TuwaIO/docs/issues/63)) ([f92b55a](https://github.com/TuwaIO/docs/commit/f92b55a007523c1044de9e05fac092f362584553))
+
 ## [0.7.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.7.1...docs-ui-v0.7.2) (2026-11-05)
 
 
