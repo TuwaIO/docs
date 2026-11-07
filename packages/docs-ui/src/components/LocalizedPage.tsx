@@ -24,24 +24,26 @@ export interface LocalizedPageVariant {
 export interface LocalizedPageProps {
   /** The page in English (the server renders it) and in the languages it is translated into. */
   variants: Partial<Record<TuwaLocale, LocalizedPageVariant>> & { en: LocalizedPageVariant };
+  /** The language of the URL of this page: it shows that variant whatever the reader picks, until the switch has moved on. */
+  language?: TuwaLocale;
 }
 
 type WrapperProps = { toc: Heading[]; metadata: $NextraMetadata; sourceCode?: string; children: ReactNode };
 
 /**
  * A page of a TUWA documentation site in the language of the reader, inside the Nextra page wrapper (sidebar, table of
- * contents, breadcrumbs, pagination). All variants come prerendered from the server, so switching the language makes no
- * request and the URL stays the same; the server HTML and the search index hold English. A page without a translation
+ * contents, breadcrumbs, pagination). At an English URL all variants come prerendered from the server and the HTML holds English;
+ * at the URL of a language, `language` names the one it shows. A page without a translation
  * in the active language (package READMEs and the generated API reference) shows English with a short note in that
  * language. Must be rendered inside {@link DocsLayout}; `createDocsPage` (`@tuwaio/docs-ui/nextra/page`) renders it.
  *
  * @param props - See {@link LocalizedPageProps}.
  * @returns The page.
  */
-export function LocalizedPage({ variants }: LocalizedPageProps) {
+export function LocalizedPage({ variants, language }: LocalizedPageProps) {
   const { locale, t } = useDocsI18n();
   const Wrapper = useMDXComponents().wrapper as ComponentType<WrapperProps>;
-  const translated = variants[locale];
+  const translated = variants[language ?? locale];
   const page = translated ?? variants.en;
 
   return (

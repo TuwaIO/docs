@@ -3,12 +3,13 @@
 import type { PageMapItem } from 'nextra';
 import { Search } from 'nextra/components';
 import { LastUpdated, Layout } from 'nextra-theme-docs';
-import { type ComponentProps, type ReactNode, useMemo } from 'react';
+import { type ComponentProps, type ReactNode, useCallback, useMemo } from 'react';
 
 import { DocsI18nProvider, useDocsI18n } from '../docsI18n';
 import type { DocsLabels } from '../docsLabels';
-import { normalizeLocale, policyLanguageOf, type TuwaLocale } from '../locale';
-import { localizePageMap } from '../pageMap';
+import { localizedPath, normalizeLocale, policyLanguageOf, type TuwaLocale } from '../locale';
+import { useLocaleRouting } from '../localeRouting';
+import { localizePageMap, prefixPageMapRoutes } from '../pageMap';
 import { type SocialLink } from '../utils';
 import { Footer } from './Footer';
 import { LocaleSwitcher } from './LocaleSwitcher';
@@ -33,7 +34,12 @@ export interface DocsLayoutProps {
    * Standalone': '…' } }`). `Introduction`, `Packages`, `Guides` and `Overview` are translated already.
    */
   sidebarTitles?: Partial<Record<Exclude<TuwaLocale, 'en'>, Record<string, string>>>;
-  /** Fixed language (tests, previews): detection and the stored choice are skipped. */
+  /**
+   * The routes that have their translations at their own URLs, `/uk/...` and `/zh-CN/...`: the keys of the translated pages of the
+   * site. The language switch goes to those URLs, a saved language leads to them, and the rest of the pages stay at one URL.
+   */
+  languageRoutes?: readonly string[];
+  /** Fixed language, the language of the URL or for tests and previews: detection and the stored choice are skipped. */
   initialLocale?: TuwaLocale;
   /** The page and anything rendered next to it, such as a top loading bar. */
   children: ReactNode;
@@ -138,16 +144,31 @@ export function NextraDocsLayout({
   );
 }
 
-function LocalizedLayout({ pageMap, sidebarTitles, ...props }: Omit<DocsLayoutProps, 'initialLocale'>) {
-  const { locale, setLocale, t } = useDocsI18n();
+function LocalizedLayout({
+  pageMap,
+  sidebarTitles,
+  languageRoutes,
+  urlLocale,
+  ...props
+}: Omit<DocsLayoutProps, 'initialLocale'> & { urlLocale?: TuwaLocale }) {
+  const { locale, setLocale, resolved, t } = useDocsI18n();
+  const hasLanguageUrl = useCallback((route: string) => languageRoutes?.includes(route) ?? false, [languageRoutes]);
+  const selectLocale = useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl });
   const siteTitles = locale === 'en' ? undefined : sidebarTitles?.[locale];
-  const localizedPageMap = useMemo(
-    () => localizePageMap(pageMap, { ...t.sidebar, ...siteTitles }),
-    [pageMap, t.sidebar, siteTitles],
-  );
+  const localizedPageMap = useMemo(() => {
+    const titled = localizePageMap(pageMap, { ...t.sidebar, ...siteTitles });
+    return urlLocale ? prefixPageMapRoutes(titled, urlLocale, hasLanguageUrl) : titled;
+  }, [pageMap, t.sidebar, siteTitles, urlLocale, hasLanguageUrl]);
 
   return (
-    <NextraDocsLayout {...props} pageMap={localizedPageMap} locale={locale} onLocaleChange={setLocale} labels={t} />
+    <NextraDocsLayout
+      {...props}
+      logoLink={urlLocale && localizedPath('/', urlLocale)}
+      pageMap={localizedPageMap}
+      locale={locale}
+      onLocaleChange={selectLocale}
+      labels={t}
+    />
   );
 }
 
@@ -170,7 +191,10 @@ function LocalizedLayout({ pageMap, sidebarTitles, ...props }: Omit<DocsLayoutPr
 export function DocsLayout({ initialLocale, ...props }: DocsLayoutProps) {
   return (
     <DocsI18nProvider initialLocale={initialLocale}>
-      <LocalizedLayout {...props} />
+      <LocalizedLayout
+        urlLocale={props.languageRoutes && initialLocale !== 'en' ? initialLocale : undefined}
+        {...props}
+      />
     </DocsI18nProvider>
   );
 }

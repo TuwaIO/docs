@@ -228,7 +228,25 @@ export function useLanguageSwitch(locale: TuwaLocale, setLocale: (locale: TuwaLo
 }
 ```
 
-Picking a language goes to its URL with the query and the anchor. A reader with a saved or detected language who opens the English URL of such a page is taken to the URL of that language; crawlers stay where they are. The site gives the provider the language of the URL (the `[lang]` root layout) so the server renders it, and adds a route under `[lang]` for each page. The docs hub is built this way; `DocsLayout` of a project site keeps one URL per page for now.
+Picking a language goes to its URL with the query and the anchor. A reader with a saved or detected language who opens the English URL of such a page is taken to the URL of that language; crawlers stay where they are. The site gives the provider the language of the URL (the `[lang]` root layout) so the server renders it, and adds a route under `[lang]` for each page. The docs hub is built this way, with every page translated.
+
+A project site has only a few translated pages, so only they move, and the English reference keeps its one URL. The English route goes to `src/app/(default)`, with a root layout that renders the document with `lang="en"`, and each language gets its own folder, as `src/app/uk`, with a root layout for that language and a route that serves its translated pages:
+
+```tsx
+import { createDocsPage } from '@tuwaio/docs-ui/nextra/page';
+
+import { localizedPages } from '@/i18n/pages';
+
+const { generateStaticParams, generateMetadata, Page } = createDocsPage({ localizedPages, locale: 'uk' });
+
+// Only the translated pages: an unknown one is a 404
+export const dynamicParams = false;
+
+export { generateMetadata, generateStaticParams };
+export default Page;
+```
+
+Folders with the name of the language and not one `[lang]` folder: a dynamic segment would take every English URL from the root route. The root layouts render `DocsLayout` with `initialLocale` for their language and `languageRoutes={Object.keys(localizedPages)}`, and the root metadata needs `metadataBase`, for the canonical URL and `hreflang`. A search from a translated page has to find the reference, so such a site indexes all its pages together: `tuwa-docs-search-index --force-language en`.
 
 ### Search index
 

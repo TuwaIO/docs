@@ -30,6 +30,11 @@ import { en, uk, zhCN } from '../i18n';
 // English with a note. These tests keep the shared parts: the interface texts, the sidebar titles, the page that
 // switches to its translation and the check that keeps translations in line with their English pages.
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
+
 vi.mock('nextra-theme-docs', () => ({
   // Stand-ins that render what the tests read: the layout props, the navbar children and the page wrapper
   Layout: (props: Record<string, unknown> & { children: ReactNode; navbar: ReactNode; footer: ReactNode }) =>
@@ -307,6 +312,27 @@ describe('DocsLayout', () => {
     expect(props.toc).toEqual({ title: 'На цій сторінці', backToTop: 'Прокрутити вгору' });
     expect(props.themeSwitch).toEqual({ light: 'Світла', dark: 'Темна', system: 'Системна' });
     expect(JSON.stringify(props.pageMap)).toContain('"title":"Вступ"');
+  });
+
+  it('gives the sidebar the links of the language at a language URL, and leaves the pages with one URL', () => {
+    const html = renderToStaticMarkup(
+      createElement(
+        DocsLayout,
+        {
+          logo: createElement('img', { alt: 'TUWA' }),
+          pageMap: [
+            { name: 'index', route: '/' },
+            { name: 'orbit-core', route: '/packages/orbit-core' },
+          ] as PageMapItem[],
+          docsRepositoryBase: 'https://github.com/TuwaIO/orbit',
+          initialLocale: 'uk',
+          languageRoutes: ['/'],
+        },
+        null,
+      ),
+    );
+    const routes = (propsOf(html).pageMap as { route: string }[]).map((item) => item.route);
+    expect(routes).toEqual(['/uk', '/packages/orbit-core']);
   });
 
   it('renders the controlled layout the docs hub uses, with its texts and Nextra sidebar options', () => {
