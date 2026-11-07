@@ -487,7 +487,6 @@ export const Increment = () => {
           type: 'increment',
           adapter: OrbitAdapter.SOLANA,
           desiredChainID: cluster,
-          rpcUrl, // saved with the transaction, so tracking resumes on the same RPC after a reload
           title: ['Incrementing', 'Incremented', 'Increment failed', 'Increment replaced'],
           description: 'Increment the counter by 1.',
           payload: { value: 1 },

@@ -153,7 +153,7 @@ export const en: DocsHubLabels = {
         '@tuwaio/pulsar-core':
           'L3 core of Pulsar (TUWA): headless, framework-agnostic transaction store with localStorage persistence, a chain adapter contract, metadata validation and remote sync hooks for tracking EVM and Solana transactions.',
         '@tuwaio/pulsar-evm':
-          'L4 EVM package of Pulsar (TUWA): transaction adapter and trackers for standard transactions, ERC-4337 UserOperations, Safe multisig and Gelato relay, with speed-up and cancel actions, built on viem and @wagmi/core.',
+          'L4 EVM package of Pulsar (TUWA): transaction adapter and trackers for standard transactions, ERC-4337 UserOperations and Safe multisig, with speed-up and cancel actions, built on viem and @wagmi/core.',
         '@tuwaio/pulsar-react':
           'L4 React package of Pulsar (TUWA): useInitializeTransactionsPool resumes tracking of pending transactions after a page reload, and useTxFinished reacts to every finished transaction.',
         '@tuwaio/pulsar-solana':
@@ -421,8 +421,7 @@ export const en: DocsHubLabels = {
           'status-webhooks': 'Quasar sends signed webhooks when a transaction settles.',
           'email-social': 'By design: TUWA connects the wallets users already have.',
           'embedded-wallets': 'By design: no custodial, MPC or enclave wallets.',
-          'gas-or-onramp':
-            'Pulsar tracks ERC-4337 and Gelato relay transactions, but TUWA sponsors no gas and has no on-ramp.',
+          'gas-or-onramp': 'Pulsar tracks ERC-4337 transactions, but TUWA sponsors no gas and has no on-ramp.',
           evm: 'Built on wagmi and viem.',
           solana: 'Built on @solana/kit and Wallet Standard.',
           'other-chains': 'Starknet, Tron, Bitcoin and TON are on the roadmap (Phase 8).',

@@ -211,11 +211,6 @@ components:
                 - reason
                 - txHash
               description: "`invoice.held`: why (`reason`), its transaction, the senders, `late`."
-            mightHaveLanded:
-              type: boolean
-              enum:
-                - true
-              description: "On `refund.failed` and `invoice.expired`: nothing proves that the money stayed: a transaction was lost sight of and may still land, or money may have moved in what spent its nonce, or inside a Safe's or a sponsor's call. Check it before sending the money again or selling the goods on."
             heldTransfer:
               anyOf:
                 - type: object
@@ -1277,9 +1272,6 @@ components:
             - type: string
             - type: "null"
           description: Number of confirmations or finality status.
-        rpcUrl:
-          type: string
-          description: RPC URL used for submission.
         syncStatus:
           type: string
           enum:
@@ -1358,7 +1350,6 @@ components:
       enum:
         - ethereum
         - safe
-        - gelato
         - solana
         - erc4337
         - eip5792
@@ -1445,9 +1436,6 @@ components:
             - type: string
             - type: "null"
           description: Number of confirmations or finality status.
-        rpcUrl:
-          type: string
-          description: RPC URL used for submission.
         syncStatus:
           type: string
           enum:
@@ -1574,9 +1562,6 @@ components:
             - type: string
             - type: "null"
           description: Number of confirmations or finality status.
-        rpcUrl:
-          type: string
-          description: RPC URL used for submission.
         syncStatus:
           type: string
           enum:
@@ -2986,11 +2971,9 @@ components:
                 (`reverted`, `cancelled`, `expired` Solana blockhash, `no_matching_transfer`, `reference_missing`,
                 `too_early`, `tx_already_used`, `payer_unconfirmed`, `chain_mismatch`, `no_quote`, `no_payment_method`,
                 a relay the bundler refused or never sent, `unresolved_after_24h`), so the buyer may pay again;
-                otherwise (`not_found`, `timeout`, `replaced`, `nonce_spent`, `unmined_after_24h`,
-                `nonce_spent_unexplained`, `payer_mismatch`, `settlement_failed`…) the money may
+                otherwise (`not_found`, `timeout`, `replaced`, `payer_mismatch`, `settlement_failed`…) the money may
                 still be on its way or with the merchant: ask the buyer to check the wallet before paying again (for
-                `settlement_failed`, confirmed on chain, and `nonce_spent_unexplained`, whose nonce went to a transaction
-                Quasar could not find, to contact the merchant and not pay again). `movedMoney`: the
+                `settlement_failed`, confirmed on chain, to contact the merchant and not pay again). `movedMoney`: the
                 transaction went through without paying the invoice, or Quasar has not recorded it yet, and may have
                 moved money. `rechecked`: Quasar still reads the transaction again (a `not_found`, `timeout` or
                 `replaced` rejection, for 24 hours after Quasar learned of the payment, while `unresolvedPayments`
@@ -3009,10 +2992,8 @@ components:
               type: number
               description: "Payments of the invoice that may still arrive: tracked transactions neither verified nor rejected for good
                 (also one stuck past the 25 minutes `pendingPayments` counts, and one rejected with `not_found`,
-                `timeout`, `replaced` or `nonce_spent`), which Quasar reads again for 24 hours after it learned of them and
-                then closes (`unresolved_after_24h` for a hash no node ever showed; `unmined_after_24h` or
-                `nonce_spent_unexplained`, not final and read again hourly for a week, for one a tracker saw), a payment the
-                app's paymaster sponsored in the last 35 minutes, gasless relays still sending, and claims of this invoice on a transaction
+                `timeout` or `replaced`), which Quasar reads again for 24 hours after it learned of them and then closes
+                (`unresolved_after_24h`), gasless relays still sending, and claims of this invoice on a transaction
                 another invoice handed over first that Quasar has not decided yet. While it is above 0, do not offer a
                 plain second payment and never tell the buyer that nothing was charged."
             onTimeTxKeys:
@@ -3514,9 +3495,9 @@ components:
           type: boolean
           enum:
             - true
-          description: "Set while Quasar still reads the transaction again: a rejection for `not_found`, `timeout`, `replaced` or
-            `nonce_spent` of a payment Quasar learned of within the last 24 hours that nothing has resolved since (still
-            unresolved after the 24 hours, it is closed: see `unresolvedPayments`), or a `settlement_failed` one
+          description: "Set while Quasar still reads the transaction again: a rejection for `not_found`, `timeout` or `replaced`
+            of a payment Quasar learned of within the last 24 hours that nothing has resolved since (still unresolved
+            after the 24 hours, it is closed with the final reason `unresolved_after_24h`), or a `settlement_failed` one
             Quasar still settles again daily (for 30 days after it learned of the payment). Only then may the page
             promise that Quasar checks the payment again. Any other rejection that is not `final` (a relay operation
             lost, `transaction_failed`, a transfer from another wallet…) is never read again: ask the buyer to contact

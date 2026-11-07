@@ -269,7 +269,7 @@ export const TUWA: Product = {
     'embedded-wallets': fact('no', 'By design: no custodial, MPC or enclave wallets.', TUWA_SOURCES.satellite),
     'gas-or-onramp': fact(
       'no',
-      'Pulsar tracks ERC-4337 and Gelato relay transactions, but TUWA sponsors no gas and has no on-ramp.',
+      'Pulsar tracks ERC-4337 transactions, but TUWA sponsors no gas and has no on-ramp.',
       TUWA_SOURCES.pulsar,
     ),
     evm: fact('yes', 'Built on wagmi and viem.', TUWA_SOURCES.hub),
