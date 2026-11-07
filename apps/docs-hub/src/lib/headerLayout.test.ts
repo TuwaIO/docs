@@ -35,7 +35,7 @@ const selectorOf = (className: string) => `.${className.replace(/[^\w-]/g, (char
 
 describe('the Nextra header of @tuwaio/docs-ui', () => {
   it.each([
-    ['source', 'src/styles/general.css'],
+    ['source', 'src/styles/site.css'],
     ['build', 'dist/index.css'],
   ])('is opaque in the theme background on phones in portrait and on touch screens up to 1024px (%s)', (_, file) => {
     const block = mediaBlockOf(read(file), '.nextra-navbar');

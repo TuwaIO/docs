@@ -128,8 +128,7 @@ export function createSectionPage(section: string, sectionTitle: string) {
 
 /**
  * The Nextra docs layout of a section: the TUWA navbar and footer, the sidebar built from the page map of
- * `src/content` and the top loading bar. Side effect: `RemoteLogo` fetches the TUWA logo (cached by Next.js for
- * 24 hours).
+ * `src/content` and the top loading bar.
  *
  * @param props - Layout props.
  * @param props.children - The page.

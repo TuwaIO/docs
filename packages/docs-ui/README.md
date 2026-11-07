@@ -10,12 +10,12 @@
 ## 🏛️ Core Capabilities
 
 - **Nextra layout parts:** `Navbar` and `Footer` wrap the navbar and footer of `nextra-theme-docs` with the site logo and a row of external links (`baseNavLinks`, `baseFooterLinks` are the defaults: the npm and GitHub organizations of TUWA). The footer also links the policies in force on tuwa.io and the list of all policies on the docs hub.
-- **Logo:** `RemoteLogo` is an async React Server Component that fetches an SVG (by default the TUWA logo) and renders it as React elements, so it takes `className` and `currentColor`.
+- **Logo:** `SiteLogo` shows the logo of TUWA for the light and the dark theme (images on `tuwa.io`).
 - **Theme switch:** `ThemeSwitcher` is a light/dark switch for any theme state (for example `next-themes`).
 - **Language select:** `LocaleSwitcher` is an accessible glassmorphic select dropdown for switching languages (English, Українська, 简体中文, etc.), styled to match `ThemeSwitcher`. Features zero layout shift, Nova UI Kit animated directional chevron, collision detection with auto-flip (`placement="auto"`), multi-layout Latin typeahead navigation (independent of user OS keyboard language), and an invisible native `<select>` overlay on touch devices (`pointer: coarse`) for native mobile system pickers (iOS wheel, Android sheet). Full WCAG 2.1/2.2 AA/AAA compliance. It renders an invisible placeholder during SSR to avoid hydration shifts.
 - **Three languages (project sites):** `@tuwaio/docs-ui/nextra` and `@tuwaio/docs-ui/nextra/page` turn a Nextra site into an English, Ukrainian and Simplified Chinese site with one URL per page, as on the [docs hub](https://docs.tuwa.io). `DocsLayout` is the Nextra layout with the navbar (the language switch after the links; the theme switch stays in the Nextra sidebar and the mobile menu), the footer, the search, the table of contents, the edit, feedback and last-updated texts and the sidebar titles in the language of the reader (`docsLabels`, `localizePageMap`). `createDocsPage` creates the `[[...mdxPath]]` route: each page is prerendered in English and in the languages it is translated into, and `LocalizedPage` shows the reader's language without a request; pages without a translation (package READMEs, the generated API reference) show English with a note in the reader's language. The language is detected after mount (`tuwa-locale`, then the browser languages and the time zone; no cookie, no request). The `tuwa-docs-i18n-check` command keeps the translations in line with their English pages.
 - **Interface settings for 30 days:** `PreferenceExpiry` is an inline script for the `<head>` of a site's root layout. It forgets the Local Storage values of the given keys (by default `theme`) 30 days after they were written, as the [Cookie Policy](https://tuwa.io/cookie) states, and dates each later write, whatever library writes it (`next-themes`, the `Tabs` of Nextra).
-- **Decoration:** `Orb` (an animated sphere in the brand color of a TUWA project), `StarryBackground` (an animated star field on a canvas) and `NoSSR` (renders its children only on the client).
+- **Decoration:** `Orb` (an animated sphere in the brand color of a TUWA project) and `StarryBackground` (an animated star field on a canvas).
 - **Policy pages:** `policies` lists the TUWA policies (Terms, Privacy, Cookie, Refund, Security, Data Processing Addendum) with their paths and whether they are in force (`publishedPolicies`; footers use `footerPolicies`). `loadPolicy` loads the text of a policy in a language, and `PolicyDocument` renders it with the date of the version, a Download PDF button, a language switch (English, Українська) when the policy is translated, anchored sections (the same anchors in every language) and a list of sections. The texts and PDFs come from [`TuwaIO/workflows/docs`](https://github.com/TuwaIO/workflows/tree/main/docs). Code that needs only the list or `loadPolicy` (footers, sitemaps, route handlers) imports them from `@tuwaio/docs-ui/policies`, which has no React, Next.js or Nextra imports.
 - **Search index:** the `tuwa-docs-search-index` command builds the [Pagefind](https://pagefind.app) index that the Nextra search loads from `/_pagefind`, from the pages `next build` prerendered. It reads both places Next.js keeps them: `.next/server/app` and, in builds with a deployment adapter (Next.js 16.3.8 and later on Vercel), `.next/server/route-cache`, where `pagefind --site .next/server/app` finds no pages.
 - **Stylesheet:** `dist/index.css` contains the `--tuwa-*` theme variables of [`@tuwaio/nova-core`](https://stories.tuwa.io/?path=/docs/packages-nova-core-overview--docs) (light and `.dark`), the styles of the Nextra parts and the Tailwind CSS v4 utilities used by the components, prefixed with `tuwadocs:`.
@@ -28,9 +28,9 @@
 pnpm add @tuwaio/docs-ui next nextra nextra-theme-docs react react-dom @heroicons/react
 ```
 
-`nextra-theme-docs` is needed by `Navbar`, `Footer` and `DocsLayout`, `nextra` by `DocsLayout`, `LocalizedPage` and `createDocsPage`, `next` by `RemoteLogo` (a Server Component that uses the `fetch` cache of Next.js) and `createDocsPage`, and `@heroicons/react` by `ThemeSwitcher`.
+`next`, `nextra` and `nextra-theme-docs` are optional: only the `/nextra` and `/nextra/page` entries need them (`Navbar`, `Footer`, `DocsLayout`, `LocalizedPage`, `createDocsPage`), so the root entry works in any React app. `@heroicons/react` is needed by `ThemeSwitcher`.
 
-Import the stylesheet after the Nextra theme:
+Import the stylesheet after the Nextra theme. `dist/index.css` includes the stylesheet of Nova Core, whose fonts it carries in `dist/fonts`. An app that loads Nova Core or the SDK stylesheet itself imports `dist/site.css` instead, which has none of it:
 
 ```css
 @import 'nextra-theme-docs/style.css';
@@ -45,13 +45,14 @@ Import the stylesheet after the Nextra theme:
 The root layout of a TUWA documentation site:
 
 ```tsx
-import { baseNavLinks, Footer, Navbar, PreferenceExpiry, RemoteLogo } from '@tuwaio/docs-ui';
+import { baseNavLinks, PreferenceExpiry, SiteLogo } from '@tuwaio/docs-ui';
+import { Footer, Navbar } from '@tuwaio/docs-ui/nextra';
 import { Head } from 'nextra/components';
 import { getPageMap } from 'nextra/page-map';
 import { Layout } from 'nextra-theme-docs';
 import type { ReactNode } from 'react';
 
-const logo = <RemoteLogo width={126} height={40} />;
+const logo = <SiteLogo width={126} height={40} />;
 
 const navLinks = [
   ...baseNavLinks,
@@ -238,7 +239,7 @@ It writes the index to `public/_pagefind` (keep that directory in `.gitignore`) 
 
 ## 🌐 External Services
 
-`RemoteLogo` requests its `url` on the server (by default `tuwa.io/brand/logo_v2.svg`), cached by Next.js for 24 hours. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. `createDocsPage` and `LocalizedPage` send no requests: the translations are part of the page. The other components send no requests.
+`SiteLogo` loads its images from `tuwa.io`. `loadPolicy` requests `raw.githubusercontent.com/TuwaIO/workflows/main/docs/<slug>.json` (a translation: `docs/<language>/<slug>.json`, and the English file when it does not exist) on the server, cached by Next.js for an hour by default. The Download PDF button of `PolicyDocument` links to the PDF on the same host; the browser requests it only when it is clicked. `createDocsPage` and `LocalizedPage` send no requests: the translations are part of the page. The other components send no requests.
 
 ---
 

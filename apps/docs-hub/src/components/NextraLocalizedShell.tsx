@@ -477,7 +477,7 @@ export function NextraPageWrapper({ toc, metadata, sourceCode = '', routeKey, ch
  * Client wrapper around the Nextra `Layout`: `NextraDocsLayout` of `@tuwaio/docs-ui` (the layout of every TUWA
  * documentation site) in the language of the reader, with the sidebar `pageMap` translated by route
  * (`localizePageMap` with `nextra.sidebar` of the hub dictionaries).
- * @param props.logo - Server-rendered `<RemoteLogo />` element.
+ * @param props.logo - Server-rendered `<SiteLogo />` element.
  * @param props.pageMap - Raw Nextra `PageMapItem[]` from `getPageMap()`.
  * @param props.children - Section children.
  */

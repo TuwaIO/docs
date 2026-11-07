@@ -170,22 +170,3 @@ export function createI18n<Labels>(
 
   return { I18nProvider, useI18n, dictionaries };
 }
-
-/**
- * Renders the child of the active locale: content prepared for every locale on the server (translated MDX pages),
- * switched on the client without a request. The server HTML holds the {@link DEFAULT_LOCALE} child, so crawlers and
- * the search index read English.
- *
- * @param props.locale - The active locale.
- * @param props.variants - Content by locale; a missing locale shows the default.
- * @returns The content of the locale.
- */
-export function LocaleVariant({
-  locale,
-  variants,
-}: {
-  locale: TuwaLocale;
-  variants: Partial<Record<TuwaLocale, ReactNode>> & { en: ReactNode };
-}) {
-  return <>{variants[locale] ?? variants[DEFAULT_LOCALE]}</>;
-}

@@ -171,7 +171,9 @@ export function resolveClientLocale(storageKey: string = LOCALE_STORAGE_KEY): Tu
 }
 
 /**
- * Replaces `{name}` tokens of a template with values, as the labels of Nova UI Kit do. Unknown tokens stay.
+ * Replaces `{name}` tokens of a template with values, as `formatLabel` of `@tuwaio/nova-core/utils` does. Its own copy: the
+ * translation check loads this file in plain Node on every documentation site, and that entry reaches Orbit.
+ * Unknown tokens stay.
  *
  * @param template - Text with `{name}` tokens.
  * @param values - Values by token name.

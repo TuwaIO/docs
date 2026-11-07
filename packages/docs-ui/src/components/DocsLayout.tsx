@@ -9,9 +9,10 @@ import { DocsI18nProvider, useDocsI18n } from '../docsI18n';
 import type { DocsLabels } from '../docsLabels';
 import { normalizeLocale, policyLanguageOf, type TuwaLocale } from '../locale';
 import { localizePageMap } from '../pageMap';
+import { type SocialLink } from '../utils';
 import { Footer } from './Footer';
 import { LocaleSwitcher } from './LocaleSwitcher';
-import { Navbar, type SocialLink } from './NavBar';
+import { Navbar } from './NavBar';
 
 /**
  * Props of {@link DocsLayout}.

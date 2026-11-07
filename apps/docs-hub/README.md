@@ -97,7 +97,7 @@ Hovering an npm package of the timeline (or focusing it with the keyboard) shows
 | `releases.json`        | The latest `vX.Y.Z` tag of each repository in `RELEASES` of the script, listed with `git ls-remote` (no GitHub API rate limit) |
 | `package-guides.json`  | The pages of `src/content/guides` and `src/content/quasar` that mention each package, most mentions first                      |
 
-A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last saved file, or saves an empty one: the rows then link to npm and the release badge is hidden. The main page is still revalidated once a day, because `RemoteLogo` of `@tuwaio/docs-ui` caches the logo for 24 hours; the data does not change between builds.
+A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last saved file, or saves an empty one: the rows then link to npm and the release badge is hidden. The main page is still revalidated once a day; the data does not change between builds.
 
 ### Search Engines and LLMs
 

@@ -1,7 +1,21 @@
-import type { SocialLink } from './components/NavBar';
+import type { ReactNode } from 'react';
 
 /**
- * The default links of {@link Navbar}: the npm organization of TUWA. Sites spread it into their own `links` to keep it
+ * A link to an external page, rendered with its icon by `Navbar` and `Footer`. Links open in a new tab.
+ */
+export type SocialLink = {
+  /** Text of the link; `Navbar` shows it from 1024px wide and keeps it as the accessible name and tooltip below */
+  title: string;
+  /** Absolute URL of the page */
+  href: string;
+  /** Icon rendered before the title */
+  image: ReactNode;
+  /** Classes added to the link */
+  className?: string;
+};
+
+/**
+ * The default links of `Navbar`: the npm organization of TUWA. Sites spread it into their own `links` to keep it
  * next to site-specific links (for example the GitHub repository).
  */
 export const baseNavLinks: SocialLink[] = [
@@ -18,7 +32,7 @@ export const baseNavLinks: SocialLink[] = [
 ];
 
 /**
- * The default links of {@link Footer}: the npm organization and the GitHub organization of TUWA.
+ * The default links of `Footer`: the npm organization and the GitHub organization of TUWA.
  */
 export const baseFooterLinks: SocialLink[] = [
   {
