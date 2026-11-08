@@ -1,3 +1,5 @@
+import { InlineScript } from './inlineScript';
+
 /** How long the TUWA sites keep an interface setting after it is chosen (Cookie Policy). */
 export const PREFERENCE_DAYS = 30;
 
@@ -47,5 +49,6 @@ export function expireStoredPreferences(
 export function PreferenceExpiry({ keys = ['theme'] }: { keys?: string[] }) {
   const ms = PREFERENCE_DAYS * 86_400_000;
   const code = `(${expireStoredPreferences.toString()})(window.localStorage, Storage.prototype, ${JSON.stringify(keys)}, ${ms}, Date.now())`;
-  return <script dangerouslySetInnerHTML={{ __html: code }} />;
+  // Runs once, when the page loads; a switch to another root layout (`/` → `/uk`) renders no script on the client
+  return <InlineScript code={code} />;
 }
