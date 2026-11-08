@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon } from '@heroicons/react/24/outline';
 import { Orb, PackageType } from '@tuwaio/docs-ui';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
 import { type FocusEvent, type MouseEvent, type ReactNode, useRef, useState } from 'react';
 
 import { useI18n } from '../i18n';
@@ -125,7 +126,7 @@ export function DocCard({
             title="GitHub"
             className="w-8 h-8 2xl:w-9 2xl:h-9 rounded-[var(--tuwa-rounded-corners)] flex items-center justify-center text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:bg-[var(--tuwa-text-primary)]/10 transition-all duration-200"
           >
-            <ArrowTopRightOnSquareIcon className="w-4 h-4 2xl:w-5 2xl:h-5" />
+            <ExternalLinkIcon className="w-4 h-4 2xl:w-5 2xl:h-5" />
           </a>
         </div>
       </div>

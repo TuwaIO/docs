@@ -1,7 +1,7 @@
 'use client';
 
-import { CheckIcon, ClipboardDocumentIcon, CommandLineIcon } from '@heroicons/react/24/outline';
-import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
+import { CommandLineIcon } from '@heroicons/react/24/outline';
+import { cn, CopyIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 
 import { useI18n } from '../i18n';
 import { PACKAGE_MANAGERS, type PackageManager } from '../lib/packageManager';
@@ -67,7 +67,7 @@ export function CommandLine({ command, copyTitle }: { command: string; copyTitle
         title={copyTitle ?? t.common.copyCommand}
         className="shrink-0 inline-flex items-center gap-1 text-xs font-sans cursor-pointer text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] disabled:cursor-default"
       >
-        {isCopied ? <CheckIcon className="w-4 h-4 text-emerald-500" /> : <ClipboardDocumentIcon className="w-4 h-4" />}
+        <CopyIcon copied={isCopied} className="w-4 h-4" />
         {isCopied ? t.common.copied : t.common.copy}
       </button>
     </div>

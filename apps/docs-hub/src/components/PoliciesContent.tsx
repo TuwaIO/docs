@@ -1,7 +1,8 @@
 'use client';
 
-import { ArrowDownTrayIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { formatPolicyDate, getPolicyFileUrl, getPolicyPageUrl, publishedPolicies } from '@tuwaio/docs-ui';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
 
 import { formatLabel, policyLanguageOf, useI18n } from '@/i18n';
 
@@ -61,7 +62,7 @@ export function PoliciesContent({ dates }: { dates: (string | undefined)[] }) {
                     className={linkClassName}
                   >
                     {t.policies.read}
-                    <ArrowTopRightOnSquareIcon className="w-4 h-4" aria-hidden="true" />
+                    <ExternalLinkIcon className="w-4 h-4" />
                   </a>
                   <a
                     href={getPolicyFileUrl(policy.slug, 'pdf', undefined, policyLanguage)}

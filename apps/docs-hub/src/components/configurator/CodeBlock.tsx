@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { useCopyToClipboard } from '@tuwaio/nova-core';
+import { CopyIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 import { useEffect, useState } from 'react';
 import type { HighlighterCore } from 'shiki/core';
 
@@ -68,11 +67,7 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
         title={t.common.copyCode}
         className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)] dark:bg-[#0d1117] px-2 py-1 text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer disabled:cursor-default transition-colors"
       >
-        {isCopied ? (
-          <CheckIcon className="w-3.5 h-3.5 text-emerald-500" />
-        ) : (
-          <ClipboardDocumentIcon className="w-3.5 h-3.5" />
-        )}
+        <CopyIcon copied={isCopied} className="w-3.5 h-3.5" />
         {isCopied ? t.common.copied : t.common.copy}
       </button>
       {highlighted?.code === code ? (

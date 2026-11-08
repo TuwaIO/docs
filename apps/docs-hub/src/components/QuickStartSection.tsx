@@ -1,13 +1,8 @@
 'use client';
 
-import {
-  ArrowTopRightOnSquareIcon,
-  CheckIcon,
-  ClipboardDocumentIcon,
-  CommandLineIcon,
-} from '@heroicons/react/24/outline';
+import { CommandLineIcon } from '@heroicons/react/24/outline';
 import { Orb } from '@tuwaio/docs-ui';
-import { useCopyToClipboard } from '@tuwaio/nova-core';
+import { CopyIcon, ExternalLinkIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 
 import Link from '@/components/LocaleNextLink';
 
@@ -63,16 +58,12 @@ export function QuickStartSection() {
                   : 'cursor-pointer hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50'
               }`}
             >
+              {/* One icon in both states, so its sheets fold into the check mark */}
+              <CopyIcon copied={isCopied} className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />
               {isCopied ? (
-                <>
-                  <CheckIcon className="w-3.5 h-3.5 2xl:w-4 2xl:h-4 text-emerald-400" />
-                  <span className="text-emerald-400 font-medium">{t.common.copied}</span>
-                </>
+                <span className="text-emerald-400 font-medium">{t.common.copied}</span>
               ) : (
-                <>
-                  <ClipboardDocumentIcon className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />
-                  <span>{t.common.copy}</span>
-                </>
+                <span>{t.common.copy}</span>
               )}
             </button>
           </div>
@@ -88,7 +79,7 @@ export function QuickStartSection() {
             >
               <span className="font-bold text-red-500 dark:text-red-400">npm</span>
               <span className="truncate">@tuwaio/create-cosmos-playground</span>
-              <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
+              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
             </a>
             <a
               href="https://github.com/TuwaIO/cosmos-playground"
@@ -99,7 +90,7 @@ export function QuickStartSection() {
             >
               <span className="font-bold text-[var(--tuwa-text-primary)]">GitHub</span>
               <span className="truncate">TuwaIO/cosmos-playground</span>
-              <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
+              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
             </a>
             <a
               href="https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md"
@@ -110,7 +101,7 @@ export function QuickStartSection() {
             >
               <span className="font-bold text-[var(--tuwa-text-accent)]">{t.ui.quickStartSteps.aiAgentsBadge}</span>
               <span className="truncate">TUWA_AGENTS.md</span>
-              <ArrowTopRightOnSquareIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
+              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
             </a>
           </div>
         </div>
