@@ -11,15 +11,20 @@ interface Star {
   vy: number;
   opacity: number; // Twinkling alpha state
   tint: Tint; // The colour of the star: most are neutral, a few are blue or amber
+  phase: number; // Where the star is in its twinkle, fixed: it does not change as the star drifts
+  speed: number; // How fast it twinkles, in radians per millisecond
 }
 
-// A rare shooting star: a pixel head with a trail of fading pixels, crossing a part of the sky once
-interface Comet {
+// A rare event of the sky, one at a time: a shooting star, a supernova, a satellite passing or a rocket taking off
+type SkyEventKind = 'comet' | 'supernova' | 'satellite' | 'rocket';
+interface SkyEvent {
+  kind: SkyEventKind;
   x: number;
   y: number;
-  vx: number;
+  vx: number; // Pixels per millisecond (or, for a shooting star, the whole way it goes)
   vy: number;
   start: number;
+  duration: number;
 }
 
 type Tint = 'neutral' | 'blue' | 'amber';
@@ -53,23 +58,54 @@ const SPARKLE_FAR_ARM_OPACITY = 0.25;
 const LINE_MAX_DISTANCE = 120;
 const LINE_MAX_DISTANCE_SQ = LINE_MAX_DISTANCE * LINE_MAX_DISTANCE; // Pre-calculated squared distance
 const LINE_DASH = [2, 3];
-const TWINKLE_SPEED = 0.001;
+// A slow twinkle: each star brightens and dims over 2.5 to 4.5 seconds
+const TWINKLE_PERIOD_MIN = 2_500;
+const TWINKLE_PERIOD_RANGE = 2_000;
 
-// Shooting stars: rare, short and faint
-const COMET_INTERVAL_MIN = 10_000;
-const COMET_INTERVAL_RANGE = 8_000;
+// The rare events of the sky: one every 12 to 20 seconds, small and faint, picked by these weights
+const EVENT_INTERVAL_MIN = 12_000;
+const EVENT_INTERVAL_RANGE = 8_000;
+const EVENT_WEIGHTS: [SkyEventKind, number][] = [
+  ['comet', 0.4],
+  ['supernova', 0.2],
+  ['satellite', 0.2],
+  ['rocket', 0.2],
+];
 const COMET_DURATION = 1_400;
 const COMET_TRAIL = 9; // Pixels of the trail
 const COMET_TRAIL_GAP = 3; // CSS pixels between two pixels of the trail
+const SUPERNOVA_DURATION = 2_800;
+const SUPERNOVA_RING = 16; // Pixels of the shock wave
+const SUPERNOVA_RADIUS = 22; // CSS pixels the shock wave reaches
+const SATELLITE_DURATION = 10_000;
+const ROCKET_DURATION = 3_600;
+const SPRITE_UNIT = 1.5; // CSS pixels per pixel of a sprite
+
+// The sprites: `#` the body, `o` a lit window, `a` a blinking light, `f` and `F` a flickering flame
+const SATELLITE_ART = ['....a....', '....#....', '##.###.##', '#########', '##.###.##'] as const;
+const ROCKET_ART = ['..#..', '.###.', '.#o#.', '.###.', '#####', '#.#.#', '.fFf.', '..f..'] as const;
 
 // The colours of the stars, the arms of the sparkles and the lines, on a dark and on a light page
-const PALETTE: Record<'dark' | 'light', Record<Tint, Rgb> & { arm: Rgb; line: Rgb; alpha: number }> = {
+type Palette = Record<Tint, Rgb> & {
+  arm: Rgb;
+  line: Rgb;
+  body: Rgb; // The body of a satellite or a rocket
+  flame: Rgb;
+  flameHot: Rgb;
+  signal: Rgb; // The blinking light of a satellite
+  alpha: number;
+};
+const PALETTE: Record<'dark' | 'light', Palette> = {
   dark: {
     neutral: [255, 255, 255],
     blue: [147, 197, 253], // blue-300
     amber: [252, 211, 77], // amber-300
     arm: [147, 197, 253],
     line: [147, 197, 253],
+    body: [203, 213, 225], // slate-300
+    flame: [251, 191, 36], // amber-400
+    flameHot: [253, 230, 138], // amber-200
+    signal: [248, 113, 113], // red-400
     alpha: 1,
   },
   light: {
@@ -78,6 +114,10 @@ const PALETTE: Record<'dark' | 'light', Record<Tint, Rgb> & { arm: Rgb; line: Rg
     amber: [180, 83, 9], // amber-700
     arm: [71, 85, 105], // slate-600
     line: [71, 85, 105],
+    body: [71, 85, 105], // slate-600
+    flame: [217, 119, 6], // amber-600
+    flameHot: [245, 158, 11], // amber-500
+    signal: [220, 38, 38], // red-600
     alpha: 0.85,
   },
 };
@@ -85,15 +125,16 @@ const PALETTE: Record<'dark' | 'light', Record<Tint, Rgb> & { arm: Rgb; line: Rg
 const rgba = ([r, g, b]: Rgb, alpha: number) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
 
 /**
- * A full-size canvas of slowly drifting, twinkling stars joined by dotted lines, which move away from the mouse pointer
- * and shine a little brighter near it. The stars are crisp pixels on the pixel grid of the screen, in the pixel manner
- * of the TUWA switches: specks of dust, larger stars and sparkles whose four arms reach out while they are at their
- * brightest; a few are blue or amber. Now and then (every 10 to 18 seconds) a faint pixel shooting star crosses a part
- * of the sky, except for reduced motion. Place it behind the content of a page; it takes the size of the window and
- * follows its resizes.
+ * A full-size canvas of slowly drifting stars that twinkle calmly (each over 2.5 to 4.5 seconds), joined by dotted
+ * lines; they move away from the mouse pointer and shine a little brighter near it. The stars are crisp pixels on the
+ * pixel grid of the screen, in the pixel manner of the TUWA switches: specks of dust, larger stars and sparkles whose
+ * four arms reach out while they are at their brightest; a few are blue or amber. Now and then (every 12 to 20 seconds)
+ * one small, faint event of the sky: a shooting star, a supernova flaring with a ring of light spreading from it, a
+ * satellite drifting across with its light blinking, or a rocket taking off with a flickering flame; none for reduced
+ * motion. Place it behind the content of a page; it takes the size of the window and follows its resizes.
  *
  * Side effects: `mousemove` and `resize` listeners on `window` and a `requestAnimationFrame` loop, all removed on
- * unmount; it reads the `prefers-reduced-motion` media query before each shooting star.
+ * unmount; it reads the `prefers-reduced-motion` media query before each event.
  *
  * @returns The canvas.
  */
@@ -128,10 +169,10 @@ export default function StarryBackground() {
     // A position or a size on the pixel grid of the screen
     const snap = (value: number) => Math.round(value * dpr) / dpr;
 
-    // Shooting stars only for those who have not asked for less motion
+    // The rare events only for those who have not asked for less motion
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let comet: Comet | null = null;
-    let nextComet = Date.now() + COMET_INTERVAL_MIN / 2 + Math.random() * COMET_INTERVAL_RANGE;
+    let event: SkyEvent | null = null;
+    let nextEvent = Date.now() + EVENT_INTERVAL_MIN / 2 + Math.random() * EVENT_INTERVAL_RANGE;
 
     // Populate stars using predefined dimensions and limits
     const createStars = (): Star[] => {
@@ -146,23 +187,65 @@ export default function StarryBackground() {
           vy: (Math.random() - 0.5) * STAR_VELOCITY_FACTOR,
           opacity: Math.random() * STAR_INITIAL_OPACITY_RANGE + STAR_INITIAL_OPACITY_MIN,
           tint: pick < BLUE_SHARE ? 'blue' : pick < BLUE_SHARE + AMBER_SHARE ? 'amber' : 'neutral',
+          phase: Math.random() * Math.PI * 2,
+          speed: (Math.PI * 2) / (TWINKLE_PERIOD_MIN + Math.random() * TWINKLE_PERIOD_RANGE),
         });
       }
       return stars;
     };
 
-    // A shooting star from the upper part of the sky, sliding down to one side at a shallow angle
-    const launchComet = (now: number): Comet => {
+    // A rare event at a place of the sky that suits it
+    const launchEvent = (now: number): SkyEvent => {
+      let roll = Math.random();
+      const kind = EVENT_WEIGHTS.find(([, weight]) => (roll -= weight) < 0)?.[0] ?? 'comet';
       const toRight = Math.random() < 0.5;
-      const distance = Math.min(width, height) * (0.25 + Math.random() * 0.15);
-      const angle = (12 + Math.random() * 14) * (Math.PI / 180);
-      return {
-        x: width * (toRight ? 0.1 + Math.random() * 0.5 : 0.4 + Math.random() * 0.5),
-        y: height * Math.random() * 0.4,
-        vx: (toRight ? 1 : -1) * Math.cos(angle) * distance,
-        vy: Math.sin(angle) * distance,
-        start: now,
-      };
+      switch (kind) {
+        case 'supernova':
+          return {
+            kind,
+            x: width * (0.1 + Math.random() * 0.8),
+            y: height * (0.1 + Math.random() * 0.5),
+            vx: 0,
+            vy: 0,
+            start: now,
+            duration: SUPERNOVA_DURATION,
+          };
+        case 'satellite':
+          // It crosses about two fifths of the screen, slowly, as satellites do
+          return {
+            kind,
+            x: width * (toRight ? 0.05 + Math.random() * 0.45 : 0.5 + Math.random() * 0.45),
+            y: height * (0.08 + Math.random() * 0.37),
+            vx: ((toRight ? 1 : -1) * width * 0.4) / SATELLITE_DURATION,
+            vy: (height * (Math.random() - 0.5) * 0.06) / SATELLITE_DURATION,
+            start: now,
+            duration: SATELLITE_DURATION,
+          };
+        case 'rocket':
+          return {
+            kind,
+            x: width * (0.15 + Math.random() * 0.7),
+            y: height * (0.7 + Math.random() * 0.2),
+            vx: 0,
+            vy: -height * 0.45,
+            start: now,
+            duration: ROCKET_DURATION,
+          };
+        default: {
+          // A shooting star from the upper part of the sky, sliding down to one side at a shallow angle
+          const distance = Math.min(width, height) * (0.25 + Math.random() * 0.15);
+          const angle = (12 + Math.random() * 14) * (Math.PI / 180);
+          return {
+            kind: 'comet',
+            x: width * (toRight ? 0.1 + Math.random() * 0.5 : 0.4 + Math.random() * 0.5),
+            y: height * Math.random() * 0.4,
+            vx: (toRight ? 1 : -1) * Math.cos(angle) * distance,
+            vy: Math.sin(angle) * distance,
+            start: now,
+            duration: COMET_DURATION,
+          };
+        }
+      }
     };
 
     // --- Event Handler Methods ---
@@ -180,28 +263,123 @@ export default function StarryBackground() {
     // --- Main Rendering Loop ---
 
     /**
-     * Draws a shooting star: its head and a trail of pixels that fade behind it, the whole fading in and out.
+     * Draws a small pixel sprite.
+     * @param art The rows of the sprite.
+     * @param left Left edge in CSS pixels.
+     * @param top Top edge in CSS pixels.
+     * @param alpha Its opacity.
+     * @param colourOf The colour of a cell of the sprite, or nothing for an empty one.
+     */
+    const drawSprite = (
+      art: readonly string[],
+      left: number,
+      top: number,
+      alpha: number,
+      colourOf: (cell: string) => Rgb | null,
+    ) => {
+      const unit = snap(SPRITE_UNIT);
+      art.forEach((row, y) => {
+        for (let x = 0; x < row.length; x++) {
+          const colour = colourOf(row[x]);
+          if (!colour) continue;
+          ctx.fillStyle = rgba(colour, alpha);
+          ctx.fillRect(snap(left + x * unit), snap(top + y * unit), unit, unit);
+        }
+      });
+    };
+
+    /**
+     * Draws the rare event of the sky, if one is on.
      * @param now Current time in milliseconds.
      * @param colours The palette of the theme.
-     * @returns Whether it is still crossing the sky.
+     * @returns Whether it is still on.
      */
-    const drawComet = (now: number, colours: (typeof PALETTE)['dark']) => {
-      if (!comet) return false;
-      const t = (now - comet.start) / COMET_DURATION;
+    const drawEvent = (now: number, colours: Palette) => {
+      if (!event) return false;
+      const elapsed = now - event.start;
+      const t = elapsed / event.duration;
       if (t >= 1) return false;
-      const eased = 1 - (1 - t) ** 3;
-      const fade = Math.sin(Math.PI * t) * 0.8 * colours.alpha;
-      const length = Math.hypot(comet.vx, comet.vy);
-      const ux = comet.vx / length;
-      const uy = comet.vy / length;
-      const headX = comet.x + comet.vx * eased;
-      const headY = comet.y + comet.vy * eased;
-      const unit = snap(1.5);
-      for (let i = COMET_TRAIL; i >= 0; i--) {
-        const px = snap(headX - ux * i * COMET_TRAIL_GAP);
-        const py = snap(headY - uy * i * COMET_TRAIL_GAP);
-        ctx.fillStyle = rgba(i === 0 ? colours.neutral : colours.arm, fade * (1 - i / (COMET_TRAIL + 1)));
-        ctx.fillRect(px, py, i === 0 ? unit * 1.5 : unit, i === 0 ? unit * 1.5 : unit);
+      const unit = snap(SPRITE_UNIT);
+
+      if (event.kind === 'comet') {
+        // A pixel head with a trail of pixels that fade behind it, the whole fading in and out
+        const eased = 1 - (1 - t) ** 3;
+        const fade = Math.sin(Math.PI * t) * 0.8 * colours.alpha;
+        const length = Math.hypot(event.vx, event.vy);
+        const ux = event.vx / length;
+        const uy = event.vy / length;
+        const headX = event.x + event.vx * eased;
+        const headY = event.y + event.vy * eased;
+        for (let i = COMET_TRAIL; i >= 0; i--) {
+          const size = i === 0 ? snap(unit * 1.5) : unit;
+          ctx.fillStyle = rgba(i === 0 ? colours.neutral : colours.arm, fade * (1 - i / (COMET_TRAIL + 1)));
+          ctx.fillRect(snap(headX - ux * i * COMET_TRAIL_GAP), snap(headY - uy * i * COMET_TRAIL_GAP), size, size);
+        }
+        return true;
+      }
+
+      if (event.kind === 'supernova') {
+        // A star flares up fast and fades slowly; its rays reach out and a ring of light spreads from it
+        const flare = t < 0.18 ? t / 0.18 : 1 - (t - 0.18) / 0.82;
+        const alpha = Math.max(0, flare) * colours.alpha;
+        const core = snap(unit * (1 + flare));
+        const cx = snap(event.x - core / 2);
+        const cy = snap(event.y - core / 2);
+        ctx.fillStyle = rgba(colours.neutral, alpha);
+        ctx.fillRect(cx, cy, core, core);
+        const reach = Math.round(1 + flare * 3);
+        for (let i = 1; i <= reach; i++) {
+          ctx.fillStyle = rgba(colours.arm, alpha * (1 - i / (reach + 1)));
+          ctx.fillRect(cx - i * unit, cy + (core - unit) / 2, unit, unit);
+          ctx.fillRect(cx + core + (i - 1) * unit, cy + (core - unit) / 2, unit, unit);
+          ctx.fillRect(cx + (core - unit) / 2, cy - i * unit, unit, unit);
+          ctx.fillRect(cx + (core - unit) / 2, cy + core + (i - 1) * unit, unit, unit);
+        }
+        const radius = (1 - (1 - t) ** 3) * SUPERNOVA_RADIUS;
+        ctx.fillStyle = rgba(colours.flame, (1 - t) * 0.6 * colours.alpha);
+        for (let i = 0; i < SUPERNOVA_RING; i++) {
+          const angle = (i / SUPERNOVA_RING) * Math.PI * 2;
+          ctx.fillRect(snap(event.x + Math.cos(angle) * radius), snap(event.y + Math.sin(angle) * radius), unit, unit);
+        }
+        return true;
+      }
+
+      // A satellite or a rocket: in and out softly
+      const fade = Math.min(1, t / 0.12, (1 - t) / (event.kind === 'rocket' ? 0.25 : 0.12)) * colours.alpha;
+
+      if (event.kind === 'satellite') {
+        // It drifts across with its light blinking now and then
+        const blink = elapsed % 1_400 < 260;
+        drawSprite(
+          SATELLITE_ART,
+          event.x + event.vx * elapsed - (SATELLITE_ART[0].length * unit) / 2,
+          event.y + event.vy * elapsed,
+          fade * 0.8,
+          (cell) => (cell === '#' ? colours.body : cell === 'a' && blink ? colours.signal : null),
+        );
+        return true;
+      }
+
+      // The rocket rises faster and faster, its flame flickering, a trail of sparks behind it
+      const rise = t * t;
+      const left = event.x - (ROCKET_ART[0].length * unit) / 2;
+      const top = event.y + event.vy * rise;
+      const flicker = Math.floor(elapsed / 90) % 2 === 0;
+      drawSprite(ROCKET_ART, left, top, fade * 0.85, (cell) => {
+        if (cell === '#') return colours.body;
+        if (cell === 'o') return colours.blue;
+        if (cell === 'f') return flicker ? colours.flame : colours.flameHot;
+        if (cell === 'F') return flicker ? colours.flameHot : colours.flame;
+        return null;
+      });
+      for (let i = 1; i <= 4; i++) {
+        ctx.fillStyle = rgba(colours.flame, fade * 0.5 * (1 - i / 5));
+        ctx.fillRect(
+          snap(event.x - unit / 2 + (i % 2 === 0 ? unit : -unit) * 0.5),
+          snap(top + ROCKET_ART.length * unit + i * 3),
+          unit,
+          unit,
+        );
       }
       return true;
     };
@@ -249,7 +427,7 @@ export default function StarryBackground() {
         }
 
         // 4. Update twinkling alpha state
-        star.opacity = 0.3 + Math.sin(timestamp * TWINKLE_SPEED + star.x) * 0.5 + 0.5;
+        star.opacity = 0.3 + Math.sin(timestamp * star.speed + star.phase) * 0.5 + 0.5;
         const twinkle = Math.min(star.opacity, 1.0);
         const alpha = Math.min(1, twinkle * (1 + near * MOUSE_BRIGHTEN)) * colours.alpha;
 
@@ -308,12 +486,12 @@ export default function StarryBackground() {
       }
       ctx.setLineDash([]);
 
-      // --- Phase 3: A shooting star now and then ---
-      if (!drawComet(timestamp, colours)) {
-        comet = null;
-        if (timestamp >= nextComet) {
-          if (!reducedMotion.matches && document.visibilityState === 'visible') comet = launchComet(timestamp);
-          nextComet = timestamp + COMET_INTERVAL_MIN + Math.random() * COMET_INTERVAL_RANGE;
+      // --- Phase 3: A rare event now and then ---
+      if (!drawEvent(timestamp, colours)) {
+        event = null;
+        if (timestamp >= nextEvent) {
+          if (!reducedMotion.matches && document.visibilityState === 'visible') event = launchEvent(timestamp);
+          nextEvent = timestamp + EVENT_INTERVAL_MIN + Math.random() * EVENT_INTERVAL_RANGE;
         }
       }
     };
