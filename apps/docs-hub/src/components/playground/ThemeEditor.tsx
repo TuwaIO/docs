@@ -1,7 +1,6 @@
 'use client';
 
-import { CheckIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
-import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
+import { cn, CopyIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 
 import { useI18n } from '@/i18n';
 import { LENGTH_VARIABLES, THEME_GROUPS, THEME_PRESETS, themeCss, type ThemeVariable } from '@/lib/playground/themes';
@@ -73,11 +72,7 @@ export function ThemeEditor() {
           disabled={isCopied}
           className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 cursor-pointer disabled:cursor-default"
         >
-          {isCopied ? (
-            <CheckIcon className="h-4 w-4 text-emerald-500" />
-          ) : (
-            <ClipboardDocumentIcon className="h-4 w-4" />
-          )}
+          <CopyIcon copied={isCopied} className="h-4 w-4" />
           {isCopied ? cust.cssCopied : cust.copyCss}
         </button>
         {themeEdited && (

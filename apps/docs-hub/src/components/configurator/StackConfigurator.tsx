@@ -1,13 +1,7 @@
 'use client';
 
-import {
-  ArrowTopRightOnSquareIcon,
-  CheckIcon,
-  CpuChipIcon,
-  LinkIcon,
-  RocketLaunchIcon,
-} from '@heroicons/react/24/outline';
-import { cn, useCopyToClipboard } from '@tuwaio/nova-core';
+import { CpuChipIcon, LinkIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import { cn, DrawnCheck, ExternalLinkIcon, MorphIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 import { type ReactNode, useMemo } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -96,7 +90,10 @@ function CopyButton({
       disabled={isCopied}
       className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 cursor-pointer disabled:cursor-default transition-colors"
     >
-      {isCopied ? <CheckIcon className="w-4 h-4 text-emerald-500" /> : icon}
+      {/* The icon of the button gives way to Nova's check mark, drawn in the success colour of its copy icon */}
+      <MorphIcon iconKey={isCopied ? 'copied' : 'idle'} className="w-4 h-4">
+        {isCopied ? <DrawnCheck className="w-4 h-4 text-[var(--tuwa-success-icon)]" /> : icon}
+      </MorphIcon>
       {isCopied ? copiedLabel : label}
     </button>
   );
@@ -239,7 +236,7 @@ export function StackConfigurator() {
                     className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/40 transition-colors"
                   >
                     {t.configurator.guideTitles[guide.href] ?? guide.title}
-                    {external && <ArrowTopRightOnSquareIcon className="w-3 h-3 opacity-70" aria-hidden="true" />}
+                    {external && <ExternalLinkIcon className="w-3 h-3 opacity-70" />}
                   </Link>
                 </li>
               );

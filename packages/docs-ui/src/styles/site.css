@@ -460,28 +460,466 @@ article .nextra-border a:hover {
   font-size: 0.875em;
 }
 
-@keyframes slideToDark {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(107%);
+/* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and flat: the sizes of the switch before it (80 ×
+   40 on a phone, 64 × 32 from md), a knob that slides with a spring and stretches on its way (the sun on the left, the
+   moon on the right), pixel art that rebuilds itself, a twinkle, an orbit and a glow along an edge of the knob */
+.tuwa-theme-switch {
+  --knob: 34px;
+  --pixel-step: 3px;
+  --glow: #f59e0b;
+  --pixel: #c2410c;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 80px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  border-radius: var(--tuwa-rounded-corners);
+  background: rgb(0 0 0 / 0.05);
+  cursor: pointer;
+  transition: border-color 200ms ease;
+  /* The tilted orbit of the satellite or the planet, in the knob (its box inside the border) */
+  --orbit-path: path('M 3.21 21.69 A 14 5.2 -24 1 0 28.79 10.31 A 14 5.2 -24 1 0 3.21 21.69');
+}
+@media (min-width: 768px) {
+  .tuwa-theme-switch {
+    --knob: 26px;
+    --pixel-step: 2.5px;
+    --orbit-path: path('M 1.95 16.47 A 11 4 -24 1 0 22.05 7.53 A 11 4 -24 1 0 1.95 16.47');
+    width: 64px;
+    height: 32px;
   }
 }
-@keyframes slideToLight {
-  from {
-    transform: translateX(107%);
+.tuwa-theme-switch--dark {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.08);
+  --glow: var(--tuwa-text-accent);
+  --pixel: color-mix(in srgb, var(--tuwa-text-accent) 55%, #ffffff);
+}
+.tuwa-theme-switch--placeholder {
+  opacity: 0;
+  cursor: default;
+}
+.tuwa-theme-switch:hover {
+  border-color: color-mix(in srgb, var(--glow) 50%, var(--tuwa-border-primary));
+}
+.tuwa-theme-switch:focus-visible {
+  outline: 2px solid var(--tuwa-text-accent);
+  outline-offset: 2px;
+}
+
+.tuwa-theme-switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  display: grid;
+  place-items: center;
+  width: var(--knob);
+  height: var(--knob);
+  translate: 0 -50%;
+  border: 1px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-primary);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 10px -4px var(--glow);
+  transition: box-shadow 300ms ease;
+}
+.tuwa-theme-switch--dark .tuwa-theme-switch__knob {
+  left: calc(100% - var(--knob) - 3px);
+}
+.tuwa-theme-switch:hover .tuwa-theme-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 14px -3px var(--glow);
+}
+.tuwa-theme-switch__knob--to-dark {
+  animation: tuwa-knob-to-dark 480ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+.tuwa-theme-switch__knob--to-light {
+  animation: tuwa-knob-to-light 480ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+@keyframes tuwa-knob-to-dark {
+  0% {
+    left: 2px;
+    width: var(--knob);
   }
-  to {
-    transform: translateX(0);
+  45% {
+    width: calc(var(--knob) * 1.45);
+  }
+  100% {
+    left: calc(100% - var(--knob) - 3px);
+    width: var(--knob);
+  }
+}
+@keyframes tuwa-knob-to-light {
+  0% {
+    left: calc(100% - var(--knob) - 3px);
+    width: var(--knob);
+  }
+  45% {
+    width: calc(var(--knob) * 1.45);
+  }
+  100% {
+    left: 2px;
+    width: var(--knob);
   }
 }
 
-.tuwa-slide-dark {
-  animation: slideToDark 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+/* The glow along an edge, wrapping a little onto the sides: warm amber over the sun, the accent under the moon. The
+   border of the knob, masked to its edge; the halo follows what shows of it. Quiet: it sits in a header */
+.tuwa-theme-switch__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--glow) 60%, transparent))
+    drop-shadow(0 0 4px color-mix(in srgb, var(--glow) 28%, transparent));
+  opacity: 0;
+  transition: opacity 300ms ease 160ms;
 }
-.tuwa-slide-light {
-  animation: slideToLight 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+.tuwa-theme-switch__glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--glow);
+  border-radius: inherit;
+}
+.tuwa-theme-switch__glow--top::before {
+  mask-image: linear-gradient(to bottom, #000 0%, #000 18%, transparent 46%);
+}
+.tuwa-theme-switch__glow--bottom::before {
+  mask-image: linear-gradient(to top, #000 0%, #000 18%, transparent 46%);
+}
+.tuwa-theme-switch--light .tuwa-theme-switch__glow--top,
+.tuwa-theme-switch--dark .tuwa-theme-switch__glow--bottom {
+  opacity: 0.85;
+}
+
+/* The pixels: solid (a hair larger than their step, so no seam shows between two of them), each travels to its place in
+   the other picture, one after another */
+.tuwa-theme-switch__pixels {
+  position: relative;
+  width: calc(var(--pixel-step) * 7);
+  height: calc(var(--pixel-step) * 7);
+}
+/* A warm halo behind the disc of the sun, so it reads as the sun at a glance */
+.tuwa-theme-switch__pixels::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--pixel-step) * 0.5);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(251 191 36 / 0.42) 0%, rgb(251 191 36 / 0.12) 45%, transparent 70%);
+  opacity: 0;
+  transition: opacity 500ms ease 200ms;
+}
+.tuwa-theme-switch--light .tuwa-theme-switch__pixels::before {
+  opacity: 1;
+}
+.tuwa-theme-switch__pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--pixel-step) + 0.2px);
+  height: calc(var(--pixel-step) + 0.2px);
+  background: var(--pixel);
+  transform: translate(calc(var(--x) * var(--pixel-step)), calc(var(--y) * var(--pixel-step)));
+  transition:
+    transform 560ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay),
+    opacity 260ms ease var(--delay),
+    border-radius 400ms ease var(--delay),
+    background-color 300ms ease;
+}
+/* The corners of the disc of the sun round it */
+.tuwa-theme-switch__pixel--tl {
+  border-top-left-radius: 100%;
+}
+.tuwa-theme-switch__pixel--tr {
+  border-top-right-radius: 100%;
+}
+.tuwa-theme-switch__pixel--bl {
+  border-bottom-left-radius: 100%;
+}
+.tuwa-theme-switch__pixel--br {
+  border-bottom-right-radius: 100%;
+}
+/* The stars dim and shine once, slowly, after a change, then shine steady: the switch sits in a header */
+.tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__pixel--twinkle {
+  animation: tuwa-twinkle-a 2s cubic-bezier(0.37, 0, 0.63, 1) calc(300ms + var(--twinkle-delay) / 3) both;
+}
+.tuwa-theme-switch__knob--to-light .tuwa-theme-switch__pixel--twinkle {
+  animation: tuwa-twinkle-b 2s cubic-bezier(0.37, 0, 0.63, 1) calc(300ms + var(--twinkle-delay) / 3) both;
+}
+@keyframes tuwa-twinkle-a {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes tuwa-twinkle-b {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* A satellite around the moon, a planet around the sun: a pixel on a tilted orbit, upright all the way */
+.tuwa-theme-switch__orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tuwa-theme-switch__orbiter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--pixel-step) * 0.8);
+  height: calc(var(--pixel-step) * 0.8);
+  background: var(--pixel);
+  box-shadow: 0 0 4px var(--glow);
+  offset-path: var(--orbit-path);
+  offset-rotate: 0deg;
+  opacity: 0;
+}
+/* One slow pass of the orbit after a change, easing in and out, then gone: nothing keeps moving in a header */
+.tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__orbiter {
+  animation: tuwa-orbit-a 2.2s cubic-bezier(0.37, 0, 0.63, 1) 300ms both;
+}
+.tuwa-theme-switch__knob--to-light .tuwa-theme-switch__orbiter {
+  animation: tuwa-orbit-b 2.2s cubic-bezier(0.37, 0, 0.63, 1) 300ms both;
+}
+@keyframes tuwa-orbit-a {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  20%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+@keyframes tuwa-orbit-b {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  20%,
+  78% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* The language switch, a pair with the theme switch: the flag of the language on the same knob, a soft glow in the
+   colour of the flag along its lower edge, a small spring and a new flag coming in when the language changes */
+.tuwa-locale-switch__knob,
+.tuwa-locale-switch__tile,
+.tuwa-locale-switch__option {
+  /* The glow as a line and a dot: deeper on a light page, where a pale yellow would vanish */
+  --glow-line: var(--glow);
+}
+:root:not(.dark) .tuwa-locale-switch__knob,
+:root:not(.dark) .tuwa-locale-switch__tile,
+:root:not(.dark) .tuwa-locale-switch__option {
+  --glow-line: color-mix(in srgb, var(--glow) 74%, #000);
+}
+.tuwa-locale-switch__knob {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-primary);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 10px -4px var(--glow);
+  transition: box-shadow 300ms ease;
+}
+@media (min-width: 768px) {
+  .tuwa-locale-switch__knob {
+    width: 26px;
+    height: 26px;
+  }
+}
+:root:not(.dark) .tuwa-locale-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 8px -4px var(--glow-line);
+}
+.group:hover .tuwa-locale-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 14px -3px var(--glow);
+}
+:root:not(.dark) .group:hover .tuwa-locale-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 10px -3px var(--glow-line);
+}
+/* The glow line: quiet, it sits in a header */
+.tuwa-locale-switch__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--glow) 60%, transparent))
+    drop-shadow(0 0 4px color-mix(in srgb, var(--glow) 28%, transparent));
+  transition:
+    filter 300ms ease,
+    opacity 300ms ease;
+}
+/* On a light page the halo stays close to the line, so the flag is not washed out */
+:root:not(.dark) .tuwa-locale-switch__glow {
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--glow) 50%, transparent));
+}
+.tuwa-locale-switch__glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--glow-line);
+  border-radius: inherit;
+  mask-image: linear-gradient(to top, #000 0%, #000 18%, transparent 46%);
+  transition: border-color 300ms ease;
+}
+
+/* The flag of each language in the menu sits on a small knob of its own, with the glow of its colour: faint on the
+   others, full on the chosen and the highlighted one */
+.tuwa-locale-switch__tile {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border: 1px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-primary);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+  transition: box-shadow 300ms ease;
+}
+.tuwa-locale-switch__tile .tuwa-locale-switch__glow {
+  opacity: 0.25;
+}
+.tuwa-locale-switch__option[aria-selected='true'] .tuwa-locale-switch__tile,
+.tuwa-locale-switch__option--active .tuwa-locale-switch__tile {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 10px -4px var(--glow-line);
+}
+.tuwa-locale-switch__option[aria-selected='true'] .tuwa-locale-switch__tile .tuwa-locale-switch__glow,
+.tuwa-locale-switch__option--active .tuwa-locale-switch__tile .tuwa-locale-switch__glow {
+  opacity: 0.85;
+}
+.tuwa-locale-switch__knob--bump-a {
+  animation: tuwa-locale-bump-a 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tuwa-locale-switch__knob--bump-b {
+  animation: tuwa-locale-bump-b 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes tuwa-locale-bump-a {
+  0% {
+    scale: 0.86;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@keyframes tuwa-locale-bump-b {
+  0% {
+    scale: 0.86;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* The flags, as vectors with a hair edge so they hold their shape on a white page; a new one comes in softly */
+.tuwa-locale-flag {
+  display: block;
+  width: 16px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22);
+}
+.dark .tuwa-locale-flag {
+  box-shadow: 0 0 0 0.5px rgb(255 255 255 / 0.2);
+}
+.tuwa-locale-switch__flag {
+  display: grid;
+}
+.tuwa-locale-switch__flag--in {
+  animation: tuwa-locale-flag-in 380ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+@keyframes tuwa-locale-flag-in {
+  from {
+    opacity: 0;
+    scale: 0.6;
+  }
+}
+
+/* The switches come in softly once the page is ready, instead of popping up after hydration */
+.tuwa-switch-appear {
+  animation: tuwa-switch-appear 280ms ease-out both;
+}
+@keyframes tuwa-switch-appear {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A change of language crossfades the page. The languages are separate root layouts, so a change loads the page
+   anew: the crossfade covers that load (both pages have this rule), and a change within one layout too
+   (`useLocaleRouting`). Calm and short */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 340ms;
+  animation-timing-function: cubic-bezier(0.37, 0, 0.63, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-theme-switch__knob--to-dark,
+  .tuwa-theme-switch__knob--to-light,
+  .tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__pixel--twinkle,
+  .tuwa-theme-switch__knob--to-light .tuwa-theme-switch__pixel--twinkle,
+  .tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__orbiter,
+  .tuwa-theme-switch__knob--to-light .tuwa-theme-switch__orbiter {
+    animation: none;
+  }
+  .tuwa-theme-switch__pixel,
+  .tuwa-theme-switch__glow {
+    transition: none;
+  }
+  .tuwa-locale-switch__knob--bump-a,
+  .tuwa-locale-switch__knob--bump-b,
+  .tuwa-locale-switch__flag--in,
+  .tuwa-switch-appear {
+    animation: none;
+  }
+  @view-transition {
+    navigation: none;
+  }
 }
 
 .nextra-nav-container .nx-text-primary-600 {
@@ -530,32 +968,466 @@ article:focus {
   outline-offset: 2px;
 }
 
-/* Orb Component Animations */
-@keyframes orb-spin {
-  0% {
-    transform: rotate(0deg);
+/* The badge of a TUWA project (Orb), in the manner of the switches: a flat round knob, a pixel icon in the brand color
+   of the project, a faint ring of that color and a glowing arc that drifts slowly round it. The icon gathers pixel by
+   pixel in a wave when it first comes into view, then moves quietly in its own way */
+.tuwa-orb {
+  --orb-pixel: var(--orb);
+  --orb-lit: color-mix(in srgb, var(--orb) 72%, #000);
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--orb) 22%, var(--tuwa-border-primary));
+  border-radius: 50%;
+  background: var(--tuwa-bg-primary);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 16px -7px var(--orb);
+  transition:
+    box-shadow 400ms ease,
+    border-color 400ms ease;
+}
+.dark .tuwa-orb {
+  --orb-pixel: color-mix(in srgb, var(--orb) 70%, #fff);
+  --orb-lit: color-mix(in srgb, var(--orb) 32%, #fff);
+}
+.group:hover .tuwa-orb {
+  border-color: color-mix(in srgb, var(--orb) 40%, var(--tuwa-border-primary));
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 20px -6px var(--orb);
+}
+/* The arc of light: the border, masked to a third of the circle, turning slowly */
+.tuwa-orb__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--orb) 65%, transparent))
+    drop-shadow(0 0 4px color-mix(in srgb, var(--orb) 30%, transparent));
+  animation: tuwa-orb-drift 9s linear infinite;
+}
+.tuwa-orb__glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.25px solid var(--orb);
+  border-radius: 50%;
+  mask-image: conic-gradient(transparent 0deg, #000 50deg, #000 80deg, transparent 140deg, transparent 360deg);
+}
+.group:hover .tuwa-orb__glow {
+  opacity: 1;
+}
+@keyframes tuwa-orb-drift {
+  to {
+    rotate: 360deg;
   }
-  100% {
-    transform: rotate(360deg);
+}
+.tuwa-orb__pixels {
+  position: relative;
+  width: calc(var(--orb-step) * 9);
+  height: calc(var(--orb-step) * 9);
+}
+/* Solid pixels, a hair larger than their step so no seam shows between two of them */
+.tuwa-orb__pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--orb-step) + 0.2px);
+  height: calc(var(--orb-step) + 0.2px);
+  background: var(--orb-pixel);
+  transform: translate(calc(var(--x) * var(--orb-step)), calc(var(--y) * var(--orb-step)));
+}
+.tuwa-orb__pixel--lit,
+.tuwa-orb__planet {
+  background: var(--orb-lit);
+}
+.dark .tuwa-orb__pixel--lit,
+.dark .tuwa-orb__planet {
+  box-shadow: 0 0 3px color-mix(in srgb, var(--orb) 70%, transparent);
+}
+.tuwa-orb__svg {
+  width: 45%;
+  height: 45%;
+  color: var(--orb-pixel);
+}
+
+/* The planet of the orbit, on the ring, upright while it goes round */
+.tuwa-orb__spin {
+  position: absolute;
+  inset: 0;
+}
+.tuwa-orb__planet {
+  position: absolute;
+  top: calc(var(--orb-step) * 0.5);
+  left: 50%;
+  width: calc(var(--orb-step) * 1.6);
+  height: calc(var(--orb-step) * 1.6);
+  translate: -50% -50%;
+}
+/* Hidden until the badge comes into view, only where scripts run: without them the icon simply shows */
+@media (scripting: enabled) {
+  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__pixel,
+  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__planet {
+    opacity: 0;
+  }
+}
+.tuwa-orb--shown .tuwa-orb__pixel {
+  animation: tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both;
+}
+.tuwa-orb--shown .tuwa-orb__planet {
+  animation: tuwa-orb-fade-in 600ms ease 400ms both;
+}
+@keyframes tuwa-orb-pixel-in {
+  from {
+    opacity: 0;
+    scale: 0.2;
+  }
+}
+@keyframes tuwa-orb-fade-in {
+  from {
+    opacity: 0;
   }
 }
 
-@keyframes orb-float {
+/* The motion of each icon: slow and smooth, it sits in a list */
+/* Sign-in: the arrow glides into the door and is gone, again */
+.tuwa-orb--shown.tuwa-orb--sign-in .tuwa-orb__pixel[data-g='a'] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-enter 4s cubic-bezier(0.37, 0, 0.63, 1) 1.2s infinite;
+}
+@keyframes tuwa-orb-enter {
+  0% {
+    translate: calc(var(--orb-step) * -2.5) 0;
+    opacity: 0;
+  }
+  30%,
+  72% {
+    translate: 0 0;
+    opacity: 1;
+  }
+  100% {
+    translate: calc(var(--orb-step) * 1.2) 0;
+    opacity: 0;
+  }
+}
+/* Orbit: the planet goes round its star */
+.tuwa-orb--shown.tuwa-orb--orbit .tuwa-orb__spin {
+  animation: tuwa-orb-drift 10s linear infinite;
+}
+.tuwa-orb--shown.tuwa-orb--orbit .tuwa-orb__planet {
+  animation:
+    tuwa-orb-fade-in 600ms ease 400ms both,
+    tuwa-orb-upright 10s linear infinite;
+}
+@keyframes tuwa-orb-upright {
+  to {
+    rotate: -360deg;
+  }
+}
+/* Satellite: it floats; the light of its antenna blinks and the signal goes out */
+.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixels {
+  animation: tuwa-orb-float 5s ease-in-out infinite;
+}
+.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g='a'] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-blink 2.6s ease-in-out 1s infinite;
+}
+.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g='b'] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-signal 2.6s ease-in-out 1s infinite;
+}
+@keyframes tuwa-orb-float {
   0%,
   100% {
-    transform: translateY(0) rotate(0deg);
+    translate: 0 0;
   }
   50% {
-    transform: translateY(-3%) rotate(5deg);
+    translate: 0 calc(var(--orb-step) * -0.6);
+  }
+}
+@keyframes tuwa-orb-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes tuwa-orb-signal {
+  0%,
+  45% {
+    opacity: 0;
+    translate: 0 calc(var(--orb-step) * 0.5);
+  }
+  65% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 calc(var(--orb-step) * -0.5);
+  }
+}
+/* Pulsar: a pulse runs out along the two beams of the star */
+.tuwa-orb--shown.tuwa-orb--pulsar .tuwa-orb__pixel[data-g] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-beam 2.4s ease-in-out var(--beam) infinite;
+}
+.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='a'] {
+  --beam: 1s;
+}
+.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='b'] {
+  --beam: 1.2s;
+}
+.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='c'] {
+  --beam: 1.4s;
+}
+@keyframes tuwa-orb-beam {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  25% {
+    opacity: 1;
+  }
+}
+/* Cloud: data rises into it, one piece after another */
+.tuwa-orb--shown.tuwa-orb--cloud .tuwa-orb__pixel[data-g] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-rise 3s cubic-bezier(0.37, 0, 0.63, 1) var(--rise) infinite;
+}
+.tuwa-orb--cloud .tuwa-orb__pixel[data-g='a'] {
+  --rise: 1s;
+}
+.tuwa-orb--cloud .tuwa-orb__pixel[data-g='b'] {
+  --rise: 2s;
+}
+.tuwa-orb--cloud .tuwa-orb__pixel[data-g='c'] {
+  --rise: 3s;
+}
+@keyframes tuwa-orb-rise {
+  0% {
+    translate: 0 calc(var(--orb-step) * 1);
+    opacity: 0;
+  }
+  30%,
+  60% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 calc(var(--orb-step) * -3);
+    opacity: 0;
+  }
+}
+/* Server: the lights of the racks blink in turn */
+.tuwa-orb--shown.tuwa-orb--server .tuwa-orb__pixel[data-g] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    tuwa-orb-blink 2.8s ease-in-out var(--led) infinite;
+}
+.tuwa-orb--server .tuwa-orb__pixel[data-g='a'] {
+  --led: 1s;
+}
+.tuwa-orb--server .tuwa-orb__pixel[data-g='b'] {
+  --led: 2.4s;
+}
+/* Supernova: the star flares and throws a shock wave out, the tips of its rays catching the light */
+.tuwa-orb--shown.tuwa-orb--supernova .tuwa-orb__pixel[data-g] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    var(--burst) 3.6s cubic-bezier(0.22, 1, 0.36, 1) 1s infinite;
+}
+.tuwa-orb--supernova .tuwa-orb__pixel[data-g='a'] {
+  --burst: tuwa-orb-shock;
+}
+.tuwa-orb--supernova .tuwa-orb__pixel[data-g='b'] {
+  --burst: tuwa-orb-ray;
+}
+.tuwa-orb--supernova .tuwa-orb__pixel[data-g='c'] {
+  --burst: tuwa-orb-flare;
+}
+@keyframes tuwa-orb-shock {
+  0% {
+    translate: calc((4 - var(--x)) * var(--orb-step) * 0.75) calc((4 - var(--y)) * var(--orb-step) * 0.75);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  70% {
+    translate: 0 0;
+    opacity: 0.9;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 0;
+  }
+}
+@keyframes tuwa-orb-ray {
+  0%,
+  30%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes tuwa-orb-flare {
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+  8% {
+    opacity: 1;
+  }
+}
+/* Terminal: two characters are typed, the cursor blinks, then the line clears */
+.tuwa-orb--shown.tuwa-orb--terminal .tuwa-orb__pixel[data-g] {
+  animation:
+    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
+    var(--type) 4.8s ease-in-out 1s infinite;
+}
+.tuwa-orb--terminal .tuwa-orb__pixel[data-g='a'] {
+  --type: tuwa-orb-type-a;
+}
+.tuwa-orb--terminal .tuwa-orb__pixel[data-g='b'] {
+  --type: tuwa-orb-type-b;
+}
+.tuwa-orb--terminal .tuwa-orb__pixel[data-g='c'] {
+  --type: tuwa-orb-type-c;
+}
+@keyframes tuwa-orb-type-a {
+  0%,
+  8% {
+    opacity: 0;
+  }
+  13%,
+  84% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tuwa-orb-type-b {
+  0%,
+  20% {
+    opacity: 0;
+  }
+  25%,
+  84% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes tuwa-orb-type-c {
+  0%,
+  32% {
+    opacity: 0;
+  }
+  37%,
+  47% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.15;
+  }
+  63%,
+  73% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.15;
+  }
+  86% {
+    opacity: 1;
+  }
+  92%,
+  100% {
+    opacity: 0;
   }
 }
 
-.tuwa-orb-spin {
-  animation: orb-spin 20s linear infinite;
+/* Rocket: it takes off once, rising into its place with its flame flickering, then rests */
+.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel {
+  animation: none;
+}
+.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixels {
+  animation: tuwa-orb-launch 1.8s cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+}
+.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel[data-g] {
+  animation: tuwa-orb-flame 260ms ease-in-out 300ms 7 alternate;
+}
+@keyframes tuwa-orb-launch {
+  0% {
+    translate: 0 calc(var(--orb-step) * 3.5);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    translate: 0 0;
+    opacity: 1;
+  }
+}
+@keyframes tuwa-orb-flame {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+/* Its window is a porthole: pale on a light page, where a darker blue on blue would not show; lit in the dark */
+:root:not(.dark) .tuwa-orb--rocket .tuwa-orb__pixel--lit:not([data-g]) {
+  background: color-mix(in srgb, var(--orb) 16%, #fff);
+}
+/* Its flame burns amber */
+.tuwa-orb--rocket .tuwa-orb__pixel[data-g] {
+  background: #f59e0b;
+}
+.tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
+  background: #fbbf24;
+}
+.dark .tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
+  box-shadow: 0 0 3px rgb(245 158 11 / 0.7);
 }
 
-.tuwa-orb-float {
-  animation: orb-float 8s ease-in-out infinite;
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__pixel,
+  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__planet {
+    opacity: 1;
+  }
+  .tuwa-orb__glow,
+  .tuwa-orb--shown .tuwa-orb__pixel,
+  .tuwa-orb--shown .tuwa-orb__pixels,
+  .tuwa-orb--shown .tuwa-orb__spin,
+  .tuwa-orb--shown .tuwa-orb__planet,
+  .tuwa-orb--shown.tuwa-orb--sign-in .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--pulsar .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--cloud .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--server .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--terminal .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel[data-g],
+  .tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixels,
+  .tuwa-orb--shown.tuwa-orb--supernova .tuwa-orb__pixel[data-g] {
+    animation: none;
+  }
 }
 
 /*

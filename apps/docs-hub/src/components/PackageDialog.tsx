@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon, BookOpenIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import {
   CloseIcon,
   cn,
@@ -10,6 +10,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  ExternalLinkIcon,
 } from '@tuwaio/nova-core';
 import { Fragment, type ReactNode } from 'react';
 
@@ -257,7 +258,7 @@ export function PackageDialog({ open, name, packages, onSelect, onClose }: Packa
                     className="inline-flex items-center gap-1 text-sm font-medium text-[var(--tuwa-text-accent)] hover:underline underline-offset-2"
                   >
                     {link.label}
-                    <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                    <ExternalLinkIcon className="w-3.5 h-3.5" />
                   </a>
                 ))}
               </div>

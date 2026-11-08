@@ -1,7 +1,36 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core/utils';
-import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+
+/** The colour of the glow of each built-in flag. */
+const FLAG_GLOWS: Record<string, string> = { en: '#3b82f6', uk: '#facc15', zh: '#ef4444' };
+
+/** The key of a built-in flag for a locale code, if there is one. */
+function flagKeyOf(code: string): string | undefined {
+  const normalized = code.toLowerCase();
+  if (normalized === 'en' || normalized === 'en-us' || normalized === 'en-gb') return 'en';
+  if (normalized === 'uk' || normalized === 'ua') return 'uk';
+  if (normalized === 'zh' || normalized === 'zh-cn' || normalized === 'zh-hans') return 'zh';
+  return undefined;
+}
+
+/** The glow of a language: the colour of its built-in flag, or the accent for a flag of the site's own. */
+function glowOf(code: string): string {
+  const flag = flagKeyOf(code);
+  return flag ? FLAG_GLOWS[flag] : 'var(--tuwa-text-accent)';
+}
+
+const subscribeNothing = () => () => {};
 
 /**
  * Built-in vector SVG flag for the United Kingdom / English language.
@@ -139,18 +168,10 @@ function ChevronArrowWithAnim({ isOpen, className }: { isOpen: boolean; classNam
  * @returns The SVG icon node or `undefined` if no built-in flag is available.
  */
 export function getLocaleFlag(code: string): ReactNode {
-  const normalized = code.toLowerCase();
-  const flagClass =
-    'tuwadocs:h-3 tuwadocs:w-4 tuwadocs:rounded-[2px] tuwadocs:object-cover tuwadocs:shadow-xs tuwadocs:border tuwadocs:border-black/10 tuwadocs:dark:border-white/20 tuwadocs:shrink-0';
-  if (normalized === 'en' || normalized === 'en-us' || normalized === 'en-gb') {
-    return <FlagUK className={flagClass} />;
-  }
-  if (normalized === 'uk' || normalized === 'ua') {
-    return <FlagUkraine className={flagClass} />;
-  }
-  if (normalized === 'zh' || normalized === 'zh-cn' || normalized === 'zh-hans') {
-    return <FlagChina className={flagClass} />;
-  }
+  const flag = flagKeyOf(code);
+  if (flag === 'en') return <FlagUK className="tuwa-locale-flag" />;
+  if (flag === 'uk') return <FlagUkraine className="tuwa-locale-flag" />;
+  if (flag === 'zh') return <FlagChina className="tuwa-locale-flag" />;
   return undefined;
 }
 
@@ -320,7 +341,20 @@ export function LocaleSwitcher({
   ariaLabel = 'Select language',
   nativeTouch = true,
 }: LocaleSwitcherProps) {
-  const [mounted, setMounted] = useState(false);
+  // A placeholder only while the page hydrates: a switch rendered on the client (the next page after a language
+  // change) shows at once, with nothing blinking
+  const mounted = useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
+  // How many times the language changed since mount: each change springs the knob once (none on the first render)
+  const [shown, setShown] = useState(locale);
+  const [changes, setChanges] = useState(0);
+  if (shown !== locale) {
+    setShown(locale);
+    setChanges(changes + 1);
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [resolvedPlacement, setResolvedPlacement] = useState<'bottom' | 'top'>('bottom');
@@ -332,8 +366,6 @@ export function LocaleSwitcher({
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
     if (typeof window === 'undefined') return;
 
     // Detect primary touch pointer (smartphones, tablets) to conditionally engage native select overlay
@@ -535,9 +567,10 @@ export function LocaleSwitcher({
   const activeOption = locales.find((item) => item.code === locale) ?? locales[0];
   const shortText = activeOption?.short ?? activeOption?.code?.slice(0, 2).toUpperCase() ?? 'EN';
   const activeFlag = activeOption?.flag ?? getLocaleFlag(activeOption?.code ?? 'en');
+  const glow = glowOf(activeOption?.code ?? 'en');
 
   return (
-    <div ref={containerRef} className={cn('tuwadocs:relative tuwadocs:inline-block', className)}>
+    <div ref={containerRef} className={cn('tuwa-switch-appear tuwadocs:relative tuwadocs:inline-block', className)}>
       {/* Native touch select overlay: on touch devices (pointer: coarse), sits directly over the button to open iOS/Android native pickers */}
       {nativeTouch && (
         <select
@@ -564,7 +597,7 @@ export function LocaleSwitcher({
         onClick={() => (isOpen ? closeMenu() : openMenu())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:px-2 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border tuwadocs:motion-reduce:transition-none',
+          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:pl-[2px] tuwadocs:pr-2 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border tuwadocs:motion-reduce:transition-none',
           'tuwadocs:focus-visible:ring-2 tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)] tuwadocs:focus-visible:outline-none tuwadocs:focus-visible:ring-offset-1 tuwadocs:focus-visible:ring-offset-[var(--tuwa-bg-primary)]',
           staticSize,
           defaultStyles,
@@ -573,12 +606,23 @@ export function LocaleSwitcher({
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
       >
-        {/* Local Flag Icon */}
+        {/* The flag on a knob as the theme switch's, with a glow in its colour; a small spring when the language changes */}
         <span
           aria-hidden="true"
-          className="tuwadocs:flex tuwadocs:items-center tuwadocs:justify-center tuwadocs:shrink-0"
+          className={cn(
+            'tuwa-locale-switch__knob',
+            changes > 0 && (changes % 2 ? 'tuwa-locale-switch__knob--bump-a' : 'tuwa-locale-switch__knob--bump-b'),
+          )}
+          style={{ '--glow': glow } as CSSProperties}
         >
-          {activeFlag}
+          <span className="tuwa-locale-switch__glow" />
+          {/* A new flag comes in softly when the language changes */}
+          <span
+            key={activeOption?.code}
+            className={cn('tuwa-locale-switch__flag', changes > 0 && 'tuwa-locale-switch__flag--in')}
+          >
+            {activeFlag}
+          </span>
         </span>
 
         {/* Visible label starts accessible name, full language and action follow (WCAG 2.5.3) */}
@@ -627,29 +671,34 @@ export function LocaleSwitcher({
                 onPointerMove={() => {
                   if (activeIndex !== i) setActiveIndex(i);
                 }}
+                // Each language in the colours of its flag, as the knob of the switch
+                style={{ '--glow': glowOf(item.code) } as CSSProperties}
                 className={cn(
-                  'tuwadocs:relative tuwadocs:flex tuwadocs:w-full tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-2.5 tuwadocs:px-3.5 tuwadocs:py-2.5 tuwadocs:text-xs tuwadocs:transition-colors tuwadocs:outline-none',
+                  'tuwa-locale-switch__option',
+                  isFocused && 'tuwa-locale-switch__option--active',
+                  'tuwadocs:relative tuwadocs:flex tuwadocs:w-full tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-2.5 tuwadocs:px-3 tuwadocs:py-2 tuwadocs:text-xs tuwadocs:transition-colors tuwadocs:outline-none',
                   'tuwadocs:focus-visible:ring-1 tuwadocs:focus-visible:ring-inset tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)]',
                   isSelected
                     ? isFocused
-                      ? 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--tuwa-text-accent)]/25 tuwadocs:via-[var(--tuwa-text-accent)]/10 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
-                      : 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--tuwa-text-accent)]/15 tuwadocs:via-[var(--tuwa-text-accent)]/5 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      ? 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/20 tuwadocs:via-[var(--glow)]/8 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      : 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/14 tuwadocs:via-[var(--glow)]/5 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
                     : isFocused
                       ? 'tuwadocs:bg-[var(--tuwa-bg-muted)]/70 tuwadocs:text-[var(--tuwa-text-primary)]'
                       : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:bg-[var(--tuwa-bg-muted)]/50 tuwadocs:hover:text-[var(--tuwa-text-primary)]',
                 )}
               >
-                {/* Flush left edge accent bar — directly on the outer container edge */}
+                {/* Flush left edge bar in the colour of the flag, with its glow */}
                 {isSelected && (
                   <span
-                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--tuwa-text-accent)] tuwadocs:shadow-[0_0_8px_var(--tuwa-text-accent)]"
+                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
                     aria-hidden="true"
                   />
                 )}
 
-                <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2 tuwadocs:truncate">
+                <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2.5 tuwadocs:truncate">
                   {flag && (
-                    <span aria-hidden="true" className="tuwadocs:shrink-0">
+                    <span aria-hidden="true" className="tuwa-locale-switch__tile">
+                      <span className="tuwa-locale-switch__glow" />
                       {flag}
                     </span>
                   )}
@@ -661,7 +710,7 @@ export function LocaleSwitcher({
                     className={cn(
                       'tuwadocs:font-mono tuwadocs:text-[10px] tuwadocs:uppercase tuwadocs:px-1.5 tuwadocs:py-0.5 tuwadocs:rounded',
                       isSelected
-                        ? 'tuwadocs:bg-[var(--tuwa-text-accent)]/15 tuwadocs:text-[var(--tuwa-text-accent)] tuwadocs:font-bold'
+                        ? 'tuwadocs:bg-[var(--glow)]/15 tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:ring-1 tuwadocs:ring-inset tuwadocs:ring-[var(--glow-line)]/40 tuwadocs:font-bold'
                         : 'tuwadocs:text-[var(--tuwa-text-tertiary)]',
                     )}
                   >
@@ -669,7 +718,7 @@ export function LocaleSwitcher({
                   </span>
                   {isSelected && (
                     <span
-                      className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:rounded-full tuwadocs:bg-[var(--tuwa-text-accent)] tuwadocs:shadow-[0_0_8px_var(--tuwa-text-accent)]"
+                      className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:rounded-full tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
                       aria-hidden="true"
                     />
                   )}

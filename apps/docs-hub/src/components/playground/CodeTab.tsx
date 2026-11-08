@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
 import { useState } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -82,7 +82,7 @@ export function CodeTab() {
           className="inline-flex items-center gap-1 text-[var(--tuwa-text-accent)] hover:underline"
         >
           {t.playground.inspector.code.openInStackblitz}
-          <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5" aria-hidden="true" />
+          <ExternalLinkIcon className="h-3.5 w-3.5" />
         </a>
       </div>
     </div>

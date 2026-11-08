@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowLeftIcon, ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
 
 import Link from '@/components/LocaleNextLink';
 import { useI18n } from '@/i18n';
@@ -51,7 +52,7 @@ export function NotFoundContent() {
               className="inline-flex h-11 items-center justify-center gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] dark:border-white/10 bg-[var(--tuwa-bg-primary)] dark:bg-white/[0.03] px-5 text-sm font-semibold text-[var(--tuwa-text-primary)] transition-colors hover:bg-[var(--tuwa-bg-muted)] dark:hover:bg-white/[0.06]"
             >
               {t.ui.notFoundExtra.reportBrokenLink}
-              <ArrowTopRightOnSquareIcon className="w-4 h-4" aria-hidden="true" />
+              <ExternalLinkIcon className="w-4 h-4" />
             </a>
           </div>
         </header>
@@ -102,7 +103,7 @@ export function NotFoundContent() {
                   className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/[0.08] bg-[var(--tuwa-bg-primary)]/80 dark:bg-white/[0.02] px-3 py-1.5 text-sm text-[var(--tuwa-text-secondary)] transition-colors hover:text-[var(--tuwa-text-primary)]"
                 >
                   {site.name}
-                  <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" aria-hidden="true" />
+                  <ExternalLinkIcon className="w-3.5 h-3.5" />
                 </a>
               </li>
             ))}

@@ -98,7 +98,8 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
   // The classes of the Orb live next to the dead ones: removing by range once took a class in use with it
   it('keeps the classes in use', () => {
     const css = readFileSync(join(dist, 'site.css'), 'utf8');
-    for (const name of ['.tuwa-orb-float', '.tuwa-slide-dark', '.tuwa-footer-link--npm']) expect(css).toContain(name);
+    for (const name of ['.tuwa-orb__pixel', '.tuwa-theme-switch__knob--to-dark', '.tuwa-footer-link--npm'])
+      expect(css).toContain(name);
   });
 
   it.each([
@@ -109,6 +110,8 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
     'tuwa-float',
     'tuwa-pulse',
     'tuwa-orb-pulse',
+    'tuwa-orb-float',
+    'tuwa-orb-spin',
     'remote-logo',
   ])('drops %s, which nothing uses', (name) => {
     expect(readFileSync(join(dist, 'site.css'), 'utf8')).not.toMatch(new RegExp(`\\.${name}(?![\\w-])`));
