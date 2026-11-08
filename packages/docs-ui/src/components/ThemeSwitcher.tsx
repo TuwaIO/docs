@@ -1,8 +1,7 @@
 'use client';
 
-import { MoonIcon, SunIcon } from '@heroicons/react/24/solid';
 import { cn } from '@tuwaio/nova-core/utils';
-import { useEffect, useState } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 
 /**
  * Props of {@link ThemeSwitcher}.
@@ -16,83 +15,113 @@ export interface ThemeSwitcherProps {
   ariaLabel?: string;
 }
 
+/** A pixel of the 7 × 7 grid; `twinkle` makes it shine on and off (the stars, the rays). */
+type Pixel = readonly [x: number, y: number, twinkle?: 1];
+
+/** A crescent moon and two stars that twinkle. */
+// prettier-ignore
+const MOON: Pixel[] = [
+  [2, 0], [3, 0], [4, 0],
+  [1, 1], [2, 1], [3, 1],
+  [0, 2], [1, 2], [2, 2],
+  [0, 3], [1, 3], [2, 3],
+  [0, 4], [1, 4], [2, 4],
+  [1, 5], [2, 5], [3, 5],
+  [2, 6], [3, 6], [4, 6],
+  [6, 0, 1], [5, 3, 1],
+];
+
+/** A star like the sun: its disc and eight rays that pulse as a pulsar's. */
+// prettier-ignore
+const SUN: Pixel[] = [
+  [2, 2], [3, 2], [4, 2],
+  [2, 3], [3, 3], [4, 3],
+  [2, 4], [3, 4], [4, 4],
+  [3, 0, 1], [5, 1, 1], [6, 3, 1], [5, 5, 1], [3, 6, 1], [1, 5, 1], [0, 3, 1], [1, 1, 1],
+];
+
+/** The pixels of both pictures in the order of their angle around the centre, so each pixel travels a short way. */
+const byAngle = (pixels: Pixel[]) =>
+  [...pixels].sort(([ax, ay], [bx, by]) => Math.atan2(ay - 3, ax - 3) - Math.atan2(by - 3, bx - 3));
+const MOON_PATH = byAngle(MOON);
+const SUN_PATH = byAngle(SUN);
+const COUNT = Math.max(MOON_PATH.length, SUN_PATH.length);
+
 /**
- * A light/dark switch with a sliding indicator. It stores no theme itself: pass the resolved theme and a toggle. Until
- * it is mounted on the client it renders an invisible placeholder of the same size, so the server output does not
- * depend on the theme.
+ * A light/dark switch in the cosmic manner of TUWA: a knob that slides with a spring and stretches on its way; on it a
+ * pixel crescent moon with twinkling stars and a satellite on its orbit in the dark, a pixel star like the sun with
+ * pulsing rays and a planet on its orbit in the light, each pixel travelling to its place when the theme changes; a glow
+ * along an edge of the knob, the accent under it in the dark and warm amber over it in the light. Flat, in the TUWA
+ * style: the borders, backgrounds and radius of the theme. Only CSS (`site.css`), nothing to install; still at once for
+ * reduced motion. It stores no theme itself: pass the
+ * resolved theme and a toggle. Until it is mounted on the client it renders an invisible placeholder of the same size,
+ * so the server output does not depend on the theme.
  *
  * @param props - See {@link ThemeSwitcherProps}.
  * @returns The switch button.
  */
 export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: ThemeSwitcherProps) {
   const [mounted, setMounted] = useState(false);
+  // The first render places the knob without moving it; the moves of later toggles play
+  const [moved, setMoved] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
-  const defaultStyles =
-    'tuwadocs:bg-black/5 tuwadocs:border-black/5 tuwadocs:hover:bg-black/10 tuwadocs:dark:bg-white/10 tuwadocs:dark:border-white/10 tuwadocs:dark:hover:bg-white/20';
-
   if (!mounted) {
-    return (
-      <div
-        className={cn(
-          'tuwadocs:relative tuwadocs:flex tuwadocs:h-10 tuwadocs:w-20 tuwadocs:md:h-8 tuwadocs:md:w-16 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:opacity-0',
-          defaultStyles,
-        )}
-      />
-    );
+    return <div aria-hidden className="tuwa-theme-switch tuwa-theme-switch--placeholder" />;
   }
 
   const isDark = theme === 'dark';
+  const pixels = isDark ? MOON_PATH : SUN_PATH;
 
   return (
     <button
-      onClick={onToggle}
-      className={cn(
-        'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:h-10 tuwadocs:w-20 tuwadocs:md:h-8 tuwadocs:md:w-16 tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:p-1 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border',
-        defaultStyles,
-      )}
+      type="button"
+      role="switch"
+      aria-checked={isDark}
       aria-label={ariaLabel}
+      onClick={() => {
+        setMoved(true);
+        onToggle();
+      }}
+      className={cn('tuwa-theme-switch', isDark ? 'tuwa-theme-switch--dark' : 'tuwa-theme-switch--light')}
     >
-      {/* Mobile slide indicator with custom spring-like keyframe animation */}
-      <div
+      <span
+        aria-hidden
         className={cn(
-          'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:md:hidden',
-          isDark ? 'tuwa-slide-dark' : 'tuwa-slide-light',
+          'tuwa-theme-switch__knob',
+          moved && (isDark ? 'tuwa-theme-switch__knob--to-dark' : 'tuwa-theme-switch__knob--to-light'),
         )}
-      />
-      {/* Desktop slide indicator with custom spring-like keyframe animation */}
-      <div
-        className={cn(
-          'tuwadocs:absolute tuwadocs:top-[1px] tuwadocs:left-[2px] tuwadocs:z-10 tuwadocs:h-9 tuwadocs:w-9 tuwadocs:md:h-7 tuwadocs:md:w-7 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:shadow-md tuwadocs:hidden tuwadocs:md:block',
-          isDark ? 'tuwa-slide-dark' : 'tuwa-slide-light',
-        )}
-      />
-
-      <div className="tuwadocs:relative tuwadocs:z-20 tuwadocs:flex tuwadocs:w-full tuwadocs:justify-between">
-        {/* Sun Icon */}
-        <div className="tuwadocs:flex tuwadocs:flex-1 tuwadocs:items-center tuwadocs:justify-center">
-          <SunIcon
-            className={`tuwadocs:h-6 tuwadocs:w-6 tuwadocs:relative tuwadocs:-left-[2px] tuwadocs:md:h-5 tuwadocs:md:w-5 tuwadocs:transition-colors tuwadocs:duration-300 ${
-              !isDark
-                ? 'tuwadocs:text-yellow-500' // Active color
-                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-yellow-400' // Passive + Hover color
-            }`}
-          />
-        </div>
-        {/* Moon Icon */}
-        <div className="tuwadocs:flex tuwadocs:flex-1 tuwadocs:justify-center">
-          <MoonIcon
-            className={`tuwadocs:h-6 tuwadocs:w-6 tuwadocs:relative tuwadocs:left-[2px] tuwadocs:md:h-5 tuwadocs:md:w-5 tuwadocs:transition-colors tuwadocs:duration-300 ${
-              isDark
-                ? 'tuwadocs:text-[#0052ff]' // Active color
-                : 'tuwadocs:text-slate-500 tuwadocs:group-hover:text-[#0052ff]' // Passive + Hover color
-            }`}
-          />
-        </div>
-      </div>
+      >
+        <span className="tuwa-theme-switch__glow tuwa-theme-switch__glow--top" />
+        <span className="tuwa-theme-switch__glow tuwa-theme-switch__glow--bottom" />
+        <span className="tuwa-theme-switch__pixels">
+          {Array.from({ length: COUNT }, (_, index) => {
+            const pixel = pixels[index];
+            return (
+              <span
+                key={index}
+                className={cn('tuwa-theme-switch__pixel', pixel?.[2] && 'tuwa-theme-switch__pixel--twinkle')}
+                style={
+                  {
+                    '--x': pixel ? pixel[0] : 3,
+                    '--y': pixel ? pixel[1] : 3,
+                    '--delay': `${index * 14}ms`,
+                    '--twinkle-delay': `${(index % 4) * 600}ms`,
+                    opacity: pixel ? 1 : 0,
+                  } as CSSProperties
+                }
+              />
+            );
+          })}
+        </span>
+        {/* A satellite around the moon, a planet around the sun: on a tilted orbit */}
+        <span className="tuwa-theme-switch__orbit">
+          <span className="tuwa-theme-switch__orbiter" />
+        </span>
+      </span>
     </button>
   );
 }

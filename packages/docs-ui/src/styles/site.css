@@ -460,28 +460,212 @@ article .nextra-border a:hover {
   font-size: 0.875em;
 }
 
-@keyframes slideToDark {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(107%);
+/* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and flat: the sizes of the switch before it (80 ×
+   40 on a phone, 64 × 32 from md), a knob that slides with a spring and stretches on its way (the sun on the left, the
+   moon on the right), pixel art that rebuilds itself, a twinkle, an orbit and a glow along an edge of the knob */
+.tuwa-theme-switch {
+  --knob: 34px;
+  --pixel-step: 3.25px;
+  --glow: #f59e0b;
+  --pixel: #d97706;
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 80px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid rgb(0 0 0 / 0.06);
+  border-radius: var(--tuwa-rounded-corners);
+  background: rgb(0 0 0 / 0.05);
+  cursor: pointer;
+  transition: border-color 200ms ease;
+  /* The tilted orbit of the satellite or the planet, in the knob (its box inside the border) */
+  --orbit-path: path('M 3.21 21.69 A 14 5.2 -24 1 0 28.79 10.31 A 14 5.2 -24 1 0 3.21 21.69');
+}
+@media (min-width: 768px) {
+  .tuwa-theme-switch {
+    --knob: 26px;
+    --pixel-step: 2.5px;
+    --orbit-path: path('M 1.95 16.47 A 11 4 -24 1 0 22.05 7.53 A 11 4 -24 1 0 1.95 16.47');
+    width: 64px;
+    height: 32px;
   }
 }
-@keyframes slideToLight {
-  from {
-    transform: translateX(107%);
+.tuwa-theme-switch--dark {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.08);
+  --glow: var(--tuwa-text-accent);
+  --pixel: color-mix(in srgb, var(--tuwa-text-accent) 55%, #ffffff);
+}
+.tuwa-theme-switch--placeholder {
+  opacity: 0;
+  cursor: default;
+}
+.tuwa-theme-switch:hover {
+  border-color: color-mix(in srgb, var(--glow) 50%, var(--tuwa-border-primary));
+}
+.tuwa-theme-switch:focus-visible {
+  outline: 2px solid var(--tuwa-text-accent);
+  outline-offset: 2px;
+}
+
+.tuwa-theme-switch__knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  display: grid;
+  place-items: center;
+  width: var(--knob);
+  height: var(--knob);
+  translate: 0 -50%;
+  border: 1px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-primary);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 14px -3px var(--glow);
+  transition: box-shadow 300ms ease;
+}
+.tuwa-theme-switch--dark .tuwa-theme-switch__knob {
+  left: calc(100% - var(--knob) - 3px);
+}
+.tuwa-theme-switch:hover .tuwa-theme-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 18px -2px var(--glow);
+}
+.tuwa-theme-switch__knob--to-dark {
+  animation: tuwa-knob-to-dark 480ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+.tuwa-theme-switch__knob--to-light {
+  animation: tuwa-knob-to-light 480ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
+}
+@keyframes tuwa-knob-to-dark {
+  0% {
+    left: 2px;
+    width: var(--knob);
   }
-  to {
-    transform: translateX(0);
+  45% {
+    width: calc(var(--knob) * 1.45);
+  }
+  100% {
+    left: calc(100% - var(--knob) - 3px);
+    width: var(--knob);
+  }
+}
+@keyframes tuwa-knob-to-light {
+  0% {
+    left: calc(100% - var(--knob) - 3px);
+    width: var(--knob);
+  }
+  45% {
+    width: calc(var(--knob) * 1.45);
+  }
+  100% {
+    left: 2px;
+    width: var(--knob);
   }
 }
 
-.tuwa-slide-dark {
-  animation: slideToDark 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+/* The glow along an edge, wrapping a little onto the sides: warm amber over the sun, the accent under the moon. The
+   border of the knob, masked to its edge; the halo follows what shows of it */
+.tuwa-theme-switch__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--glow)) drop-shadow(0 0 6px color-mix(in srgb, var(--glow) 60%, transparent));
+  opacity: 0;
+  transition: opacity 300ms ease 160ms;
 }
-.tuwa-slide-light {
-  animation: slideToLight 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+.tuwa-theme-switch__glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--glow);
+  border-radius: inherit;
+}
+.tuwa-theme-switch__glow--top::before {
+  mask-image: linear-gradient(to bottom, #000 0%, #000 18%, transparent 46%);
+}
+.tuwa-theme-switch__glow--bottom::before {
+  mask-image: linear-gradient(to top, #000 0%, #000 18%, transparent 46%);
+}
+.tuwa-theme-switch--light .tuwa-theme-switch__glow--top,
+.tuwa-theme-switch--dark .tuwa-theme-switch__glow--bottom {
+  opacity: 1;
+}
+
+/* The pixels: each travels to its place in the other picture, one after another */
+.tuwa-theme-switch__pixels {
+  position: relative;
+  width: calc(var(--pixel-step) * 6.72);
+  height: calc(var(--pixel-step) * 6.72);
+}
+.tuwa-theme-switch__pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--pixel-step) * 0.72);
+  height: calc(var(--pixel-step) * 0.72);
+  background: var(--pixel);
+  transform: translate(calc(var(--x) * var(--pixel-step)), calc(var(--y) * var(--pixel-step)));
+  transition:
+    transform 460ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay),
+    opacity 220ms ease var(--delay),
+    background-color 300ms ease;
+}
+.tuwa-theme-switch__pixel--twinkle {
+  animation: tuwa-twinkle 2.4s ease-in-out var(--twinkle-delay) infinite;
+}
+@keyframes tuwa-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* A satellite around the moon, a planet around the sun: a pixel on a tilted orbit, upright all the way */
+.tuwa-theme-switch__orbit {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.tuwa-theme-switch__orbiter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--pixel-step) * 0.72);
+  height: calc(var(--pixel-step) * 0.72);
+  background: var(--pixel);
+  box-shadow: 0 0 4px var(--glow);
+  offset-path: var(--orbit-path);
+  offset-rotate: 0deg;
+  animation: tuwa-orbit 5.5s linear infinite;
+}
+@keyframes tuwa-orbit {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-theme-switch__knob--to-dark,
+  .tuwa-theme-switch__knob--to-light,
+  .tuwa-theme-switch__pixel--twinkle,
+  .tuwa-theme-switch__orbiter {
+    animation: none;
+  }
+  .tuwa-theme-switch__pixel,
+  .tuwa-theme-switch__glow {
+    transition: none;
+  }
 }
 
 .nextra-nav-container .nx-text-primary-600 {
