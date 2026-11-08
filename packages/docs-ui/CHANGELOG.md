@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.9.0...docs-ui-v0.10.0) (2026-11-08)
+
+
+### Features
+
+* **docs-ui:** cosmic pixel switches, a smooth language change, pixel badges and a pixel star field ([#67](https://github.com/TuwaIO/docs/issues/67)) ([97b0fd7](https://github.com/TuwaIO/docs/commit/97b0fd70c23646dd86e32b5561c28da17e137306))
+
 ## [0.9.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.8.0...docs-ui-v0.9.0) (2026-11-07)
 
 
