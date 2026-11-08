@@ -1392,6 +1392,20 @@ article:focus {
     opacity: 0.35;
   }
 }
+/* Its window is a porthole: pale on a light page, where a darker blue on blue would not show; lit in the dark */
+:root:not(.dark) .tuwa-orb--rocket .tuwa-orb__pixel--lit:not([data-g]) {
+  background: color-mix(in srgb, var(--orb) 16%, #fff);
+}
+/* Its flame burns amber */
+.tuwa-orb--rocket .tuwa-orb__pixel[data-g] {
+  background: #f59e0b;
+}
+.tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
+  background: #fbbf24;
+}
+.dark .tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
+  box-shadow: 0 0 3px rgb(245 158 11 / 0.7);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__pixel,
