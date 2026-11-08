@@ -5,8 +5,8 @@ import {
   CheckIcon,
   ClipboardDocumentIcon,
   CommandLineIcon,
-  RocketLaunchIcon,
 } from '@heroicons/react/24/outline';
+import { Orb } from '@tuwaio/docs-ui';
 import { useCopyToClipboard } from '@tuwaio/nova-core';
 
 import Link from '@/components/LocaleNextLink';
@@ -28,9 +28,8 @@ export function QuickStartSection() {
       <div className="mx-auto max-w-4xl 2xl:max-w-5xl">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-12 h-12 2xl:w-14 2xl:h-14 mb-4 bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] rounded-full flex items-center justify-center shadow-lg opacity-90">
-            <RocketLaunchIcon className="w-6 h-6 2xl:w-7 2xl:h-7 text-white" aria-hidden="true" />
-          </div>
+          {/* A pixel rocket on a knob as the badges of the projects: it takes off once, when it comes into view */}
+          <Orb packageType="sdk" pixelIcon="rocket" color="var(--tuwa-text-accent)" size={56} className="mb-5" />
           <h2 className="text-xl sm:text-2xl 2xl:text-3xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
             {t.home.quickStart.titlePrefix}{' '}
             <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">

@@ -1,7 +1,9 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core/utils';
-import { type CSSProperties, useEffect, useState } from 'react';
+import { type CSSProperties, useState, useSyncExternalStore } from 'react';
+
+const subscribeNothing = () => () => {};
 
 /**
  * Props of {@link ThemeSwitcher}.
@@ -15,8 +17,11 @@ export interface ThemeSwitcherProps {
   ariaLabel?: string;
 }
 
-/** A pixel of the 7 × 7 grid; `twinkle` makes it shine on and off (the stars, the rays). */
-type Pixel = readonly [x: number, y: number, twinkle?: 1];
+/**
+ * A pixel of the 7 × 7 grid; `twinkle` makes it shine on and off after a change (the stars), a corner rounds that
+ * corner of the pixel (the disc of the sun, so it reads as a disc).
+ */
+type Pixel = readonly [x: number, y: number, mark?: 'twinkle' | 'tl' | 'tr' | 'bl' | 'br'];
 
 /** A crescent moon and two stars that twinkle. */
 // prettier-ignore
@@ -28,15 +33,15 @@ const MOON: Pixel[] = [
   [0, 4], [1, 4], [2, 4],
   [1, 5], [2, 5], [3, 5],
   [2, 6], [3, 6], [4, 6],
-  [6, 0, 1], [5, 3, 1],
+  [6, 0, 'twinkle'], [5, 3, 'twinkle'],
 ];
 
-/** A star like the sun: its disc and eight rays, steady so it reads at a glance in a header. */
+/** The sun: a round disc and eight rays, steady and solid so it reads at a glance in a header. */
 // prettier-ignore
 const SUN: Pixel[] = [
-  [2, 2], [3, 2], [4, 2],
+  [2, 2, 'tl'], [3, 2], [4, 2, 'tr'],
   [2, 3], [3, 3], [4, 3],
-  [2, 4], [3, 4], [4, 4],
+  [2, 4, 'bl'], [3, 4], [4, 4, 'br'],
   [3, 0], [5, 1], [6, 3], [5, 5], [3, 6], [1, 5], [0, 3], [1, 1],
 ];
 
@@ -49,26 +54,28 @@ const COUNT = Math.max(MOON_PATH.length, SUN_PATH.length);
 
 /**
  * A light/dark switch in the cosmic manner of TUWA: a knob that slides with a spring and stretches on its way; on it a
- * pixel crescent moon with stars in the dark and a pixel sun in the light, each pixel travelling to its place when the
- * theme changes, the stars twinkling and a satellite or a planet passing on its orbit for a second after a change and
- * then still (it sits in a header); a glow
- * along an edge of the knob, the accent under it in the dark and warm amber over it in the light. Flat, in the TUWA
- * style: the borders, backgrounds and radius of the theme. Only CSS (`site.css`), nothing to install; still at once for
- * reduced motion. It stores no theme itself: pass the
- * resolved theme and a toggle. Until it is mounted on the client it renders an invisible placeholder of the same size,
- * so the server output does not depend on the theme.
+ * pixel crescent moon with stars in the dark and a solid pixel sun with a round disc and a warm halo in the light, each
+ * pixel travelling to its place when the theme changes; for about two seconds after a change the stars dim and shine
+ * once and a satellite or a planet passes slowly on its orbit, then all is still (it sits in a header); a glow along an
+ * edge of the knob, the accent under it in the dark and warm amber over it in the light. Flat, in the TUWA style: the
+ * borders, backgrounds and radius of the theme. Only CSS (`site.css`), nothing to install; still at once for reduced
+ * motion. It stores no theme itself: pass the resolved theme and a toggle. While the page hydrates it renders an
+ * invisible placeholder of the same size, so the server output does not depend on the theme; rendered on the client
+ * (as after a change of language) it shows at once.
  *
  * @param props - See {@link ThemeSwitcherProps}.
  * @returns The switch button.
  */
 export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: ThemeSwitcherProps) {
-  const [mounted, setMounted] = useState(false);
+  // A placeholder only while the page hydrates: a switch rendered on the client (the next page after a language
+  // change, a separate root layout) shows at once, with nothing blinking
+  const mounted = useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
   // The first render places the knob without moving it; the moves of later toggles play
   const [moved, setMoved] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
 
   if (!mounted) {
     return <div aria-hidden className="tuwa-theme-switch tuwa-theme-switch--placeholder" />;
@@ -87,7 +94,10 @@ export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: T
         setMoved(true);
         onToggle();
       }}
-      className={cn('tuwa-theme-switch', isDark ? 'tuwa-theme-switch--dark' : 'tuwa-theme-switch--light')}
+      className={cn(
+        'tuwa-theme-switch tuwa-switch-appear',
+        isDark ? 'tuwa-theme-switch--dark' : 'tuwa-theme-switch--light',
+      )}
     >
       <span
         aria-hidden
@@ -101,10 +111,15 @@ export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: T
         <span className="tuwa-theme-switch__pixels">
           {Array.from({ length: COUNT }, (_, index) => {
             const pixel = pixels[index];
+            const mark = pixel?.[2];
             return (
               <span
                 key={index}
-                className={cn('tuwa-theme-switch__pixel', pixel?.[2] && 'tuwa-theme-switch__pixel--twinkle')}
+                className={cn(
+                  'tuwa-theme-switch__pixel',
+                  mark === 'twinkle' && 'tuwa-theme-switch__pixel--twinkle',
+                  mark && mark !== 'twinkle' && `tuwa-theme-switch__pixel--${mark}`,
+                )}
                 style={
                   {
                     '--x': pixel ? pixel[0] : 3,

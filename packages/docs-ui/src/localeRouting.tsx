@@ -12,6 +12,41 @@ import {
   type TuwaLocale,
 } from './locale';
 
+/** Ends the crossfade of a language change, once the page in the new language is rendered. */
+let finishLanguageChange: (() => void) | undefined;
+
+/**
+ * Runs a change of language with a short crossfade of the page where the browser has view transitions (none for
+ * reduced motion): the languages are separate root layouts, so the page is rendered anew, and the crossfade keeps the
+ * change smooth while the flag of the language switch changes on the new page. It waits for the new page at most
+ * 1.5 s; without view transitions the change just happens.
+ *
+ * @param change - Saves the language and goes to its URL.
+ * @internal
+ */
+export function changeSmoothly(change: () => void) {
+  if (!('startViewTransition' in document) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    change();
+    return;
+  }
+  const transition = document.startViewTransition(
+    () =>
+      new Promise<void>((resolve) => {
+        const finish = () => {
+          clearTimeout(timer);
+          finishLanguageChange = undefined;
+          resolve();
+        };
+        const timer = setTimeout(finish, 1500);
+        finishLanguageChange = finish;
+        change();
+      }),
+  );
+  // The browser skips the crossfade when the change loads another root layout (a new document, which crossfades by
+  // the `@view-transition` rule of `site.css`) or another transition starts; nothing waits for it, so it is let go
+  transition.ready.catch(() => {});
+}
+
 /** What {@link useLocaleRouting} needs. */
 export interface LocaleRoutingOptions {
   /** The language shown. */
@@ -38,7 +73,8 @@ export interface LocaleRoutingOptions {
  * and a reader whose language is not English, who opens the English URL of such a page, is taken to the URL of that language.
  * Search engines have no saved language and a browser in English, so they stay on the URL they asked for.
  *
- * Side effects: navigates; the provider saves the choice.
+ * Side effects: navigates, with a short crossfade of the page where the browser has view transitions; the provider
+ * saves the choice.
  *
  * @param options - See {@link LocaleRoutingOptions}.
  * @returns The function to call with the language the reader picks.
@@ -48,6 +84,11 @@ export function useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl }
   const router = useRouter();
   const base = pathWithoutLocale(pathname);
   const onLanguageUrl = Boolean(localeOfPath(pathname));
+
+  // The page in the new language is rendered (on a new root layout, or on the same one): the crossfade can run
+  useEffect(() => {
+    finishLanguageChange?.();
+  }, [pathname]);
 
   useEffect(() => {
     if (onLanguageUrl || !resolved || locale === DEFAULT_LOCALE || !hasLanguageUrl(base)) return;
@@ -60,9 +101,14 @@ export function useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl }
   return (target: string) => {
     const picked = normalizeLocale(target);
     if (!picked) return;
-    setLocale(picked);
-    // The query and the anchor stay: a shared link of the configurator keeps its stack in the query
-    if (hasLanguageUrl(base))
+    if (!hasLanguageUrl(base)) {
+      setLocale(picked);
+      return;
+    }
+    changeSmoothly(() => {
+      setLocale(picked);
+      // The query and the anchor stay: a shared link of the configurator keeps its stack in the query
       router.push(`${localizedPath(base, picked)}${window.location.search}${window.location.hash}`);
+    });
   };
 }

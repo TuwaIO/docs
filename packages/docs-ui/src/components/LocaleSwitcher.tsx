@@ -1,39 +1,19 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core/utils';
-import { type CSSProperties, type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 
-type FlagCell = (x: number, y: number) => string;
-
-const UK_BLUE = '#012169';
-const UK_RED = '#C8102E';
-const WHITE = '#FFFFFF';
-
-/** The built-in flags as pixels on an 8 × 6 grid, and the colour of the glow of each. */
-const PIXEL_FLAGS: Record<string, { cell: FlagCell; glow: string }> = {
-  // The Union Jack: the red cross, its white edges and the white of the diagonals in the corners
-  en: {
-    glow: '#3b82f6',
-    cell: (x, y) =>
-      x === 3 || x === 4 || y === 2 || y === 3
-        ? UK_RED
-        : x === 2 || x === 5 || y === 1 || y === 4 || ((x === 0 || x === 7) && (y === 0 || y === 5))
-          ? WHITE
-          : UK_BLUE,
-  },
-  uk: { glow: '#facc15', cell: (_x, y) => (y < 3 ? '#0057B7' : '#FFD700') },
-  // The big star and the four small ones on red
-  zh: {
-    glow: '#ef4444',
-    cell: (x, y) =>
-      (x >= 1 && x <= 2 && y >= 1 && y <= 2) ||
-      (x === 4 && y === 0) ||
-      (x === 5 && (y === 1 || y === 2)) ||
-      (x === 4 && y === 3)
-        ? '#FFDE00'
-        : '#EE1C25',
-  },
-};
+/** The colour of the glow of each built-in flag. */
+const FLAG_GLOWS: Record<string, string> = { en: '#3b82f6', uk: '#facc15', zh: '#ef4444' };
 
 /** The key of a built-in flag for a locale code, if there is one. */
 function flagKeyOf(code: string): string | undefined {
@@ -44,29 +24,78 @@ function flagKeyOf(code: string): string | undefined {
   return undefined;
 }
 
+/** The glow of a language: the colour of its built-in flag, or the accent for a flag of the site's own. */
+function glowOf(code: string): string {
+  const flag = flagKeyOf(code);
+  return flag ? FLAG_GLOWS[flag] : 'var(--tuwa-text-accent)';
+}
+
+const subscribeNothing = () => () => {};
+
 /**
- * A flag as pixels, in the pixel manner of the theme switch: when the language changes, each pixel takes its new colour
- * in a wave from one corner to the other (still for reduced motion).
+ * Built-in vector SVG flag for the United Kingdom / English language.
+ * Rendered locally without external network requests or third-party image dependencies.
  *
- * @param props - The key of a built-in flag.
- * @returns The flag.
+ * @param props - Component properties.
+ * @param props.className - Optional CSS classes for dimensioning and positioning.
+ * @returns An SVG element representing the Union Jack.
+ * @internal
  */
-function PixelFlag({ flag }: { flag: string }) {
-  const { cell } = PIXEL_FLAGS[flag];
+function FlagUK({ className }: { className?: string }) {
   return (
-    <span aria-hidden="true" className="tuwa-pixel-flag">
-      {Array.from({ length: 48 }, (_, index) => {
-        const x = index % 8;
-        const y = Math.floor(index / 8);
-        return (
-          <span
-            key={index}
-            className="tuwa-pixel-flag__pixel"
-            style={{ '--x': x, '--y': y, '--c': cell(x, y), '--delay': `${(x + y) * 22}ms` } as CSSProperties}
-          />
-        );
-      })}
-    </span>
+    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
+      <path fill="#012169" d="M0 0h640v480H0z" />
+      <path fill="#FFF" d="m75 0 245 180L565 0h75v60L435 240l205 180v60h-75L320 300 75 480H0v-60l205-180L0 60V0h75z" />
+      <path
+        fill="#C8102E"
+        d="m425 285 215 165v30h-35L380 300l45-15zM215 195 0 30v-30h35l225 180-45 15zm0 90L0 450v30h35l225-180-45-15zm210-90L640 30v-30h-35L380 180l45 15z"
+      />
+      <path fill="#FFF" d="M250 0h140v480H250zM0 170h640v140H0z" />
+      <path fill="#C8102E" d="M276 0h88v480h-88zM0 196h640v88H0z" />
+    </svg>
+  );
+}
+
+/**
+ * Built-in vector SVG flag for Ukraine / Ukrainian language.
+ * Rendered locally without external network requests or third-party image dependencies.
+ *
+ * @param props - Component properties.
+ * @param props.className - Optional CSS classes for dimensioning and positioning.
+ * @returns An SVG element representing the Ukrainian national flag.
+ * @internal
+ */
+function FlagUkraine({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
+      <path fill="#0057b7" d="M0 0h640v240H0z" />
+      <path fill="#ffd700" d="M0 240h640v240H0z" />
+    </svg>
+  );
+}
+
+/**
+ * Built-in vector SVG flag for China / Simplified Chinese language.
+ * Rendered locally without external network requests or third-party image dependencies.
+ *
+ * @param props - Component properties.
+ * @param props.className - Optional CSS classes for dimensioning and positioning.
+ * @returns An SVG element representing the Chinese national flag.
+ * @internal
+ */
+function FlagChina({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
+      <rect width="640" height="480" fill="#ee1c25" />
+      <path
+        fill="#ffde00"
+        d="M120 72l14.1 43.4H180l-36.9 26.8 14.1 43.4-37.2-26.8-37.2 26.8 14.1-43.4L60 115.4h45.9z"
+      />
+      <circle cx="200" cy="40" r="12" fill="#ffde00" />
+      <circle cx="240" cy="80" r="12" fill="#ffde00" />
+      <circle cx="240" cy="140" r="12" fill="#ffde00" />
+      <circle cx="200" cy="180" r="12" fill="#ffde00" />
+    </svg>
   );
 }
 
@@ -128,7 +157,7 @@ function ChevronArrowWithAnim({ isOpen, className }: { isOpen: boolean; classNam
 }
 
 /**
- * Returns a built-in pixel flag for a given locale code (8 × 6 pixels, in the manner of the theme switch).
+ * Returns a locally embedded SVG flag node for a given locale code.
  *
  * Supported built-in codes:
  * - English: `'en'`, `'en-US'`, `'en-GB'`
@@ -136,11 +165,14 @@ function ChevronArrowWithAnim({ isOpen, className }: { isOpen: boolean; classNam
  * - Chinese: `'zh'`, `'zh-CN'`, `'zh-Hans'`
  *
  * @param code - The BCP-47 or ISO language tag (e.g. `'en'`, `'uk'`, `'zh-CN'`).
- * @returns The flag or `undefined` if no built-in flag is available.
+ * @returns The SVG icon node or `undefined` if no built-in flag is available.
  */
 export function getLocaleFlag(code: string): ReactNode {
   const flag = flagKeyOf(code);
-  return flag ? <PixelFlag flag={flag} /> : undefined;
+  if (flag === 'en') return <FlagUK className="tuwa-locale-flag" />;
+  if (flag === 'uk') return <FlagUkraine className="tuwa-locale-flag" />;
+  if (flag === 'zh') return <FlagChina className="tuwa-locale-flag" />;
+  return undefined;
 }
 
 /**
@@ -309,7 +341,13 @@ export function LocaleSwitcher({
   ariaLabel = 'Select language',
   nativeTouch = true,
 }: LocaleSwitcherProps) {
-  const [mounted, setMounted] = useState(false);
+  // A placeholder only while the page hydrates: a switch rendered on the client (the next page after a language
+  // change) shows at once, with nothing blinking
+  const mounted = useSyncExternalStore(
+    subscribeNothing,
+    () => true,
+    () => false,
+  );
   // How many times the language changed since mount: each change springs the knob once (none on the first render)
   const [shown, setShown] = useState(locale);
   const [changes, setChanges] = useState(0);
@@ -328,8 +366,6 @@ export function LocaleSwitcher({
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
     if (typeof window === 'undefined') return;
 
     // Detect primary touch pointer (smartphones, tablets) to conditionally engage native select overlay
@@ -531,10 +567,10 @@ export function LocaleSwitcher({
   const activeOption = locales.find((item) => item.code === locale) ?? locales[0];
   const shortText = activeOption?.short ?? activeOption?.code?.slice(0, 2).toUpperCase() ?? 'EN';
   const activeFlag = activeOption?.flag ?? getLocaleFlag(activeOption?.code ?? 'en');
-  const glow = PIXEL_FLAGS[flagKeyOf(activeOption?.code ?? 'en') ?? 'en'].glow;
+  const glow = glowOf(activeOption?.code ?? 'en');
 
   return (
-    <div ref={containerRef} className={cn('tuwadocs:relative tuwadocs:inline-block', className)}>
+    <div ref={containerRef} className={cn('tuwa-switch-appear tuwadocs:relative tuwadocs:inline-block', className)}>
       {/* Native touch select overlay: on touch devices (pointer: coarse), sits directly over the button to open iOS/Android native pickers */}
       {nativeTouch && (
         <select
@@ -580,7 +616,13 @@ export function LocaleSwitcher({
           style={{ '--glow': glow } as CSSProperties}
         >
           <span className="tuwa-locale-switch__glow" />
-          {activeFlag}
+          {/* A new flag comes in softly when the language changes */}
+          <span
+            key={activeOption?.code}
+            className={cn('tuwa-locale-switch__flag', changes > 0 && 'tuwa-locale-switch__flag--in')}
+          >
+            {activeFlag}
+          </span>
         </span>
 
         {/* Visible label starts accessible name, full language and action follow (WCAG 2.5.3) */}
@@ -629,29 +671,34 @@ export function LocaleSwitcher({
                 onPointerMove={() => {
                   if (activeIndex !== i) setActiveIndex(i);
                 }}
+                // Each language in the colours of its flag, as the knob of the switch
+                style={{ '--glow': glowOf(item.code) } as CSSProperties}
                 className={cn(
-                  'tuwadocs:relative tuwadocs:flex tuwadocs:w-full tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-2.5 tuwadocs:px-3.5 tuwadocs:py-2.5 tuwadocs:text-xs tuwadocs:transition-colors tuwadocs:outline-none',
+                  'tuwa-locale-switch__option',
+                  isFocused && 'tuwa-locale-switch__option--active',
+                  'tuwadocs:relative tuwadocs:flex tuwadocs:w-full tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-2.5 tuwadocs:px-3 tuwadocs:py-2 tuwadocs:text-xs tuwadocs:transition-colors tuwadocs:outline-none',
                   'tuwadocs:focus-visible:ring-1 tuwadocs:focus-visible:ring-inset tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)]',
                   isSelected
                     ? isFocused
-                      ? 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--tuwa-text-accent)]/25 tuwadocs:via-[var(--tuwa-text-accent)]/10 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
-                      : 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--tuwa-text-accent)]/15 tuwadocs:via-[var(--tuwa-text-accent)]/5 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      ? 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/20 tuwadocs:via-[var(--glow)]/8 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      : 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/14 tuwadocs:via-[var(--glow)]/5 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
                     : isFocused
                       ? 'tuwadocs:bg-[var(--tuwa-bg-muted)]/70 tuwadocs:text-[var(--tuwa-text-primary)]'
                       : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:bg-[var(--tuwa-bg-muted)]/50 tuwadocs:hover:text-[var(--tuwa-text-primary)]',
                 )}
               >
-                {/* Flush left edge accent bar — directly on the outer container edge */}
+                {/* Flush left edge bar in the colour of the flag, with its glow */}
                 {isSelected && (
                   <span
-                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--tuwa-text-accent)] tuwadocs:shadow-[0_0_8px_var(--tuwa-text-accent)]"
+                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
                     aria-hidden="true"
                   />
                 )}
 
-                <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2 tuwadocs:truncate">
+                <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-2.5 tuwadocs:truncate">
                   {flag && (
-                    <span aria-hidden="true" className="tuwadocs:shrink-0">
+                    <span aria-hidden="true" className="tuwa-locale-switch__tile">
+                      <span className="tuwa-locale-switch__glow" />
                       {flag}
                     </span>
                   )}
@@ -663,7 +710,7 @@ export function LocaleSwitcher({
                     className={cn(
                       'tuwadocs:font-mono tuwadocs:text-[10px] tuwadocs:uppercase tuwadocs:px-1.5 tuwadocs:py-0.5 tuwadocs:rounded',
                       isSelected
-                        ? 'tuwadocs:bg-[var(--tuwa-text-accent)]/15 tuwadocs:text-[var(--tuwa-text-accent)] tuwadocs:font-bold'
+                        ? 'tuwadocs:bg-[var(--glow)]/15 tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:ring-1 tuwadocs:ring-inset tuwadocs:ring-[var(--glow-line)]/40 tuwadocs:font-bold'
                         : 'tuwadocs:text-[var(--tuwa-text-tertiary)]',
                     )}
                   >
@@ -671,7 +718,7 @@ export function LocaleSwitcher({
                   </span>
                   {isSelected && (
                     <span
-                      className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:rounded-full tuwadocs:bg-[var(--tuwa-text-accent)] tuwadocs:shadow-[0_0_8px_var(--tuwa-text-accent)]"
+                      className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:rounded-full tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
                       aria-hidden="true"
                     />
                   )}

@@ -41,14 +41,34 @@ export function expireStoredPreferences(
 }
 
 /**
- * The inline script of {@link expireStoredPreferences}, for the `<head>` of a site's root layout, before the theme
- * script of next-themes.
+ * Takes the crossfade of a page load quietly when the browser skips it. A change to another root layout (another
+ * language) loads a new document, which crossfades by the `@view-transition` rule of `site.css`; when the browser skips
+ * that crossfade (the page took long, the tab went to the background) it rejects the `ready` promise of the transition
+ * it hands to `pagereveal`, and nothing else waits for it. It runs inline in the page head; the page can be revealed
+ * before it runs, so it also takes the crossfade that is already active. It is serialised with `toString()`, so it uses
+ * only its argument.
+ *
+ * @param target - `window`.
+ */
+export function quietSkippedPageTransitions(target: Pick<Window, 'addEventListener' | 'document'>): void {
+  const quiet = (transition: ViewTransition | null | undefined) => {
+    if (transition) transition.ready.catch(() => {});
+  };
+  quiet((target.document as Document & { activeViewTransition?: ViewTransition | null }).activeViewTransition);
+  target.addEventListener('pagereveal', (event) => {
+    quiet((event as Event & { viewTransition?: ViewTransition | null }).viewTransition);
+  });
+}
+
+/**
+ * The inline script of {@link expireStoredPreferences} and {@link quietSkippedPageTransitions}, for the `<head>` of a
+ * site's root layout, before the theme script of next-themes.
  *
  * @param props.keys - The Local Storage keys to keep for {@link PREFERENCE_DAYS} days; `theme` by default.
  */
 export function PreferenceExpiry({ keys = ['theme'] }: { keys?: string[] }) {
   const ms = PREFERENCE_DAYS * 86_400_000;
-  const code = `(${expireStoredPreferences.toString()})(window.localStorage, Storage.prototype, ${JSON.stringify(keys)}, ${ms}, Date.now())`;
+  const code = `(${expireStoredPreferences.toString()})(window.localStorage, Storage.prototype, ${JSON.stringify(keys)}, ${ms}, Date.now());(${quietSkippedPageTransitions.toString()})(window)`;
   // Runs once, when the page loads; a switch to another root layout (`/` → `/uk`) renders no script on the client
   return <InlineScript code={code} />;
 }

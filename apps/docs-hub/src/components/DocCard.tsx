@@ -2,7 +2,7 @@
 
 import { ArrowTopRightOnSquareIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 import { Orb, PackageType } from '@tuwaio/docs-ui';
-import React, { type FocusEvent, type MouseEvent, type ReactNode, useRef, useState } from 'react';
+import { type FocusEvent, type MouseEvent, type ReactNode, useRef, useState } from 'react';
 
 import { useI18n } from '../i18n';
 import type { DocEntry } from '../lib/ecosystem';
@@ -69,7 +69,7 @@ export function DocCard({
   tagline,
   id,
   orb,
-  icon,
+  pixelIcon,
   gradientFrom,
   gradientTo,
   docsUrl,
@@ -89,17 +89,13 @@ export function DocCard({
         />
       </div>
 
-      <div className="flex items-center gap-4 p-4 sm:p-5 2xl:p-6">
-        {/* Mobile fallback badge */}
-        <div
-          className={`shrink-0 w-10 h-10 2xl:w-12 2xl:h-12 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-full flex sm:hidden items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-300`}
-        >
-          {icon && React.createElement(icon, { className: 'w-5 h-5 2xl:w-6 2xl:h-6 text-white' })}
+      <div className="flex items-center gap-4 sm:gap-5 2xl:gap-6 p-4 sm:p-5 2xl:p-6">
+        {/* The badge of the project: its pixel icon on a knob, as the switches of the header */}
+        <div className="shrink-0 flex sm:hidden items-center justify-center">
+          <Orb packageType={orb ?? (id as PackageType)} pixelIcon={pixelIcon} size={40} />
         </div>
-
-        {/* Desktop Orb badge */}
-        <div className="shrink-0 hidden sm:flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity duration-300">
-          <Orb packageType={orb ?? (id as PackageType)} size={48} className="2xl:scale-125 origin-left" icon={icon} />
+        <div className="shrink-0 hidden sm:flex items-center justify-center">
+          <Orb packageType={orb ?? (id as PackageType)} pixelIcon={pixelIcon} size={48} />
         </div>
 
         {/* Text */}

@@ -1,15 +1,4 @@
-import {
-  BoltIcon,
-  CloudIcon,
-  CodeBracketSquareIcon,
-  CpuChipIcon,
-  CubeIcon,
-  GlobeAltIcon,
-  KeyIcon,
-  ServerStackIcon,
-} from '@heroicons/react/24/outline';
-import type { PackageType } from '@tuwaio/docs-ui';
-import type { ComponentType, SVGProps } from 'react';
+import type { OrbIcon, PackageType } from '@tuwaio/docs-ui';
 
 // The stages, projects and packages of the main page. Kept out of the client components, so server code (llms.txt,
 // the sitemap) reads the same data. `scripts/build-data.mjs` reads the `@tuwaio/` package names from this file.
@@ -35,9 +24,10 @@ export interface DocEntry {
   id: string;
   /** Orb style to render; defaults to `id`. Lets an entry without its own orb reuse another's. */
   orb?: PackageType;
+  /** Pixel icon of the orb; defaults to the icon of its project */
+  pixelIcon?: OrbIcon;
   name: string;
   tagline: string;
-  icon: ComponentType<SVGProps<SVGSVGElement>>;
   gradientFrom: string;
   gradientTo: string;
   docsUrl: string;
@@ -69,7 +59,6 @@ export const layers: EcosystemLayer[] = [
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         tagline: 'CAIP-122 authentication engine & adapters',
-        icon: KeyIcon,
         gradientFrom: 'from-emerald-600 dark:from-emerald-400',
         gradientTo: 'to-teal-600 dark:to-emerald-500',
         docsUrl: 'https://siwx.docs.tuwa.io/',
@@ -86,7 +75,6 @@ export const layers: EcosystemLayer[] = [
         id: 'orbit',
         name: 'Orbit Utils',
         tagline: 'Multi-chain utilities for EVM & Solana',
-        icon: GlobeAltIcon,
         gradientFrom: 'from-emerald-600 dark:from-emerald-400',
         gradientTo: 'to-teal-700 dark:to-teal-500',
         docsUrl: 'https://orbit.docs.tuwa.io/',
@@ -109,7 +97,6 @@ export const layers: EcosystemLayer[] = [
         id: 'satellite',
         name: 'Satellite Connect',
         tagline: 'Headless wallet connection store for EVM & Solana',
-        icon: CpuChipIcon,
         gradientFrom: 'from-[#0052ff] dark:from-blue-500',
         gradientTo: 'to-sky-600 dark:to-sky-400',
         docsUrl: 'https://satellite.docs.tuwa.io/',
@@ -126,7 +113,6 @@ export const layers: EcosystemLayer[] = [
         id: 'pulsar',
         name: 'Pulsar',
         tagline: 'Transaction tracking that survives reloads',
-        icon: BoltIcon,
         gradientFrom: 'from-amber-500 dark:from-amber-400',
         gradientTo: 'to-orange-600 dark:to-orange-500',
         docsUrl: 'https://pulsar.docs.tuwa.io/',
@@ -150,7 +136,6 @@ export const layers: EcosystemLayer[] = [
         id: 'quasar',
         name: 'Quasar Cloud',
         tagline: 'Managed cloud · Transaction indexing & sync',
-        icon: CloudIcon,
         gradientFrom: 'from-[#0052ff] dark:from-blue-500',
         gradientTo: 'to-blue-800 dark:to-sky-300',
         docsUrl: '/quasar',
@@ -163,9 +148,9 @@ export const layers: EcosystemLayer[] = [
       {
         id: 'quasar-community',
         orb: 'quasar',
+        pixelIcon: 'server',
         name: 'Quasar Community',
         tagline: 'Self-hosted engine & admin · Apache-2.0',
-        icon: ServerStackIcon,
         gradientFrom: 'from-teal-600 dark:from-teal-400',
         gradientTo: 'to-blue-700 dark:to-sky-400',
         docsUrl: '/quasar/self-hosting',
@@ -187,7 +172,6 @@ export const layers: EcosystemLayer[] = [
         id: 'nova',
         name: 'Nova UI Kit',
         tagline: 'Design system & component library',
-        icon: CubeIcon,
         gradientFrom: 'from-[#0052ff] dark:from-blue-500',
         gradientTo: 'to-sky-600 dark:to-sky-300',
         docsUrl: 'https://stories.tuwa.io/',
@@ -210,7 +194,6 @@ export const layers: EcosystemLayer[] = [
         id: 'sdk',
         name: 'TUWA SDK',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
-        icon: CodeBracketSquareIcon,
         gradientFrom: 'from-blue-700 dark:from-blue-500',
         gradientTo: 'to-[#0052ff] dark:to-sky-300',
         docsUrl: 'https://sdk.docs.tuwa.io/',

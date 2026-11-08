@@ -1,23 +1,37 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core/utils';
-import React from 'react';
+import React, { type CSSProperties, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 /**
- * A TUWA project with its own brand color and {@link Orb} texture.
+ * A TUWA project with its own brand color and {@link Orb} icon.
  */
 export type PackageType = 'orbit' | 'pulsar' | 'satellite' | 'nova' | 'quasar' | 'siwx' | 'sdk';
+
+/**
+ * A pixel icon of an {@link Orb}, each with its own quiet motion: `sign-in` (an arrow gliding into a door), `orbit` (a
+ * planet going round its star), `satellite` (floating, sending a signal), `pulsar` (a neutron star whose two beams
+ * pulse outwards), `cloud` (data rising into a cloud), `server` (two racks with blinking lights), `supernova` (a star
+ * that flares and throws a shock wave out), `terminal` (a prompt being typed) and `rocket` (it takes off once, into its
+ * place, when it comes into view).
+ */
+export type OrbIcon =
+  'sign-in' | 'orbit' | 'satellite' | 'pulsar' | 'cloud' | 'server' | 'supernova' | 'terminal' | 'rocket';
 
 /**
  * Props of {@link Orb}; the other props are applied to the root `div`.
  */
 export interface OrbProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** The project, which selects the color and the animated texture */
+  /** The project, which selects the color and the default icon */
   packageType: PackageType;
   /** Diameter in pixels (default: `120`) */
   size?: number;
-  /** Icon rendered in the center */
+  /** The pixel icon (default: the icon of `packageType`) */
+  pixelIcon?: OrbIcon;
+  /** An SVG icon to show instead of the pixel icon, in the color of the project */
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  /** A CSS color instead of the brand color of the project, for example `var(--tuwa-text-accent)` */
+  color?: string;
 }
 
 /** Brand color per package */
@@ -31,363 +45,214 @@ const packageColors: Record<PackageType, string> = {
   sdk: '#1d4ed8',
 };
 
-/** Lighter tint for the sphere base background */
-const packageTints: Record<PackageType, string> = {
-  siwx: 'rgba(16,185,129,0.12)',
-  orbit: 'rgba(13,148,136,0.12)',
-  satellite: 'rgba(0,82,255,0.12)',
-  pulsar: 'rgba(245,158,11,0.12)',
-  quasar: 'rgba(37,99,235,0.12)',
-  nova: 'rgba(2,132,199,0.12)',
-  sdk: 'rgba(29,78,216,0.12)',
-};
-
-const getCosmicFilter = (type: PackageType, id: string) => {
-  const starField = (freq: string, seed: string, dur: string) => (
-    <>
-      <feTurbulence type="fractalNoise" baseFrequency={freq} numOctaves="1" seed={seed} result="starNoise">
-        <animate
-          attributeName="baseFrequency"
-          values={`${freq};${(parseFloat(freq) * 1.15).toFixed(3)};${freq}`}
-          dur={dur}
-          repeatCount="indefinite"
-        />
-      </feTurbulence>
-      <feColorMatrix
-        type="matrix"
-        values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  8 0 0 40 -32"
-        in="starNoise"
-        result="stars"
-      />
-    </>
-  );
-
-  switch (type) {
-    case 'satellite':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.06', '9', '14s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="4" result="nebulaNoise">
-            <animate
-              attributeName="baseFrequency"
-              values="0.018;0.024;0.016;0.018"
-              dur="18s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.7  0 0 0 0 0.7  0 0 0 0 1.0  0 0 0 3 -0.5"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="cosmic">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feGaussianBlur in="cosmic" stdDeviation="1.2" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'pulsar':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.12', '1', '6s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="2" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.035;0.055;0.025;0.035" dur="5s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 1.0  0 0 0 0 0.8  0 0 0 0 0.2  0 0 0 4 -1"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="cosmic">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feGaussianBlur in="cosmic" stdDeviation="1.0" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'orbit':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.15', '42', '22s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="12" result="nebulaNoise">
-            <animate
-              attributeName="baseFrequency"
-              values="0.012;0.018;0.010;0.012"
-              dur="20s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.2  0 0 0 0 0.9  0 0 0 0 0.85  0 0 0 3 -0.5"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="preMerge">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feDisplacementMap
-            in="preMerge"
-            in2="nebulaNoise"
-            scale="18"
-            xChannelSelector="R"
-            yChannelSelector="G"
-            result="warped"
-          />
-          <feGaussianBlur in="warped" stdDeviation="0.8" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'nova':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.20', '7', '8s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="4" seed="7" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.025;0.042;0.018;0.025" dur="7s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.9  0 0 0 0 0.5  0 0 0 0 1.0  0 0 0 5 -1.5"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="preMerge">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feDisplacementMap
-            in="preMerge"
-            in2="nebulaNoise"
-            scale="28"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="warped"
-          />
-          <feGaussianBlur in="warped" stdDeviation="1.5" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'quasar':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.25', '99', '7s')}
-          <feTurbulence type="turbulence" baseFrequency="0.015" numOctaves="3" seed="99" result="nebulaNoise">
-            <animate attributeName="baseFrequency" values="0.015;0.032;0.010;0.015" dur="9s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.0  0 0 0 0 0.85  0 0 0 0 1.0  0 0 0 5 -1"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="preMerge">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feDisplacementMap
-            in="preMerge"
-            in2="nebulaNoise"
-            scale="40"
-            xChannelSelector="G"
-            yChannelSelector="B"
-            result="warped"
-          />
-          <feGaussianBlur in="warped" stdDeviation="1.0" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'siwx':
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.09', '11', '16s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.06 0.012" numOctaves="2" seed="1" result="nebulaNoise">
-            <animate
-              attributeName="baseFrequency"
-              values="0.06 0.012; 0.09 0.020; 0.05 0.010; 0.06 0.012"
-              dur="10s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.3  0 0 0 0 1.0  0 0 0 0 0.7  0 0 0 4 -1"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="cosmic">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feGaussianBlur in="cosmic" stdDeviation="1.4" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-    case 'sdk':
-    default:
-      return (
-        <filter id={id} x="-20%" y="-20%" width="140%" height="140%">
-          {starField('0.10', '3', '28s')}
-          <feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="3" result="nebulaNoise">
-            <animate
-              attributeName="baseFrequency"
-              values="0.014;0.020;0.010;0.014"
-              dur="22s"
-              repeatCount="indefinite"
-            />
-          </feTurbulence>
-          <feColorMatrix
-            type="matrix"
-            values="0 0 0 0 0.3  0 0 0 0 0.6  0 0 0 0 1.0  0 0 0 3 -0.5"
-            in="nebulaNoise"
-            result="nebula"
-          />
-          <feMerge result="cosmic">
-            <feMergeNode in="nebula" />
-            <feMergeNode in="stars" />
-          </feMerge>
-          <feGaussianBlur in="cosmic" stdDeviation="1.2" result="softCosmic" />
-          <feComposite in="softCosmic" in2="SourceGraphic" operator="in" />
-        </filter>
-      );
-  }
+/** The icon of each project when no other is given. */
+const defaultIcons: Record<PackageType, OrbIcon> = {
+  siwx: 'sign-in',
+  orbit: 'orbit',
+  satellite: 'satellite',
+  pulsar: 'pulsar',
+  quasar: 'cloud',
+  nova: 'supernova',
+  sdk: 'terminal',
 };
 
 /**
- * An animated glass sphere in the brand color of a TUWA project, with an SVG texture (animated SVG filters) and an
- * optional icon in the center. The SVG ids include `packageType`, so two orbs of the same project on one page share
- * their filters.
+ * The icons on a 9 × 9 grid: `#` a pixel, `o` a lit pixel, `.` none. A letter is a pixel of a group that moves (`site.css`
+ * animates each group of each icon): a lowercase one plain, an uppercase one lit.
+ */
+// prettier-ignore
+const iconArt: Record<OrbIcon, string[]> = {
+  // The arrow (a) glides into the door
+  'sign-in': [
+    '.....####',
+    '........#',
+    '....a...#',
+    '.....a..#',
+    'aaaaaaA.#',
+    '.....a..#',
+    '....a...#',
+    '........#',
+    '.....####',
+  ],
+  // A star in the middle of an orbit; the planet that goes round it is an element of its own
+  orbit: [
+    '...###...',
+    '.##...##.',
+    '.#.....#.',
+    '#..ooo..#',
+    '#..ooo..#',
+    '#..ooo..#',
+    '.#.....#.',
+    '.##...##.',
+    '...###...',
+  ],
+  // The light of the antenna (A) blinks and its signal (b) goes out
+  satellite: [
+    '...b.b...',
+    '....A....',
+    '....#....',
+    '...###...',
+    '##.###.##',
+    '#########',
+    '##.###.##',
+    '...###...',
+    '.........',
+  ],
+  // A neutron star with its two beams: a pulse runs out along them (A, B, C)
+  pulsar: [
+    '........C',
+    '.......B.',
+    '....#.A..',
+    '...ooo...',
+    '..#ooo#..',
+    '...ooo...',
+    '..A.#....',
+    '.B.......',
+    'C........',
+  ],
+  // Data (A, B, C) rises into the cloud
+  cloud: [
+    '.........',
+    '....ooo..',
+    '..##...#.',
+    '.#......#',
+    '#.......#',
+    '#.......#',
+    '.#######.',
+    '..A.B.C..',
+    '.........',
+  ],
+  // The lights of the two racks (A, B) blink in turn
+  server: [
+    '.........',
+    '.#######.',
+    '.#A.####.',
+    '.#######.',
+    '.........',
+    '.#######.',
+    '.#B.####.',
+    '.#######.',
+    '.........',
+  ],
+  // A star that flares (C) and throws a shock wave out (A), the tips of its rays (b) catching the light
+  supernova: [
+    'A...b...A',
+    '....#....',
+    '..#.#.#..',
+    '...CCC...',
+    'b##CCC##b',
+    '...CCC...',
+    '..#.#.#..',
+    '....#....',
+    'A...b...A',
+  ],
+  // A prompt: the characters (A, B) are typed and the cursor (C) blinks
+  terminal: [
+    '#########',
+    '#########',
+    '#.......#',
+    '#.#.....#',
+    '#..#....#',
+    '#.#.ABC.#',
+    '#.......#',
+    '#.......#',
+    '#########',
+  ],
+  // A rocket with its window lit and its flame (A, b), which flickers while it takes off
+  rocket: [
+    '....#....',
+    '...###...',
+    '...#o#...',
+    '...###...',
+    '...###...',
+    '..#####..',
+    '.#.###.#.',
+    '...bAb...',
+    '....b....',
+  ],
+};
+
+/** The pixels of an icon: their column, row, whether each is lit and the group it moves with. */
+const pixelsOf = (icon: OrbIcon) =>
+  iconArt[icon].flatMap((row, y) =>
+    [...row].flatMap((cell, x) => {
+      if (cell === '.') return [];
+      const group = /[a-z]/i.test(cell) && cell !== 'o' ? cell.toLowerCase() : undefined;
+      return [{ x, y, lit: cell === 'o' || cell !== cell.toLowerCase(), group }];
+    }),
+  );
+
+/**
+ * The badge of a TUWA project, in the manner of the TUWA switches: a flat round knob with the borders and background of
+ * the theme, a pixel icon in the brand color of the project (or an SVG `icon`) and a quiet glow of that color along its
+ * lower edge. When it first comes into view the icon gathers pixel by pixel, in a wave from one corner, and then moves
+ * slowly in its own way (see {@link OrbIcon}); still for reduced motion, and visible without JavaScript.
+ *
+ * Side effects: an `IntersectionObserver` until the badge has come into view.
  *
  * @param props - See {@link OrbProps}.
  * @param ref - Ref of the root `div`.
- * @returns The orb.
+ * @returns The badge.
  */
 export const Orb = React.forwardRef<HTMLDivElement, OrbProps>(
-  ({ packageType, size = 120, icon: Icon, className, style, ...props }, ref) => {
-    const color = packageColors[packageType];
-    const tint = packageTints[packageType];
-    const filterId = `orb-filter-${packageType}`;
-    const nebGradId = `orb-neb-${packageType}`;
-    const glowGradId = `orb-glow-${packageType}`;
+  ({ packageType, size = 120, pixelIcon, icon: Icon, color, className, style, ...props }, ref) => {
+    const rootRef = useRef<HTMLDivElement>(null);
+    useImperativeHandle(ref, () => rootRef.current as HTMLDivElement);
+    const [shown, setShown] = useState(false);
+    const iconName = pixelIcon ?? defaultIcons[packageType];
+
+    useEffect(() => {
+      const root = rootRef.current;
+      if (!root || typeof IntersectionObserver === 'undefined') {
+        return;
+      }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            setShown(true);
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.4 },
+      );
+      observer.observe(root);
+      return () => observer.disconnect();
+    }, []);
 
     return (
       <div
-        ref={ref}
-        className={cn(
-          'tuwadocs:relative tuwadocs:flex tuwadocs:items-center tuwadocs:justify-center tuwa-orb-float',
-          className,
-        )}
-        style={{ width: size, height: size, flexShrink: 0, ...style }}
+        ref={rootRef}
+        className={cn('tuwa-orb', `tuwa-orb--${iconName}`, shown && 'tuwa-orb--shown', className)}
+        style={
+          {
+            width: size,
+            height: size,
+            '--orb': color ?? packageColors[packageType],
+            '--orb-step': `${size / 16}px`,
+            ...style,
+          } as CSSProperties
+        }
         {...props}
       >
-        {/* Soft tinted glass sphere base */}
-        <div
-          className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:rounded-full tuwadocs:overflow-hidden"
-          style={{
-            background: `radial-gradient(circle at 40% 35%, ${color}28 0%, ${tint} 55%, rgba(255,255,255,0.04) 100%)`,
-            boxShadow: [
-              `0 0 0 1px ${color}30`,
-              `0 4px 24px ${color}25`,
-              'inset 0 1px 0 rgba(255,255,255,0.35)',
-              `inset 0 -2px 8px ${color}20`,
-            ].join(', '),
-            backdropFilter: 'blur(2px)',
-          }}
-        >
-          {/* Cosmic nebula SVG animation */}
-          <svg
-            className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:w-full tuwadocs:h-full"
-            style={{ mixBlendMode: 'screen', opacity: 0.85 }}
-          >
-            <defs>
-              {getCosmicFilter(packageType, filterId)}
-              <radialGradient id={nebGradId} cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={color} stopOpacity="0.9" />
-                <stop offset="50%" stopColor={color} stopOpacity="0.45" />
-                <stop offset="100%" stopColor={color} stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <circle
-              cx="50%"
-              cy="50%"
-              r="52%"
-              fill={`url(#${nebGradId})`}
-              filter={`url(#${filterId})`}
-              className="tuwa-orb-spin"
-              style={{ transformOrigin: 'center' }}
-            />
-          </svg>
-
-          {/* Inner ambient pulsing glow core */}
-          <svg
-            className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:w-full tuwadocs:h-full"
-            style={{ mixBlendMode: 'soft-light', opacity: 0.6 }}
-          >
-            <defs>
-              <radialGradient id={glowGradId} cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor={color} stopOpacity="1">
-                  <animate attributeName="stop-opacity" values="1;0.4;1" dur="4s" repeatCount="indefinite" />
-                </stop>
-                <stop offset="60%" stopColor={color} stopOpacity="0.2" />
-                <stop offset="100%" stopColor={color} stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <circle cx="50%" cy="50%" r="40%" fill={`url(#${glowGradId})`} />
-          </svg>
-        </div>
-
-        {/* Primary specular highlight — top-left glass sheen */}
-        <div
-          className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:rounded-full tuwadocs:pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse at 28% 22%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 28%, transparent 55%)',
-          }}
-        />
-
-        {/* Secondary rim highlight — bottom-right warm tint */}
-        <div
-          className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:rounded-full tuwadocs:pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 70% 78%, ${color}22 0%, transparent 55%)`,
-          }}
-        />
-
-        {/* Small sharp glint at top */}
-        <div
-          className="tuwadocs:absolute tuwadocs:pointer-events-none"
-          style={{
-            top: '14%',
-            left: '22%',
-            width: '28%',
-            height: '10%',
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, transparent 100%)',
-            transform: 'rotate(-38deg)',
-            filter: 'blur(0.5px)',
-            borderRadius: '50%',
-          }}
-        />
-
-        {/* Icon centered inside the orb */}
-        {Icon && (
-          <div className="tuwadocs:absolute tuwadocs:inset-0 tuwadocs:flex tuwadocs:items-center tuwadocs:justify-center tuwadocs:z-10 tuwadocs:pointer-events-none">
-            <Icon
-              className="tuwadocs:w-5 tuwadocs:h-5 tuwadocs:2xl:w-6 tuwadocs:2xl:h-6"
-              style={{
-                color: 'rgba(255,255,255,0.95)',
-                filter: [
-                  `drop-shadow(0 0 6px ${color})`,
-                  `drop-shadow(0 0 14px ${color}90)`,
-                  'drop-shadow(0 2px 4px rgba(0,0,0,0.4))',
-                ].join(' '),
-              }}
-            />
-          </div>
+        <span aria-hidden className="tuwa-orb__glow" />
+        {Icon ? (
+          <Icon aria-hidden className="tuwa-orb__svg" />
+        ) : (
+          <span aria-hidden className="tuwa-orb__pixels">
+            {pixelsOf(iconName).map(({ x, y, lit, group }) => (
+              <span
+                key={`${x}-${y}`}
+                data-g={group}
+                className={cn('tuwa-orb__pixel', lit && 'tuwa-orb__pixel--lit')}
+                style={{ '--x': x, '--y': y, '--delay': `${(x + y) * 28}ms` } as CSSProperties}
+              />
+            ))}
+            {iconName === 'orbit' && (
+              <span className="tuwa-orb__spin">
+                <span className="tuwa-orb__planet" />
+              </span>
+            )}
+          </span>
         )}
       </div>
     );
