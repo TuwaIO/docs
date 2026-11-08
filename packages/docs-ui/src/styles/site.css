@@ -467,7 +467,7 @@ article .nextra-border a:hover {
   --knob: 34px;
   --pixel-step: 3.25px;
   --glow: #f59e0b;
-  --pixel: #d97706;
+  --pixel: #c2410c;
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
@@ -615,15 +615,32 @@ article .nextra-border a:hover {
     opacity 220ms ease var(--delay),
     background-color 300ms ease;
 }
-.tuwa-theme-switch__pixel--twinkle {
-  animation: tuwa-twinkle 2.4s ease-in-out var(--twinkle-delay) infinite;
+/* The stars twinkle for a second after a change, then shine steady: the switch sits in a header */
+.tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__pixel--twinkle {
+  animation: tuwa-twinkle-a 1s ease-in-out calc(var(--twinkle-delay) / 4) both;
 }
-@keyframes tuwa-twinkle {
+.tuwa-theme-switch__knob--to-light .tuwa-theme-switch__pixel--twinkle {
+  animation: tuwa-twinkle-b 1s ease-in-out calc(var(--twinkle-delay) / 4) both;
+}
+@keyframes tuwa-twinkle-a {
   0%,
+  50%,
   100% {
     opacity: 1;
   }
-  50% {
+  25%,
+  75% {
+    opacity: 0.2;
+  }
+}
+@keyframes tuwa-twinkle-b {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
     opacity: 0.2;
   }
 }
@@ -644,27 +661,150 @@ article .nextra-border a:hover {
   box-shadow: 0 0 4px var(--glow);
   offset-path: var(--orbit-path);
   offset-rotate: 0deg;
-  animation: tuwa-orbit 5.5s linear infinite;
+  opacity: 0;
 }
-@keyframes tuwa-orbit {
-  from {
+/* One pass of the orbit after a change, then gone: nothing keeps moving in a header */
+.tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__orbiter {
+  animation: tuwa-orbit-a 1s ease-in-out 200ms both;
+}
+.tuwa-theme-switch__knob--to-light .tuwa-theme-switch__orbiter {
+  animation: tuwa-orbit-b 1s ease-in-out 200ms both;
+}
+@keyframes tuwa-orbit-a {
+  0% {
     offset-distance: 0%;
+    opacity: 0;
   }
-  to {
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
     offset-distance: 100%;
+    opacity: 0;
   }
+}
+@keyframes tuwa-orbit-b {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  15%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* The language switch, a pair with the theme switch: the flag of the language as pixels on the same knob, a glow in
+   the colour of the flag along its lower edge, a small spring and a wave of colour when the language changes */
+.tuwa-locale-switch__knob {
+  --flag-step: 3px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border: 1px solid var(--tuwa-border-primary);
+  border-radius: var(--tuwa-rounded-corners);
+  background: var(--tuwa-bg-primary);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 14px -3px var(--glow);
+  transition: box-shadow 300ms ease;
+}
+@media (min-width: 768px) {
+  .tuwa-locale-switch__knob {
+    --flag-step: 2.5px;
+    width: 26px;
+    height: 26px;
+  }
+}
+.group:hover .tuwa-locale-switch__knob {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 0 18px -2px var(--glow);
+}
+.tuwa-locale-switch__glow {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  filter: drop-shadow(0 0 2px var(--glow)) drop-shadow(0 0 6px color-mix(in srgb, var(--glow) 60%, transparent));
+  transition: filter 300ms ease;
+}
+.tuwa-locale-switch__glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--glow);
+  border-radius: inherit;
+  mask-image: linear-gradient(to top, #000 0%, #000 18%, transparent 46%);
+  transition: border-color 300ms ease;
+}
+.tuwa-locale-switch__knob--bump-a {
+  animation: tuwa-locale-bump-a 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tuwa-locale-switch__knob--bump-b {
+  animation: tuwa-locale-bump-b 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes tuwa-locale-bump-a {
+  0% {
+    scale: 0.86;
+  }
+  100% {
+    scale: 1;
+  }
+}
+@keyframes tuwa-locale-bump-b {
+  0% {
+    scale: 0.86;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* A flag as pixels: each pixel takes its new colour in a wave from one corner */
+.tuwa-pixel-flag {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  width: calc(var(--flag-step, 2px) * 7.86);
+  height: calc(var(--flag-step, 2px) * 5.86);
+}
+.tuwa-pixel-flag__pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: calc(var(--flag-step, 2px) * 0.86);
+  height: calc(var(--flag-step, 2px) * 0.86);
+  background: var(--c);
+  transform: translate(calc(var(--x) * var(--flag-step, 2px)), calc(var(--y) * var(--flag-step, 2px)));
+  transition: background-color 260ms ease var(--delay);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tuwa-theme-switch__knob--to-dark,
   .tuwa-theme-switch__knob--to-light,
-  .tuwa-theme-switch__pixel--twinkle,
-  .tuwa-theme-switch__orbiter {
+  .tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__pixel--twinkle,
+  .tuwa-theme-switch__knob--to-light .tuwa-theme-switch__pixel--twinkle,
+  .tuwa-theme-switch__knob--to-dark .tuwa-theme-switch__orbiter,
+  .tuwa-theme-switch__knob--to-light .tuwa-theme-switch__orbiter {
     animation: none;
   }
   .tuwa-theme-switch__pixel,
-  .tuwa-theme-switch__glow {
+  .tuwa-theme-switch__glow,
+  .tuwa-pixel-flag__pixel {
     transition: none;
+  }
+  .tuwa-locale-switch__knob--bump-a,
+  .tuwa-locale-switch__knob--bump-b {
+    animation: none;
   }
 }
 

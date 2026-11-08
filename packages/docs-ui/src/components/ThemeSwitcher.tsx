@@ -31,13 +31,13 @@ const MOON: Pixel[] = [
   [6, 0, 1], [5, 3, 1],
 ];
 
-/** A star like the sun: its disc and eight rays that pulse as a pulsar's. */
+/** A star like the sun: its disc and eight rays, steady so it reads at a glance in a header. */
 // prettier-ignore
 const SUN: Pixel[] = [
   [2, 2], [3, 2], [4, 2],
   [2, 3], [3, 3], [4, 3],
   [2, 4], [3, 4], [4, 4],
-  [3, 0, 1], [5, 1, 1], [6, 3, 1], [5, 5, 1], [3, 6, 1], [1, 5, 1], [0, 3, 1], [1, 1, 1],
+  [3, 0], [5, 1], [6, 3], [5, 5], [3, 6], [1, 5], [0, 3], [1, 1],
 ];
 
 /** The pixels of both pictures in the order of their angle around the centre, so each pixel travels a short way. */
@@ -49,8 +49,9 @@ const COUNT = Math.max(MOON_PATH.length, SUN_PATH.length);
 
 /**
  * A light/dark switch in the cosmic manner of TUWA: a knob that slides with a spring and stretches on its way; on it a
- * pixel crescent moon with twinkling stars and a satellite on its orbit in the dark, a pixel star like the sun with
- * pulsing rays and a planet on its orbit in the light, each pixel travelling to its place when the theme changes; a glow
+ * pixel crescent moon with stars in the dark and a pixel sun in the light, each pixel travelling to its place when the
+ * theme changes, the stars twinkling and a satellite or a planet passing on its orbit for a second after a change and
+ * then still (it sits in a header); a glow
  * along an edge of the knob, the accent under it in the dark and warm amber over it in the light. Flat, in the TUWA
  * style: the borders, backgrounds and radius of the theme. Only CSS (`site.css`), nothing to install; still at once for
  * reduced motion. It stores no theme itself: pass the

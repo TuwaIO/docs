@@ -1,72 +1,72 @@
 'use client';
 
 import { cn } from '@tuwaio/nova-core/utils';
-import { type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react';
+import { type CSSProperties, type KeyboardEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react';
 
-/**
- * Built-in vector SVG flag for the United Kingdom / English language.
- * Rendered locally without external network requests or third-party image dependencies.
- *
- * @param props - Component properties.
- * @param props.className - Optional CSS classes for dimensioning and positioning.
- * @returns An SVG element representing the Union Jack.
- * @internal
- */
-function FlagUK({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
-      <path fill="#012169" d="M0 0h640v480H0z" />
-      <path fill="#FFF" d="m75 0 245 180L565 0h75v60L435 240l205 180v60h-75L320 300 75 480H0v-60l205-180L0 60V0h75z" />
-      <path
-        fill="#C8102E"
-        d="m425 285 215 165v30h-35L380 300l45-15zM215 195 0 30v-30h35l225 180-45 15zm0 90L0 450v30h35l225-180-45-15zm210-90L640 30v-30h-35L380 180l45 15z"
-      />
-      <path fill="#FFF" d="M250 0h140v480H250zM0 170h640v140H0z" />
-      <path fill="#C8102E" d="M276 0h88v480h-88zM0 196h640v88H0z" />
-    </svg>
-  );
+type FlagCell = (x: number, y: number) => string;
+
+const UK_BLUE = '#012169';
+const UK_RED = '#C8102E';
+const WHITE = '#FFFFFF';
+
+/** The built-in flags as pixels on an 8 × 6 grid, and the colour of the glow of each. */
+const PIXEL_FLAGS: Record<string, { cell: FlagCell; glow: string }> = {
+  // The Union Jack: the red cross, its white edges and the white of the diagonals in the corners
+  en: {
+    glow: '#3b82f6',
+    cell: (x, y) =>
+      x === 3 || x === 4 || y === 2 || y === 3
+        ? UK_RED
+        : x === 2 || x === 5 || y === 1 || y === 4 || ((x === 0 || x === 7) && (y === 0 || y === 5))
+          ? WHITE
+          : UK_BLUE,
+  },
+  uk: { glow: '#facc15', cell: (_x, y) => (y < 3 ? '#0057B7' : '#FFD700') },
+  // The big star and the four small ones on red
+  zh: {
+    glow: '#ef4444',
+    cell: (x, y) =>
+      (x >= 1 && x <= 2 && y >= 1 && y <= 2) ||
+      (x === 4 && y === 0) ||
+      (x === 5 && (y === 1 || y === 2)) ||
+      (x === 4 && y === 3)
+        ? '#FFDE00'
+        : '#EE1C25',
+  },
+};
+
+/** The key of a built-in flag for a locale code, if there is one. */
+function flagKeyOf(code: string): string | undefined {
+  const normalized = code.toLowerCase();
+  if (normalized === 'en' || normalized === 'en-us' || normalized === 'en-gb') return 'en';
+  if (normalized === 'uk' || normalized === 'ua') return 'uk';
+  if (normalized === 'zh' || normalized === 'zh-cn' || normalized === 'zh-hans') return 'zh';
+  return undefined;
 }
 
 /**
- * Built-in vector SVG flag for Ukraine / Ukrainian language.
- * Rendered locally without external network requests or third-party image dependencies.
+ * A flag as pixels, in the pixel manner of the theme switch: when the language changes, each pixel takes its new colour
+ * in a wave from one corner to the other (still for reduced motion).
  *
- * @param props - Component properties.
- * @param props.className - Optional CSS classes for dimensioning and positioning.
- * @returns An SVG element representing the Ukrainian national flag.
- * @internal
+ * @param props - The key of a built-in flag.
+ * @returns The flag.
  */
-function FlagUkraine({ className }: { className?: string }) {
+function PixelFlag({ flag }: { flag: string }) {
+  const { cell } = PIXEL_FLAGS[flag];
   return (
-    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
-      <path fill="#0057b7" d="M0 0h640v240H0z" />
-      <path fill="#ffd700" d="M0 240h640v240H0z" />
-    </svg>
-  );
-}
-
-/**
- * Built-in vector SVG flag for China / Simplified Chinese language.
- * Rendered locally without external network requests or third-party image dependencies.
- *
- * @param props - Component properties.
- * @param props.className - Optional CSS classes for dimensioning and positioning.
- * @returns An SVG element representing the Chinese national flag.
- * @internal
- */
-function FlagChina({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 640 480" className={className} aria-hidden="true">
-      <rect width="640" height="480" fill="#ee1c25" />
-      <path
-        fill="#ffde00"
-        d="M120 72l14.1 43.4H180l-36.9 26.8 14.1 43.4-37.2-26.8-37.2 26.8 14.1-43.4L60 115.4h45.9z"
-      />
-      <circle cx="200" cy="40" r="12" fill="#ffde00" />
-      <circle cx="240" cy="80" r="12" fill="#ffde00" />
-      <circle cx="240" cy="140" r="12" fill="#ffde00" />
-      <circle cx="200" cy="180" r="12" fill="#ffde00" />
-    </svg>
+    <span aria-hidden="true" className="tuwa-pixel-flag">
+      {Array.from({ length: 48 }, (_, index) => {
+        const x = index % 8;
+        const y = Math.floor(index / 8);
+        return (
+          <span
+            key={index}
+            className="tuwa-pixel-flag__pixel"
+            style={{ '--x': x, '--y': y, '--c': cell(x, y), '--delay': `${(x + y) * 22}ms` } as CSSProperties}
+          />
+        );
+      })}
+    </span>
   );
 }
 
@@ -128,7 +128,7 @@ function ChevronArrowWithAnim({ isOpen, className }: { isOpen: boolean; classNam
 }
 
 /**
- * Returns a locally embedded SVG flag node for a given locale code.
+ * Returns a built-in pixel flag for a given locale code (8 × 6 pixels, in the manner of the theme switch).
  *
  * Supported built-in codes:
  * - English: `'en'`, `'en-US'`, `'en-GB'`
@@ -136,22 +136,11 @@ function ChevronArrowWithAnim({ isOpen, className }: { isOpen: boolean; classNam
  * - Chinese: `'zh'`, `'zh-CN'`, `'zh-Hans'`
  *
  * @param code - The BCP-47 or ISO language tag (e.g. `'en'`, `'uk'`, `'zh-CN'`).
- * @returns The SVG icon node or `undefined` if no built-in flag is available.
+ * @returns The flag or `undefined` if no built-in flag is available.
  */
 export function getLocaleFlag(code: string): ReactNode {
-  const normalized = code.toLowerCase();
-  const flagClass =
-    'tuwadocs:h-3 tuwadocs:w-4 tuwadocs:rounded-[2px] tuwadocs:object-cover tuwadocs:shadow-xs tuwadocs:border tuwadocs:border-black/10 tuwadocs:dark:border-white/20 tuwadocs:shrink-0';
-  if (normalized === 'en' || normalized === 'en-us' || normalized === 'en-gb') {
-    return <FlagUK className={flagClass} />;
-  }
-  if (normalized === 'uk' || normalized === 'ua') {
-    return <FlagUkraine className={flagClass} />;
-  }
-  if (normalized === 'zh' || normalized === 'zh-cn' || normalized === 'zh-hans') {
-    return <FlagChina className={flagClass} />;
-  }
-  return undefined;
+  const flag = flagKeyOf(code);
+  return flag ? <PixelFlag flag={flag} /> : undefined;
 }
 
 /**
@@ -321,6 +310,13 @@ export function LocaleSwitcher({
   nativeTouch = true,
 }: LocaleSwitcherProps) {
   const [mounted, setMounted] = useState(false);
+  // How many times the language changed since mount: each change springs the knob once (none on the first render)
+  const [shown, setShown] = useState(locale);
+  const [changes, setChanges] = useState(0);
+  if (shown !== locale) {
+    setShown(locale);
+    setChanges(changes + 1);
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [resolvedPlacement, setResolvedPlacement] = useState<'bottom' | 'top'>('bottom');
@@ -535,6 +531,7 @@ export function LocaleSwitcher({
   const activeOption = locales.find((item) => item.code === locale) ?? locales[0];
   const shortText = activeOption?.short ?? activeOption?.code?.slice(0, 2).toUpperCase() ?? 'EN';
   const activeFlag = activeOption?.flag ?? getLocaleFlag(activeOption?.code ?? 'en');
+  const glow = PIXEL_FLAGS[flagKeyOf(activeOption?.code ?? 'en') ?? 'en'].glow;
 
   return (
     <div ref={containerRef} className={cn('tuwadocs:relative tuwadocs:inline-block', className)}>
@@ -564,7 +561,7 @@ export function LocaleSwitcher({
         onClick={() => (isOpen ? closeMenu() : openMenu())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:px-2 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border tuwadocs:motion-reduce:transition-none',
+          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:pl-[2px] tuwadocs:pr-2 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border tuwadocs:motion-reduce:transition-none',
           'tuwadocs:focus-visible:ring-2 tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)] tuwadocs:focus-visible:outline-none tuwadocs:focus-visible:ring-offset-1 tuwadocs:focus-visible:ring-offset-[var(--tuwa-bg-primary)]',
           staticSize,
           defaultStyles,
@@ -573,11 +570,16 @@ export function LocaleSwitcher({
         aria-expanded={isOpen}
         aria-controls={isOpen ? listboxId : undefined}
       >
-        {/* Local Flag Icon */}
+        {/* The flag on a knob as the theme switch's, with a glow in its colour; a small spring when the language changes */}
         <span
           aria-hidden="true"
-          className="tuwadocs:flex tuwadocs:items-center tuwadocs:justify-center tuwadocs:shrink-0"
+          className={cn(
+            'tuwa-locale-switch__knob',
+            changes > 0 && (changes % 2 ? 'tuwa-locale-switch__knob--bump-a' : 'tuwa-locale-switch__knob--bump-b'),
+          )}
+          style={{ '--glow': glow } as CSSProperties}
         >
+          <span className="tuwa-locale-switch__glow" />
           {activeFlag}
         </span>
 
