@@ -10,7 +10,20 @@ interface Star {
   vx: number;
   vy: number;
   opacity: number; // Twinkling alpha state
+  tint: Tint; // The colour of the star: most are neutral, a few are blue or amber
 }
+
+// A rare shooting star: a pixel head with a trail of fading pixels, crossing a part of the sky once
+interface Comet {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  start: number;
+}
+
+type Tint = 'neutral' | 'blue' | 'amber';
+type Rgb = readonly [number, number, number];
 
 // --- Configuration Constants ---
 // Removes magic numbers and allows easy customization of the effect
@@ -20,30 +33,67 @@ const STAR_RADIUS_MAX = 2.7;
 const STAR_VELOCITY_FACTOR = 0.3; // Speed scaling factor
 const STAR_INITIAL_OPACITY_MIN = 0.5;
 const STAR_INITIAL_OPACITY_RANGE = 0.5; // (min + Math.random() * range)
+const BLUE_SHARE = 0.16; // Shares of the tinted stars; the rest are neutral
+const AMBER_SHARE = 0.08;
 
 // Mouse repulsion settings
 const MOUSE_REPEL_DISTANCE = 150;
 const MOUSE_REPEL_DISTANCE_SQ = MOUSE_REPEL_DISTANCE * MOUSE_REPEL_DISTANCE; // Pre-calculated squared distance
 const MOUSE_REPEL_FORCE = 2;
+const MOUSE_BRIGHTEN = 0.45; // Stars near the pointer shine a little brighter
 
-// The brightest stars are drawn as small pixel sparkles: a core and four arms
+// The kinds of stars by radius: dust (one pixel), stars (a larger pixel) and sparkles (a core with four arms that
+// reach out further while the star is at its brightest)
+const STAR_RADIUS_STAR = 1.6;
 const SPARKLE_RADIUS_MIN = 2.3;
-const SPARKLE_ARM_OPACITY = 0.45;
+const SPARKLE_ARM_OPACITY = 0.5;
+const SPARKLE_FAR_ARM_OPACITY = 0.25;
 
-// Connector lines configuration
+// Connector lines configuration: a dotted line of pixels, as a constellation drawn on a chart
 const LINE_MAX_DISTANCE = 120;
 const LINE_MAX_DISTANCE_SQ = LINE_MAX_DISTANCE * LINE_MAX_DISTANCE; // Pre-calculated squared distance
-const LINE_WIDTH = 0.75;
+const LINE_DASH = [2, 3];
 const TWINKLE_SPEED = 0.001;
 
+// Shooting stars: rare, short and faint
+const COMET_INTERVAL_MIN = 10_000;
+const COMET_INTERVAL_RANGE = 8_000;
+const COMET_DURATION = 1_400;
+const COMET_TRAIL = 9; // Pixels of the trail
+const COMET_TRAIL_GAP = 3; // CSS pixels between two pixels of the trail
+
+// The colours of the stars, the arms of the sparkles and the lines, on a dark and on a light page
+const PALETTE: Record<'dark' | 'light', Record<Tint, Rgb> & { arm: Rgb; line: Rgb; alpha: number }> = {
+  dark: {
+    neutral: [255, 255, 255],
+    blue: [147, 197, 253], // blue-300
+    amber: [252, 211, 77], // amber-300
+    arm: [147, 197, 253],
+    line: [147, 197, 253],
+    alpha: 1,
+  },
+  light: {
+    neutral: [15, 23, 42], // slate-900
+    blue: [29, 78, 216], // blue-700
+    amber: [180, 83, 9], // amber-700
+    arm: [71, 85, 105], // slate-600
+    line: [71, 85, 105],
+    alpha: 0.85,
+  },
+};
+
+const rgba = ([r, g, b]: Rgb, alpha: number) => `rgba(${r}, ${g}, ${b}, ${alpha})`;
+
 /**
- * A full-size canvas of slowly drifting, twinkling stars joined by lines, which move away from the mouse pointer. The
- * stars are crisp pixels on the pixel grid of the screen, in the pixel manner of the TUWA switches, and the brightest
- * are small four-armed sparkles. Place it behind the content of a page; it takes the size of the window and follows
- * its resizes.
+ * A full-size canvas of slowly drifting, twinkling stars joined by dotted lines, which move away from the mouse pointer
+ * and shine a little brighter near it. The stars are crisp pixels on the pixel grid of the screen, in the pixel manner
+ * of the TUWA switches: specks of dust, larger stars and sparkles whose four arms reach out while they are at their
+ * brightest; a few are blue or amber. Now and then (every 10 to 18 seconds) a faint pixel shooting star crosses a part
+ * of the sky, except for reduced motion. Place it behind the content of a page; it takes the size of the window and
+ * follows its resizes.
  *
  * Side effects: `mousemove` and `resize` listeners on `window` and a `requestAnimationFrame` loop, all removed on
- * unmount.
+ * unmount; it reads the `prefers-reduced-motion` media query before each shooting star.
  *
  * @returns The canvas.
  */
@@ -78,10 +128,16 @@ export default function StarryBackground() {
     // A position or a size on the pixel grid of the screen
     const snap = (value: number) => Math.round(value * dpr) / dpr;
 
+    // Shooting stars only for those who have not asked for less motion
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let comet: Comet | null = null;
+    let nextComet = Date.now() + COMET_INTERVAL_MIN / 2 + Math.random() * COMET_INTERVAL_RANGE;
+
     // Populate stars using predefined dimensions and limits
     const createStars = (): Star[] => {
       const stars: Star[] = [];
       for (let i = 0; i < NUM_STARS; i++) {
+        const pick = Math.random();
         stars.push({
           x: Math.random() * width,
           y: Math.random() * height,
@@ -89,9 +145,24 @@ export default function StarryBackground() {
           vx: (Math.random() - 0.5) * STAR_VELOCITY_FACTOR,
           vy: (Math.random() - 0.5) * STAR_VELOCITY_FACTOR,
           opacity: Math.random() * STAR_INITIAL_OPACITY_RANGE + STAR_INITIAL_OPACITY_MIN,
+          tint: pick < BLUE_SHARE ? 'blue' : pick < BLUE_SHARE + AMBER_SHARE ? 'amber' : 'neutral',
         });
       }
       return stars;
+    };
+
+    // A shooting star from the upper part of the sky, sliding down to one side at a shallow angle
+    const launchComet = (now: number): Comet => {
+      const toRight = Math.random() < 0.5;
+      const distance = Math.min(width, height) * (0.25 + Math.random() * 0.15);
+      const angle = (12 + Math.random() * 14) * (Math.PI / 180);
+      return {
+        x: width * (toRight ? 0.1 + Math.random() * 0.5 : 0.4 + Math.random() * 0.5),
+        y: height * Math.random() * 0.4,
+        vx: (toRight ? 1 : -1) * Math.cos(angle) * distance,
+        vy: Math.sin(angle) * distance,
+        start: now,
+      };
     };
 
     // --- Event Handler Methods ---
@@ -109,6 +180,33 @@ export default function StarryBackground() {
     // --- Main Rendering Loop ---
 
     /**
+     * Draws a shooting star: its head and a trail of pixels that fade behind it, the whole fading in and out.
+     * @param now Current time in milliseconds.
+     * @param colours The palette of the theme.
+     * @returns Whether it is still crossing the sky.
+     */
+    const drawComet = (now: number, colours: (typeof PALETTE)['dark']) => {
+      if (!comet) return false;
+      const t = (now - comet.start) / COMET_DURATION;
+      if (t >= 1) return false;
+      const eased = 1 - (1 - t) ** 3;
+      const fade = Math.sin(Math.PI * t) * 0.8 * colours.alpha;
+      const length = Math.hypot(comet.vx, comet.vy);
+      const ux = comet.vx / length;
+      const uy = comet.vy / length;
+      const headX = comet.x + comet.vx * eased;
+      const headY = comet.y + comet.vy * eased;
+      const unit = snap(1.5);
+      for (let i = COMET_TRAIL; i >= 0; i--) {
+        const px = snap(headX - ux * i * COMET_TRAIL_GAP);
+        const py = snap(headY - uy * i * COMET_TRAIL_GAP);
+        ctx.fillStyle = rgba(i === 0 ? colours.neutral : colours.arm, fade * (1 - i / (COMET_TRAIL + 1)));
+        ctx.fillRect(px, py, i === 0 ? unit * 1.5 : unit, i === 0 ? unit * 1.5 : unit);
+      }
+      return true;
+    };
+
+    /**
      * Updates physics states and renders the canvas elements.
      * @param timestamp System animation timestamp.
      */
@@ -120,7 +218,7 @@ export default function StarryBackground() {
       const mouse = mouseRef.current;
 
       // Determine active theme on the fly
-      const isDark = document.documentElement.classList.contains('dark');
+      const colours = document.documentElement.classList.contains('dark') ? PALETTE.dark : PALETTE.light;
 
       // --- Phase 1: Update and Draw Stars (O(n)) ---
       for (const star of stars) {
@@ -136,6 +234,7 @@ export default function StarryBackground() {
         const dxMouse = mouse.x - star.x;
         const dyMouse = mouse.y - star.y;
         const distMouseSq = dxMouse * dxMouse + dyMouse * dyMouse;
+        let near = 0;
 
         // Optimize: Calculate square root only if stars are within reach
         if (distMouseSq < MOUSE_REPEL_DISTANCE_SQ) {
@@ -146,33 +245,43 @@ export default function StarryBackground() {
 
           star.x -= forceX;
           star.y -= forceY;
+          near = force;
         }
 
         // 4. Update twinkling alpha state
         star.opacity = 0.3 + Math.sin(timestamp * TWINKLE_SPEED + star.x) * 0.5 + 0.5;
-        const clampedOpacity = Math.min(star.opacity, 1.0);
+        const twinkle = Math.min(star.opacity, 1.0);
+        const alpha = Math.min(1, twinkle * (1 + near * MOUSE_BRIGHTEN)) * colours.alpha;
 
-        // 5. Draw the star as a pixel on the grid of the screen; the brightest as a sparkle with four arms
-        const size = Math.max(1 / dpr, snap(star.radius * 0.8));
+        // 5. Draw the star as a pixel on the grid of the screen: dust, a larger star, or a sparkle with four arms
+        const size = snap(star.radius >= SPARKLE_RADIUS_MIN ? 2 : star.radius >= STAR_RADIUS_STAR ? 1.5 : 1);
         const x = snap(star.x - size / 2);
         const y = snap(star.y - size / 2);
-        ctx.fillStyle = isDark
-          ? `rgba(255, 255, 255, ${clampedOpacity})`
-          : `rgba(15, 23, 42, ${clampedOpacity * 0.85})`; // slate-900
+        ctx.fillStyle = rgba(colours[star.tint], alpha);
         ctx.fillRect(x, y, size, size);
         if (star.radius >= SPARKLE_RADIUS_MIN) {
-          ctx.fillStyle = isDark
-            ? `rgba(147, 197, 253, ${clampedOpacity * SPARKLE_ARM_OPACITY})` // blue-300
-            : `rgba(71, 85, 105, ${clampedOpacity * SPARKLE_ARM_OPACITY})`; // slate-600
+          const arm = star.tint === 'neutral' ? colours.arm : colours[star.tint];
+          ctx.fillStyle = rgba(arm, alpha * SPARKLE_ARM_OPACITY);
           ctx.fillRect(x - size, y, size, size);
           ctx.fillRect(x + size, y, size, size);
           ctx.fillRect(x, y - size, size, size);
           ctx.fillRect(x, y + size, size, size);
+          // The far ends of the arms come in smoothly as the star nears its brightest
+          const reach = Math.max(0, (twinkle - 0.6) / 0.4);
+          if (reach > 0) {
+            const half = snap(size / 2);
+            ctx.fillStyle = rgba(arm, alpha * SPARKLE_FAR_ARM_OPACITY * reach);
+            ctx.fillRect(x - size - half, y + half / 2, half, half);
+            ctx.fillRect(x + size * 2, y + half / 2, half, half);
+            ctx.fillRect(x + half / 2, y - size - half, half, half);
+            ctx.fillRect(x + half / 2, y + size * 2, half, half);
+          }
         }
       }
 
       // --- Phase 2: Draw Connection Lines (O(n^2)) ---
-      ctx.lineWidth = LINE_WIDTH;
+      ctx.lineWidth = Math.max(1 / dpr, 0.5);
+      ctx.setLineDash(LINE_DASH);
 
       for (let i = 0; i < stars.length; i++) {
         const star1 = stars[i];
@@ -187,18 +296,24 @@ export default function StarryBackground() {
           if (distanceSq < LINE_MAX_DISTANCE_SQ) {
             // Optimize: Calculate opacity based on distanceSq to avoid Math.sqrt calls
             // This yields quadratic decay instead of linear, which looks visually organic and runs much faster
-            const opacity = 0.2 * (1 - distanceSq / LINE_MAX_DISTANCE_SQ);
-
-            if (isDark) {
-              ctx.strokeStyle = `rgba(147, 197, 253, ${opacity})`;
-            } else {
-              ctx.strokeStyle = `rgba(71, 85, 105, ${opacity * 1.5})`; // slate-600
-            }
+            // (a little stronger than a solid line would be, as the dots leave gaps)
+            const opacity = 0.28 * (1 - distanceSq / LINE_MAX_DISTANCE_SQ);
+            ctx.strokeStyle = rgba(colours.line, colours === PALETTE.light ? opacity * 1.5 : opacity);
             ctx.beginPath();
             ctx.moveTo(star1.x, star1.y);
             ctx.lineTo(star2.x, star2.y);
             ctx.stroke();
           }
+        }
+      }
+      ctx.setLineDash([]);
+
+      // --- Phase 3: A shooting star now and then ---
+      if (!drawComet(timestamp, colours)) {
+        comet = null;
+        if (timestamp >= nextComet) {
+          if (!reducedMotion.matches && document.visibilityState === 'visible') comet = launchComet(timestamp);
+          nextComet = timestamp + COMET_INTERVAL_MIN + Math.random() * COMET_INTERVAL_RANGE;
         }
       }
     };
