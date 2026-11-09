@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.10.0...docs-ui-v0.10.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **docs-ui:** a softer glow around the dark logo ([#69](https://github.com/TuwaIO/docs/issues/69)) ([c1f55f7](https://github.com/TuwaIO/docs/commit/c1f55f74b45eca536f2919f9eb4d8768fe86f0f6))
+
 ## [0.10.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.9.0...docs-ui-v0.10.0) (2026-11-08)
 
 
