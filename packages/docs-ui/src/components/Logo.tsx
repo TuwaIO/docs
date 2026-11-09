@@ -18,8 +18,8 @@ export interface SiteLogoProps {
 
 /**
  * SiteLogo renders the TUWA brand logo:
- * - Light mode: black vector logo (https://tuwa.io/brand/logo_v2.svg)
- * - Dark mode: glowing cyan vector logo (https://tuwa.io/brand/logo_glow.svg) with constellation nodes/lines and ambient drop-shadow
+ * - Light mode: dark pixel logo (https://tuwa.io/brand/logo_v2.svg)
+ * - Dark mode: cyan pixel logo (https://tuwa.io/brand/logo_glow.svg) with constellation nodes and lines and a soft glow
  *
  * Using standalone <img> tags isolates each SVG document context, completely avoiding
  * WebKit/Safari SVG ID collision and gradient-rendering bugs.
@@ -60,7 +60,8 @@ export function SiteLogo({
         style={{
           width: `${width}px`,
           height: 'auto',
-          filter: 'drop-shadow(0 0 12px rgba(103, 232, 249, 0.45))',
+          // A soft glow, in step with the quiet glows of the header switches; a wide bright halo pulled the eye
+          filter: 'drop-shadow(0 0 4px rgba(34, 195, 230, 0.32))',
         }}
         loading="eager"
         decoding="async"
