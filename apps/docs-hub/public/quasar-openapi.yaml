@@ -199,6 +199,11 @@ components:
                   type:
                     - string
                     - "null"
+                chainId:
+                  type:
+                    - string
+                    - "null"
+                  description: CAIP-2 chain of the transaction.
                 senders:
                   type: array
                   items:
@@ -210,7 +215,8 @@ components:
               required:
                 - reason
                 - txHash
-              description: "`invoice.held`: why (`reason`), its transaction, the senders, `late`."
+                - chainId
+              description: "`invoice.held`: why (`reason`), its transaction and network, the senders, `late`."
             heldTransfer:
               anyOf:
                 - type: object
@@ -223,6 +229,11 @@ components:
                       type:
                         - string
                         - "null"
+                    chainId:
+                      type:
+                        - string
+                        - "null"
+                      description: CAIP-2 chain of the transaction.
                     amount:
                       type:
                         - string
@@ -263,6 +274,7 @@ components:
                   required:
                     - id
                     - txHash
+                    - chainId
                     - amount
                     - senders
                     - reason
@@ -280,6 +292,11 @@ components:
                       type:
                         - string
                         - "null"
+                    chainId:
+                      type:
+                        - string
+                        - "null"
+                      description: CAIP-2 chain of the transaction.
                     paidInvoice:
                       type:
                         - string
@@ -288,6 +305,7 @@ components:
                     - id
                     - voided
                     - txHash
+                    - chainId
                     - paidInvoice
               description: "`invoice.transfer_held`: a transfer that reached the invoice without being tied to it by proof, recorded
                 as a held transfer (`id`) to refund to its sender; the invoice stays as it was.
