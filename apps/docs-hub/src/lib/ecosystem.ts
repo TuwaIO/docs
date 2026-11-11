@@ -1,4 +1,4 @@
-import type { OrbIcon, PackageType } from '@tuwaio/docs-ui';
+import { type PackageType, type ProjectIcon, projectIcons } from '@tuwaio/docs-ui';
 
 // The stages, projects and packages of the main page. Kept out of the client components, so server code (llms.txt,
 // the sitemap) reads the same data. `scripts/build-data.mjs` reads the `@tuwaio/` package names from this file.
@@ -22,11 +22,13 @@ export interface PackageBadge {
  */
 export interface DocEntry {
   id: string;
-  /** Orb style to render; defaults to `id`. Lets an entry without its own orb reuse another's. */
+  /** The project whose icon the entry shows; defaults to `id`. Lets an entry without its own icon reuse another's. */
   orb?: PackageType;
-  /** Pixel icon of the orb; defaults to the icon of its project */
-  pixelIcon?: OrbIcon;
+  /** Pixel icon of the entry; defaults to the icon of its project */
+  pixelIcon?: ProjectIcon;
   name: string;
+  /** The short name on the plate of the hero (default: `name`) */
+  plateName?: string;
   tagline: string;
   gradientFrom: string;
   gradientTo: string;
@@ -58,6 +60,7 @@ export const layers: EcosystemLayer[] = [
       {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
+        plateName: 'SIWX',
         tagline: 'CAIP-122 authentication engine & adapters',
         gradientFrom: 'from-emerald-600 dark:from-emerald-400',
         gradientTo: 'to-teal-600 dark:to-emerald-500',
@@ -216,3 +219,40 @@ export const packageLayers: ReadonlyMap<string, string | undefined> = new Map(
     layer.entries.flatMap((entry) => (entry.packages ?? []).map((pkg) => [pkg.name, pkg.layer] as const)),
   ),
 );
+
+/**
+ * A project of the main page with the number of its stage (from 1) and its pixel icon.
+ */
+export type StagedEntry = DocEntry & { stage: number; icon: ProjectIcon };
+
+/**
+ * The projects of the main page in the order of the stages, each with its stage and its icon.
+ *
+ * @returns The projects.
+ */
+export function stagedEntries(): StagedEntry[] {
+  return layers.flatMap((layer, index) =>
+    layer.entries.map((entry) => ({
+      ...entry,
+      stage: index + 1,
+      icon: entry.pixelIcon ?? projectIcons[entry.orb ?? (entry.id as PackageType)],
+    })),
+  );
+}
+
+/**
+ * The size of the ecosystem, counted from the data so the hero never states an old number: the npm packages that are
+ * not deprecated (link rows are not packages), the products and the stages.
+ *
+ * @returns The three counts.
+ */
+export function ecosystemCounts(): { packages: number; products: number; stages: number } {
+  const entries = layers.flatMap((layer) => layer.entries);
+  return {
+    packages: entries
+      .flatMap((entry) => entry.packages ?? [])
+      .filter((pkg) => pkg.name.startsWith('@tuwaio/') && !pkg.isDeprecated).length,
+    products: entries.length,
+    stages: layers.length,
+  };
+}

@@ -175,7 +175,8 @@ apps/docs-hub/
 │   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
 │   │   ├── Footer.tsx               # Footer of the hub pages: logo, description, policies in mono caps, copyright
 │   │   ├── Header.tsx               # Fixed paper header: logo, links, language and theme cells; links-only menu below 1024px
-│   │   ├── HeroSection.tsx          # Gradient title + subtitle
+│   │   ├── HeroSection.tsx          # Hero: kicker, title, lead, licence, buttons, the plate
+│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), homeLayout
 │   │   ├── HubShell.tsx             # Frame of the hub pages: skip link, header, main, footer
 │   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers

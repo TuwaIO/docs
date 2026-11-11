@@ -53,6 +53,14 @@ describe('the root entry of @tuwaio/docs-ui', () => {
     expect(nextra).toMatch(/components\/Footer/);
   });
 
+  // The square of a project and its pixel art are for the website and Quasar as well as the hub; Orb stays as its old name
+  it('exports the square of a project, its pixel art and the old name Orb', () => {
+    const index = readFileSync(join(src, 'index.ts'), 'utf8');
+    expect(index).toContain("export * from './components/ProjectSquare';");
+    expect(index).toContain("export * from './projectIcons';");
+    expect(index).toContain("export * from './components/Orb';");
+  });
+
   it('declares what only the Nextra entries need as optional', () => {
     const { peerDependenciesMeta } = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
     for (const name of ['next', 'nextra', 'nextra-theme-docs'])
@@ -95,13 +103,17 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
     expect(css).toContain('--nextra-primary-hue');
   });
 
-  // The classes of the Orb live next to the dead ones: removing by range once took a class in use with it. Other
-  // repositories pin some of them too: Quasar's dashboard stills the theme switch through its classes and keyframes
+  // Classes in use live next to dead ones: removing by range once took a class in use with it. Other repositories pin
+  // some of them too: Quasar's dashboard stills the theme switch through its classes and keyframes
   // (admin-layout-contract.test.ts) and hands article links their own colours back (docs-ui-article-links.test.ts)
   it('keeps the classes in use', () => {
     const css = readFileSync(join(dist, 'site.css'), 'utf8');
     for (const name of [
-      '.tuwa-orb__pixel',
+      '.tuwa-project-square',
+      '.tuwa-project-square__corners',
+      '.tuwa-pixel-art',
+      '.tuwa-pixel-art--assemble',
+      '.tuwa-corner-marks',
       '.tuwa-theme-switch__knob--to-dark',
       '.tuwa-theme-switch__knob--to-light',
       '.tuwa-switch-appear',
@@ -168,6 +180,9 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
     'tuwa-orb-pulse',
     'tuwa-orb-float',
     'tuwa-orb-spin',
+    'tuwa-orb',
+    'tuwa-orb__pixel',
+    'tuwa-orb__glow',
     'remote-logo',
   ])('drops %s, which nothing uses', (name) => {
     expect(readFileSync(join(dist, 'site.css'), 'utf8')).not.toMatch(new RegExp(`\\.${name}(?![\\w-])`));

@@ -18,7 +18,6 @@ const novaCss = read(createRequire(path.join(docsUi, 'package.json')).resolve('@
 
 /** The parts of docs-ui not yet redrawn in paper and ink: their rules of site.css and their components. */
 const notYetRedrawn = [
-  { part: 'the badge of a project (Orb)', selector: /\.tuwa-orb/, files: ['Orb.tsx'] },
   { part: 'the star field (StarryBackground)', selector: /\.tuwa-starry/, files: ['StarryBackground.tsx'] },
   { part: 'the policy pages', selector: /\.tuwadocs-policy/, files: ['PolicyDocument.tsx'] },
 ];
@@ -235,6 +234,12 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
     expect(cssViolation(selector, property, value)).toBeUndefined();
   });
 
+  // Motions play once: a page of documentation is read, and nothing on it moves for ever
+  it('has no motion that repeats for ever', () => {
+    const css = withoutCssComments(read(siteCssFile));
+    expect(css.match(/[^;{}]*\binfinite\b[^;{}]*/g) ?? []).toEqual([]);
+  });
+
   it('draws its scanlines as Nova draws them', () => {
     expect(novaScanlines).toMatch(/^repeating-linear-gradient\(/);
     const scan = rulesOf(read(siteCssFile))
@@ -267,6 +272,8 @@ const hubRedrawn = [
   'components/Footer.tsx',
   'components/HubShell.tsx',
   'components/PageBackground.tsx',
+  'components/HeroSection.tsx',
+  'components/home/HeroPlate.tsx',
   'app/rootDocument.tsx',
 ];
 

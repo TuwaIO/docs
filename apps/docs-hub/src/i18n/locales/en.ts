@@ -50,6 +50,17 @@ export const en: DocsHubLabels = {
       explorePackages: 'Explore Packages',
       tryPlayground: 'Try in the Playground',
     },
+    plate: {
+      ariaLabel: 'The TUWA projects',
+      packagesOnNpm: {
+        one: 'Package on npm',
+        few: 'Packages on npm',
+        many: 'Packages on npm',
+        other: 'Packages on npm',
+      },
+      products: { one: '{n} product', few: '{n} products', many: '{n} products', other: '{n} products' },
+      stages: { one: '{n} stage', few: '{n} stages', many: '{n} stages', other: '{n} stages' },
+    },
     timeline: {
       titlePrefix: 'Ecosystem',
       titleHighlight: 'Architecture',

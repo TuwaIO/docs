@@ -82,7 +82,10 @@ export function DocCard({
   const { locale, t } = useI18n();
   return (
     // No `overflow-hidden`: the package previews float out of the card. A hovered card is raised over the next ones.
-    <div className="group relative hover:z-20 focus-within:z-20 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]">
+    <div
+      id={`p-${id}`}
+      className="group relative scroll-mt-24 hover:z-20 focus-within:z-20 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/40 dark:bg-white/[0.02] sm:bg-[var(--tuwa-bg-primary)]/30 dark:sm:bg-white/[0.015] sm:backdrop-blur-sm transition-all duration-300 hover:border-[var(--tuwa-text-accent)]/20 hover:bg-[var(--tuwa-bg-primary)]/50 dark:hover:bg-white/[0.03]"
+    >
       {/* Top accent line, clipped to the rounded corners */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
         <div

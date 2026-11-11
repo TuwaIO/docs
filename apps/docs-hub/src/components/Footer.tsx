@@ -5,6 +5,8 @@ import { footerPolicies, getPolicyPageUrl, SiteLogo } from '@tuwaio/docs-ui';
 import Link from '@/components/LocaleNextLink';
 import { policyLanguageOf, useI18n } from '@/i18n';
 
+import { homeContentClassName } from './home/homeLayout';
+
 const policyClassName = 'font-mono text-[11px] leading-[1.3] uppercase tracking-[0.12em] transition-colors';
 
 /**
@@ -20,7 +22,7 @@ export function Footer() {
 
   return (
     <footer className="relative z-10 mt-[120px] border-t border-[var(--tuwa-text-primary)]">
-      <div className="mx-auto max-w-[1120px] px-4 pt-7 pb-9 md:px-8 md:pt-8 md:pb-10 xl:px-12 xl:pb-11 min-[1600px]:max-w-[1232px] min-[1600px]:px-14">
+      <div className={`${homeContentClassName} pt-7 pb-9 md:pt-8 md:pb-10 xl:pb-11`}>
         <div className="grid gap-[22px] md:grid-cols-2 md:items-start">
           <div className="grid justify-items-start gap-3.5">
             <SiteLogo width={57} />

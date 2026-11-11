@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
 import { HeroSection } from '../../../components/HeroSection';
+import { homeContentClassName } from '../../../components/home/homeLayout';
 import { JsonLd } from '../../../components/JsonLd';
 import { LayerTimeline } from '../../../components/LayerTimeline';
 import { PageBackground } from '../../../components/PageBackground';
@@ -43,9 +44,11 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
 
-      <div className="relative z-10 pt-14 sm:pt-16 pb-16">
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6">
+      <div className="relative z-10 pb-16">
+        <div className={homeContentClassName}>
           <HeroSection />
+        </div>
+        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6 pt-24">
           <LayerTimeline releases={getReleases()} packages={getPackageDetails()} />
           <QuickStartSection />
         </div>

@@ -4,6 +4,7 @@ import type { TuwaLocale } from '@tuwaio/docs-ui/locale';
 import type { AxisId, SegmentId } from '../lib/comparisons';
 import type { StyleKit } from '../lib/playground/customization';
 import type { ThemeId } from '../lib/playground/themes';
+import type { PluralLabel } from '../lib/plural';
 
 export type SimulatedOutcomeKey = 'succeed' | 'fail' | 'replace' | 'cancel' | 'reject';
 
@@ -262,6 +263,17 @@ export interface DocsHubLabels {
       searchButton: string;
       explorePackages: string;
       tryPlayground: string;
+    };
+    /** The plate of the projects in the hero: their links around the count of the packages */
+    plate: {
+      /** Accessible name of the plate */
+      ariaLabel: string;
+      /** Under the count of the packages, in the form of the count */
+      packagesOnNpm: PluralLabel;
+      /** The number of products (`{n}`) */
+      products: PluralLabel;
+      /** The number of stages (`{n}`) */
+      stages: PluralLabel;
     };
     timeline: {
       titlePrefix: string;

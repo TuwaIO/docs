@@ -45,7 +45,7 @@ export function LayerTimeline({
         const stageLabel = stageTranslation?.label ?? layer.label;
         const stageSubtitle = stageTranslation?.subtitle ?? layer.subtitle;
         return (
-          <div key={layer.label} className="relative">
+          <div key={layer.label} id={`stage-${index + 1}`} className="relative scroll-mt-24">
             {/* Left dot */}
             <div
               className={`absolute -left-[22px] sm:-left-[39px] top-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-gradient-to-r ${layer.dotGradient} ring-[3px] ring-[var(--tuwa-bg-primary)] dark:ring-gray-950`}

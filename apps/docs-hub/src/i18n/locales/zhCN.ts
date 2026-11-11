@@ -50,6 +50,17 @@ export const zhCN: DocsHubLabels = {
       explorePackages: '浏览软件包',
       tryPlayground: '在演练场中体验',
     },
+    plate: {
+      ariaLabel: 'TUWA 项目',
+      packagesOnNpm: {
+        one: 'npm 上的软件包',
+        few: 'npm 上的软件包',
+        many: 'npm 上的软件包',
+        other: 'npm 上的软件包',
+      },
+      products: { one: '{n} 个产品', few: '{n} 个产品', many: '{n} 个产品', other: '{n} 个产品' },
+      stages: { one: '{n} 个阶段', few: '{n} 个阶段', many: '{n} 个阶段', other: '{n} 个阶段' },
+    },
     timeline: {
       titlePrefix: '生态系统',
       titleHighlight: '架构全景',

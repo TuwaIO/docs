@@ -50,6 +50,17 @@ export const uk: DocsHubLabels = {
       explorePackages: 'Огляд пакетів',
       tryPlayground: 'Спробувати в Пісочниці',
     },
+    plate: {
+      ariaLabel: 'Проєкти TUWA',
+      packagesOnNpm: {
+        one: 'пакет у npm',
+        few: 'пакети в npm',
+        many: 'пакетів у npm',
+        other: 'пакета в npm',
+      },
+      products: { one: '{n} продукт', few: '{n} продукти', many: '{n} продуктів', other: '{n} продукту' },
+      stages: { one: '{n} етап', few: '{n} етапи', many: '{n} етапів', other: '{n} етапу' },
+    },
     timeline: {
       titlePrefix: 'Архітектура',
       titleHighlight: 'Екосистеми',
