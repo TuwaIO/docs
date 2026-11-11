@@ -16,7 +16,7 @@ export const uk: DocsHubLabels = {
     theme: 'Тема',
     language: 'Мова',
     selectLanguage: docsLabels.uk.selectLanguage,
-    toggleTheme: 'Перемкнути тему',
+    toggleTheme: docsLabels.uk.toggleTheme,
     openMenu: 'Відкрити меню навігації',
     closeMenu: 'Закрити меню навігації',
     mobileNavAria: 'Розділи документації',

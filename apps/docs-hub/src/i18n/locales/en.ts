@@ -16,7 +16,7 @@ export const en: DocsHubLabels = {
     theme: 'Theme',
     language: 'Language',
     selectLanguage: docsLabels.en.selectLanguage,
-    toggleTheme: 'Toggle theme',
+    toggleTheme: docsLabels.en.toggleTheme,
     openMenu: 'Open navigation menu',
     closeMenu: 'Close navigation menu',
     mobileNavAria: 'Documentation sections',

@@ -550,7 +550,9 @@ export function LocaleSwitcher({
     'tuwadocs:bg-transparent tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_5%,transparent)]';
 
   // Constant static dimensions to prevent any layout shift across languages
-  const staticSize = 'tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem]';
+  // The narrowest phones (below 400px) take a smaller switch, so the navbar holds one row at 320px
+  const staticSize =
+    'tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem] tuwadocs:max-[400px]:h-[34px] tuwadocs:max-[400px]:w-[4.25rem] tuwadocs:max-[360px]:w-[3.75rem]';
 
   if (!mounted) {
     return (
@@ -637,7 +639,7 @@ export function LocaleSwitcher({
         {/* Nova-Style Animated Chevron Arrow */}
         <ChevronArrowWithAnim
           isOpen={isOpen}
-          className="tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:group-hover:text-[var(--tuwa-text-primary)]"
+          className="tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:group-hover:text-[var(--tuwa-text-primary)] tuwadocs:max-[360px]:hidden"
         />
       </button>
 

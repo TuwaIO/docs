@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
@@ -50,6 +50,7 @@ vi.mock('nextra-theme-docs', () => ({
   LastUpdated: ({ children }: { children: ReactNode }) => createElement('span', null, children),
   Navbar: ({ logo, children }: { logo: ReactNode; children?: ReactNode }) => createElement('nav', null, logo, children),
   Footer: ({ children }: { children: ReactNode }) => createElement('footer', null, children),
+  useTheme: () => ({ resolvedTheme: 'light', setTheme: () => undefined }),
   useMDXComponents: () => ({
     wrapper: ({
       toc,
@@ -78,17 +79,30 @@ vi.mock('../../../../packages/docs-ui/src/components/LocaleSwitcher', () => ({
     createElement('button', { 'data-locale': locale, 'aria-label': ariaLabel }),
 }));
 
+vi.mock('../../../../packages/docs-ui/src/components/ThemeSwitcher', () => ({
+  ThemeSwitcher: ({ theme, ariaLabel }: { theme: string; ariaLabel: string }) =>
+    createElement('button', { 'data-theme-switch': theme, 'aria-label': ariaLabel }),
+}));
+
 /** The props of the Nextra `Layout` that the language changes, as JSON-friendly values. */
 function layoutPropsOf(props: Record<string, unknown>) {
-  const { editLink, feedback, toc, themeSwitch, pageMap, sidebar } = props as {
+  const { editLink, feedback, toc, darkMode, pageMap, sidebar } = props as {
     editLink: string;
     feedback: { content: string };
     toc: { title: string; backToTop: string };
-    themeSwitch: Record<string, string>;
+    darkMode?: boolean;
     pageMap: PageMapItem[];
     sidebar?: Record<string, unknown>;
   };
-  return { editLink, feedback: feedback.content, toc, themeSwitch, pageMap, sidebar };
+  return {
+    editLink,
+    feedback: feedback.content,
+    toc,
+    darkMode,
+    themeSwitchOptions: 'themeSwitch' in props,
+    pageMap,
+    sidebar,
+  };
 }
 
 /** Collects every key path of an object, so dictionaries of different languages can be compared. */
@@ -302,15 +316,20 @@ describe('DocsLayout', () => {
         .replace(/&amp;/g, '&'),
     ) as ReturnType<typeof layoutPropsOf>;
 
-  it('puts the language switch in the navbar and the interface texts of the language in the layout', () => {
+  it('puts the language switch and then the theme switch in the navbar and the texts of the language in the layout', () => {
     const html = render('uk');
-    expect(html).toMatch(/<nav><img alt="TUWA"\/>.*<button data-locale="uk" aria-label="Оберіть мову"><\/button>/);
+    // Language first, then theme: the one theme switch of the page sits in the header, as on the hub and the website
+    expect(html).toMatch(
+      /<nav><img alt="TUWA"\/>.*<button data-locale="uk" aria-label="Оберіть мову"><\/button><button data-theme-switch="light" aria-label="Перемкнути тему"><\/button><\/div><\/nav>/,
+    );
     expect(html).toContain(`placeholder="${docsLabels.uk.nextra.searchPlaceholder}"`);
     expect(html).toContain(docsLabels.uk.footer.description);
     const props = propsOf(html);
     expect(props.editLink).toBe('Редагувати цю сторінку');
     expect(props.toc).toEqual({ title: 'На цій сторінці', backToTop: 'Прокрутити вгору' });
-    expect(props.themeSwitch).toEqual({ light: 'Світла', dark: 'Темна', system: 'Системна' });
+    // Nextra's own Light / Dark / System select is off, in the sidebar, the mobile menu and the footer
+    expect(props.darkMode).toBe(false);
+    expect(props.themeSwitchOptions).toBe(false);
     expect(JSON.stringify(props.pageMap)).toContain('"title":"Вступ"');
   });
 
@@ -346,8 +365,10 @@ describe('DocsLayout', () => {
       }),
     );
     expect(html).toContain(`aria-label="${docsLabels['zh-CN'].selectLanguage}"`);
+    expect(html).toContain(`aria-label="${docsLabels['zh-CN'].toggleTheme}"`);
     expect(html).toContain(docsLabels['zh-CN'].footer.description);
     const props = propsOf(html);
+    expect(props.darkMode).toBe(false);
     expect(props.editLink).toBe(docsLabels['zh-CN'].nextra.editThisPage);
     expect(props.sidebar).toEqual({ defaultMenuCollapseLevel: 1 });
     // The page map is passed as it is: the caller localizes it
@@ -492,5 +513,27 @@ describe('the translation check', () => {
         'run the check from the docs app',
       );
     });
+  });
+});
+
+// The page has one theme switch, the docs-ui one in the navbar: Nextra's own select (sidebar, mobile menu, footer) is
+// off everywhere, and nothing wires it back in
+describe('one theme switch per page', () => {
+  const sources = (dir: string): string[] =>
+    readdirSync(dir).flatMap((entry) => {
+      const file = join(dir, entry);
+      if (statSync(file).isDirectory()) return entry === 'node_modules' || entry === '.next' ? [] : sources(file);
+      return /\.(tsx?|mdx)$/.test(entry) && !/\.test\.tsx?$/.test(entry) ? [file] : [];
+    });
+  const files = [...sources(join(__dirname, '../../../../packages/docs-ui/src')), ...sources(join(__dirname, '..'))];
+
+  it('never passes Nextra the options of its own theme switch or turns its dark mode select on', () => {
+    expect(files.length).toBeGreaterThan(20);
+    for (const file of files) {
+      const source = readFileSync(file, 'utf8');
+      expect(source, file).not.toMatch(/\bthemeSwitch=/);
+      expect(source, file).not.toMatch(/\bdarkMode=\{(?!false\})/);
+      expect(source, file).not.toMatch(/import\s*\{[^}]*\bThemeSwitch\b[^}]*\}\s*from\s*'nextra-theme-docs'/);
+    }
   });
 });

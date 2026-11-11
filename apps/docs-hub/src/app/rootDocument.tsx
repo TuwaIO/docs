@@ -82,13 +82,14 @@ export function RootDocument({ lang, children }: { lang: string; children: React
   return (
     <html lang={lang} suppressHydrationWarning>
       {/* Defines the Nextra theme variables; without --nextra-bg the mobile menu of the Nextra pages is transparent.
-          The background colors are those of the body below. Dark mode uses the TUWA cosmic midnight blue (#0a0e27). */}
-      <Head backgroundColor={{ light: '#ffffff', dark: '#0a0e27' }}>
+          The colors are the paper of each theme, as the body below: Nextra paints its sticky header and the foot of its
+          sidebar with them. */}
+      <Head backgroundColor={{ light: '#f2f1ee', dark: '#101014' }}>
         {/* Before the theme script of next-themes and the tabs of Nextra: the theme, guide tab and locale are kept 30 days
             after they are chosen (Cookie Policy) */}
         <PreferenceExpiry keys={['theme', 'tuwa-guide-network', 'tuwa-locale']} />
       </Head>
-      <body className={`antialiased bg-[var(--tuwa-bg-primary)] dark:bg-[#0a0e27] text-[var(--tuwa-text-primary)]`}>
+      <body className={`antialiased bg-[var(--tuwa-docs-paper)] text-[var(--tuwa-text-primary)]`}>
         <Providers urlLocale={localeOfPath(`/${lang}`) ?? undefined}>{children}</Providers>
       </body>
     </html>

@@ -297,6 +297,15 @@ describe('the paper of the documentation sites', () => {
     expect(valueOf('html, body', 'background-color')).toBe('var(--tuwa-docs-paper)');
   });
 
+  // Nextra writes --nextra-bg from the colours of its Head, after site.css: its sticky header and sidebar footer are
+  // painted with them, so the hub gives it the paper too, not white and the midnight blue before it
+  it('gives the Head of Nextra the paper of each theme', () => {
+    const rootDocument = read(path.resolve(__dirname, '../app/rootDocument.tsx'));
+    expect(rootDocument).toContain(
+      `<Head backgroundColor={{ light: '${novaValue(':root', '--tuwa-bg-secondary')}', dark: '${novaValue('.dark', '--tuwa-bg-primary')}' }}>`,
+    );
+  });
+
   // Nextra's links, active items and focus take the accent of Nova, in each theme
   it('builds the accent scale of Nextra on the accent of Nova', () => {
     expect(valueOf(':root, .dark', '--x-color-primary-600')).toBe('var(--tuwa-text-accent)');

@@ -16,7 +16,7 @@ export const zhCN: DocsHubLabels = {
     theme: '主题',
     language: '语言',
     selectLanguage: docsLabels['zh-CN'].selectLanguage,
-    toggleTheme: '切换主题',
+    toggleTheme: docsLabels['zh-CN'].toggleTheme,
     openMenu: '打开导航菜单',
     closeMenu: '关闭导航菜单',
     mobileNavAria: '文档分区',

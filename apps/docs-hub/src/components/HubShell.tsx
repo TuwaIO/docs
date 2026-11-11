@@ -8,7 +8,7 @@ import { Header } from './Header';
 
 const navbarLogo = (
   <Link href="/" className="hover:opacity-80 transition-opacity duration-200" aria-label="TUWA Docs">
-    <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />
+    <SiteLogo className="tuwadocs:transition-opacity tuwadocs:duration-300" />
   </Link>
 );
 

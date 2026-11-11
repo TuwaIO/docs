@@ -12,7 +12,7 @@ import { NextraLocalizedShell, NextraPageWrapper } from '../components/NextraLoc
 import { languageTexts } from './languageMetadata';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
-const logo = <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
+const logo = <SiteLogo className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
 
 /** Route params of the `[[...mdxPath]]` page of a section. */
 export type SectionPageProps = {

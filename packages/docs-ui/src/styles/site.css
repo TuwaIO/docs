@@ -477,6 +477,16 @@ article .nextra-border a:hover {
     height: 32px;
   }
 }
+/* The narrowest phones: the logo, both switches and the menu button fit one row of the navbar at 320px */
+@media (max-width: 399.98px) {
+  .tuwa-theme-switch {
+    --knob: 28px;
+    --pixel-step: 2.5px;
+    --orbit-path: path('M 1.95 16.47 A 11 4 -24 1 0 22.05 7.53 A 11 4 -24 1 0 1.95 16.47');
+    width: 60px;
+    height: 34px;
+  }
+}
 .tuwa-theme-switch--dark {
   --glow: var(--tuwa-text-accent);
   --pixel: color-mix(in srgb, var(--tuwa-text-accent) 55%, #ffffff);
@@ -724,6 +734,12 @@ article .nextra-border a:hover {
   .tuwa-locale-switch__knob {
     width: 26px;
     height: 26px;
+  }
+}
+@media (max-width: 399.98px) {
+  .tuwa-locale-switch__knob {
+    width: 28px;
+    height: 28px;
   }
 }
 /* The line in colour: quiet, it sits in a header */

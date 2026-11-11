@@ -44,14 +44,22 @@ describe('the Nextra header of @tuwaio/docs-ui', () => {
     expect(block?.body).not.toMatch(/background:\s*white/);
   });
 
-  it('keeps the logo at its width, so it cannot paint over the next items', () => {
+  // The logo and both switches fit one row of the navbar on a 320px phone: the logo is sized by its height there
+  it('fits the logo to the navbar by its height, and keeps it from shrinking', () => {
     const html = renderToStaticMarkup(createElement(SiteLogo, {}));
     const images = html.match(/<img [^>]*>/g) ?? [];
     expect(images).toHaveLength(2);
     for (const image of images) {
       expect(image).toContain('tuwadocs:max-w-none');
-      expect(image).toContain('width:126px');
+      expect(image).toContain('tuwadocs:h-5 tuwadocs:sm:h-[22px] tuwadocs:w-auto');
+      expect(image).not.toContain('width:126px');
     }
+  });
+
+  it('keeps a width it is given, for the headers that size the logo themselves', () => {
+    const images = renderToStaticMarkup(createElement(SiteLogo, { width: 126 })).match(/<img [^>]*>/g) ?? [];
+    expect(images).toHaveLength(2);
+    for (const image of images) expect(image).toContain('width:126px');
   });
 
   it('does not let the logo link shrink, and shows the link titles from 1024px with the title as their name', () => {
