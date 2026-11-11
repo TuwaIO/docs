@@ -4,88 +4,113 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Responsive base font-size scaling to fit content beautifully on larger displays */
-html {
-  font-size: 16px;
-  transition: font-size 0.2s ease-in-out;
-}
-
-@media (max-width: 1536px) {
-  html {
-    font-size: 15px;
-  }
-}
-
+/*
+ * Paper and ink, on the tokens of Nova Core: warm paper, ink, lines of 1px, the TUWA blue and square corners, with no
+ * gradients, soft shadows or blur.
+ *
+ * Nova swaps paper and raised between the themes: in light the page is --tuwa-bg-secondary and a card --tuwa-bg-primary,
+ * in dark the other way round. The surfaces below name them by their role and are set again for each theme, so that a
+ * page is never painted with --tuwa-bg-primary.
+ */
 :root {
-  --tuwa-primary: #0052ff;
-  --tuwa-secondary: #0284c7;
+  --tuwa-docs-paper: var(--tuwa-bg-secondary);
+  --tuwa-docs-raised: var(--tuwa-bg-primary);
+  --tuwa-docs-sunken: var(--tuwa-bg-muted);
+  /* The paper again, as the channels Nextra reads: `rgb(var(--nextra-bg))`, and `rgba(var(--nextra-bg), 0.8)` behind a
+     zoomed image, which needs the commas its own `Head` writes */
+  --nextra-bg: 242, 241, 238;
+
+  --tuwa-primary: var(--tuwa-text-accent);
+  --tuwa-secondary: #0047de;
   --tuwa-success: #10b981;
   --tuwa-warning: #f59e0b;
   --tuwa-error: #ef4444;
-  --tuwa-gradient: linear-gradient(135deg, #0052ff 0%, #1d4ed8 50%, #0284c7 100%);
-  --tuwa-hero-gradient-from: #0052ff;
-  --tuwa-hero-gradient-via: #1d4ed8;
-  --tuwa-hero-gradient-to: #0284c7;
   /* --tuwa-button-gradient-* are left to @tuwaio/nova-core, so the Connect Button keeps Nova's colors */
 
-  --nextra-primary-hue: 212;
-  --nextra-primary-saturation: 100%;
+  /* Geist and Geist Mono only, then the generic fonts of the system. Nova lists more monospace fonts after Geist Mono and
+     puts JetBrains Mono first for Ukrainian (through --tuwa-font-mono-uk), while a documentation page reads in one face in
+     every language. Chinese takes the CJK font of the system: Geist has no CJK glyphs. The Ukrainian stack is written out
+     rather than pointed at --tuwa-font-mono, because Nova sets that one from it and the two would refer to each other */
+  --tuwa-font-sans: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tuwa-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --tuwa-font-mono-uk: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* The chrome and the code blocks of Nextra: nothing set these, so they were in the fonts of the system */
+  --x-font-sans: var(--tuwa-font-sans);
+  --x-font-mono: var(--tuwa-font-mono);
 
-  --x-color-primary-50: rgb(239 246 255);
-  --x-color-primary-100: rgb(219 234 254);
-  --x-color-primary-200: rgb(191 219 254);
-  --x-color-primary-300: rgb(147 197 253);
-  --x-color-primary-400: rgb(96 165 250);
-  --x-color-primary-500: #0052ff;
-  --x-color-primary-600: #2563eb;
-  --x-color-primary-700: #1d4ed8;
-  --x-color-primary-800: #1e40af;
-  --x-color-primary-900: #1e3a8a;
-  --x-color-primary-950: #172554;
+  /* Square, as Nova: the callouts, search, code, cards and tabs of Nextra */
+  --x-radius-sm: var(--tuwa-rounded-corners);
+  --x-radius-md: var(--tuwa-rounded-corners);
+  --x-radius-lg: var(--tuwa-rounded-corners);
+  --x-radius-xl: var(--tuwa-rounded-corners);
+
+  /* The accent as Nextra describes it, for the selection: #0052ff */
+  --nextra-primary-hue: 221deg;
+  --nextra-primary-saturation: 100%;
+  --nextra-primary-lightness: 50%;
 
   --tuwa-footer-border: rgb(229 231 235);
   --tuwa-footer-text-primary: rgb(75 85 99);
   --tuwa-footer-text-secondary: rgb(107 114 128);
   --tuwa-footer-text-muted: rgb(156 163 175);
   --tuwa-footer-link-color: rgb(107 114 128);
-  --tuwa-footer-link-hover: #0052ff;
+  --tuwa-footer-link-hover: var(--tuwa-primary);
   --tuwa-footer-npm-hover: rgb(220 38 38);
   --tuwa-footer-github-hover: rgb(31 41 55);
 }
 
 .dark {
-  --tuwa-primary: #38bdf8;
-  --tuwa-secondary: #7dd3fc;
-  --nextra-bg: 10 14 39;
-  --tuwa-bg-dark: #0a0e27;
+  --tuwa-docs-paper: var(--tuwa-bg-primary);
+  --tuwa-docs-raised: var(--tuwa-bg-secondary);
+  --tuwa-docs-sunken: var(--tuwa-bg-muted);
+  --nextra-bg: 16, 16, 20;
 
-  --tuwa-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #7dd3fc 100%);
-  --tuwa-hero-gradient-from: #2563eb;
-  --tuwa-hero-gradient-via: #3b82f6;
-  --tuwa-hero-gradient-to: #7dd3fc;
+  /* Set again, so that they follow the accent of the theme wherever the class sits */
+  --tuwa-primary: var(--tuwa-text-accent);
+  --tuwa-secondary: #93c5fd;
+  --tuwa-footer-link-hover: var(--tuwa-primary);
 
-  --x-color-primary-50: rgb(15 23 42);
-  --x-color-primary-100: rgb(23 37 84);
-  --x-color-primary-200: rgb(30 58 138);
-  --x-color-primary-300: rgb(30 64 175);
-  --x-color-primary-400: #38bdf8;
-  --x-color-primary-500: #38bdf8;
-  --x-color-primary-600: #38bdf8;
-  --x-color-primary-700: #7dd3fc;
-  --x-color-primary-800: rgb(191 219 254);
-  --x-color-primary-900: rgb(219 234 254);
-  --x-color-primary-950: rgb(239 246 255);
-
-  --x-color-neutral-900: #0a0e27;
+  /* #60a5fa */
+  --nextra-primary-hue: 213deg;
+  --nextra-primary-saturation: 94%;
+  --nextra-primary-lightness: 68%;
 
   --tuwa-footer-border: rgba(255, 255, 255, 0.08);
   --tuwa-footer-text-primary: rgb(209 213 219);
   --tuwa-footer-text-secondary: rgb(156 163 175);
   --tuwa-footer-text-muted: rgb(107 114 128);
   --tuwa-footer-link-color: rgb(156 163 175);
-  --tuwa-footer-link-hover: #38bdf8;
   --tuwa-footer-npm-hover: rgb(248 113 113);
   --tuwa-footer-github-hover: rgb(243 244 246);
+}
+
+/* Values built from the tokens of the theme, declared on `.dark` as well: a variable resolves where it is declared, and
+   the class may sit below the root */
+:root,
+.dark {
+  /* The scale Nextra colours its links, active items and focus with, on the accent of Nova (#0052ff in light, #60a5fa in
+     dark) and shaped as Nextra shapes its own: the accent at 600, lighter below, darker above */
+  --x-color-primary-50: color-mix(in srgb, var(--tuwa-text-accent) 6%, #ffffff);
+  --x-color-primary-100: color-mix(in srgb, var(--tuwa-text-accent) 12%, #ffffff);
+  --x-color-primary-200: color-mix(in srgb, var(--tuwa-text-accent) 26%, #ffffff);
+  --x-color-primary-300: color-mix(in srgb, var(--tuwa-text-accent) 44%, #ffffff);
+  --x-color-primary-400: color-mix(in srgb, var(--tuwa-text-accent) 66%, #ffffff);
+  --x-color-primary-500: color-mix(in srgb, var(--tuwa-text-accent) 86%, #ffffff);
+  --x-color-primary-600: var(--tuwa-text-accent);
+  --x-color-primary-700: color-mix(in srgb, var(--tuwa-text-accent) 86%, #101014);
+  --x-color-primary-800: color-mix(in srgb, var(--tuwa-text-accent) 70%, #101014);
+  --x-color-primary-900: color-mix(in srgb, var(--tuwa-text-accent) 54%, #101014);
+  --x-color-primary-950: color-mix(in srgb, var(--tuwa-text-accent) 38%, #101014);
+
+  /* Scanlines, the rule of Nova's `.tuwa-scanlines`: a line of --tuwa-scanline every 4px, still and under the content, so
+     a surface of docs-ui and a dialog of Nova show the same lines. A variable as well, for the parts of Nextra docs-ui
+     styles by selector; with an older Nova, which has no --tuwa-scanline, there are none */
+  --tuwa-docs-scan: repeating-linear-gradient(to bottom, var(--tuwa-scanline, transparent) 0 1px, transparent 1px 4px);
+}
+
+/* Faint lines across a surface (a header, a page): see --tuwa-docs-scan */
+.tuwa-docs-scan {
+  background-image: var(--tuwa-docs-scan);
 }
 
 .tuwa-footer-border {
@@ -93,51 +118,38 @@ html {
   border-top-width: 1px;
 }
 
-/* Nextra sidebar footer (theme switcher & collapse button container) in dark mode */
-.dark .nextra-sidebar-footer,
-html.dark .nextra-sidebar-footer {
-  background-color: #0a0e27 !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.dark .nextra-sidebar,
-html.dark .nextra-sidebar {
-  background-color: #0a0e27 !important;
-}
-
-/* Override Nextra purple callouts & borders with TUWA signature blue */
+/* Nextra's callouts of the `important` kind and other purple parts take the accent: TUWA has no purple */
 .nextra-callout.x\:border-purple-600,
 .nextra-callout[class*='border-purple'],
 .x\:border-purple-600,
 .x\:dark\:border-purple-600,
 [class*='border-purple'] {
-  border-color: #0052ff !important;
+  border-color: var(--tuwa-primary) !important;
 }
 .nextra-callout.x\:border-purple-600 svg,
 .nextra-callout[class*='border-purple'] svg,
 .x\:text-purple-600,
 .x\:dark\:text-purple-400,
 [class*='text-purple'] {
-  color: #38bdf8 !important;
-  fill: #38bdf8 !important;
+  color: var(--tuwa-primary) !important;
+  fill: var(--tuwa-primary) !important;
 }
 .nextra-callout.x\:border-purple-600,
 .nextra-callout[class*='bg-purple'],
 .x\:bg-purple-100 {
-  background-color: rgba(0, 82, 255, 0.08) !important;
+  background-color: color-mix(in srgb, var(--tuwa-primary) 8%, transparent) !important;
 }
 .dark .nextra-callout.x\:border-purple-600,
 .dark .nextra-callout[class*='dark:bg-purple'],
 .dark .x\:dark\:bg-purple-900\/30,
 [class*='dark:bg-purple'] {
-  background-color: rgba(0, 82, 255, 0.12) !important;
+  background-color: color-mix(in srgb, var(--tuwa-primary) 12%, transparent) !important;
 }
 
-.dark hr.nextra-border,
-html.dark hr.nextra-border,
-.dark .nextra-border,
-html.dark .nextra-border {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+/* The lines of Nextra (the navbar, the sidebar, rules) in the line colour of paper and ink */
+hr.nextra-border,
+.nextra-border {
+  border-color: var(--tuwa-border-primary) !important;
 }
 
 .tuwa-footer-description {
@@ -174,48 +186,32 @@ html.dark .nextra-border {
 
 .nextra-sidebar a[data-active] {
   color: var(--tuwa-primary) !important;
-  background-color: rgb(0 82 255 / 0.1) !important;
-  border-color: var(--tuwa-primary) !important;
-}
-
-.dark .nextra-sidebar a[data-active] {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(56 189 248 / 0.1) !important;
+  background-color: color-mix(in srgb, var(--tuwa-primary) 10%, transparent) !important;
   border-color: var(--tuwa-primary) !important;
 }
 
 .nextra-sidebar a:hover {
   color: var(--tuwa-primary) !important;
-  background-color: rgb(0 82 255 / 0.05) !important;
-}
-
-.dark .nextra-sidebar a:hover {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(56 189 248 / 0.05) !important;
+  background-color: color-mix(in srgb, var(--tuwa-primary) 5%, transparent) !important;
 }
 
 .nextra-search input {
-  border-color: rgb(229 231 235);
-  transition: all 0.2s ease;
+  border-color: var(--tuwa-border-primary);
+  transition: border-color 0.2s ease;
   border-radius: var(--tuwa-rounded-corners);
 }
 
-.nextra-search input:focus {
+/* Focus is a 2px outline in the accent, as everywhere in paper and ink, not a soft ring */
+.nextra-search input:focus-visible {
   border-color: var(--tuwa-primary) !important;
-  box-shadow: 0 0 0 3px rgb(0 82 255 / 0.15) !important;
-}
-
-.dark .nextra-search input:focus {
-  border-color: var(--tuwa-primary) !important;
-  box-shadow: 0 0 0 3px rgb(56 189 248 / 0.15) !important;
+  box-shadow: none !important;
+  outline: 2px solid var(--tuwa-text-accent);
+  outline-offset: 2px;
 }
 
 .nextra-breadcrumb,
 .nextra-breadcrumbs {
-  font-family: var(
-    --tuwa-font-mono,
-    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
-  ) !important;
+  font-family: var(--tuwa-font-mono) !important;
 }
 
 article h1,
@@ -224,10 +220,7 @@ article h3,
 article h4,
 article h5,
 article h6 {
-  font-family: var(
-    --tuwa-font-mono,
-    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
-  ) !important;
+  font-family: var(--tuwa-font-mono) !important;
   color: var(--tuwa-text-primary) !important;
   @apply tuwadocs:tracking-tight;
 }
@@ -257,18 +250,15 @@ article h6 {
 }
 
 .nextra-code button:hover {
-  background-color: rgba(0, 0, 0, 0.06) !important;
+  background-color: color-mix(in srgb, var(--tuwa-text-primary) 6%, transparent) !important;
   color: var(--tuwa-primary) !important;
 }
 
-.dark .nextra-code button:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #38bdf8 !important;
-}
-
+/* Quasar's dashboard hands the links of its cards (articles too) their own colours back against this rule: it keeps its
+   `!important` */
 article a {
   color: var(--tuwa-primary) !important;
-  text-decoration-color: rgba(0, 82, 255, 0.3);
+  text-decoration-color: color-mix(in srgb, var(--tuwa-primary) 35%, transparent);
   transition: all 0.2s ease;
 }
 
@@ -277,33 +267,9 @@ article a:hover {
   text-decoration-color: var(--tuwa-secondary);
 }
 
-.dark article a {
-  color: #38bdf8 !important;
-  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
-}
-
-.dark article a:hover {
-  color: #7dd3fc !important;
-  text-decoration-color: #7dd3fc !important;
-}
-
-.dark .nextra-toc a:hover {
-  color: #38bdf8 !important;
-}
-
-.dark .nextra-toc a[data-active] {
-  color: #38bdf8 !important;
-  border-color: #38bdf8 !important;
-}
-
-.dark .x\:text-primary-600,
-.dark [class*='text-primary-600'] {
-  color: #38bdf8 !important;
-}
-
 .nextra-callout[class*='border-blue-'] {
   border-color: var(--tuwa-primary) !important;
-  background: rgb(0 82 255 / 0.05) !important;
+  background: color-mix(in srgb, var(--tuwa-primary) 5%, transparent) !important;
 }
 
 .nextra-callout[class*='border-yellow-'] {
@@ -343,7 +309,7 @@ article .nextra-border a:hover {
 }
 
 .nextra-hamburger:hover {
-  background-color: rgb(0 82 255 / 0.1) !important;
+  background-color: color-mix(in srgb, var(--tuwa-primary) 10%, transparent) !important;
 }
 
 .nextra-toc .nextra-border a {
@@ -354,9 +320,28 @@ article .nextra-border a:hover {
   color: var(--tuwa-secondary) !important;
 }
 
+/* The classes of Nextra with a radius of their own rather than its variables: square as well. A shape that was a circle
+   (the ring of the back-to-top arrow) follows --tuwa-rounded-full, square in Nova and round again where an app sets it */
+.x\:rounded {
+  border-radius: var(--tuwa-rounded-corners);
+}
+
+.x\:rounded-t {
+  border-top-left-radius: var(--tuwa-rounded-corners);
+  border-top-right-radius: var(--tuwa-rounded-corners);
+}
+
+.x\:rounded-full {
+  border-radius: var(--tuwa-rounded-full);
+}
+
+:not(pre) > code.nextra-code:not([class*='twoslash-']) {
+  border-radius: var(--tuwa-rounded-corners);
+}
+
 /* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security */
 .tuwadocs-policy-title {
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
 }
 
 .tuwadocs-policy {
@@ -372,7 +357,7 @@ article .nextra-border a:hover {
 .tuwadocs-policy h2,
 .tuwadocs-policy h3 {
   color: var(--tuwa-text-primary);
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
   font-weight: 700;
   letter-spacing: -0.01em;
   scroll-margin-top: 6rem;
@@ -456,7 +441,7 @@ article .nextra-border a:hover {
   border-radius: var(--tuwa-rounded-corners);
   background: var(--tuwa-bg-muted);
   padding: 0.1em 0.35em;
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
   font-size: 0.875em;
 }
 
@@ -955,12 +940,11 @@ article a[href^='http']:after {
   }
 }
 
-html.dark {
-  background-color: #0a0e27;
-}
-
-html.dark body {
-  background-color: #0a0e27;
+/* The page is paper in both themes. A site may paint its body with --tuwa-bg-primary, which Nova makes the raised surface
+   in light; outside a layer, this holds over a utility class on the body */
+html,
+body {
+  background-color: var(--tuwa-docs-paper);
 }
 
 article:focus {
@@ -1432,7 +1416,7 @@ article:focus {
 
 /*
  * What the page of a documentation site takes for granted. Nova Core no longer sets any of this on its host: it would be a
- * surprise on another site. Ukrainian needs its tracking reset, as tight tracking makes Cyrillic glyphs collide.
+ * surprise on another site.
  */
 html {
   scrollbar-gutter: stable;
@@ -1443,38 +1427,30 @@ html {
     font-family: var(--tuwa-font-sans);
   }
 
-  [class*='font-mono'] {
+  /* Monospace runs tight in one line by default. A part that sets its own tracking or line height keeps it, as Nova
+     does for its own parts: the caps labels of paper and ink are spaced 0.12em, and a block of code needs its lines */
+  [class*='font-mono']:not([class*='tracking-']) {
     letter-spacing: -0.025em !important;
+  }
+
+  [class*='font-mono']:not([class*='leading-']) {
     line-height: 1 !important;
   }
 
-  /* Reset negative tracking for Cyrillic / Ukrainian to prevent glyph collision */
-  :lang(uk) [class*='font-mono'],
-  html[lang='uk'] [class*='font-mono'],
-  html[lang^='uk'] [class*='font-mono'],
-  [lang='uk'] [class*='font-mono'],
-  [lang^='uk'] [class*='font-mono'] {
+  /* Ukrainian: tight tracking makes Cyrillic glyphs collide, so monospace and headings that set no tracking, or a tight
+     one, run at the normal tracking. A label spaced wider keeps its spacing */
+  :lang(uk) :is([class*='font-mono'], h1, h2, h3, h4, h5, h6):not([class*='tracking-']),
+  :lang(uk) :is([class*='font-mono'], h1, h2, h3, h4, h5, h6)[class*='tracking-tight'] {
     letter-spacing: normal !important;
   }
 
-  :lang(uk) h1,
-  :lang(uk) h2,
-  :lang(uk) h3,
-  :lang(uk) h4,
-  :lang(uk) h5,
-  :lang(uk) h6,
-  html[lang='uk'] h1,
-  html[lang='uk'] h2,
-  html[lang='uk'] h3,
-  html[lang='uk'] h4,
-  html[lang='uk'] h5,
-  html[lang='uk'] h6,
-  html[lang^='uk'] h1,
-  html[lang^='uk'] h2,
-  html[lang^='uk'] h3,
-  html[lang^='uk'] h4,
-  html[lang^='uk'] h5,
-  html[lang^='uk'] h6 {
+  /* Chinese has no capitals, and spacing CJK glyphs apart breaks up the words: a monospace caps label shows as written,
+     at the normal tracking. Nova's own parts are left to Nova */
+  :lang(zh)
+    :is([class*='font-mono'], [class*='font-geist-mono'])[class*='uppercase']:not(
+      :is([class*='novacore:'], [class*='novacon:'], [class*='novatx:'], [class*='novapay:'])
+    ) {
+    text-transform: none !important;
     letter-spacing: normal !important;
   }
 }
