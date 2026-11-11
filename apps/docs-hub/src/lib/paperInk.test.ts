@@ -306,6 +306,21 @@ describe('the paper of the documentation sites', () => {
     );
   });
 
+  // Nextra 4 marks the current page of its sidebar with the class `active` on the item, not with a `data-active`
+  // attribute: a rule on `[data-active]` matches nothing and leaves the pale accent block of Nextra in its place
+  it('draws the current page of the sidebar as a block of ink, on the item Nextra marks', () => {
+    const sidebar = read(path.join(docsUi, 'node_modules/nextra-theme-docs/dist/components/sidebar.js'));
+    expect(sidebar).toMatch(/jsxs?\("li", \{ className: t3/);
+    expect(sidebar).toMatch(/cn\(\{\s*open,\s*active\s*\}\)/);
+    expect(sidebar).not.toContain('data-active');
+    const current = '.nextra-sidebar li.active > :is(a, button), .nextra-mobile-nav li.active > :is(a, button)';
+    expect(valueOf(current, 'background-color')).toBe('var(--tuwa-text-primary) !important');
+    expect(valueOf(current, 'color')).toBe('var(--tuwa-docs-paper) !important');
+    expect(rules.filter((rule) => /\.nextra-(sidebar|mobile-nav)\S*[^,]*\[data-active\]/.test(rule.selector))).toEqual(
+      [],
+    );
+  });
+
   // Nextra's links, active items and focus take the accent of Nova, in each theme
   it('builds the accent scale of Nextra on the accent of Nova', () => {
     expect(valueOf(':root, .dark', '--x-color-primary-600')).toBe('var(--tuwa-text-accent)');
