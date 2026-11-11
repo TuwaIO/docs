@@ -150,7 +150,7 @@ export async function SectionLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <NextraLocalizedShell logo={logo} pageMap={pageMap}>
-        <NextTopLoader color="#0052ff" shadow="0 0 10px #0052ff,0 0 5px #0052ff" showSpinner={false} />
+        <NextTopLoader color="var(--tuwa-text-accent)" shadow={false} showSpinner={false} />
         {children}
       </NextraLocalizedShell>
     </div>

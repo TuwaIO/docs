@@ -20,6 +20,9 @@ export const en: DocsHubLabels = {
     openMenu: 'Open navigation menu',
     closeMenu: 'Close navigation menu',
     mobileNavAria: 'Documentation sections',
+    mainNavAria: 'Main navigation',
+    homeAria: 'TUWA Docs, main page',
+    skipToContent: 'Skip to content',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.en.footer,

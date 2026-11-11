@@ -25,7 +25,7 @@ export function NotFoundContent() {
   const { t } = useI18n();
 
   return (
-    <div className="relative z-10 pt-28 sm:pt-32 pb-16">
+    <div className="relative z-10 pt-14 sm:pt-16 pb-16">
       <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-12">
         <header className="text-center max-w-2xl mx-auto">
           <p className="font-geist-mono text-6xl sm:text-8xl font-bold tracking-tight text-[var(--tuwa-text-tertiary)]/60">

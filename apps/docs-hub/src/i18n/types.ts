@@ -224,6 +224,12 @@ export interface DocsHubLabels {
     openMenu: string;
     closeMenu: string;
     mobileNavAria: string;
+    /** Accessible name of the links of the header */
+    mainNavAria: string;
+    /** Accessible name of the logo link to the main page */
+    homeAria: string;
+    /** The link past the header to the content, the first stop of the keyboard */
+    skipToContent: string;
   };
   footer: {
     description: string;

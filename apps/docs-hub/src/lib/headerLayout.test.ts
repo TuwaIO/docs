@@ -105,34 +105,59 @@ describe('the Nextra header of @tuwaio/docs-ui', () => {
 describe('the header of the hub pages', () => {
   const source = readFileSync(path.resolve(__dirname, '../components/Header.tsx'), 'utf8');
   const headerClasses = source.match(/<header className="([^"]+)"/)?.[1].split(/\s+/) ?? [];
+  const headerMarkup = source.slice(source.indexOf('<header'), source.indexOf('</header>'));
+  const drawerMarkup = source.slice(source.indexOf('id="mobile-menu"'));
 
-  it('blurs the page under it at every width and is nearly opaque on phones', () => {
-    expect(headerClasses).toContain('backdrop-blur-xl');
-    const phoneOpacity = (variant: string) =>
-      Number(headerClasses.find((name) => name.startsWith(`${variant}bg-`))?.match(/\/(\d+)$/)?.[1]);
-    expect(phoneOpacity('')).toBeGreaterThanOrEqual(90);
-    expect(phoneOpacity('dark:')).toBeGreaterThanOrEqual(90);
-  });
-
-  it('stays nearly opaque until the inline links show, so phones in landscape do not see the page through it', () => {
-    expect(headerClasses.some((name) => name.startsWith('sm:bg-') || name.startsWith('sm:dark:bg-'))).toBe(false);
+  // Paper and ink: the header is the paper of the page with its scanlines and a line of 1px below, at every width, so
+  // nothing shows through it on a phone or a desktop; no glass, no translucent colour
+  it('is opaque paper with scanlines and a 1px line, with no glass at any width', () => {
     expect(headerClasses).toEqual(
-      expect.arrayContaining([expect.stringMatching(/^lg:bg-/), expect.stringMatching(/^lg:dark:bg-/)]),
+      expect.arrayContaining([
+        'fixed',
+        'h-[56px]',
+        'bg-[var(--tuwa-docs-paper)]',
+        'tuwa-docs-scan',
+        'border-b',
+        'border-[var(--tuwa-border-primary)]',
+      ]),
     );
+    expect(headerClasses.filter((name) => /backdrop-|blur|shadow|\/\d+$|\/\[/.test(name))).toEqual([]);
   });
 
-  it('puts the language before the theme, in the header and in the menu (owner 2026-10-28)', () => {
+  // The language, then the theme (as on every TUWA site), each in its own cell of the header at every width; the menu
+  // of phones holds only the links
+  it('puts the language before the theme, once, in the header, and keeps both out of the menu', () => {
     const order = [...source.matchAll(/<(LocaleSwitcher|ThemeSwitcher)\b/g)].map(([, name]) => name);
-    expect(order).toEqual(['LocaleSwitcher', 'ThemeSwitcher', 'LocaleSwitcher', 'ThemeSwitcher']);
+    expect(order).toEqual(['LocaleSwitcher', 'ThemeSwitcher']);
+    expect(headerMarkup).toContain('<LocaleSwitcher');
+    expect(headerMarkup).toContain('<ThemeSwitcher');
+    expect(drawerMarkup).not.toMatch(/<(LocaleSwitcher|ThemeSwitcher)\b/);
   });
 
   it('switches between the inline links and the menu at one breakpoint, 1024px', () => {
     // Between 768 and 1024px the five links and both switchers need the whole row in Ukrainian; at `md` they touched
     const shown = [...source.matchAll(/"hidden (\w+):flex/g)].map(([, breakpoint]) => breakpoint);
     const hidden = [...source.matchAll(/[`"](\w+):hidden /g)].map(([, breakpoint]) => breakpoint);
-    expect(shown).toEqual(['lg', 'lg']);
+    expect(shown).toEqual(['lg']);
     expect(hidden).toEqual(['lg', 'lg', 'lg']);
     // The menu closes when the window reaches the breakpoint of Tailwind's `lg` (64rem)
     expect(source).toContain("window.matchMedia('(min-width: 64rem)')");
+  });
+
+  // The logo cell is as wide as the flight plan of the main page from 1280px, so the two line up
+  it('gives the logo a cell of the width of the flight plan from 1280px', () => {
+    expect(headerMarkup).toMatch(/className="[^"]*\bxl:w-\[320px\][^"]*"/);
+  });
+});
+
+describe('the frame of the hub pages', () => {
+  const shell = readFileSync(path.resolve(__dirname, '../components/HubShell.tsx'), 'utf8');
+
+  // The first stop of the keyboard is a link past the header to the content
+  it('opens with a link to the content, before the header', () => {
+    const skip = shell.indexOf('href="#content"');
+    expect(skip).toBeGreaterThan(-1);
+    expect(skip).toBeLessThan(shell.indexOf('<Header'));
+    expect(shell).toMatch(/<main id="content"/);
   });
 });

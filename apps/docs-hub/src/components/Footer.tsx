@@ -1,29 +1,34 @@
 'use client';
 
-import { footerPolicies, getPolicyPageUrl } from '@tuwaio/docs-ui';
+import { footerPolicies, getPolicyPageUrl, SiteLogo } from '@tuwaio/docs-ui';
 
 import Link from '@/components/LocaleNextLink';
 import { policyLanguageOf, useI18n } from '@/i18n';
 
-const linkClassName = 'hover:text-[var(--tuwa-text-primary)] transition-colors';
+const policyClassName = 'font-mono text-[11px] leading-[1.3] uppercase tracking-[0.12em] transition-colors';
 
 /**
- * Standalone footer for the Docs Hub, visually separated from main content: the tagline on the left, links to the
- * policies in force on tuwa.io and to the list of all policies (`/policies`) on the right, and the copyright line
- * centered below. On narrow screens everything is centered and the links wrap.
+ * The footer of the hub pages, in paper and ink: a rule of ink above; the logo and the description of TUWA on the left;
+ * the policies in force on tuwa.io and the list of all policies (`/policies`, in ink) on the right, in mono caps; the
+ * copyright and the address of the hub in mono below a line of 1px. On phones the parts stack and the links wrap.
+ *
+ * @returns The footer.
  */
 export function Footer() {
   const { locale, t } = useI18n();
   const policyLanguage = policyLanguageOf(locale);
 
   return (
-    <footer className="relative z-10 border-t border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/30 dark:bg-[#030303]/20 backdrop-blur-sm">
-      <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 py-8 flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[var(--tuwa-text-tertiary)] text-center sm:text-left">{t.footer.description}</p>
+    <footer className="relative z-10 mt-[120px] border-t border-[var(--tuwa-text-primary)]">
+      <div className="mx-auto max-w-[1120px] px-4 pt-7 pb-9 md:px-8 md:pt-8 md:pb-10 xl:px-12 xl:pb-11 min-[1600px]:max-w-[1232px] min-[1600px]:px-14">
+        <div className="grid gap-[22px] md:grid-cols-2 md:items-start">
+          <div className="grid justify-items-start gap-3.5">
+            <SiteLogo width={57} />
+            <p className="m-0 max-w-[460px] text-sm text-[var(--tuwa-text-secondary)]">{t.footer.description}</p>
+          </div>
           <nav
             aria-label={t.footer.policiesAriaLabel}
-            className="flex flex-wrap items-center justify-center sm:justify-end gap-x-4 gap-y-2 text-xs text-[var(--tuwa-text-tertiary)]"
+            className="flex flex-wrap content-start gap-x-5 gap-y-2.5 md:justify-end"
           >
             {footerPolicies.map((policy) => (
               <a
@@ -31,18 +36,21 @@ export function Footer() {
                 href={getPolicyPageUrl(policy.slug, undefined, policyLanguage)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={linkClassName}
+                className={`${policyClassName} font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]`}
               >
                 {t.footer.policyTitles[policy.slug] ?? policy.title}
               </a>
             ))}
-            <Link href="/policies" className={`${linkClassName} font-semibold`}>
+            <Link href="/policies" className={`${policyClassName} font-bold text-[var(--tuwa-text-primary)]`}>
               {t.footer.allPolicies}
             </Link>
           </nav>
         </div>
-        <p className="border-t border-[var(--tuwa-border-primary)]/20 dark:border-white/[0.06] pt-6 text-center text-xs text-[var(--tuwa-text-tertiary)]">
-          © 2025–{new Date().getFullYear()} TUWA. {t.footer.copyright}
+        <p className="mt-7 flex flex-wrap justify-between gap-3 border-t border-[var(--tuwa-border-primary)] pt-4 font-mono text-xs leading-[1.4] text-[var(--tuwa-text-secondary)]">
+          <span>
+            © 2025–{new Date().getFullYear()} TUWA. {t.footer.copyright}
+          </span>
+          <span>docs.tuwa.io</span>
         </p>
       </div>
     </footer>

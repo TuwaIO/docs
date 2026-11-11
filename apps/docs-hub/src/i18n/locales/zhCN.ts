@@ -20,6 +20,9 @@ export const zhCN: DocsHubLabels = {
     openMenu: '打开导航菜单',
     closeMenu: '关闭导航菜单',
     mobileNavAria: '文档分区',
+    mainNavAria: '主导航',
+    homeAria: 'TUWA Docs 首页',
+    skipToContent: '跳到内容',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels['zh-CN'].footer,

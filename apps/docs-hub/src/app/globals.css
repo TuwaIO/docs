@@ -12,7 +12,8 @@
   --font-mono: var(--tuwa-font-mono);
 }
 
-/* The gradient of the titles of the hub pages, which docs-ui no longer carries */
+/* The gradient of the titles of the hub pages, which docs-ui no longer carries. The titles are transparent text over it:
+   it goes with the last of them, when their pages are redrawn in paper and ink (without it they would not show) */
 :root {
   --tuwa-hero-gradient-from: #0052ff;
   --tuwa-hero-gradient-via: #1d4ed8;

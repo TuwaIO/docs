@@ -261,6 +261,48 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
   });
 });
 
+/** The parts of the hub redrawn in paper and ink so far; the list grows with each part until it is the whole hub. */
+const hubRedrawn = [
+  'components/Header.tsx',
+  'components/Footer.tsx',
+  'components/HubShell.tsx',
+  'components/PageBackground.tsx',
+  'app/rootDocument.tsx',
+];
+
+/** What breaks paper and ink in a component of the hub: its Tailwind classes, inline styles and colours. */
+function hubViolations(file: string) {
+  const source = withoutJsComments(read(file));
+  const classes = [...source.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\})/g)].flatMap((match) =>
+    (match[1] ?? match[2] ?? '')
+      .replace(/\$\{[^}]*\}/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean),
+  );
+  const found = classes.map(classViolation).filter((violation): violation is string => !!violation);
+  if (/(linear|radial|conic)-gradient\(/.test(source)) found.push('a gradient in a style');
+  for (const match of source.matchAll(/\b(boxShadow|backdropFilter|filter|textShadow)\s*:\s*(['"`])([^'"`]*)\2/g))
+    if (match[3] !== 'none') found.push(`${match[1]}: ${match[3]}`);
+  for (const colour of [/#0a0e27/i, /#030303/i, /#38bdf8/i, /\bStarryBackground\b/, /\bdark:bg-\[#/])
+    if (colour.test(source)) found.push(`${colour}`);
+  return found;
+}
+
+describe('paper and ink in the hub', () => {
+  it.each(hubRedrawn)('has no gradients, shadows, blur, rounded corners or cosmic colours in %s', (file) => {
+    expect(hubViolations(path.resolve(__dirname, '..', file))).toEqual([]);
+  });
+
+  // The guard itself: it would catch what the hub had before
+  it('flags the glass header and the starry background of the look before', () => {
+    expect(classViolation('backdrop-blur-xl')).toBeDefined();
+    expect(classViolation('lg:dark:bg-gradient-to-r')).toBeDefined();
+    expect(classViolation('rounded-full')).toBeDefined();
+    expect(classViolation('shadow-xl')).toBeDefined();
+    expect(classViolation('rounded-none')).toBeUndefined();
+  });
+});
+
 describe('the paper of the documentation sites', () => {
   const rules = rulesOf(read(siteCssFile));
   const valueOf = (selector: string, property: string) =>

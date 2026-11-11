@@ -43,7 +43,7 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
 
-      <div className="relative z-10 pt-28 sm:pt-32 pb-16">
+      <div className="relative z-10 pt-14 sm:pt-16 pb-16">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6">
           <HeroSection />
           <LayerTimeline releases={getReleases()} packages={getPackageDetails()} />

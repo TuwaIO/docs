@@ -35,7 +35,7 @@ export function ComparisonsContent() {
   const verified = formatCheckDate(verifiedAsOf(), locale);
 
   return (
-    <div className="relative z-10 pt-28 sm:pt-32 pb-16">
+    <div className="relative z-10 pt-14 sm:pt-16 pb-16">
       <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-16 sm:gap-20">
         {/* Hero */}
         <header className="text-center max-w-3xl mx-auto">

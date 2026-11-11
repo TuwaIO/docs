@@ -20,6 +20,9 @@ export const uk: DocsHubLabels = {
     openMenu: 'Відкрити меню навігації',
     closeMenu: 'Закрити меню навігації',
     mobileNavAria: 'Розділи документації',
+    mainNavAria: 'Основна навігація',
+    homeAria: 'TUWA Docs, головна сторінка',
+    skipToContent: 'Перейти до змісту',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.uk.footer,

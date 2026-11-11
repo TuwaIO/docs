@@ -1,27 +1,42 @@
+'use client';
+
 import { SiteLogo } from '@tuwaio/docs-ui';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
+import { useI18n } from '@/i18n';
 
 import { Footer } from './Footer';
 import { Header } from './Header';
 
-const navbarLogo = (
-  <Link href="/" className="hover:opacity-80 transition-opacity duration-200" aria-label="TUWA Docs">
-    <SiteLogo className="tuwadocs:transition-opacity tuwadocs:duration-300" />
-  </Link>
-);
-
 /**
  * The frame of the React pages of the Docs Hub (the main page, comparisons, configurator, playground, policies and the
- * 404 page): the fixed header with the logo, the content and the footer.
+ * 404 page): a link past the header to the content, first for the keyboard, the fixed header with the logo, the content
+ * under the header and the footer.
+ *
  * @param props.children - The page.
+ * @returns The frame with the page.
  */
 export function HubShell({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
+  const navbarLogo = (
+    <Link href="/" aria-label={t.nav.homeAria} className="flex items-center px-4 xl:pl-6">
+      <SiteLogo />
+    </Link>
+  );
+
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative flex min-h-screen flex-col">
+      <a
+        href="#content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[60] focus:border focus:border-[var(--tuwa-text-primary)] focus:bg-[var(--tuwa-docs-raised)] focus:px-4 focus:py-2 focus:font-mono focus:text-xs focus:font-bold focus:uppercase focus:tracking-[0.12em] focus:text-[var(--tuwa-text-primary)]"
+      >
+        {t.nav.skipToContent}
+      </a>
       <Header logo={navbarLogo} />
-      <main className="flex-1">{children}</main>
+      <main id="content" className="flex-1 pt-[56px]">
+        {children}
+      </main>
       <Footer />
     </div>
   );

@@ -173,13 +173,15 @@ apps/docs-hub/
 │   │   ├── comparisons/             # Radar, criteria matrix, methodology of /comparisons
 │   │   ├── configurator/            # Options, code blocks (Shiki), file tabs, full and compact Stack Configurator
 │   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
-│   │   ├── Footer.tsx               # Footer of the main screen
-│   │   ├── Header.tsx               # Fixed glassmorphic header + theme switcher
+│   │   ├── Footer.tsx               # Footer of the hub pages: logo, description, policies in mono caps, copyright
+│   │   ├── Header.tsx               # Fixed paper header: logo, links, language and theme cells; links-only menu below 1024px
 │   │   ├── HeroSection.tsx          # Gradient title + subtitle
+│   │   ├── HubShell.tsx             # Frame of the hub pages: skip link, header, main, footer
 │   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
 │   │   ├── PackageDialog.tsx        # Details of an npm package (Dialog of @tuwaio/nova-core)
 │   │   ├── PackagePreview.tsx       # Hover preview of an npm package
+│   │   ├── PageBackground.tsx       # Paper with Nova's scanlines under the hub pages
 │   │   ├── playground/              # Studio: controls, stage, inspector; nova/: copyable Nova customization
 │   │   ├── QuickStartSection.tsx    # Cosmos Playground CLI quick start, compact Stack Configurator
 │   │   ├── QuasarApiReference.tsx   # Scalar reference of the Quasar API (client only, not in the barrel)

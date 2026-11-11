@@ -51,7 +51,7 @@ export default async function PlaygroundPage({ params }: LanguagePageProps) {
       <PageBackground />
 
       {/* Above the footer (z-10): the fixed Nova toasts of the stage render inside this layer */}
-      <div className="relative z-20 pt-28 sm:pt-32 pb-16">
+      <div className="relative z-20 pt-14 sm:pt-16 pb-16">
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6">
           <PlaygroundHeader />
           <PlaygroundLoader />
