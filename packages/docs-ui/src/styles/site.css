@@ -48,15 +48,6 @@
   --nextra-primary-hue: 221deg;
   --nextra-primary-saturation: 100%;
   --nextra-primary-lightness: 50%;
-
-  --tuwa-footer-border: rgb(229 231 235);
-  --tuwa-footer-text-primary: rgb(75 85 99);
-  --tuwa-footer-text-secondary: rgb(107 114 128);
-  --tuwa-footer-text-muted: rgb(156 163 175);
-  --tuwa-footer-link-color: rgb(107 114 128);
-  --tuwa-footer-link-hover: var(--tuwa-primary);
-  --tuwa-footer-npm-hover: rgb(220 38 38);
-  --tuwa-footer-github-hover: rgb(31 41 55);
 }
 
 .dark {
@@ -68,26 +59,28 @@
   /* Set again, so that they follow the accent of the theme wherever the class sits */
   --tuwa-primary: var(--tuwa-text-accent);
   --tuwa-secondary: #93c5fd;
-  --tuwa-footer-link-hover: var(--tuwa-primary);
 
   /* #60a5fa */
   --nextra-primary-hue: 213deg;
   --nextra-primary-saturation: 94%;
   --nextra-primary-lightness: 68%;
-
-  --tuwa-footer-border: rgba(255, 255, 255, 0.08);
-  --tuwa-footer-text-primary: rgb(209 213 219);
-  --tuwa-footer-text-secondary: rgb(156 163 175);
-  --tuwa-footer-text-muted: rgb(107 114 128);
-  --tuwa-footer-link-color: rgb(156 163 175);
-  --tuwa-footer-npm-hover: rgb(248 113 113);
-  --tuwa-footer-github-hover: rgb(243 244 246);
 }
 
 /* Values built from the tokens of the theme, declared on `.dark` as well: a variable resolves where it is declared, and
    the class may sit below the root */
 :root,
 .dark {
+  /* The footer in the inks of paper and ink: secondary for its texts and links, full ink under the pointer (npm and
+     GitHub too, no brand colours) */
+  --tuwa-footer-border: var(--tuwa-border-primary);
+  --tuwa-footer-text-primary: var(--tuwa-text-secondary);
+  --tuwa-footer-text-secondary: var(--tuwa-text-tertiary);
+  --tuwa-footer-text-muted: var(--tuwa-text-tertiary);
+  --tuwa-footer-link-color: var(--tuwa-text-secondary);
+  --tuwa-footer-link-hover: var(--tuwa-text-primary);
+  --tuwa-footer-npm-hover: var(--tuwa-text-primary);
+  --tuwa-footer-github-hover: var(--tuwa-text-primary);
+
   /* The scale Nextra colours its links, active items and focus with, on the accent of Nova (#0052ff in light, #60a5fa in
      dark) and shaped as Nextra shapes its own: the accent at 600, lighter below, darker above */
   --x-color-primary-50: color-mix(in srgb, var(--tuwa-text-accent) 6%, #ffffff);
@@ -164,6 +157,7 @@ hr.nextra-border,
 
 .tuwa-footer-copyright {
   @apply tuwadocs:text-xs;
+  font-family: var(--tuwa-font-mono);
   color: var(--tuwa-footer-text-muted);
 }
 
@@ -174,6 +168,11 @@ hr.nextra-border,
 
 .tuwa-footer-link:hover {
   color: var(--tuwa-footer-link-hover);
+}
+
+/* The list of all policies, in ink */
+.tuwa-footer-link--all {
+  color: var(--tuwa-text-primary);
 }
 
 .tuwa-footer-link--npm:hover {
@@ -891,15 +890,38 @@ article a[href^='http']:after {
   filter: hue-rotate(210deg) saturate(1.5);
 }
 
-/* Phones: the sticky Nextra header is opaque in the theme background (--nextra-bg, set by the `Head` of Nextra; white
-   without it), so the page never shows through it while it scrolls under the header. Its blur layer, 70% of the same
-   color, adds nothing on top. It covers portrait phones (below 768px, where the desktop navbar of Nextra begins) and
-   touch screens up to 1024px (phones in landscape, tablets); a desktop window keeps the glass look at every width. */
-@media (max-width: 767.98px), (pointer: coarse) and (max-width: 1023.98px) {
-  .nextra-navbar {
-    backdrop-filter: none;
-    background: rgb(var(--nextra-bg, 255 255 255));
-  }
+/* The sticky Nextra header is opaque paper at every width (--nextra-bg, set by the `Head` of Nextra to the paper of each
+   theme): the page never shows through it while it scrolls under the header. Its glass layer becomes the paper with
+   faint scanlines and a line of 1px below, with no blur */
+.nextra-navbar {
+  backdrop-filter: none;
+  background: rgb(var(--nextra-bg, 242, 241, 238));
+}
+.nextra-navbar-blur {
+  backdrop-filter: none;
+  background-color: rgb(var(--nextra-bg, 242, 241, 238));
+  background-image: var(--tuwa-docs-scan);
+}
+
+/* The top-level pages in the Nextra header: mono caps, as the labels of paper and ink; ink on the current page */
+.nextra-navbar nav :is(a, button)[class*='x:whitespace-nowrap'] {
+  font-family: var(--tuwa-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tuwa-text-secondary);
+}
+.nextra-navbar nav :is(a, button)[class*='x:whitespace-nowrap']:hover,
+.nextra-navbar nav a[aria-current='true'],
+.nextra-navbar nav a[aria-current='page'] {
+  color: var(--tuwa-text-primary);
+}
+
+/* The footer of Nextra stands on the paper, below a line of 1px, not on its grey band */
+[class*='x:bg-gray-100'][class*='x:dark:bg-neutral-900'] {
+  background-color: var(--tuwa-docs-paper);
+  border-top: 1px solid var(--tuwa-border-strong);
 }
 
 @media (max-width: 768px) {

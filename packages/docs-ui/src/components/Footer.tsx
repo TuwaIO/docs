@@ -40,10 +40,11 @@ export interface FooterProps extends NavProps {
 }
 
 /**
- * The footer of a TUWA documentation site: the `Footer` of `nextra-theme-docs` with the logo, external links, the
- * TUWA description and the license on the left, links to the policies in force on tuwa.io (`footerPolicies`) and to
- * the list of all policies on the docs hub on the right, and the copyright line (the current year is read on render;
- * while a prerendered page hydrates, the year of its HTML stays without a hydration error) centered below; on narrow
+ * The footer of a TUWA documentation site, in paper and ink: the `Footer` of `nextra-theme-docs` on the paper with a
+ * line of 1px above, the logo and external links (mono caps, pixel marks), the TUWA description and the license on
+ * the left, links to the policies in force on tuwa.io (`footerPolicies`) and to the list of all policies on the docs
+ * hub on the right, in mono caps (Chinese as written), and the copyright line in mono below (the current year is read
+ * on render; while a prerendered page hydrates, the year of its HTML stays without a hydration error); on narrow
  * screens everything is centered. Render it in the `footer` prop of the Nextra `Layout`.
  *
  * @param props - See {@link FooterProps}.
@@ -56,7 +57,7 @@ export function Footer({ links, logo, labels, policyLanguage = 'en' }: FooterPro
         <div className="tuwadocs:mb-6 tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:w-full tuwadocs:justify-between">
           <div className="tuwadocs:flex tuwadocs:items-center">{logo}</div>
 
-          <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:text-sm">
+          <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-4 tuwadocs:font-mono tuwadocs:text-xs tuwadocs:uppercase tuwadocs:tracking-[0.12em]">
             {(links ?? baseFooterLinks).map(({ title, href, image, className }) => (
               <a
                 key={title}
@@ -86,7 +87,7 @@ export function Footer({ links, logo, labels, policyLanguage = 'en' }: FooterPro
 
             <nav
               aria-label={labels?.policiesAriaLabel ?? 'Policies'}
-              className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-center tuwadocs:sm:justify-end tuwadocs:gap-x-4 tuwadocs:gap-y-2 tuwadocs:text-xs"
+              className="tuwa-footer-policies tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-center tuwadocs:sm:justify-end tuwadocs:gap-x-4 tuwadocs:gap-y-2 tuwadocs:font-mono tuwadocs:text-[11px] tuwadocs:uppercase tuwadocs:tracking-[0.12em]"
             >
               {footerPolicies.map((policy) => (
                 <a
@@ -103,14 +104,14 @@ export function Footer({ links, logo, labels, policyLanguage = 'en' }: FooterPro
                 href={POLICIES_INDEX_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tuwa-footer-link tuwadocs:font-semibold"
+                className="tuwa-footer-link tuwa-footer-link--all tuwadocs:font-bold"
               >
                 {labels?.allPolicies ?? 'All policies'}
               </a>
             </nav>
           </div>
 
-          <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-center tuwadocs:gap-3 tuwadocs:mt-4 tuwadocs:pt-4 tuwa-footer-border">
+          <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-center tuwadocs:sm:justify-start tuwadocs:gap-3 tuwadocs:mt-4 tuwadocs:pt-4 tuwa-footer-border">
             {/* The year is read on render: a page prerendered in one year and hydrated in the next keeps the year of
                 its HTML instead of failing hydration (one text node, so React accepts the difference) */}
             <div className="tuwa-footer-copyright" suppressHydrationWarning>

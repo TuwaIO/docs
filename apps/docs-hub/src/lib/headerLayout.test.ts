@@ -30,6 +30,14 @@ function mediaBlockOf(css: string, selector: string): { query: string; body: str
   return undefined;
 }
 
+/** The body of a rule of the stylesheet outside any `@media` block, by its exact selector. */
+function topLevelRuleOf(css: string, selector: string): string | undefined {
+  const outside = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/@media[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, '');
+  for (const match of outside.matchAll(/([^{}]+)\{([^{}]*)\}/g))
+    if ((match[1] as string).trim() === selector) return match[2] as string;
+  return undefined;
+}
+
 /** The selector Tailwind writes for a class name: every character other than letters, digits, `_` and `-` escaped. */
 const selectorOf = (className: string) => `.${className.replace(/[^\w-]/g, (char) => `\\${char}`)}`;
 
@@ -37,11 +45,17 @@ describe('the Nextra header of @tuwaio/docs-ui', () => {
   it.each([
     ['source', 'src/styles/site.css'],
     ['build', 'dist/index.css'],
-  ])('is opaque in the theme background on phones in portrait and on touch screens up to 1024px (%s)', (_, file) => {
-    const block = mediaBlockOf(read(file), '.nextra-navbar');
-    expect(block?.query).toBe('(max-width: 767.98px), (pointer: coarse) and (max-width: 1023.98px)');
-    expect(block?.body).toMatch(/background:\s*rgb\(var\(--nextra-bg/);
-    expect(block?.body).not.toMatch(/background:\s*white/);
+  ])('is opaque paper with scanlines and no glass at every width (%s)', (_, file) => {
+    const css = read(file);
+    const navbar = topLevelRuleOf(css, '.nextra-navbar');
+    expect(navbar).toMatch(/backdrop-filter:\s*none/);
+    expect(navbar).toMatch(/background:\s*rgb\(var\(--nextra-bg/);
+    const glass = topLevelRuleOf(css, '.nextra-navbar-blur');
+    expect(glass).toMatch(/backdrop-filter:\s*none/);
+    expect(glass).toMatch(/background-color:\s*rgb\(var\(--nextra-bg/);
+    expect(glass).toMatch(/background-image:\s*var\(--tuwa-docs-scan\)/);
+    // No width brings the glass back
+    expect(mediaBlockOf(css, '.nextra-navbar {')).toBeUndefined();
   });
 
   // The logo and both switches fit one row of the navbar on a 320px phone: the logo is sized by its height there
