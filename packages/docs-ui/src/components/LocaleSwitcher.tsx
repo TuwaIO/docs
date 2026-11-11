@@ -545,8 +545,9 @@ export function LocaleSwitcher({
     }
   };
 
+  // Paper and ink: a frame of 1px, no fill until the pointer is over it
   const defaultStyles =
-    'tuwadocs:bg-black/5 tuwadocs:border-black/5 tuwadocs:hover:bg-black/10 tuwadocs:dark:bg-white/10 tuwadocs:dark:border-white/10 tuwadocs:dark:hover:bg-white/20';
+    'tuwadocs:bg-transparent tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_5%,transparent)]';
 
   // Constant static dimensions to prevent any layout shift across languages
   const staticSize = 'tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem]';
@@ -597,8 +598,8 @@ export function LocaleSwitcher({
         onClick={() => (isOpen ? closeMenu() : openMenu())}
         onKeyDown={handleKeyDown}
         className={cn(
-          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:pl-[2px] tuwadocs:pr-2 tuwadocs:transition-all tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:backdrop-blur-sm tuwadocs:border tuwadocs:motion-reduce:transition-none',
-          'tuwadocs:focus-visible:ring-2 tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)] tuwadocs:focus-visible:outline-none tuwadocs:focus-visible:ring-offset-1 tuwadocs:focus-visible:ring-offset-[var(--tuwa-bg-primary)]',
+          'tuwadocs:group tuwadocs:relative tuwadocs:flex tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:pl-[2px] tuwadocs:pr-2 tuwadocs:transition-colors tuwadocs:duration-300 tuwadocs:ease-in-out tuwadocs:border tuwadocs:motion-reduce:transition-none',
+          'tuwadocs:focus-visible:outline-2 tuwadocs:focus-visible:outline-offset-2 tuwadocs:focus-visible:outline-[var(--tuwa-text-accent)]',
           staticSize,
           defaultStyles,
         )}
@@ -626,7 +627,7 @@ export function LocaleSwitcher({
         </span>
 
         {/* Visible label starts accessible name, full language and action follow (WCAG 2.5.3) */}
-        <span className="tuwadocs:w-5 tuwadocs:text-center tuwadocs:font-mono tuwadocs:text-xs tuwadocs:font-bold tuwadocs:tracking-tight tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:shrink-0">
+        <span className="tuwadocs:w-[1.375rem] tuwadocs:text-center tuwadocs:font-mono tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:uppercase tuwadocs:tracking-[0.12em] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:shrink-0">
           {shortText}
         </span>
         <span className="tuwadocs:sr-only">
@@ -650,7 +651,7 @@ export function LocaleSwitcher({
           aria-activedescendant={`${listboxId}-option-${locales[activeIndex]?.code}`}
           onKeyDown={handleKeyDown}
           className={cn(
-            'tuwadocs:absolute tuwadocs:right-0 tuwadocs:z-50 tuwadocs:min-w-[12rem] tuwadocs:max-h-[min(20rem,60vh)] tuwadocs:overflow-y-auto tuwadocs:overflow-x-hidden tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:bg-[var(--tuwa-bg-primary)]/95 tuwadocs:p-0 tuwadocs:shadow-xl tuwadocs:backdrop-blur-md tuwadocs:outline-none',
+            'tuwadocs:absolute tuwadocs:right-0 tuwadocs:z-50 tuwadocs:min-w-[12rem] tuwadocs:max-h-[min(20rem,60vh)] tuwadocs:overflow-y-auto tuwadocs:overflow-x-hidden tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:p-0 tuwadocs:outline-none',
             resolvedPlacement === 'top' ? 'tuwadocs:bottom-full tuwadocs:mb-1.5' : 'tuwadocs:top-full tuwadocs:mt-1.5',
           )}
         >
@@ -677,20 +678,21 @@ export function LocaleSwitcher({
                   'tuwa-locale-switch__option',
                   isFocused && 'tuwa-locale-switch__option--active',
                   'tuwadocs:relative tuwadocs:flex tuwadocs:w-full tuwadocs:cursor-pointer tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-2.5 tuwadocs:px-3 tuwadocs:py-2 tuwadocs:text-xs tuwadocs:transition-colors tuwadocs:outline-none',
-                  'tuwadocs:focus-visible:ring-1 tuwadocs:focus-visible:ring-inset tuwadocs:focus-visible:ring-[var(--tuwa-text-accent)]',
+                  'tuwadocs:focus-visible:outline-1 tuwadocs:focus-visible:-outline-offset-1 tuwadocs:focus-visible:outline-[var(--tuwa-text-accent)]',
+                  // The chosen language: a flat tint of its flag colour; the highlighted one a little more
                   isSelected
                     ? isFocused
-                      ? 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/20 tuwadocs:via-[var(--glow)]/8 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
-                      : 'tuwadocs:bg-gradient-to-r tuwadocs:from-[var(--glow)]/14 tuwadocs:via-[var(--glow)]/5 tuwadocs:to-transparent tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      ? 'tuwadocs:bg-[color-mix(in_srgb,var(--glow)_14%,transparent)] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
+                      : 'tuwadocs:bg-[color-mix(in_srgb,var(--glow)_10%,transparent)] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:font-bold'
                     : isFocused
-                      ? 'tuwadocs:bg-[var(--tuwa-bg-muted)]/70 tuwadocs:text-[var(--tuwa-text-primary)]'
-                      : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:bg-[var(--tuwa-bg-muted)]/50 tuwadocs:hover:text-[var(--tuwa-text-primary)]',
+                      ? 'tuwadocs:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_5%,transparent)] tuwadocs:text-[var(--tuwa-text-primary)]'
+                      : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_5%,transparent)] tuwadocs:hover:text-[var(--tuwa-text-primary)]',
                 )}
               >
-                {/* Flush left edge bar in the colour of the flag, with its glow */}
+                {/* Flush left edge bar in the colour of the flag */}
                 {isSelected && (
                   <span
-                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
+                    className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:top-0 tuwadocs:bottom-0 tuwadocs:w-[3px] tuwadocs:bg-[var(--glow-line)]"
                     aria-hidden="true"
                   />
                 )}
@@ -708,19 +710,16 @@ export function LocaleSwitcher({
                 <div className="tuwadocs:flex tuwadocs:items-center tuwadocs:gap-1.5 tuwadocs:shrink-0">
                   <span
                     className={cn(
-                      'tuwadocs:font-mono tuwadocs:text-[10px] tuwadocs:uppercase tuwadocs:px-1.5 tuwadocs:py-0.5 tuwadocs:rounded',
+                      'tuwadocs:font-mono tuwadocs:text-[10px] tuwadocs:uppercase tuwadocs:tracking-[0.12em] tuwadocs:px-1.5 tuwadocs:py-0.5 tuwadocs:border',
                       isSelected
-                        ? 'tuwadocs:bg-[var(--glow)]/15 tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:ring-1 tuwadocs:ring-inset tuwadocs:ring-[var(--glow-line)]/40 tuwadocs:font-bold'
-                        : 'tuwadocs:text-[var(--tuwa-text-tertiary)]',
+                        ? 'tuwadocs:bg-[color-mix(in_srgb,var(--glow)_15%,transparent)] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:border-[color-mix(in_srgb,var(--glow-line)_40%,transparent)] tuwadocs:font-bold'
+                        : 'tuwadocs:text-[var(--tuwa-text-tertiary)] tuwadocs:border-transparent',
                     )}
                   >
                     {item.short ?? item.code}
                   </span>
                   {isSelected && (
-                    <span
-                      className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:rounded-full tuwadocs:bg-[var(--glow-line)] tuwadocs:shadow-[0_0_8px_var(--glow)]"
-                      aria-hidden="true"
-                    />
+                    <span className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:bg-[var(--glow-line)]" aria-hidden="true" />
                   )}
                 </div>
               </button>

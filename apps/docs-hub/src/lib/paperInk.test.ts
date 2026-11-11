@@ -18,12 +18,39 @@ const novaCss = read(createRequire(path.join(docsUi, 'package.json')).resolve('@
 
 /** The parts of docs-ui not yet redrawn in paper and ink: their rules of site.css and their components. */
 const notYetRedrawn = [
-  { part: 'the theme switch', selector: /\.tuwa-theme-switch/, files: ['ThemeSwitcher.tsx'] },
-  { part: 'the language switch', selector: /\.tuwa-locale-(switch|flag)/, files: ['LocaleSwitcher.tsx'] },
   { part: 'the badge of a project (Orb)', selector: /\.tuwa-orb/, files: ['Orb.tsx'] },
   { part: 'the star field (StarryBackground)', selector: /\.tuwa-starry/, files: ['StarryBackground.tsx'] },
   { part: 'the policy pages', selector: /\.tuwadocs-policy/, files: ['PolicyDocument.tsx'] },
 ];
+
+/**
+ * The few drawn details of the redrawn switches, the same as in the Nova Storybook, that the rules below would flag: each
+ * by its exact selector and property, with the reason. Nothing else of a switch may break the rules.
+ */
+const drawnDetails: { selector: RegExp; property: RegExp; why: string }[] = [
+  {
+    selector: /^\.tuwa-(theme-switch__glow--(top|bottom)|locale-switch__glow)::before$/,
+    property: /^mask-image$/,
+    why: 'the line along one edge of a knob fades out on its sides: a mask, no colour',
+  },
+  {
+    selector: /^\.tuwa-theme-switch__pixels::before$/,
+    property: /^(background|border-radius)$/,
+    why: 'the warm halo behind the disc of the sun',
+  },
+  {
+    selector: /^\.tuwa-theme-switch__pixel--(tl|tr|bl|br)$/,
+    property: /radius$/,
+    why: 'the rounded corners of the disc of the sun',
+  },
+  {
+    selector: /^(\.dark )?\.tuwa-locale-flag$/,
+    property: /^box-shadow$/,
+    why: 'a hair edge of 0.5px that keeps a flag in shape on paper, not a shadow',
+  },
+];
+const isDrawnDetail = (selector: string, property: string) =>
+  drawnDetails.some((detail) => detail.selector.test(selector) && detail.property.test(property));
 
 const squeeze = (text: string) => text.replace(/\s+/g, ' ').trim();
 const withoutCssComments = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -72,7 +99,8 @@ const novaScanlines = squeeze(
     ?.body.match(/background-image:\s*([^;]+);/)?.[1] ?? '',
 );
 
-const radiusTokens = /^(0|0px|var\(--tuwa-rounded-(corners|full)\))$/;
+// `inherit` follows the part it sits on, which takes a token itself
+const radiusTokens = /^(0|0px|inherit|var\(--tuwa-rounded-(corners|full)\))$/;
 
 /** What breaks paper and ink in a declaration of site.css, or `undefined`. */
 function cssViolation(selector: string, property: string, value: string): string | undefined {
@@ -164,6 +192,7 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
       .filter((rule) => isRedrawn(rule.selector))
       .flatMap((rule) =>
         declarationsOf(rule.body).flatMap(({ property, value }) => {
+          if (isDrawnDetail(rule.selector, property)) return [];
           const violation = cssViolation(rule.selector, property, value);
           return violation ? [`${rule.selector} { ${property}: ${value} } — ${violation}`] : [];
         }),
