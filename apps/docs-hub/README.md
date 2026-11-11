@@ -176,7 +176,7 @@ apps/docs-hub/
 │   │   ├── Footer.tsx               # Footer of the hub pages: logo, description, policies in mono caps, copyright
 │   │   ├── Header.tsx               # Fixed paper header: logo, links, language and theme cells; links-only menu below 1024px
 │   │   ├── HeroSection.tsx          # Hero: kicker, title, lead, licence, buttons, the plate
-│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), homeLayout
+│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), EcosystemBoard (what builds on what), SectionHead, homeLayout
 │   │   ├── HubShell.tsx             # Frame of the hub pages: skip link, header, main, footer
 │   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
@@ -231,12 +231,13 @@ apps/docs-hub/
 
 ### Adding or Updating an Ecosystem Entry
 
-The timeline of TUWA projects is defined in `src/lib/ecosystem.ts` as a `layers` array, outside the client components, so `llms.txt` reads the same data. Each entry describes one layer of the ecosystem (label, subtitle, accent color, dot gradient, and the `DocCard` items nested under it). To add a new project:
+The stages and projects of the main page are defined in `src/lib/ecosystem.ts` as a `layers` array, outside the client components, so `llms.txt` reads the same data. The hero plate, the board of the architecture and the stage ledgers all read it. To add a new project:
 
 1. Open `src/lib/ecosystem.ts`.
-2. Add a new object to the appropriate layer (or introduce a new layer) with the correct `name`, `tagline`, `icon`, gradient classes, and links (`docsUrl`, `githubUrl`).
-3. If the icon is not yet imported, add it from `@heroicons/react/24/outline`.
-4. The desktop orb is picked by `id`. If the project has no orb of its own in `@tuwaio/docs-ui`, set `orb` to an existing one (the Quasar Community card uses `orb: 'quasar'`).
+2. Add a new object to the appropriate layer (or introduce a new layer) with its `id`, `name`, `tagline`, links (`docsUrl`, `githubUrl`) and `packages` with their layers; `plateName` gives it a shorter name on the hero plate.
+3. Its pixel icon comes from `projectIcons` of `@tuwaio/docs-ui` by `id`. A project without an icon of its own sets `orb` to another project or `pixelIcon` to an icon of `projectIconArt` (the Quasar Community entry uses `pixelIcon: 'server'`).
+4. Place it on the board: its cell in `boardPlaces` and what it builds on in `boardEdges`, by project id, never by package name (`build-data.mjs` would fetch it). `ecosystem.test.ts` fails until it has a place. A new edge takes a default route; give it its own in `routes` of `src/lib/ecosystemBoard.ts` when it should turn elsewhere. The plate of the hero holds eight projects around the counts: a ninth needs another layout.
+5. Add its tagline to `home.entries` in the three dictionaries of `src/i18n/locales`.
 
 An `@tuwaio/` package added to `packages` gets its details, preview and `llms.txt` entry on the next build. To show a project's latest `vX.Y.Z` tag, add its entry id and repository to `RELEASES` in `scripts/build-data.mjs`.
 

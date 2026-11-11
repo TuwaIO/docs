@@ -61,6 +61,25 @@ export const en: DocsHubLabels = {
       products: { one: '{n} product', few: '{n} products', many: '{n} products', other: '{n} products' },
       stages: { one: '{n} stage', few: '{n} stages', many: '{n} stages', other: '{n} stages' },
     },
+    board: {
+      kicker: {
+        one: 'The ecosystem · {n} stage',
+        few: 'The ecosystem · {n} stages',
+        many: 'The ecosystem · {n} stages',
+        other: 'The ecosystem · {n} stages',
+      },
+      stage: 'Stage',
+      projectsHeading: 'Projects and what each builds on',
+      buildsOn: 'Builds on',
+      or: 'OR',
+      cloudOrSelfHosted: 'Cloud or self-hosted',
+      selfHosted: 'Self-hosted',
+      packages: { one: '{n} package', few: '{n} packages', many: '{n} packages', other: '{n} packages' },
+      reExports: 'Re-exports',
+      relationsLabel: 'What each project builds on',
+      relation: '{project} builds on {base}',
+      relationOr: '{first} or {second}: the same backend, self-hosted or in the cloud',
+    },
     timeline: {
       titlePrefix: 'Ecosystem',
       titleHighlight: 'Architecture',
@@ -69,22 +88,27 @@ export const en: DocsHubLabels = {
       stages: {
         1: {
           label: 'Stage 1 — Core Auth & Primitives',
+          title: 'Core Auth & Primitives',
           subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
         },
         2: {
           label: 'Stage 2 — State & Connection',
+          title: 'State & Connection',
           subtitle: 'Transaction tracking & wallet connectivity',
         },
         3: {
           label: 'Stage 3 — Backend & Sync',
+          title: 'Backend & Sync',
           subtitle: 'Managed cloud or self-hosted Quasar engine',
         },
         4: {
           label: 'Stage 4 — User Interface',
+          title: 'User Interface',
           subtitle: 'React components for Satellite & Pulsar',
         },
         5: {
           label: 'Stage 5 — SDK Integration Layer',
+          title: 'SDK Integration Layer',
           subtitle: 'Core SDK & network-specific adapters',
         },
       },

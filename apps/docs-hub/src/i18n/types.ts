@@ -275,11 +275,39 @@ export interface DocsHubLabels {
       /** The number of stages (`{n}`) */
       stages: PluralLabel;
     };
+    /** The board of the architecture: what builds on what */
+    board: {
+      /** Above the title: "The ecosystem · {n} stages" */
+      kicker: PluralLabel;
+      /** Head of the column of the stages */
+      stage: string;
+      /** Head of the column of the projects */
+      projectsHeading: string;
+      /** The legend of a dotted trace */
+      buildsOn: string;
+      /** The tag between two ways to run the same thing */
+      or: string;
+      /** The legend of the tag */
+      cloudOrSelfHosted: string;
+      /** Instead of the packages of a project that has none on npm */
+      selfHosted: string;
+      /** The number of packages of a project (`{n}`) */
+      packages: PluralLabel;
+      /** Before the marks of the projects the SDK re-exports */
+      reExports: string;
+      /** Heading of the list that reads the traces out to assistive technology */
+      relationsLabel: string;
+      /** A trace read out: `{project}` builds on `{base}` */
+      relation: string;
+      /** The tag read out: `{first}` or `{second}` */
+      relationOr: string;
+    };
     timeline: {
       titlePrefix: string;
       titleHighlight: string;
       subtitle: string;
-      stages: Record<number, { label: string; subtitle: string }>;
+      /** Each stage: its label ("Stage 1 — title"), its title alone and its subtitle */
+      stages: Record<number, { label: string; title: string; subtitle: string }>;
     };
     entries: Record<string, { tagline: string; packagesBadgeLabel?: string }>;
     docCard: {

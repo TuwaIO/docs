@@ -7,6 +7,7 @@ import Link from '@/components/LocaleNextLink';
 
 import { useI18n } from '../i18n';
 import { HeroPlate } from './home/HeroPlate';
+import { Kicker } from './home/SectionHead';
 
 // prettier-ignore
 const ARROW_DOWN = ['...#...', '...#...', '...#...', '#..#..#', '.#.#.#.', '..###..', '...#...'];
@@ -45,10 +46,7 @@ export function HeroSection() {
       className="grid scroll-mt-24 gap-10 pt-12 md:pt-16 lg:grid-cols-[minmax(0,1fr)_396px] lg:items-start lg:gap-x-14 xl:pt-20"
     >
       <div className="@container min-w-0">
-        <p className="flex items-center gap-3 font-mono text-xs font-bold uppercase leading-[1.2] tracking-[0.12em] text-[var(--tuwa-text-secondary)]">
-          <span aria-hidden="true" className="h-1.5 w-1.5 shrink-0 bg-[var(--tuwa-docs-lit)]" />
-          {hero.badge}
-        </p>
+        <Kicker>{hero.badge}</Kicker>
         <h1
           id="hero-title"
           className={`mt-5 whitespace-nowrap font-sans font-medium leading-[0.92] tracking-[-0.05em] text-[var(--tuwa-text-primary)] ${titleSize[locale]}`}

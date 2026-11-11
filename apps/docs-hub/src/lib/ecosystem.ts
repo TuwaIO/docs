@@ -256,3 +256,83 @@ export function ecosystemCounts(): { packages: number; products: number; stages:
     stages: layers.length,
   };
 }
+
+/**
+ * The cell of a project on the board of the architecture: its stage row (from 1), the first of the three lanes it
+ * takes (from 1) and how many lanes it spans (default 1).
+ */
+export interface BoardPlace {
+  row: number;
+  lane: number;
+  span?: number;
+}
+
+/**
+ * Where each project sits on the board of the architecture, by project id: under the projects it builds on, so the
+ * traces between them run short and straight.
+ */
+export const boardPlaces: Readonly<Record<string, BoardPlace>> = {
+  siwx: { row: 1, lane: 1 },
+  orbit: { row: 1, lane: 3 },
+  satellite: { row: 2, lane: 1 },
+  pulsar: { row: 2, lane: 3 },
+  'quasar-community': { row: 3, lane: 2 },
+  quasar: { row: 3, lane: 3 },
+  nova: { row: 4, lane: 2 },
+  sdk: { row: 5, lane: 1, span: 3 },
+};
+
+/**
+ * An edge of the board of the architecture, by project ids: `to` builds on `from`; with the kind `or`, the two are two
+ * ways to run the same thing (Quasar self-hosted or in the cloud).
+ */
+export interface BoardEdge {
+  from: string;
+  to: string;
+  kind?: 'or';
+}
+
+/** What builds on what, top to bottom: the traces of the board and the list that reads them out. */
+export const boardEdges: readonly BoardEdge[] = [
+  { from: 'siwx', to: 'satellite' },
+  { from: 'orbit', to: 'satellite' },
+  { from: 'orbit', to: 'pulsar' },
+  { from: 'pulsar', to: 'quasar' },
+  { from: 'satellite', to: 'nova' },
+  { from: 'pulsar', to: 'nova' },
+  { from: 'nova', to: 'sdk' },
+  { from: 'quasar-community', to: 'quasar', kind: 'or' },
+];
+
+/** The projects whose packages the TUWA SDK re-exports, by id, in the order of its marks on the board. */
+export const sdkReExports: readonly string[] = ['orbit', 'siwx', 'satellite', 'pulsar', 'nova'];
+
+/** The range of the layers (`L1–L2`, `L5`) of npm packages, or an empty string without any. */
+function layerRange(packages: PackageBadge[]): string {
+  const numbers = [...new Set(packages.flatMap((pkg) => (pkg.layer ? [Number(pkg.layer.slice(1))] : [])))].sort(
+    (a, b) => a - b,
+  );
+  if (numbers.length === 0) return '';
+  return numbers.length === 1 ? `L${numbers[0]}` : `L${numbers[0]}–L${numbers[numbers.length - 1]}`;
+}
+
+/**
+ * The layers a stage spans, from the layers of its packages.
+ *
+ * @param stage - The stage, from 1.
+ * @returns The range, such as `L1–L2` or `L5`; empty for a stage without packages.
+ */
+export function stageLayerRange(stage: number): string {
+  return layerRange((layers[stage - 1]?.entries ?? []).flatMap((entry) => entry.packages ?? []));
+}
+
+/**
+ * The layers of the packages of a project.
+ *
+ * @param id - The id of the project.
+ * @returns The range, such as `L1–L2` or `L5`; empty for a project without npm packages (Quasar Community).
+ */
+export function entryLayerRange(id: string): string {
+  const entry = layers.flatMap((layer) => layer.entries).find((candidate) => candidate.id === id);
+  return layerRange(entry?.packages ?? []);
+}

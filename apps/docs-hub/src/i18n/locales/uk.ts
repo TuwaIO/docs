@@ -61,6 +61,25 @@ export const uk: DocsHubLabels = {
       products: { one: '{n} продукт', few: '{n} продукти', many: '{n} продуктів', other: '{n} продукту' },
       stages: { one: '{n} етап', few: '{n} етапи', many: '{n} етапів', other: '{n} етапу' },
     },
+    board: {
+      kicker: {
+        one: 'Екосистема · {n} етап',
+        few: 'Екосистема · {n} етапи',
+        many: 'Екосистема · {n} етапів',
+        other: 'Екосистема · {n} етапу',
+      },
+      stage: 'Етап',
+      projectsHeading: 'Проєкти і на чому кожен будується',
+      buildsOn: 'Будується на',
+      or: 'АБО',
+      cloudOrSelfHosted: 'Хмара або self-hosted',
+      selfHosted: 'Self-hosted',
+      packages: { one: '{n} пакет', few: '{n} пакети', many: '{n} пакетів', other: '{n} пакета' },
+      reExports: 'Реекспортує',
+      relationsLabel: 'На чому будується кожен проєкт',
+      relation: '{project} будується на {base}',
+      relationOr: '{first} або {second}: той самий бекенд, self-hosted або в хмарі',
+    },
     timeline: {
       titlePrefix: 'Архітектура',
       titleHighlight: 'Екосистеми',
@@ -69,22 +88,27 @@ export const uk: DocsHubLabels = {
       stages: {
         1: {
           label: 'Етап 1 — Базова автентифікація та примітиви',
+          title: 'Базова автентифікація та примітиви',
           subtitle: 'Автентифікація CAIP-122 та мультичейн-утиліти для EVM і Solana',
         },
         2: {
           label: 'Етап 2 — Стан та підключення',
+          title: 'Стан та підключення',
           subtitle: 'Підключення гаманців та відстеження транзакцій',
         },
         3: {
           label: 'Етап 3 — Бекенд та синхронізація',
+          title: 'Бекенд та синхронізація',
           subtitle: 'Керована хмара або self-hosted бекенд Quasar',
         },
         4: {
           label: 'Етап 4 — Інтерфейс користувача',
+          title: 'Інтерфейс користувача',
           subtitle: 'React-компоненти для Satellite та Pulsar',
         },
         5: {
           label: 'Етап 5 — Рівень інтеграції SDK',
+          title: 'Рівень інтеграції SDK',
           subtitle: 'Єдиний клієнтський SDK та мережеві адаптери',
         },
       },

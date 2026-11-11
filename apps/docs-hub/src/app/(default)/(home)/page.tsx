@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
 import { HeroSection } from '../../../components/HeroSection';
+import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
 import { homeContentClassName } from '../../../components/home/homeLayout';
 import { JsonLd } from '../../../components/JsonLd';
 import { LayerTimeline } from '../../../components/LayerTimeline';
@@ -47,6 +48,7 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <div className="relative z-10 pb-16">
         <div className={homeContentClassName}>
           <HeroSection />
+          <EcosystemBoard />
         </div>
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6 pt-24">
           <LayerTimeline releases={getReleases()} packages={getPackageDetails()} />

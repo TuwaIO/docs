@@ -61,6 +61,25 @@ export const zhCN: DocsHubLabels = {
       products: { one: '{n} 个产品', few: '{n} 个产品', many: '{n} 个产品', other: '{n} 个产品' },
       stages: { one: '{n} 个阶段', few: '{n} 个阶段', many: '{n} 个阶段', other: '{n} 个阶段' },
     },
+    board: {
+      kicker: {
+        one: '生态系统 · {n} 个阶段',
+        few: '生态系统 · {n} 个阶段',
+        many: '生态系统 · {n} 个阶段',
+        other: '生态系统 · {n} 个阶段',
+      },
+      stage: '阶段',
+      projectsHeading: '各项目及其构建基础',
+      buildsOn: '构建于',
+      or: '或',
+      cloudOrSelfHosted: '云端或自部署',
+      selfHosted: '自部署',
+      packages: { one: '{n} 个包', few: '{n} 个包', many: '{n} 个包', other: '{n} 个包' },
+      reExports: '重新导出',
+      relationsLabel: '各项目的构建基础',
+      relation: '{project} 构建于 {base}',
+      relationOr: '{first} 或 {second}：同一后端，自部署或云端',
+    },
     timeline: {
       titlePrefix: '生态系统',
       titleHighlight: '架构全景',
@@ -68,22 +87,27 @@ export const zhCN: DocsHubLabels = {
       stages: {
         1: {
           label: '第 1 阶段 — 核心认证与底层原语',
+          title: '核心认证与底层原语',
           subtitle: '面向 EVM 与 Solana 的 CAIP-122 登录与多链基础工具',
         },
         2: {
           label: '第 2 阶段 — 状态机与连接层',
+          title: '状态机与连接层',
           subtitle: '无头钱包连接与交易生命周期追踪',
         },
         3: {
           label: '第 3 阶段 — 服务端与状态同步',
+          title: '服务端与状态同步',
           subtitle: '托管云或私有化自部署的 Quasar 引擎',
         },
         4: {
           label: '第 4 阶段 — 用户界面组件',
+          title: '用户界面组件',
           subtitle: '面向 Satellite 与 Pulsar 的 React 组件库',
         },
         5: {
           label: '第 5 阶段 — SDK 统一集成层',
+          title: 'SDK 统一集成层',
           subtitle: '核心客户端 SDK 与特定网络适配器',
         },
       },

@@ -77,6 +77,13 @@ describe('docs-hub i18n', () => {
       expect(en.home.timeline.stages[stage]).toBeDefined();
       expect(uk.home.timeline.stages[stage]).toBeDefined();
       expect(zhCN.home.timeline.stages[stage]).toBeDefined();
+      // The title alone, for the board, the ledgers and the flight plan: the label is "Stage N — title"
+      for (const dictionary of [en, uk, zhCN]) {
+        const { label, title } = dictionary.home.timeline.stages[stage]!;
+        expect(title).toBeTruthy();
+        expect(label.endsWith(title)).toBe(true);
+        expect(title).not.toMatch(/\d/);
+      }
       for (const entry of layer.entries) {
         expect(en.home.entries[entry.id]?.tagline).toBeTruthy();
         expect(uk.home.entries[entry.id]?.tagline).toBeTruthy();

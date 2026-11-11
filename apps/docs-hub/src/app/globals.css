@@ -27,6 +27,17 @@ html.dark,
   --tuwa-hero-gradient-to: #7dd3fc;
 }
 
+/* A dotted line of the main page, the stages of the board on phones and tablets: a dot of 1px every 8px, in the colour
+   of the traces (an SVG tile: paper and ink has no gradients) */
+.tuwa-hub-dots-y {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%23636366' fill-opacity='0.7'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+}
+
+.dark .tuwa-hub-dots-y {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%238e8e90' fill-opacity='0.7'/%3E%3C/svg%3E");
+}
+
 /* Monospace font: uses --tuwa-font-mono, which docs-ui sets to Geist Mono */
 .font-geist-mono {
   font-family: var(--tuwa-font-mono) !important;

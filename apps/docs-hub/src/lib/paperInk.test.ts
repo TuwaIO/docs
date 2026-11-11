@@ -274,6 +274,8 @@ const hubRedrawn = [
   'components/PageBackground.tsx',
   'components/HeroSection.tsx',
   'components/home/HeroPlate.tsx',
+  'components/home/SectionHead.tsx',
+  'components/home/EcosystemBoard.tsx',
   'app/rootDocument.tsx',
 ];
 
