@@ -375,17 +375,28 @@ describe('the pixel pictures', () => {
 describe('the flight plan on the page', () => {
   const markup = render();
 
-  // The craft flew up the left side of the frame, its labels on its left. It is a spacecraft now and flies down the
-  // page as the reader does, along a ruler by the edge of the screen with its labels on its right
-  it('flies the craft of the rail down a ruler by the edge of the screen', () => {
-    expect(plan).toContain('const LINE = 22;');
+  // The craft flew up the left side of the frame, its labels on its left; then down a ruler by the left edge of the
+  // screen. It is a spacecraft and flies down the page as the reader does, along a ruler by the right edge of the screen,
+  // beside the scrollbar, which tells the same story; its labels stand on its left
+  it('flies the craft of the rail down a ruler by the right edge of the screen, beside the scrollbar', () => {
+    expect(plan).toContain('const LINE = 24;');
     expect(plan).toContain("transform: 'translateY(var(--flight-y, 0px))'");
     expect(plan).not.toContain('* -1');
     const rail = markup.match(/<nav data-flight-rail=""[^>]*class="([^"]*)"/)?.[1] ?? '';
-    expect(rail.split(' ')).toEqual(expect.arrayContaining(['fixed', 'left-0', 'top-[80px]', 'bottom-6']));
-    // The labels start on the right of the line, past the lane of the tag of the craft
-    expect(plan).toContain('const LABELS_LEFT = 82;');
-    expect(plan).toMatch(/paddingLeft: \(isStage \? NAMES_LEFT : LABELS_LEFT\) - CLEAR/);
+    expect(rail.split(' ')).toEqual(expect.arrayContaining(['fixed', 'right-0', 'top-[80px]', 'bottom-6']));
+    expect(rail.split(' ')).not.toContain('left-0');
+    // The line, the craft and the Earth are placed from the right edge of the screen
+    expect(plan).toContain('style={{ right: LINE, top: SHIP_HALF, bottom: EARTH_SIZE + EARTH_BAY }}');
+    expect(plan).toMatch(/style=\{\{ right: LINE - SHIP_HALF, width: SHIP, height: SHIP, transform:/);
+    // The labels start on the left of the line, past the lane of the tag of the craft; the number stands next to the
+    // line and the name before it
+    expect(plan).toContain('const LABELS_AT = 84;');
+    expect(plan).toMatch(/paddingRight: \(isStage \? NAMES_AT : LABELS_AT\) - CLEAR/);
+    expect(plan).toMatch(/justify-end font-mono/);
+    // The ticks of the ruler are on the side of the edge of the screen
+    expect(plan).toContain(
+      'style={{ right: LINE - length, width: length, top: SHIP_HALF + Math.round((tick * travel) / TICKS) }}',
+    );
   });
 
   // A ruler: a tick every 5% of the flight, a longer one every 25%, and the same ruler lit as far as the craft has flown
@@ -401,7 +412,7 @@ describe('the flight plan on the page', () => {
   // The quick start is the finish and it is at the foot of the rail: the Earth, where the reader starts building
   it('ends the rail at the Earth, the last waypoint', () => {
     expect(plan).toContain(
-      '<Pixels art={EARTH} pixels={earthPixels} style={{ left: LINE - EARTH_HALF, bottom: EARTH_BAY }} />',
+      '<Pixels art={EARTH} pixels={earthPixels} style={{ right: LINE - EARTH_HALF, bottom: EARTH_BAY }} />',
     );
     expect(plan).toContain('const isEarth = index === lastIndex;');
     expect(plan).toMatch(/index === lastIndex\s*\? travel \+ EARTH_AFTER \+ EARTH_HALF/);
@@ -469,7 +480,8 @@ describe('the flight plan on the page', () => {
       expect(column.split(' ')).toContain(width);
       expect(home).toContain(width);
     }
-    expect(hook).toContain('column?.getBoundingClientRect().left');
+    // The margin on the right of the column, without the scrollbar
+    expect(hook).toContain('document.documentElement.clientWidth - column.getBoundingClientRect().right');
   });
 
   // A name shows when the margin has room for it, in every language: the widths are read from the page, not guessed
@@ -479,7 +491,7 @@ describe('the flight plan on the page', () => {
     expect(hook).toContain(`sectionNames: widest(root.querySelectorAll('[data-flight-name="section"]')),`);
     expect(hook).toContain(`stageNames: widest(root.querySelectorAll('[data-flight-name="stage"]')),`);
     expect(plan).toContain(
-      'const fits = (width: number | undefined) => !!width && margin >= NAMES_LEFT + width + CLEAR;',
+      'const fits = (width: number | undefined) => !!width && margin >= NAMES_AT + width + CLEAR;',
     );
     expect(plan).toContain('const namesShown = numbersShown && fits(measure?.sectionNames);');
     expect(plan).toContain('const stagesShown = namesShown && fits(measure?.stageNames);');

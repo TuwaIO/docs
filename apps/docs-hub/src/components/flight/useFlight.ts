@@ -22,7 +22,7 @@ export interface FlightMeasure {
   railTravel: number;
   /** How far the craft of the strip travels from edge to the Earth, in pixels (0 while the strip is hidden) */
   stripTravel: number;
-  /** The margin of the page on the left of its column, where the rail stands, in pixels */
+  /** The margin of the page on the right of its column, where the rail stands, in pixels */
   margin: number;
   /** The width of the longest name of a section among the labels of the rail, in pixels */
   sectionNames: number;
@@ -69,7 +69,8 @@ const widest = (elements: Iterable<Element>) =>
  * @param fixed - What of the rail and of the strip is not the way of the craft, in pixels: the length of the way is
  * the height of `[data-flight-rail]` less `fixed.rail`, and the width of `[data-flight-strip]` less `fixed.strip`.
  * @param fixed.rail - For the rail: the hull of the craft and the Earth with the space around it.
- * @param fixed.strip - For the strip: the same. The margin of the page is the left edge of `[data-flight-column]`;
+ * @param fixed.strip - For the strip: the same. The margin of the page is what is on the right of
+ * `[data-flight-column]`;
  * the widths of the names are those of `[data-flight-name="section"]` and `[data-flight-name="stage"]`.
  * @returns `rootRef` for the element that holds the rail and the strip; the measure of the page (`null` before the
  * first one); `here`, the index of the waypoint whose part the reader reads (the craft has locked on it: its part has
@@ -201,7 +202,10 @@ export function useFlight(
         stops,
         railTravel,
         stripTravel,
-        margin: Math.max(0, Math.round(column?.getBoundingClientRect().left ?? 0)),
+        // The margin on the right of the column, where the rail stands, without the scrollbar
+        margin: column
+          ? Math.max(0, Math.round(document.documentElement.clientWidth - column.getBoundingClientRect().right))
+          : 0,
         sectionNames: widest(root.querySelectorAll('[data-flight-name="section"]')),
         stageNames: widest(root.querySelectorAll('[data-flight-name="stage"]')),
       };
