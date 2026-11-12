@@ -17,7 +17,7 @@ export const metadata: Metadata = {
  */
 export default function NotFound() {
   return (
-    <HubShell>
+    <HubShell framed>
       <PageBackground />
       <NotFoundContent />
     </HubShell>

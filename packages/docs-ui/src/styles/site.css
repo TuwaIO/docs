@@ -4,88 +4,122 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Responsive base font-size scaling to fit content beautifully on larger displays */
-html {
-  font-size: 16px;
-  transition: font-size 0.2s ease-in-out;
-}
-
-@media (max-width: 1536px) {
-  html {
-    font-size: 15px;
-  }
-}
-
+/*
+ * Paper and ink, on the tokens of Nova Core: warm paper, ink, lines of 1px, the TUWA blue and square corners, with no
+ * gradients, soft shadows or blur.
+ *
+ * Nova swaps paper and raised between the themes: in light the page is --tuwa-bg-secondary and a card --tuwa-bg-primary,
+ * in dark the other way round. The surfaces below name them by their role and are set again for each theme, so that a
+ * page is never painted with --tuwa-bg-primary.
+ */
 :root {
-  --tuwa-primary: #0052ff;
-  --tuwa-secondary: #0284c7;
+  --tuwa-docs-paper: var(--tuwa-bg-secondary);
+  --tuwa-docs-raised: var(--tuwa-bg-primary);
+  --tuwa-docs-sunken: var(--tuwa-bg-muted);
+  /* What is lit or reached: the bright fill of the brand on paper (Nova's `--tuwa-icon-accent`, the TUWA orange), the
+     light cyan of the dark logo in the dark theme */
+  --tuwa-docs-lit: var(--tuwa-icon-accent, var(--tuwa-text-accent));
+  /* The paper again, as the channels Nextra reads: `rgb(var(--nextra-bg))`, and `rgba(var(--nextra-bg), 0.8)` behind a
+     zoomed image, which needs the commas its own `Head` writes */
+  --nextra-bg: 242, 241, 238;
+
+  --tuwa-primary: var(--tuwa-text-accent);
+  /* A link under the pointer: the TUWA orange, deeper (7.8:1 on paper). A plain color: a mix here made the build nest a
+     fallback in the root rule */
+  --tuwa-secondary: #8f2d06;
   --tuwa-success: #10b981;
   --tuwa-warning: #f59e0b;
   --tuwa-error: #ef4444;
-  --tuwa-gradient: linear-gradient(135deg, #0052ff 0%, #1d4ed8 50%, #0284c7 100%);
-  --tuwa-hero-gradient-from: #0052ff;
-  --tuwa-hero-gradient-via: #1d4ed8;
-  --tuwa-hero-gradient-to: #0284c7;
   /* --tuwa-button-gradient-* are left to @tuwaio/nova-core, so the Connect Button keeps Nova's colors */
 
-  --nextra-primary-hue: 212;
-  --nextra-primary-saturation: 100%;
+  /* Geist and Geist Mono only, then the generic fonts of the system. Nova lists more monospace fonts after Geist Mono and
+     puts JetBrains Mono first for Ukrainian (through --tuwa-font-mono-uk), while a documentation page reads in one face in
+     every language. Chinese takes the CJK font of the system: Geist has no CJK glyphs. The Ukrainian stack is written out
+     rather than pointed at --tuwa-font-mono, because Nova sets that one from it and the two would refer to each other */
+  --tuwa-font-sans: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --tuwa-font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --tuwa-font-mono-uk: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* The chrome and the code blocks of Nextra: nothing set these, so they were in the fonts of the system */
+  --x-font-sans: var(--tuwa-font-sans);
+  --x-font-mono: var(--tuwa-font-mono);
 
-  --x-color-primary-50: rgb(239 246 255);
-  --x-color-primary-100: rgb(219 234 254);
-  --x-color-primary-200: rgb(191 219 254);
-  --x-color-primary-300: rgb(147 197 253);
-  --x-color-primary-400: rgb(96 165 250);
-  --x-color-primary-500: #0052ff;
-  --x-color-primary-600: #2563eb;
-  --x-color-primary-700: #1d4ed8;
-  --x-color-primary-800: #1e40af;
-  --x-color-primary-900: #1e3a8a;
-  --x-color-primary-950: #172554;
+  /* Square, as Nova: the callouts, search, code, cards and tabs of Nextra */
+  --x-radius-sm: var(--tuwa-rounded-corners);
+  --x-radius-md: var(--tuwa-rounded-corners);
+  --x-radius-lg: var(--tuwa-rounded-corners);
+  --x-radius-xl: var(--tuwa-rounded-corners);
 
-  --tuwa-footer-border: rgb(229 231 235);
-  --tuwa-footer-text-primary: rgb(75 85 99);
-  --tuwa-footer-text-secondary: rgb(107 114 128);
-  --tuwa-footer-text-muted: rgb(156 163 175);
-  --tuwa-footer-link-color: rgb(107 114 128);
-  --tuwa-footer-link-hover: #0052ff;
-  --tuwa-footer-npm-hover: rgb(220 38 38);
-  --tuwa-footer-github-hover: rgb(31 41 55);
+  /* The accent as Nextra describes it, for the selection: the deep TUWA orange, #b93b0a */
+  --nextra-primary-hue: 17deg;
+  --nextra-primary-saturation: 90%;
+  --nextra-primary-lightness: 38%;
 }
 
 .dark {
-  --tuwa-primary: #38bdf8;
-  --tuwa-secondary: #7dd3fc;
-  --nextra-bg: 10 14 39;
-  --tuwa-bg-dark: #0a0e27;
+  --tuwa-docs-paper: var(--tuwa-bg-primary);
+  --tuwa-docs-raised: var(--tuwa-bg-secondary);
+  --tuwa-docs-sunken: var(--tuwa-bg-muted);
+  --tuwa-docs-lit: #8ef5ff;
+  --nextra-bg: 16, 16, 20;
 
-  --tuwa-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #7dd3fc 100%);
-  --tuwa-hero-gradient-from: #2563eb;
-  --tuwa-hero-gradient-via: #3b82f6;
-  --tuwa-hero-gradient-to: #7dd3fc;
+  /* Set again, so that they follow the accent of the theme wherever the class sits */
+  --tuwa-primary: var(--tuwa-text-accent);
+  /* A link under the pointer: the light cyan of the dark logo */
+  --tuwa-secondary: #8ef5ff;
 
-  --x-color-primary-50: rgb(15 23 42);
-  --x-color-primary-100: rgb(23 37 84);
-  --x-color-primary-200: rgb(30 58 138);
-  --x-color-primary-300: rgb(30 64 175);
-  --x-color-primary-400: #38bdf8;
-  --x-color-primary-500: #38bdf8;
-  --x-color-primary-600: #38bdf8;
-  --x-color-primary-700: #7dd3fc;
-  --x-color-primary-800: rgb(191 219 254);
-  --x-color-primary-900: rgb(219 234 254);
-  --x-color-primary-950: rgb(239 246 255);
+  /* The cyan of the dark logo, #3ed2ec */
+  --nextra-primary-hue: 189deg;
+  --nextra-primary-saturation: 82%;
+  --nextra-primary-lightness: 58%;
+}
 
-  --x-color-neutral-900: #0a0e27;
+/* Values built from the tokens of the theme, declared on `.dark` as well: a variable resolves where it is declared, and
+   the class may sit below the root */
+:root,
+.dark {
+  /* The footer in the inks of paper and ink: secondary for its texts and links, full ink under the pointer (npm and
+     GitHub too, no brand colours) */
+  --tuwa-footer-border: var(--tuwa-border-primary);
+  --tuwa-footer-text-primary: var(--tuwa-text-secondary);
+  --tuwa-footer-text-secondary: var(--tuwa-text-tertiary);
+  --tuwa-footer-text-muted: var(--tuwa-text-tertiary);
+  --tuwa-footer-link-color: var(--tuwa-text-secondary);
+  --tuwa-footer-link-hover: var(--tuwa-text-primary);
+  --tuwa-footer-npm-hover: var(--tuwa-text-primary);
+  --tuwa-footer-github-hover: var(--tuwa-text-primary);
 
-  --tuwa-footer-border: rgba(255, 255, 255, 0.08);
-  --tuwa-footer-text-primary: rgb(209 213 219);
-  --tuwa-footer-text-secondary: rgb(156 163 175);
-  --tuwa-footer-text-muted: rgb(107 114 128);
-  --tuwa-footer-link-color: rgb(156 163 175);
-  --tuwa-footer-link-hover: #38bdf8;
-  --tuwa-footer-npm-hover: rgb(248 113 113);
-  --tuwa-footer-github-hover: rgb(243 244 246);
+  /* The scale Nextra colours its links, active items and focus with, on the accent of Nova (the deep TUWA orange in
+     light, the cyan of the logo in dark) and shaped as Nextra shapes its own: the accent at 600, lighter below, darker
+     above */
+  --x-color-primary-50: color-mix(in srgb, var(--tuwa-text-accent) 6%, #ffffff);
+  --x-color-primary-100: color-mix(in srgb, var(--tuwa-text-accent) 12%, #ffffff);
+  --x-color-primary-200: color-mix(in srgb, var(--tuwa-text-accent) 26%, #ffffff);
+  --x-color-primary-300: color-mix(in srgb, var(--tuwa-text-accent) 44%, #ffffff);
+  --x-color-primary-400: color-mix(in srgb, var(--tuwa-text-accent) 66%, #ffffff);
+  --x-color-primary-500: color-mix(in srgb, var(--tuwa-text-accent) 86%, #ffffff);
+  --x-color-primary-600: var(--tuwa-text-accent);
+  --x-color-primary-700: color-mix(in srgb, var(--tuwa-text-accent) 86%, #101014);
+  --x-color-primary-800: color-mix(in srgb, var(--tuwa-text-accent) 70%, #101014);
+  --x-color-primary-900: color-mix(in srgb, var(--tuwa-text-accent) 54%, #101014);
+  --x-color-primary-950: color-mix(in srgb, var(--tuwa-text-accent) 38%, #101014);
+
+  /* Scanlines, the rule of Nova's `.tuwa-scanlines`: a line of --tuwa-scanline every 4px, still and under the content, so
+     a surface of docs-ui and a dialog of Nova show the same lines. A variable as well, for the parts of Nextra docs-ui
+     styles by selector; with an older Nova, which has no --tuwa-scanline, there are none */
+  --tuwa-docs-scan: repeating-linear-gradient(to bottom, var(--tuwa-scanline, transparent) 0 1px, transparent 1px 4px);
+}
+
+/* Faint lines across a surface (a header, a page): see --tuwa-docs-scan */
+.tuwa-docs-scan {
+  background-image: var(--tuwa-docs-scan);
+}
+
+/* The glass of what stays over the page as it scrolls (a header, the bar of a section, a menu): the paper, a little
+   clear, over a light blur of the page under it, so the page shows as a haze and the text over it reads as on paper */
+.tuwa-docs-glass {
+  background-color: color-mix(in srgb, var(--tuwa-docs-paper) 86%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .tuwa-footer-border {
@@ -93,51 +127,38 @@ html {
   border-top-width: 1px;
 }
 
-/* Nextra sidebar footer (theme switcher & collapse button container) in dark mode */
-.dark .nextra-sidebar-footer,
-html.dark .nextra-sidebar-footer {
-  background-color: #0a0e27 !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+/* Nextra's callouts: no tint over the card, a frame of 1px and a strip of the status colour on the left (the rule of
+   Nova's statuses: the strip only). The text is ink; the icon takes the colour of the strip. TUWA has no purple: the
+   `important` kind takes the accent */
+.nextra-callout {
+  --tuwa-callout-strip: var(--tuwa-border-strong);
+  background: transparent !important;
+  color: var(--tuwa-text-primary) !important;
+  border: 1px solid var(--tuwa-border-primary) !important;
+  border-left: 3px solid var(--tuwa-callout-strip) !important;
+}
+.nextra-callout[class*='border-green'] {
+  --tuwa-callout-strip: var(--tuwa-success-icon);
+}
+.nextra-callout[class*='border-blue'],
+.nextra-callout[class*='border-purple'] {
+  --tuwa-callout-strip: var(--tuwa-text-accent);
+}
+.nextra-callout[class*='border-yellow'] {
+  --tuwa-callout-strip: var(--tuwa-warning);
+}
+.nextra-callout[class*='border-red'] {
+  --tuwa-callout-strip: var(--tuwa-error-icon);
+}
+.nextra-callout svg {
+  color: var(--tuwa-callout-strip) !important;
+  fill: currentColor;
 }
 
-.dark .nextra-sidebar,
-html.dark .nextra-sidebar {
-  background-color: #0a0e27 !important;
-}
-
-/* Override Nextra purple callouts & borders with TUWA signature blue */
-.nextra-callout.x\:border-purple-600,
-.nextra-callout[class*='border-purple'],
-.x\:border-purple-600,
-.x\:dark\:border-purple-600,
-[class*='border-purple'] {
-  border-color: #0052ff !important;
-}
-.nextra-callout.x\:border-purple-600 svg,
-.nextra-callout[class*='border-purple'] svg,
-.x\:text-purple-600,
-.x\:dark\:text-purple-400,
-[class*='text-purple'] {
-  color: #38bdf8 !important;
-  fill: #38bdf8 !important;
-}
-.nextra-callout.x\:border-purple-600,
-.nextra-callout[class*='bg-purple'],
-.x\:bg-purple-100 {
-  background-color: rgba(0, 82, 255, 0.08) !important;
-}
-.dark .nextra-callout.x\:border-purple-600,
-.dark .nextra-callout[class*='dark:bg-purple'],
-.dark .x\:dark\:bg-purple-900\/30,
-[class*='dark:bg-purple'] {
-  background-color: rgba(0, 82, 255, 0.12) !important;
-}
-
-.dark hr.nextra-border,
-html.dark hr.nextra-border,
-.dark .nextra-border,
-html.dark .nextra-border {
-  border-color: rgba(255, 255, 255, 0.08) !important;
+/* The lines of Nextra (the navbar, the sidebar, rules) in the line colour of paper and ink */
+hr.nextra-border,
+.nextra-border {
+  border-color: var(--tuwa-border-primary) !important;
 }
 
 .tuwa-footer-description {
@@ -152,6 +173,7 @@ html.dark .nextra-border {
 
 .tuwa-footer-copyright {
   @apply tuwadocs:text-xs;
+  font-family: var(--tuwa-font-mono);
   color: var(--tuwa-footer-text-muted);
 }
 
@@ -164,6 +186,11 @@ html.dark .nextra-border {
   color: var(--tuwa-footer-link-hover);
 }
 
+/* The list of all policies, in ink */
+.tuwa-footer-link--all {
+  color: var(--tuwa-text-primary);
+}
+
 .tuwa-footer-link--npm:hover {
   color: var(--tuwa-footer-npm-hover);
 }
@@ -172,76 +199,133 @@ html.dark .nextra-border {
   color: var(--tuwa-footer-github-hover);
 }
 
-.nextra-sidebar a[data-active] {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(0 82 255 / 0.1) !important;
-  border-color: var(--tuwa-primary) !important;
+/* The sidebar: the current page is a block of ink with paper text, as the selected tab of Nova; under the pointer a
+   faint ink. Nextra 4 marks the current item with the class `active` on its `li` (a page is a link, a folder with a
+   page of its own a button), in the sidebar and in the menu of phones; it has no `data-active` attribute. */
+.nextra-sidebar li.active > :is(a, button),
+.nextra-mobile-nav li.active > :is(a, button) {
+  color: var(--tuwa-docs-paper) !important;
+  background-color: var(--tuwa-text-primary) !important;
+  border-color: var(--tuwa-text-primary) !important;
 }
 
-.dark .nextra-sidebar a[data-active] {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(56 189 248 / 0.1) !important;
-  border-color: var(--tuwa-primary) !important;
-}
-
-.nextra-sidebar a:hover {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(0 82 255 / 0.05) !important;
-}
-
-.dark .nextra-sidebar a:hover {
-  color: var(--tuwa-primary) !important;
-  background-color: rgb(56 189 248 / 0.05) !important;
+.nextra-sidebar li:not(.active) > :is(a, button):hover,
+.nextra-mobile-nav li:not(.active) > :is(a, button):hover {
+  color: var(--tuwa-text-primary) !important;
+  background-color: color-mix(in srgb, var(--tuwa-text-primary) 3.5%, transparent) !important;
 }
 
 .nextra-search input {
-  border-color: rgb(229 231 235);
-  transition: all 0.2s ease;
+  border-color: var(--tuwa-border-primary);
+  transition: border-color 0.2s ease;
   border-radius: var(--tuwa-rounded-corners);
 }
 
-.nextra-search input:focus {
+/* Focus is a 2px outline in the accent, as everywhere in paper and ink, not a soft ring */
+.nextra-search input:focus-visible {
   border-color: var(--tuwa-primary) !important;
-  box-shadow: 0 0 0 3px rgb(0 82 255 / 0.15) !important;
+  box-shadow: none !important;
+  outline: 2px solid var(--tuwa-text-accent);
+  outline-offset: 2px;
 }
 
-.dark .nextra-search input:focus {
-  border-color: var(--tuwa-primary) !important;
-  box-shadow: 0 0 0 3px rgb(56 189 248 / 0.15) !important;
+/* Between the phone menu and 1024px the search of the header is a square with a pixel magnifier, so the top-level
+   pages keep the room of the header: a field of 256px left them 86 to 218px. Under a click, the keyboard or its
+   shortcut the square opens into the field, over the pages on its left, and closes when the reader leaves it */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .nextra-navbar .nextra-search {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nextra-navbar .nextra-search input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 34px !important;
+    height: 34px;
+    padding: 0 !important;
+    color: transparent;
+    cursor: pointer;
+  }
+
+  .nextra-navbar .nextra-search input::placeholder {
+    color: transparent !important;
+  }
+
+  /* The shortcut of the field has no room in the square */
+  .nextra-navbar .nextra-search kbd {
+    display: none;
+  }
+
+  /* The magnifier, drawn in pixels on a grid of 12, in the ink of the labels of the header */
+  .nextra-navbar .nextra-search::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: var(--tuwa-text-secondary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h1v1h-1zM2 7h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM8 8h1v1h-1zM9 9h1v1h-1zM10 10h1v1h-1z'/%3E%3C/svg%3E")
+      center / 14px 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h1v1h-1zM2 7h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM8 8h1v1h-1zM9 9h1v1h-1zM10 10h1v1h-1z'/%3E%3C/svg%3E")
+      center / 14px 14px no-repeat;
+    pointer-events: none;
+  }
+
+  .nextra-navbar .nextra-search:hover::before {
+    background-color: var(--tuwa-text-primary);
+  }
+
+  /* Open: the field at its width, on the raised paper, over the row of the pages and its arrows */
+  .nextra-navbar .nextra-search:focus-within {
+    z-index: 3;
+  }
+
+  .nextra-navbar .nextra-search:focus-within input {
+    width: 16rem !important;
+    padding: 0.5rem 0.75rem !important;
+    background-color: var(--tuwa-docs-raised) !important;
+    color: var(--tuwa-text-primary);
+    cursor: text;
+  }
+
+  .nextra-navbar .nextra-search:focus-within input::placeholder {
+    color: var(--tuwa-text-secondary) !important;
+  }
+
+  .nextra-navbar .nextra-search:focus-within::before {
+    display: none;
+  }
 }
 
 .nextra-breadcrumb,
 .nextra-breadcrumbs {
-  font-family: var(
-    --tuwa-font-mono,
-    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
-  ) !important;
+  font-family: var(--tuwa-font-mono) !important;
 }
 
+/* The headings of an article in Geist Mono, as every heading of TUWA: the body reads in Geist, the headings and the
+   small caps labels in mono */
 article h1,
 article h2,
 article h3,
 article h4,
 article h5,
 article h6 {
-  font-family: var(
-    --tuwa-font-mono,
-    var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
-  ) !important;
+  font-family: var(--tuwa-font-mono) !important;
   color: var(--tuwa-text-primary) !important;
   @apply tuwadocs:tracking-tight;
 }
 
 article h1 {
-  @apply tuwadocs:font-extrabold tuwadocs:text-3xl tuwadocs:sm:text-4xl;
+  @apply tuwadocs:font-semibold tuwadocs:text-3xl tuwadocs:sm:text-4xl;
 }
 
 article h2 {
-  @apply tuwadocs:font-bold tuwadocs:text-2xl tuwadocs:sm:text-3xl;
+  @apply tuwadocs:font-semibold tuwadocs:text-2xl tuwadocs:sm:text-3xl;
 }
 
 article h3 {
-  @apply tuwadocs:font-bold tuwadocs:text-xl tuwadocs:sm:text-2xl;
+  @apply tuwadocs:font-semibold tuwadocs:text-xl tuwadocs:sm:text-2xl;
 }
 
 article h4 {
@@ -256,64 +340,36 @@ article h6 {
   @apply tuwadocs:font-semibold tuwadocs:text-sm;
 }
 
+/* Code blocks on the raised paper, framed by a line of 1px instead of Nextra's ring (a box shadow); inline code on the
+   sunken paper with a hair line */
+.nextra-code pre {
+  background-color: var(--tuwa-docs-raised) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--tuwa-border-primary);
+}
+:not(pre) > code.nextra-code {
+  background-color: var(--tuwa-docs-sunken) !important;
+  border-color: var(--tuwa-border-secondary) !important;
+}
+
 .nextra-code button:hover {
-  background-color: rgba(0, 0, 0, 0.06) !important;
+  background-color: color-mix(in srgb, var(--tuwa-text-primary) 6%, transparent) !important;
   color: var(--tuwa-primary) !important;
 }
 
-.dark .nextra-code button:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #38bdf8 !important;
-}
-
+/* Quasar's dashboard hands the links of its cards (articles too) their own colours back against this rule: it keeps its
+   `!important` */
 article a {
   color: var(--tuwa-primary) !important;
-  text-decoration-color: rgba(0, 82, 255, 0.3);
+  text-decoration-color: color-mix(in srgb, var(--tuwa-primary) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   transition: all 0.2s ease;
 }
 
 article a:hover {
   color: var(--tuwa-secondary) !important;
   text-decoration-color: var(--tuwa-secondary);
-}
-
-.dark article a {
-  color: #38bdf8 !important;
-  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
-}
-
-.dark article a:hover {
-  color: #7dd3fc !important;
-  text-decoration-color: #7dd3fc !important;
-}
-
-.dark .nextra-toc a:hover {
-  color: #38bdf8 !important;
-}
-
-.dark .nextra-toc a[data-active] {
-  color: #38bdf8 !important;
-  border-color: #38bdf8 !important;
-}
-
-.dark .x\:text-primary-600,
-.dark [class*='text-primary-600'] {
-  color: #38bdf8 !important;
-}
-
-.nextra-callout[class*='border-blue-'] {
-  border-color: var(--tuwa-primary) !important;
-  background: rgb(0 82 255 / 0.05) !important;
-}
-
-.nextra-callout[class*='border-yellow-'] {
-  border-color: var(--tuwa-warning) !important;
-  background: rgb(245 158 11 / 0.05) !important;
-}
-
-.nextra-callout[class*='border-red-'] {
-  border-color: var(--tuwa-error) !important;
-  background: rgb(239 68 68 / 0.05) !important;
 }
 
 .nextra-toc a {
@@ -343,7 +399,7 @@ article .nextra-border a:hover {
 }
 
 .nextra-hamburger:hover {
-  background-color: rgb(0 82 255 / 0.1) !important;
+  background-color: color-mix(in srgb, var(--tuwa-text-primary) 3.5%, transparent) !important;
 }
 
 .nextra-toc .nextra-border a {
@@ -354,9 +410,30 @@ article .nextra-border a:hover {
   color: var(--tuwa-secondary) !important;
 }
 
-/* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security */
+/* The classes of Nextra with a radius of their own rather than its variables: square as well. A shape that was a circle
+   (the ring of the back-to-top arrow) follows --tuwa-rounded-full, square in Nova and round again where an app sets it */
+.x\:rounded {
+  border-radius: var(--tuwa-rounded-corners);
+}
+
+.x\:rounded-t {
+  border-top-left-radius: var(--tuwa-rounded-corners);
+  border-top-right-radius: var(--tuwa-rounded-corners);
+}
+
+.x\:rounded-full {
+  border-radius: var(--tuwa-rounded-full);
+}
+
+:not(pre) > code.nextra-code:not([class*='twoslash-']) {
+  border-radius: var(--tuwa-rounded-corners);
+}
+
+/* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security, in paper and ink: mono
+   headings, tables on lines of 1px with mono caps for their heads, a note in a frame of 1px with a strip of the accent
+   down its left side, and no fill but the sunken paper of inline code */
 .tuwadocs-policy-title {
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
 }
 
 .tuwadocs-policy {
@@ -372,14 +449,16 @@ article .nextra-border a:hover {
 .tuwadocs-policy h2,
 .tuwadocs-policy h3 {
   color: var(--tuwa-text-primary);
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
   font-weight: 700;
   letter-spacing: -0.01em;
   scroll-margin-top: 6rem;
 }
 
 .tuwadocs-policy h2 {
-  margin-top: 2.5rem;
+  margin-top: 2.75rem;
+  border-top: 1px solid var(--tuwa-border-primary);
+  padding-top: 1.5rem;
   font-size: 1.25rem;
   line-height: 1.4;
 }
@@ -396,7 +475,7 @@ article .nextra-border a:hover {
 }
 
 .tuwadocs-policy ul {
-  list-style: disc;
+  list-style: square;
 }
 
 .tuwadocs-policy ol {
@@ -414,7 +493,8 @@ article .nextra-border a:hover {
 
 .tuwadocs-policy a {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   overflow-wrap: anywhere;
 }
 
@@ -430,21 +510,24 @@ article .nextra-border a:hover {
 .tuwadocs-policy th,
 .tuwadocs-policy td {
   border: 1px solid var(--tuwa-border-primary);
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
   text-align: left;
   vertical-align: top;
 }
 
 .tuwadocs-policy th {
-  background: var(--tuwa-bg-muted);
   color: var(--tuwa-text-primary);
-  font-weight: 600;
+  font-family: var(--tuwa-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .tuwadocs-policy blockquote {
-  border-left: 3px solid var(--tuwa-border-primary);
-  border-radius: var(--tuwa-rounded-corners);
-  background: var(--tuwa-bg-muted);
+  border: 1px solid var(--tuwa-border-primary);
+  border-left: 3px solid var(--tuwa-docs-lit);
   padding: 0.75rem 1rem;
 }
 
@@ -453,16 +536,44 @@ article .nextra-border a:hover {
 }
 
 .tuwadocs-policy code {
-  border-radius: var(--tuwa-rounded-corners);
-  background: var(--tuwa-bg-muted);
+  border: 1px solid var(--tuwa-border-secondary);
+  background: var(--tuwa-docs-sunken);
   padding: 0.1em 0.35em;
-  font-family: var(--tuwa-font-mono, var(--font-geist-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace));
+  font-family: var(--tuwa-font-mono);
   font-size: 0.875em;
 }
 
-/* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and flat: the sizes of the switch before it (80 ×
-   40 on a phone, 64 × 32 from md), a knob that slides with a spring and stretches on its way (the sun on the left, the
-   moon on the right), pixel art that rebuilds itself, a twinkle, an orbit and a glow along an edge of the knob */
+/* A pixel picture that folds away and unfolds (`PixelFold`, the arrows over a row that scrolls sideways): folded, its
+   pixels are scattered around their places, out of sight; they fly in one after another when it unfolds and fly apart
+   the same way when it folds. Once each way */
+.tuwa-pixel-fold rect {
+  transition:
+    transform 300ms cubic-bezier(0.2, 0.9, 0.25, 1),
+    opacity 220ms linear;
+  transition-delay: calc(var(--i) * 12ms);
+}
+
+.tuwa-pixel-fold[data-folded] rect {
+  transform: translate(var(--dx), var(--dy));
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-pixel-fold rect {
+    transition: none;
+  }
+}
+
+/* The TUWA logo in motion (`LogoMotion`): while its pixels tremble under the pointer, or fly apart on a press, a filter
+   moves what its images show; at rest it has no filter at all */
+.tuwa-logo[data-pixels] {
+  filter: url(#tuwa-logo-pixels);
+}
+
+/* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and in paper and ink: a frame of 1px with no fill,
+   no shadows or halos around the knob. The sizes of the switch before it (80 × 40 on a phone, 64 × 32 from md), a knob
+   that slides with a spring and stretches on its way (the sun on the left, the moon on the right), pixel art that
+   rebuilds itself, a twinkle, an orbit and a line in colour along an edge of the knob */
 .tuwa-theme-switch {
   --knob: 34px;
   --pixel-step: 3px;
@@ -474,9 +585,9 @@ article .nextra-border a:hover {
   width: 80px;
   height: 40px;
   padding: 0;
-  border: 1px solid rgb(0 0 0 / 0.06);
+  border: 1px solid var(--tuwa-border-primary);
   border-radius: var(--tuwa-rounded-corners);
-  background: rgb(0 0 0 / 0.05);
+  background: transparent;
   cursor: pointer;
   transition: border-color 200ms ease;
   /* The tilted orbit of the satellite or the planet, in the knob (its box inside the border) */
@@ -491,9 +602,18 @@ article .nextra-border a:hover {
     height: 32px;
   }
 }
+/* The narrowest phones, in the navbar of Nextra: the logo, both switches and the menu button fit one row at 320px.
+   Only there: in a menu, where a switch has a row of its own, it keeps its size at every width */
+@media (max-width: 399.98px) {
+  .nextra-navbar .tuwa-theme-switch {
+    --knob: 28px;
+    --pixel-step: 2.5px;
+    --orbit-path: path('M 1.95 16.47 A 11 4 -24 1 0 22.05 7.53 A 11 4 -24 1 0 1.95 16.47');
+    width: 60px;
+    height: 34px;
+  }
+}
 .tuwa-theme-switch--dark {
-  border-color: rgb(255 255 255 / 0.1);
-  background: rgb(255 255 255 / 0.08);
   --glow: var(--tuwa-text-accent);
   --pixel: color-mix(in srgb, var(--tuwa-text-accent) 55%, #ffffff);
 }
@@ -521,18 +641,9 @@ article .nextra-border a:hover {
   border: 1px solid var(--tuwa-border-primary);
   border-radius: var(--tuwa-rounded-corners);
   background: var(--tuwa-bg-primary);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 10px -4px var(--glow);
-  transition: box-shadow 300ms ease;
 }
 .tuwa-theme-switch--dark .tuwa-theme-switch__knob {
   left: calc(100% - var(--knob) - 3px);
-}
-.tuwa-theme-switch:hover .tuwa-theme-switch__knob {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 14px -3px var(--glow);
 }
 .tuwa-theme-switch__knob--to-dark {
   animation: tuwa-knob-to-dark 480ms cubic-bezier(0.34, 1.3, 0.64, 1) both;
@@ -567,15 +678,13 @@ article .nextra-border a:hover {
   }
 }
 
-/* The glow along an edge, wrapping a little onto the sides: warm amber over the sun, the accent under the moon. The
-   border of the knob, masked to its edge; the halo follows what shows of it. Quiet: it sits in a header */
+/* A line in colour along an edge, wrapping a little onto the sides: warm amber over the sun, the accent under the moon.
+   The border of the knob, masked to its edge; a line, no halo */
 .tuwa-theme-switch__glow {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
   pointer-events: none;
-  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--glow) 60%, transparent))
-    drop-shadow(0 0 4px color-mix(in srgb, var(--glow) 28%, transparent));
   opacity: 0;
   transition: opacity 300ms ease 160ms;
 }
@@ -683,7 +792,6 @@ article .nextra-border a:hover {
   width: calc(var(--pixel-step) * 0.8);
   height: calc(var(--pixel-step) * 0.8);
   background: var(--pixel);
-  box-shadow: 0 0 4px var(--glow);
   offset-path: var(--orbit-path);
   offset-rotate: 0deg;
   opacity: 0;
@@ -724,8 +832,8 @@ article .nextra-border a:hover {
   }
 }
 
-/* The language switch, a pair with the theme switch: the flag of the language on the same knob, a soft glow in the
-   colour of the flag along its lower edge, a small spring and a new flag coming in when the language changes */
+/* The language switch, a pair with the theme switch: the flag of the language on the same knob, a line in the colour
+   of the flag along its lower edge, a small spring and a new flag coming in when the language changes */
 .tuwa-locale-switch__knob,
 .tuwa-locale-switch__tile,
 .tuwa-locale-switch__option {
@@ -747,10 +855,6 @@ article .nextra-border a:hover {
   border: 1px solid var(--tuwa-border-primary);
   border-radius: var(--tuwa-rounded-corners);
   background: var(--tuwa-bg-primary);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 10px -4px var(--glow);
-  transition: box-shadow 300ms ease;
 }
 @media (min-width: 768px) {
   .tuwa-locale-switch__knob {
@@ -758,37 +862,34 @@ article .nextra-border a:hover {
     height: 26px;
   }
 }
-:root:not(.dark) .tuwa-locale-switch__knob {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 8px -4px var(--glow-line);
+/* As the theme switch: smaller on the narrowest phones in the navbar of Nextra only */
+@media (max-width: 399.98px) {
+  .nextra-navbar .tuwa-locale-switch {
+    width: 4.25rem;
+    height: 34px;
+  }
+  .nextra-navbar .tuwa-locale-switch__knob {
+    width: 28px;
+    height: 28px;
+  }
 }
-.group:hover .tuwa-locale-switch__knob {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 14px -3px var(--glow);
+@media (max-width: 360px) {
+  .nextra-navbar .tuwa-locale-switch {
+    width: 3.75rem;
+  }
+  /* The narrower switch has no room for its chevron */
+  .nextra-navbar .tuwa-locale-switch__chevron {
+    display: none;
+  }
 }
-:root:not(.dark) .group:hover .tuwa-locale-switch__knob {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 10px -3px var(--glow-line);
-}
-/* The glow line: quiet, it sits in a header */
+/* The line in colour: quiet, it sits in a header */
 .tuwa-locale-switch__glow {
   position: absolute;
   inset: -1px;
   border-radius: inherit;
   pointer-events: none;
   opacity: 0.85;
-  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--glow) 60%, transparent))
-    drop-shadow(0 0 4px color-mix(in srgb, var(--glow) 28%, transparent));
-  transition:
-    filter 300ms ease,
-    opacity 300ms ease;
-}
-/* On a light page the halo stays close to the line, so the flag is not washed out */
-:root:not(.dark) .tuwa-locale-switch__glow {
-  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--glow) 50%, transparent));
+  transition: opacity 300ms ease;
 }
 .tuwa-locale-switch__glow::before {
   content: '';
@@ -800,7 +901,7 @@ article .nextra-border a:hover {
   transition: border-color 300ms ease;
 }
 
-/* The flag of each language in the menu sits on a small knob of its own, with the glow of its colour: faint on the
+/* The flag of each language in the menu sits on a small knob of its own, with the line of its colour: faint on the
    others, full on the chosen and the highlighted one */
 .tuwa-locale-switch__tile {
   position: relative;
@@ -812,17 +913,9 @@ article .nextra-border a:hover {
   border: 1px solid var(--tuwa-border-primary);
   border-radius: var(--tuwa-rounded-corners);
   background: var(--tuwa-bg-primary);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
-  transition: box-shadow 300ms ease;
 }
 .tuwa-locale-switch__tile .tuwa-locale-switch__glow {
   opacity: 0.25;
-}
-.tuwa-locale-switch__option[aria-selected='true'] .tuwa-locale-switch__tile,
-.tuwa-locale-switch__option--active .tuwa-locale-switch__tile {
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 10px -4px var(--glow-line);
 }
 .tuwa-locale-switch__option[aria-selected='true'] .tuwa-locale-switch__tile .tuwa-locale-switch__glow,
 .tuwa-locale-switch__option--active .tuwa-locale-switch__tile .tuwa-locale-switch__glow {
@@ -857,7 +950,7 @@ article .nextra-border a:hover {
   width: 16px;
   height: 12px;
   flex-shrink: 0;
-  border-radius: 2px;
+  border-radius: 0;
   box-shadow: 0 0 0 0.5px rgb(0 0 0 / 0.22);
 }
 .dark .tuwa-locale-flag {
@@ -926,27 +1019,49 @@ article .nextra-border a:hover {
   color: var(--tuwa-primary) !important;
 }
 
-.nextra-sidebar-container a[data-active] {
-  color: var(--tuwa-primary) !important;
-}
-
 .nextra-toc a[data-active] {
   color: var(--tuwa-primary) !important;
 }
 
 article a[href^='http']:after {
-  filter: hue-rotate(210deg) saturate(1.5);
+  filter: none;
 }
 
-/* Phones: the sticky Nextra header is opaque in the theme background (--nextra-bg, set by the `Head` of Nextra; white
-   without it), so the page never shows through it while it scrolls under the header. Its blur layer, 70% of the same
-   color, adds nothing on top. It covers portrait phones (below 768px, where the desktop navbar of Nextra begins) and
-   touch screens up to 1024px (phones in landscape, tablets); a desktop window keeps the glass look at every width. */
-@media (max-width: 767.98px), (pointer: coarse) and (max-width: 1023.98px) {
-  .nextra-navbar {
-    backdrop-filter: none;
-    background: rgb(var(--nextra-bg, 255 255 255));
-  }
+/* The sticky Nextra header is opaque paper at every width (--nextra-bg, set by the `Head` of Nextra to the paper of each
+   theme): the page never shows through it while it scrolls under the header. Its glass layer becomes the paper with
+   faint scanlines and a line of 1px below, with no blur */
+.nextra-navbar {
+  backdrop-filter: none;
+  background: transparent;
+}
+/* The glass of the hub header (`.tuwa-docs-glass`) on the layer of the Nextra header that spans it at every width */
+.nextra-navbar-blur {
+  background-color: color-mix(in srgb, var(--tuwa-docs-paper) 86%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  background-image: var(--tuwa-docs-scan);
+}
+
+/* The top-level pages in the Nextra header: mono caps, as the labels of paper and ink; ink on the current page */
+.nextra-navbar nav :is(a, button)[class*='x:whitespace-nowrap'] {
+  font-family: var(--tuwa-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tuwa-text-secondary);
+}
+.nextra-navbar nav :is(a, button)[class*='x:whitespace-nowrap']:hover,
+.nextra-navbar nav a[aria-current='true'],
+.nextra-navbar nav a[aria-current='page'] {
+  color: var(--tuwa-text-primary);
+}
+
+/* The footer of Nextra stands on the paper, not on its grey band, below the one line Nextra draws above it (its `hr`,
+   the grey separator of 1px). A second, darker line on the band itself stood right over that one and the two read as a
+   shadow */
+[class*='x:bg-gray-100'][class*='x:dark:bg-neutral-900'] {
+  background-color: var(--tuwa-docs-paper);
 }
 
 @media (max-width: 768px) {
@@ -955,12 +1070,17 @@ article a[href^='http']:after {
   }
 }
 
-html.dark {
-  background-color: #0a0e27;
+/* The page is paper in both themes. A site may paint its body with --tuwa-bg-primary, which Nova makes the raised surface
+   in light; outside a layer, this holds over a utility class on the body */
+html,
+body {
+  background-color: var(--tuwa-docs-paper);
 }
 
-html.dark body {
-  background-color: #0a0e27;
+/* The body holds the layers of its page: the star field (StarryBackground, `z-index: -10`) shows over the paper of the
+   body and under the content. Without it, the field would fall behind the paper of the body and never show */
+body {
+  isolation: isolate;
 }
 
 article:focus {
@@ -968,140 +1088,70 @@ article:focus {
   outline-offset: 2px;
 }
 
-/* The badge of a TUWA project (Orb), in the manner of the switches: a flat round knob, a pixel icon in the brand color
-   of the project, a faint ring of that color and a glowing arc that drifts slowly round it. The icon gathers pixel by
-   pixel in a wave when it first comes into view, then moves quietly in its own way */
-.tuwa-orb {
-  --orb-pixel: var(--orb);
-  --orb-lit: color-mix(in srgb, var(--orb) 72%, #000);
-  position: relative;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  border: 1px solid color-mix(in srgb, var(--orb) 22%, var(--tuwa-border-primary));
-  border-radius: 50%;
-  background: var(--tuwa-bg-primary);
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 16px -7px var(--orb);
-  transition:
-    box-shadow 400ms ease,
-    border-color 400ms ease;
+/* Pixel art of paper and ink: square pixels of ink and lit pixels of the accent, each a hair larger than its cell so
+   no seam shows. A part sets --tuwa-pixel-ink or --tuwa-pixel-lit to draw in other colours (a button, a badge) */
+.tuwa-pixel-art {
+  display: block;
+  overflow: visible;
+  shape-rendering: crispEdges;
 }
-.dark .tuwa-orb {
-  --orb-pixel: color-mix(in srgb, var(--orb) 70%, #fff);
-  --orb-lit: color-mix(in srgb, var(--orb) 32%, #fff);
+.tuwa-pixel-art rect {
+  fill: var(--tuwa-pixel-ink, var(--tuwa-text-primary));
 }
-.group:hover .tuwa-orb {
-  border-color: color-mix(in srgb, var(--orb) 40%, var(--tuwa-border-primary));
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 0 20px -6px var(--orb);
+.tuwa-pixel-art rect[data-lit] {
+  fill: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
 }
-/* The arc of light: the border, masked to a third of the circle, turning slowly */
-.tuwa-orb__glow {
-  position: absolute;
-  inset: -1px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--orb) 65%, transparent))
-    drop-shadow(0 0 4px color-mix(in srgb, var(--orb) 30%, transparent));
-  animation: tuwa-orb-drift 9s linear infinite;
+/* The pixels fly in to their places once, one after another, from a short way off (Nova's assemble motion) */
+.tuwa-pixel-art--assemble rect {
+  animation: tuwa-pixel-in 720ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation-delay: calc(var(--i, 0) * 14ms);
 }
-.tuwa-orb__glow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1.25px solid var(--orb);
-  border-radius: 50%;
-  mask-image: conic-gradient(transparent 0deg, #000 50deg, #000 80deg, transparent 140deg, transparent 360deg);
-}
-.group:hover .tuwa-orb__glow {
-  opacity: 1;
-}
-@keyframes tuwa-orb-drift {
+@keyframes tuwa-pixel-in {
+  from {
+    opacity: 0;
+    transform: translate(var(--dx, 0px), var(--dy, 0px));
+  }
+  60% {
+    opacity: 1;
+  }
   to {
-    rotate: 360deg;
-  }
-}
-.tuwa-orb__pixels {
-  position: relative;
-  width: calc(var(--orb-step) * 9);
-  height: calc(var(--orb-step) * 9);
-}
-/* Solid pixels, a hair larger than their step so no seam shows between two of them */
-.tuwa-orb__pixel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: calc(var(--orb-step) + 0.2px);
-  height: calc(var(--orb-step) + 0.2px);
-  background: var(--orb-pixel);
-  transform: translate(calc(var(--x) * var(--orb-step)), calc(var(--y) * var(--orb-step)));
-}
-.tuwa-orb__pixel--lit,
-.tuwa-orb__planet {
-  background: var(--orb-lit);
-}
-.dark .tuwa-orb__pixel--lit,
-.dark .tuwa-orb__planet {
-  box-shadow: 0 0 3px color-mix(in srgb, var(--orb) 70%, transparent);
-}
-.tuwa-orb__svg {
-  width: 45%;
-  height: 45%;
-  color: var(--orb-pixel);
-}
-
-/* The planet of the orbit, on the ring, upright while it goes round */
-.tuwa-orb__spin {
-  position: absolute;
-  inset: 0;
-}
-.tuwa-orb__planet {
-  position: absolute;
-  top: calc(var(--orb-step) * 0.5);
-  left: 50%;
-  width: calc(var(--orb-step) * 1.6);
-  height: calc(var(--orb-step) * 1.6);
-  translate: -50% -50%;
-}
-/* Hidden until the badge comes into view, only where scripts run: without them the icon simply shows */
-@media (scripting: enabled) {
-  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__pixel,
-  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__planet {
-    opacity: 0;
-  }
-}
-.tuwa-orb--shown .tuwa-orb__pixel {
-  animation: tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both;
-}
-.tuwa-orb--shown .tuwa-orb__planet {
-  animation: tuwa-orb-fade-in 600ms ease 400ms both;
-}
-@keyframes tuwa-orb-pixel-in {
-  from {
-    opacity: 0;
-    scale: 0.2;
-  }
-}
-@keyframes tuwa-orb-fade-in {
-  from {
-    opacity: 0;
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* The motion of each icon: slow and smooth, it sits in a list */
+/* While the reader points at the icon (`startPixelMotion`): it assembles again, faster, then its pixels move in the
+   way of its project (`data-motion`, the groups of `data-g`) until the pointer leaves, slowly and on the pixel grid;
+   then it rests where it is drawn, without assembling again (`--settled`). In the units of the picture: 1px is a cell */
+.tuwa-pixel-art--settled rect {
+  animation: none;
+}
+.tuwa-pixel-art--live rect {
+  --again: tuwa-pixel-again 520ms cubic-bezier(0.2, 0.9, 0.25, 1) calc(var(--i, 0) * 7ms) both;
+  animation: var(--again);
+}
+@keyframes tuwa-pixel-again {
+  from {
+    opacity: 0;
+    transform: translate(var(--dx, 0px), var(--dy, 0px));
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 /* Sign-in: the arrow glides into the door and is gone, again */
-.tuwa-orb--shown.tuwa-orb--sign-in .tuwa-orb__pixel[data-g='a'] {
+.tuwa-pixel-art--live[data-motion='sign-in'] rect[data-g='a'] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-enter 4s cubic-bezier(0.37, 0, 0.63, 1) 1.2s infinite;
+    var(--again),
+    tuwa-pixel-enter 3.2s cubic-bezier(0.37, 0, 0.63, 1) 700ms infinite;
 }
-@keyframes tuwa-orb-enter {
+@keyframes tuwa-pixel-enter {
   0% {
-    translate: calc(var(--orb-step) * -2.5) 0;
+    translate: -2.5px 0;
     opacity: 0;
   }
   30%,
@@ -1110,48 +1160,60 @@ article:focus {
     opacity: 1;
   }
   100% {
-    translate: calc(var(--orb-step) * 1.2) 0;
+    translate: 1.2px 0;
     opacity: 0;
   }
 }
-/* Orbit: the planet goes round its star */
-.tuwa-orb--shown.tuwa-orb--orbit .tuwa-orb__spin {
-  animation: tuwa-orb-drift 10s linear infinite;
+/* Orbit: a planet shows on the ring and goes round its star */
+.tuwa-pixel-art__spin {
+  transform-box: view-box;
+  transform-origin: 4.5px 4.5px;
 }
-.tuwa-orb--shown.tuwa-orb--orbit .tuwa-orb__planet {
-  animation:
-    tuwa-orb-fade-in 600ms ease 400ms both,
-    tuwa-orb-upright 10s linear infinite;
+.tuwa-pixel-art__planet {
+  visibility: hidden;
+  fill: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
 }
-@keyframes tuwa-orb-upright {
+.tuwa-pixel-art--live .tuwa-pixel-art__planet {
+  visibility: visible;
+  animation: tuwa-pixel-fade-in 400ms ease 450ms both;
+}
+.tuwa-pixel-art--live[data-motion='orbit'] .tuwa-pixel-art__spin {
+  animation: tuwa-pixel-spin 4s linear 450ms infinite;
+}
+@keyframes tuwa-pixel-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes tuwa-pixel-spin {
   to {
-    rotate: -360deg;
+    rotate: 360deg;
   }
 }
 /* Satellite: it floats; the light of its antenna blinks and the signal goes out */
-.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixels {
-  animation: tuwa-orb-float 5s ease-in-out infinite;
+.tuwa-pixel-art--live[data-motion='satellite'] {
+  animation: tuwa-pixel-float 3s ease-in-out 600ms infinite;
 }
-.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g='a'] {
+.tuwa-pixel-art--live[data-motion='satellite'] rect[data-g='a'] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-blink 2.6s ease-in-out 1s infinite;
+    var(--again),
+    tuwa-pixel-blink 1.8s ease-in-out 700ms infinite;
 }
-.tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g='b'] {
+.tuwa-pixel-art--live[data-motion='satellite'] rect[data-g='b'] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-signal 2.6s ease-in-out 1s infinite;
+    var(--again),
+    tuwa-pixel-signal 1.8s ease-in-out 700ms infinite;
 }
-@keyframes tuwa-orb-float {
+@keyframes tuwa-pixel-float {
   0%,
   100% {
     translate: 0 0;
   }
   50% {
-    translate: 0 calc(var(--orb-step) * -0.6);
+    translate: 0 -7%;
   }
 }
-@keyframes tuwa-orb-blink {
+@keyframes tuwa-pixel-blink {
   0%,
   100% {
     opacity: 1;
@@ -1160,36 +1222,33 @@ article:focus {
     opacity: 0.3;
   }
 }
-@keyframes tuwa-orb-signal {
+@keyframes tuwa-pixel-signal {
   0%,
   45% {
     opacity: 0;
-    translate: 0 calc(var(--orb-step) * 0.5);
+    translate: 0 0.5px;
   }
   65% {
     opacity: 1;
   }
   100% {
     opacity: 0;
-    translate: 0 calc(var(--orb-step) * -0.5);
+    translate: 0 -0.5px;
   }
 }
 /* Pulsar: a pulse runs out along the two beams of the star */
-.tuwa-orb--shown.tuwa-orb--pulsar .tuwa-orb__pixel[data-g] {
+.tuwa-pixel-art--live[data-motion='pulsar'] rect[data-g] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-beam 2.4s ease-in-out var(--beam) infinite;
+    var(--again),
+    tuwa-pixel-beam 1.6s ease-in-out var(--beam, 600ms) infinite;
 }
-.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='a'] {
-  --beam: 1s;
+.tuwa-pixel-art--live[data-motion='pulsar'] rect[data-g='b'] {
+  --beam: 750ms;
 }
-.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='b'] {
-  --beam: 1.2s;
+.tuwa-pixel-art--live[data-motion='pulsar'] rect[data-g='c'] {
+  --beam: 900ms;
 }
-.tuwa-orb--pulsar .tuwa-orb__pixel[data-g='c'] {
-  --beam: 1.4s;
-}
-@keyframes tuwa-orb-beam {
+@keyframes tuwa-pixel-beam {
   0%,
   100% {
     opacity: 0.2;
@@ -1199,23 +1258,20 @@ article:focus {
   }
 }
 /* Cloud: data rises into it, one piece after another */
-.tuwa-orb--shown.tuwa-orb--cloud .tuwa-orb__pixel[data-g] {
+.tuwa-pixel-art--live[data-motion='cloud'] rect[data-g] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-rise 3s cubic-bezier(0.37, 0, 0.63, 1) var(--rise) infinite;
+    var(--again),
+    tuwa-pixel-rise 2.4s cubic-bezier(0.37, 0, 0.63, 1) var(--rise, 600ms) infinite;
 }
-.tuwa-orb--cloud .tuwa-orb__pixel[data-g='a'] {
+.tuwa-pixel-art--live[data-motion='cloud'] rect[data-g='b'] {
   --rise: 1s;
 }
-.tuwa-orb--cloud .tuwa-orb__pixel[data-g='b'] {
-  --rise: 2s;
+.tuwa-pixel-art--live[data-motion='cloud'] rect[data-g='c'] {
+  --rise: 1.4s;
 }
-.tuwa-orb--cloud .tuwa-orb__pixel[data-g='c'] {
-  --rise: 3s;
-}
-@keyframes tuwa-orb-rise {
+@keyframes tuwa-pixel-rise {
   0% {
-    translate: 0 calc(var(--orb-step) * 1);
+    translate: 0 1px;
     opacity: 0;
   }
   30%,
@@ -1223,40 +1279,34 @@ article:focus {
     opacity: 1;
   }
   100% {
-    translate: 0 calc(var(--orb-step) * -3);
+    translate: 0 -3px;
     opacity: 0;
   }
 }
 /* Server: the lights of the racks blink in turn */
-.tuwa-orb--shown.tuwa-orb--server .tuwa-orb__pixel[data-g] {
+.tuwa-pixel-art--live[data-motion='server'] rect[data-g] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    tuwa-orb-blink 2.8s ease-in-out var(--led) infinite;
+    var(--again),
+    tuwa-pixel-blink 1.6s ease-in-out var(--led, 600ms) infinite;
 }
-.tuwa-orb--server .tuwa-orb__pixel[data-g='a'] {
-  --led: 1s;
-}
-.tuwa-orb--server .tuwa-orb__pixel[data-g='b'] {
-  --led: 2.4s;
+.tuwa-pixel-art--live[data-motion='server'] rect[data-g='b'] {
+  --led: 1.4s;
 }
 /* Supernova: the star flares and throws a shock wave out, the tips of its rays catching the light */
-.tuwa-orb--shown.tuwa-orb--supernova .tuwa-orb__pixel[data-g] {
+.tuwa-pixel-art--live[data-motion='supernova'] rect[data-g] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    var(--burst) 3.6s cubic-bezier(0.22, 1, 0.36, 1) 1s infinite;
+    var(--again),
+    var(--burst, tuwa-pixel-flare) 2.4s cubic-bezier(0.22, 1, 0.36, 1) 700ms infinite;
 }
-.tuwa-orb--supernova .tuwa-orb__pixel[data-g='a'] {
-  --burst: tuwa-orb-shock;
+.tuwa-pixel-art--live[data-motion='supernova'] rect[data-g='a'] {
+  --burst: tuwa-pixel-shock;
 }
-.tuwa-orb--supernova .tuwa-orb__pixel[data-g='b'] {
-  --burst: tuwa-orb-ray;
+.tuwa-pixel-art--live[data-motion='supernova'] rect[data-g='b'] {
+  --burst: tuwa-pixel-ray;
 }
-.tuwa-orb--supernova .tuwa-orb__pixel[data-g='c'] {
-  --burst: tuwa-orb-flare;
-}
-@keyframes tuwa-orb-shock {
+@keyframes tuwa-pixel-shock {
   0% {
-    translate: calc((4 - var(--x)) * var(--orb-step) * 0.75) calc((4 - var(--y)) * var(--orb-step) * 0.75);
+    translate: calc((4 - var(--x)) * 0.75px) calc((4 - var(--y)) * 0.75px);
     opacity: 0;
   }
   12% {
@@ -1271,7 +1321,7 @@ article:focus {
     opacity: 0;
   }
 }
-@keyframes tuwa-orb-ray {
+@keyframes tuwa-pixel-ray {
   0%,
   30%,
   100% {
@@ -1281,7 +1331,7 @@ article:focus {
     opacity: 1;
   }
 }
-@keyframes tuwa-orb-flare {
+@keyframes tuwa-pixel-flare {
   0%,
   100% {
     opacity: 0.8;
@@ -1291,21 +1341,18 @@ article:focus {
   }
 }
 /* Terminal: two characters are typed, the cursor blinks, then the line clears */
-.tuwa-orb--shown.tuwa-orb--terminal .tuwa-orb__pixel[data-g] {
+.tuwa-pixel-art--live[data-motion='terminal'] rect[data-g] {
   animation:
-    tuwa-orb-pixel-in 520ms cubic-bezier(0.34, 1.35, 0.64, 1) var(--delay) both,
-    var(--type) 4.8s ease-in-out 1s infinite;
+    var(--again),
+    var(--type, tuwa-pixel-type-a) 3.2s ease-in-out 700ms infinite;
 }
-.tuwa-orb--terminal .tuwa-orb__pixel[data-g='a'] {
-  --type: tuwa-orb-type-a;
+.tuwa-pixel-art--live[data-motion='terminal'] rect[data-g='b'] {
+  --type: tuwa-pixel-type-b;
 }
-.tuwa-orb--terminal .tuwa-orb__pixel[data-g='b'] {
-  --type: tuwa-orb-type-b;
+.tuwa-pixel-art--live[data-motion='terminal'] rect[data-g='c'] {
+  --type: tuwa-pixel-type-c;
 }
-.tuwa-orb--terminal .tuwa-orb__pixel[data-g='c'] {
-  --type: tuwa-orb-type-c;
-}
-@keyframes tuwa-orb-type-a {
+@keyframes tuwa-pixel-type-a {
   0%,
   8% {
     opacity: 0;
@@ -1319,7 +1366,7 @@ article:focus {
     opacity: 0;
   }
 }
-@keyframes tuwa-orb-type-b {
+@keyframes tuwa-pixel-type-b {
   0%,
   20% {
     opacity: 0;
@@ -1333,7 +1380,7 @@ article:focus {
     opacity: 0;
   }
 }
-@keyframes tuwa-orb-type-c {
+@keyframes tuwa-pixel-type-c {
   0%,
   32% {
     opacity: 0;
@@ -1361,78 +1408,64 @@ article:focus {
   }
 }
 
-/* Rocket: it takes off once, rising into its place with its flame flickering, then rests */
-.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel {
-  animation: none;
+/* Corner marks: the viewfinder of a tile or of a point that is aimed at, lines of 1px in the colour of the text */
+.tuwa-corner-marks {
+  overflow: visible;
+  shape-rendering: crispEdges;
+  pointer-events: none;
 }
-.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixels {
-  animation: tuwa-orb-launch 1.8s cubic-bezier(0.22, 1, 0.36, 1) 300ms both;
+.tuwa-corner-marks path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
 }
-.tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel[data-g] {
-  animation: tuwa-orb-flame 260ms ease-in-out 300ms 7 alternate;
+
+/* The square of a TUWA project: a frame of 1px with the pixel icon inside and corner marks 5px outside it (the marks
+   are measured from the padding edge, inside the frame), which turn to the accent when it is current or pointed at */
+.tuwa-project-square {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--tuwa-border-strong);
 }
-@keyframes tuwa-orb-launch {
-  0% {
-    translate: 0 calc(var(--orb-step) * 3.5);
-    opacity: 0;
-  }
-  35% {
-    opacity: 1;
-  }
-  100% {
-    translate: 0 0;
-    opacity: 1;
-  }
+.tuwa-project-square__art {
+  width: 61.4%;
+  height: 61.4%;
 }
-@keyframes tuwa-orb-flame {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0.35;
-  }
+.tuwa-project-square__corners {
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  color: var(--tuwa-border-strong);
+  transition: color 200ms ease;
 }
-/* Its window is a porthole: pale on a light page, where a darker blue on blue would not show; lit in the dark */
-:root:not(.dark) .tuwa-orb--rocket .tuwa-orb__pixel--lit:not([data-g]) {
-  background: color-mix(in srgb, var(--orb) 16%, #fff);
+.group:hover .tuwa-project-square__corners,
+.tuwa-project-square--active .tuwa-project-square__corners {
+  color: var(--tuwa-text-accent);
 }
-/* Its flame burns amber */
-.tuwa-orb--rocket .tuwa-orb__pixel[data-g] {
-  background: #f59e0b;
-}
-.tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
-  background: #fbbf24;
-}
-.dark .tuwa-orb--rocket .tuwa-orb__pixel--lit[data-g] {
-  box-shadow: 0 0 3px rgb(245 158 11 / 0.7);
+
+/* A figure that is lit in the dark theme (a count, a reached point) has the quiet glow of the dark logo */
+.dark .tuwa-docs-glow {
+  text-shadow: 0 0 6px rgba(34, 195, 230, 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__pixel,
-  .tuwa-orb:not(.tuwa-orb--shown) .tuwa-orb__planet {
-    opacity: 1;
-  }
-  .tuwa-orb__glow,
-  .tuwa-orb--shown .tuwa-orb__pixel,
-  .tuwa-orb--shown .tuwa-orb__pixels,
-  .tuwa-orb--shown .tuwa-orb__spin,
-  .tuwa-orb--shown .tuwa-orb__planet,
-  .tuwa-orb--shown.tuwa-orb--sign-in .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--satellite .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--pulsar .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--cloud .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--server .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--terminal .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixel[data-g],
-  .tuwa-orb--shown.tuwa-orb--rocket .tuwa-orb__pixels,
-  .tuwa-orb--shown.tuwa-orb--supernova .tuwa-orb__pixel[data-g] {
+  .tuwa-pixel-art--assemble rect,
+  .tuwa-pixel-art--live,
+  .tuwa-pixel-art--live rect,
+  .tuwa-pixel-art--live .tuwa-pixel-art__spin {
     animation: none;
+  }
+  .tuwa-project-square__corners {
+    transition: none;
   }
 }
 
 /*
  * What the page of a documentation site takes for granted. Nova Core no longer sets any of this on its host: it would be a
- * surprise on another site. Ukrainian needs its tracking reset, as tight tracking makes Cyrillic glyphs collide.
+ * surprise on another site.
  */
 html {
   scrollbar-gutter: stable;
@@ -1443,38 +1476,63 @@ html {
     font-family: var(--tuwa-font-sans);
   }
 
-  [class*='font-mono'] {
+  /* Monospace runs tight in one line by default. A part that sets its own tracking or line height keeps it, as Nova
+     does for its own parts: the caps labels of paper and ink are spaced 0.12em, and a block of code needs its lines */
+  [class*='font-mono']:not([class*='tracking-']) {
     letter-spacing: -0.025em !important;
+  }
+
+  [class*='font-mono']:not([class*='leading-']) {
     line-height: 1 !important;
   }
 
-  /* Reset negative tracking for Cyrillic / Ukrainian to prevent glyph collision */
-  :lang(uk) [class*='font-mono'],
-  html[lang='uk'] [class*='font-mono'],
-  html[lang^='uk'] [class*='font-mono'],
-  [lang='uk'] [class*='font-mono'],
-  [lang^='uk'] [class*='font-mono'] {
+  /* Ukrainian: tight tracking makes Cyrillic glyphs collide, so monospace and headings that set no tracking, or a tight
+     one, run at the normal tracking. A label spaced wider keeps its spacing */
+  :lang(uk) :is([class*='font-mono'], h1, h2, h3, h4, h5, h6):not([class*='tracking-']),
+  :lang(uk) :is([class*='font-mono'], h1, h2, h3, h4, h5, h6)[class*='tracking-tight'] {
     letter-spacing: normal !important;
   }
 
-  :lang(uk) h1,
-  :lang(uk) h2,
-  :lang(uk) h3,
-  :lang(uk) h4,
-  :lang(uk) h5,
-  :lang(uk) h6,
-  html[lang='uk'] h1,
-  html[lang='uk'] h2,
-  html[lang='uk'] h3,
-  html[lang='uk'] h4,
-  html[lang='uk'] h5,
-  html[lang='uk'] h6,
-  html[lang^='uk'] h1,
-  html[lang^='uk'] h2,
-  html[lang^='uk'] h3,
-  html[lang^='uk'] h4,
-  html[lang^='uk'] h5,
-  html[lang^='uk'] h6 {
+  /* Chinese has no capitals, and spacing CJK glyphs apart breaks up the words: a monospace caps label shows as written,
+     at the normal tracking. Nova's own parts are left to Nova */
+  :lang(zh)
+    :is([class*='font-mono'], [class*='font-geist-mono'])[class*='uppercase']:not(
+      :is([class*='novacore:'], [class*='novacon:'], [class*='novatx:'], [class*='novapay:'])
+    ) {
+    text-transform: none !important;
     letter-spacing: normal !important;
+  }
+}
+
+/* Where a link to an anchor of the page lands (`SmoothAnchors`): a frame of the accent closes in on the part and fades,
+   once, as a sight locking on. None for reduced motion, where the page goes there at once */
+.tuwa-landed {
+  animation: tuwa-lock-on 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes tuwa-lock-on {
+  0% {
+    outline: 1px solid color-mix(in srgb, var(--tuwa-text-accent) 0%, transparent);
+    outline-offset: 18px;
+  }
+
+  20% {
+    outline: 1px solid var(--tuwa-text-accent);
+  }
+
+  55% {
+    outline: 1px solid var(--tuwa-text-accent);
+    outline-offset: 4px;
+  }
+
+  100% {
+    outline: 1px solid color-mix(in srgb, var(--tuwa-text-accent) 0%, transparent);
+    outline-offset: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-landed {
+    animation: none;
   }
 }

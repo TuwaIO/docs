@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowsRightLeftIcon, LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { ArrowsRightLeftIcon, LockClosedIcon, SparklesIcon } from '@tuwaio/sdk/nova-icons/24/outline';
 import type { InitialTransactionParams } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import type { ComponentType, SVGProps } from 'react';
@@ -78,7 +78,7 @@ export function ActionButtons({ withTrackedModal }: { withTrackedModal: boolean 
             disabled={!family || isInitializing}
             className="group flex flex-col items-start gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-secondary)] p-4 text-left transition-colors hover:border-[var(--tuwa-text-accent)] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
           >
-            <action.icon className="h-5 w-5 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
+            <action.icon className="h-4 w-4 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
             <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{localized.label}</span>
             <span className="text-xs text-[var(--tuwa-text-secondary)]">{localized.description[0]}</span>
           </button>

@@ -4,15 +4,15 @@ import { shortenDataUri } from '@/lib/playground/encoding';
 
 function Value({ value }: { value: unknown }) {
   if (typeof value === 'string')
-    return <span className="text-emerald-700 dark:text-emerald-400">&quot;{shortenDataUri(value)}&quot;</span>;
+    return <span className="text-[var(--tuwa-success-text)]">&quot;{shortenDataUri(value)}&quot;</span>;
   if (typeof value === 'number' || typeof value === 'bigint') {
-    return <span className="text-amber-700 dark:text-amber-400">{String(value)}</span>;
+    return <span className="text-[var(--tuwa-text-accent)]">{String(value)}</span>;
   }
   if (typeof value === 'boolean' || value === null) {
-    return <span className="text-sky-700 dark:text-sky-400">{String(value)}</span>;
+    return <span className="font-bold text-[var(--tuwa-text-primary)]">{String(value)}</span>;
   }
-  if (typeof value === 'function') return <span className="italic text-sky-700 dark:text-sky-400">ƒ()</span>;
-  return <span className="text-[var(--tuwa-text-tertiary)]">undefined</span>;
+  if (typeof value === 'function') return <span className="text-[var(--tuwa-text-secondary)] italic">ƒ()</span>;
+  return <span className="text-[var(--tuwa-text-secondary)]">undefined</span>;
 }
 
 function Key({ name }: { name?: string }) {

@@ -12,7 +12,7 @@ import { NextraLocalizedShell, NextraPageWrapper } from '../components/NextraLoc
 import { languageTexts } from './languageMetadata';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from './site';
 
-const logo = <SiteLogo width={126} height={40} className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
+const logo = <SiteLogo className="tuwadocs:transition-opacity tuwadocs:duration-300" />;
 
 /** Route params of the `[[...mdxPath]]` page of a section. */
 export type SectionPageProps = {
@@ -150,7 +150,7 @@ export async function SectionLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <NextraLocalizedShell logo={logo} pageMap={pageMap}>
-        <NextTopLoader color="#0052ff" shadow="0 0 10px #0052ff,0 0 5px #0052ff" showSpinner={false} />
+        <NextTopLoader color="var(--tuwa-text-accent)" shadow={false} showSpinner={false} />
         {children}
       </NextraLocalizedShell>
     </div>

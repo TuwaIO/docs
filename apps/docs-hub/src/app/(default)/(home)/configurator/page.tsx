@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
 import { ConfiguratorHeader, StackConfigurator } from '../../../../components/configurator/StackConfigurator';
+import { homeContentClassName, homeFrameClassName } from '../../../../components/home/homeLayout';
+import { CrossMark } from '../../../../components/home/SectionHead';
 import { JsonLd } from '../../../../components/JsonLd';
 import { PageBackground } from '../../../../components/PageBackground';
 import { ORGANIZATION, SITE_URL, WEBSITE_ID, withPageMetadata } from '../../../../lib/site';
@@ -50,8 +52,11 @@ export default async function ConfiguratorPage({ params }: LanguagePageProps) {
       <JsonLd data={localizedJsonLd(structuredData, '/configurator', lang)} />
       <PageBackground />
 
-      <div className="relative z-10 pt-28 sm:pt-32 pb-16">
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6">
+      <div className="relative z-10">
+        {/* The frame of the column, as on the main page: its sides run on into the footer */}
+        <div className={`${homeContentClassName} ${homeFrameClassName}`}>
+          <CrossMark x="left" y="top" />
+          <CrossMark x="right" y="top" />
           <ConfiguratorHeader />
           <StackConfigurator />
         </div>

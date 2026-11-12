@@ -4,8 +4,13 @@ import type { Metadata } from 'next';
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
 import { HeroSection } from '../../../components/HeroSection';
+import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
+import { HomeFlightPlan } from '../../../components/home/HomeFlightPlan';
+import { homeContentClassName, homeFrameClassName } from '../../../components/home/homeLayout';
+import { PixelHandoff } from '../../../components/home/PixelHandoff';
+import { CrossMark } from '../../../components/home/SectionHead';
+import { StageLedgers } from '../../../components/home/StageLedgers';
 import { JsonLd } from '../../../components/JsonLd';
-import { LayerTimeline } from '../../../components/LayerTimeline';
 import { PageBackground } from '../../../components/PageBackground';
 import { QuickStartSection } from '../../../components/QuickStartSection';
 import { getReleases } from '../../../lib/github';
@@ -42,11 +47,19 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
     <>
       <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
+      {/* Outside the page below: its strip lies over the line of the header */}
+      <HomeFlightPlan />
 
-      <div className="relative z-10 pt-28 sm:pt-32 pb-16">
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6">
+      <div className="relative z-10">
+        <PixelHandoff />
+        {/* The frame of the column: its sides meet the line under the header with a cross and run on into the footer
+            (`Footer framed`), so it has no bottom line of its own */}
+        <div className={`${homeContentClassName} ${homeFrameClassName}`}>
+          <CrossMark x="left" y="top" />
+          <CrossMark x="right" y="top" />
           <HeroSection />
-          <LayerTimeline releases={getReleases()} packages={getPackageDetails()} />
+          <EcosystemBoard />
+          <StageLedgers releases={getReleases()} packages={getPackageDetails()} />
           <QuickStartSection />
         </div>
       </div>

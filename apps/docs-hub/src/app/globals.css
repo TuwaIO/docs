@@ -5,148 +5,106 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Main page & Hub hero gradient palette (preserves --tuwa-button-gradient-* for ConnectButton):
-   - Light mode: Electric Blue (#0052ff) -> Royal Cobalt (#1d4ed8) -> Oceanic Azure (#0284c7)
-   - Dark mode: Royal Blue (#2563eb) -> Sapphire (#3b82f6) -> Glacial Sky (#7dd3fc) on cosmic dark (#0a0e27) */
-:root {
-  --tuwa-hero-gradient-from: #0052ff;
-  --tuwa-hero-gradient-via: #1d4ed8;
-  --tuwa-hero-gradient-to: #0284c7;
+/* The `font-sans` and `font-mono` classes of the hub in Geist and Geist Mono, the fonts docs-ui sets, rather than the
+   fonts of the system Tailwind names by default. Inline, so that a class resolves the font of its own language */
+@theme inline {
+  --font-sans: var(--tuwa-font-sans);
+  --font-mono: var(--tuwa-font-mono);
 }
 
-/* Cosmic Dark Background (#0a0e27) for Nextra Layouts */
-html.dark,
-.dark {
-  --nextra-bg: 10 14 39;
-  --tuwa-bg-dark: #0a0e27;
-  --tuwa-hero-gradient-from: #2563eb;
-  --tuwa-hero-gradient-via: #3b82f6;
-  --tuwa-hero-gradient-to: #7dd3fc;
-}
-
-/* Heading links in dark mode: soft refined accent blue (#38bdf8), never pure white or blinding saturated blue */
-.dark h1 a,
-.dark h2 a,
-.dark h3 a,
-.dark h4 a,
-.dark h5 a,
-.dark h6 a,
-html.dark h1 a,
-html.dark h2 a,
-html.dark h3 a,
-html.dark h4 a,
-html.dark h5 a,
-html.dark h6 a {
-  color: #38bdf8 !important;
-  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
-}
-
-.dark h1 a:hover,
-.dark h2 a:hover,
-.dark h3 a:hover,
-.dark h4 a:hover,
-.dark h5 a:hover,
-.dark h6 a:hover,
-html.dark h1 a:hover,
-html.dark h2 a:hover,
-html.dark h3 a:hover,
-html.dark h4 a:hover,
-html.dark h5 a:hover,
-html.dark h6 a:hover {
-  color: #7dd3fc !important;
-  text-decoration-color: #7dd3fc !important;
-}
-
-/* Sidebar footer (theme switcher & collapse button container) in dark mode: matches dark background */
-.dark .nextra-sidebar-footer,
-html.dark .nextra-sidebar-footer {
-  background-color: #0a0e27 !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-.dark .nextra-sidebar,
-html.dark .nextra-sidebar {
-  background-color: #0a0e27 !important;
-}
-
-/* Subtle, light hover state on code block copy button in light mode */
-.nextra-code button:hover {
-  background-color: rgba(0, 0, 0, 0.06) !important;
-  color: var(--tuwa-primary, #0052ff) !important;
-}
-
-.dark .nextra-code button:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  color: #38bdf8 !important;
-}
-
-/* Soft accent color for dark mode links and interactive elements (pagination, feedback, edit links) */
-.dark article a {
-  color: #38bdf8 !important;
-  text-decoration-color: rgba(56, 189, 248, 0.4) !important;
-}
-
-.dark article a:hover {
-  color: #7dd3fc !important;
-  text-decoration-color: #7dd3fc !important;
-}
-
-.dark .x\:text-primary-600,
-.dark [class*='text-primary-600'] {
-  color: #38bdf8 !important;
-}
-
-/* Override Nextra purple callouts & borders with TUWA signature blue */
-.nextra-callout.x\:border-purple-600,
-.nextra-callout[class*='border-purple'],
-.x\:border-purple-600,
-.x\:dark\:border-purple-600,
-[class*='border-purple'] {
-  border-color: #0052ff !important;
-}
-.nextra-callout.x\:border-purple-600 svg,
-.nextra-callout[class*='border-purple'] svg,
-.x\:text-purple-600,
-.x\:dark\:text-purple-400,
-[class*='text-purple'] {
-  color: #38bdf8 !important;
-  fill: #38bdf8 !important;
-}
-.nextra-callout.x\:border-purple-600,
-.nextra-callout[class*='bg-purple'],
-.x\:bg-purple-100 {
-  background-color: rgba(0, 82, 255, 0.08) !important;
-}
-.dark .nextra-callout.x\:border-purple-600,
-.dark .nextra-callout[class*='dark:bg-purple'],
-.dark .x\:dark\:bg-purple-900\/30,
-[class*='dark:bg-purple'] {
-  background-color: rgba(0, 82, 255, 0.12) !important;
-}
-
-.dark hr.nextra-border,
-html.dark hr.nextra-border {
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-/* Responsive base font-size scaling to fit content beautifully on larger displays */
-html {
-  font-size: 16px;
-  transition: font-size 0.2s ease-in-out;
-}
-
-@media (max-width: 1536px) {
-  html {
-    font-size: 15px;
+/* Every heading of the hub in Geist Mono, as the headings of TUWA: the body reads in Geist. Nova draws its own parts
+   (the Playground shows it as apps get it), which keep the fonts Nova gives them */
+@layer base {
+  :is(h1, h2, h3, h4, h5, h6):not(
+    :is([class*='novacore:'], [class*='novacon:'], [class*='novatx:'], [class*='novapay:'])
+  ) {
+    font-family: var(--tuwa-font-mono);
   }
 }
 
-/* Monospace font: uses --tuwa-font-mono from @tuwaio/nova-core */
+/* The handoff of the main page (`PixelHandoff`): while the pixels of the project icons fly from the plate of the hero to
+   the board, both sets of icons hide; before it the board waits without its icons. Without the script, or for reduced
+   motion, nothing sets the attribute and every icon shows */
+html[data-handoff='flight'] :is([data-plate-icon], [data-board-icon]),
+html[data-handoff='plate'] [data-board-icon] {
+  visibility: hidden;
+}
+
+/* A pixel in flight: a square of 1px that the handoff moves and scales, in the colours of the pixel art of docs-ui */
+.tuwa-handoff-pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  transform-origin: 0 0;
+  background-color: var(--tuwa-pixel-ink, var(--tuwa-text-primary));
+  will-change: transform;
+}
+
+.tuwa-handoff-pixel--lit {
+  background-color: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
+}
+
+/* A dotted line of the main page, the stages of the board on phones and tablets: a dot of 1px every 8px, in the colour
+   of the traces (an SVG tile: paper and ink has no gradients) */
+.tuwa-hub-dots-y {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%23636366' fill-opacity='0.7'/%3E%3C/svg%3E");
+  background-repeat: repeat-y;
+}
+
+.dark .tuwa-hub-dots-y {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%238e8e90' fill-opacity='0.7'/%3E%3C/svg%3E");
+}
+
+/* The flight plan of the main page (`FlightPlan`). The flame of its craft flickers, in steps, only while the craft is
+   under way (`data-moving`, which the scroll sets and a stop removes): the one motion of the hub that repeats, and it
+   ends with the scroll */
+@keyframes tuwa-flight-flicker {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* A craft that turns around is drawn anew: its pixels fly in to their places, one after another, once */
+@keyframes tuwa-flight-assemble {
+  from {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+}
+
+.tuwa-flight-assemble [data-fly] {
+  animation: tuwa-flight-assemble 380ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation-delay: calc(var(--i) * 5ms);
+}
+
+/* The corner marks close in on the waypoint the craft has locked on, once */
+@keyframes tuwa-flight-lock {
+  from {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.tuwa-flight-lock {
+  animation: tuwa-flight-lock 560ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-flight-lock,
+  .tuwa-flight-assemble [data-fly] {
+    animation: none;
+  }
+}
+
+/* Monospace font: uses --tuwa-font-mono, which docs-ui sets to Geist Mono */
 .font-geist-mono {
-  font-family: var(
-    --tuwa-font-mono,
-    var(--font-mono, 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace)
-  ) !important;
+  font-family: var(--tuwa-font-mono) !important;
 }
 
 /* Sequence Diagram theme adaptation (Light & Dark) */
@@ -185,26 +143,30 @@ html.dark svg[aria-roledescription='sequence'] line.messageLine1 {
   stroke: #94a3b8 !important;
 }
 
-/* Code of the Stack Configurator, highlighted by Shiki with the GitHub light and dark themes (defaultColor: false) */
+/* Code of the Stack Configurator and of the Playground, in paper and ink: Geist Mono on the paper of its frame (the
+   code has no fill of its own), highlighted by Shiki with the token colours of the GitHub light and dark themes
+   (defaultColor: false) */
 .tuwa-code pre {
   margin: 0;
   overflow-x: auto;
-  padding: 1rem 1.25rem;
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  padding: 1.125rem 1.25rem;
+  font-family: var(--tuwa-font-mono);
   font-size: 0.8125rem;
   line-height: 1.65;
-  background: #f6f8fa;
-  color: #24292e;
+  background: transparent;
+  color: var(--tuwa-text-primary);
   scrollbar-width: thin;
+}
+
+/* On phones the copy button would lie over the first lines of the code: there the code starts under it */
+@media (max-width: 767px) {
+  .tuwa-code pre {
+    padding-top: 3.75rem;
+  }
 }
 
 .tuwa-code pre span {
   color: var(--shiki-light);
-}
-
-.dark .tuwa-code pre {
-  background: #0d1117;
-  color: #e1e4e8;
 }
 
 .dark .tuwa-code pre span {

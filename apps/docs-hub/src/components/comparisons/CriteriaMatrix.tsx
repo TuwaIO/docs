@@ -3,28 +3,40 @@
 import { useI18n } from '@/i18n';
 import { AXES, axisScore, CRITERIA, PRODUCTS, sourceIndex } from '@/lib/comparisons';
 
+import { capsClassName, frameClassName } from './comparisonStyles';
 import { MarkIcon, SourceRef } from './MarkIcon';
 
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
+/** The column of TUWA: a breath of ink over the paper of the table. */
+const tuwaClassName = 'bg-[color-mix(in_srgb,var(--tuwa-text-primary)_4%,transparent)]';
+
 /**
- * Every criterion against every product: the axis rows show the scores, the criterion rows the marks with the note as
- * a tooltip and a footnote to the source. Scrolls sideways on narrow screens, with the criterion column pinned.
+ * Every criterion against every product, in paper and ink: a table on shared lines of 1px in a frame. The rows of the
+ * axes show the scores on sunken paper, the rows of the criteria the marks with the note as a tooltip and a footnote to
+ * the source; the column of TUWA has a breath of ink and its head the accent. It scrolls sideways on narrow screens,
+ * with the column of the criteria pinned.
+ *
+ * @returns The table.
  */
 export function CriteriaMatrix() {
   const { t } = useI18n();
   const sources = sourceIndex();
 
   return (
-    <div className="relative rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[780px] sm:min-w-[860px] border-collapse text-xs">
+    <div className={frameClassName}>
+      {/* `relative`: the marks carry their meaning as text set out of sight (`sr-only`, placed absolutely). Without a
+          positioned box here that text is placed from the page, outside this scroller, and the page scrolls sideways
+          as far as the last column */}
+      <div className="relative overflow-x-auto">
+        <table className="w-full min-w-[780px] border-collapse text-xs md:min-w-[860px]">
           <caption className="sr-only">
             Comparison criteria of TUWA and eight other products, grouped by radar axis
           </caption>
           <thead>
-            <tr className="border-b border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.08]">
+            <tr>
               <th
                 scope="col"
-                className="sticky left-0 z-10 bg-[var(--tuwa-bg-primary)] dark:bg-[#080808] md:dark:bg-[#11152f] text-left font-semibold text-[var(--tuwa-text-tertiary)] uppercase tracking-wider text-[10px] px-3 sm:px-4 py-3 w-[150px] sm:w-[220px]"
+                className={`sticky left-0 z-10 w-[150px] border-b bg-[var(--tuwa-docs-raised)] px-3 py-3.5 text-left text-[var(--tuwa-text-secondary)] md:w-[220px] md:px-4 ${lineClassName} ${capsClassName}`}
               >
                 {t.comparisons.matrix.criterionColumn}
               </th>
@@ -32,7 +44,7 @@ export function CriteriaMatrix() {
                 <th
                   key={product.id}
                   scope="col"
-                  className={`px-2 py-3 text-center font-semibold font-geist-mono uppercase tracking-wide text-[10px] whitespace-nowrap ${product.id === 'tuwa' ? 'text-[var(--tuwa-text-accent)] bg-[var(--tuwa-text-accent)]/[0.05]' : 'text-[var(--tuwa-text-secondary)]'}`}
+                  className={`border-b border-l px-2 py-3.5 text-center whitespace-nowrap ${lineClassName} ${capsClassName} ${product.id === 'tuwa' ? `text-[var(--tuwa-text-accent)] ${tuwaClassName}` : 'text-[var(--tuwa-text-secondary)]'}`}
                 >
                   {product.name}
                 </th>
@@ -41,19 +53,17 @@ export function CriteriaMatrix() {
           </thead>
           {AXES.map((axis) => (
             <tbody key={axis.id}>
-              <tr className="bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.03]">
+              <tr>
                 <th
                   scope="rowgroup"
-                  className="sticky left-0 z-10 bg-[var(--tuwa-bg-secondary)] dark:bg-[#0f0f12] md:dark:bg-[#181c3a] text-left px-3 sm:px-4 py-2"
+                  className={`sticky left-0 z-10 border-b bg-[var(--tuwa-docs-sunken)] px-3 py-2.5 text-left text-[var(--tuwa-text-primary)] md:px-4 ${lineClassName} ${capsClassName}`}
                 >
-                  <span className="text-[11px] font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)]">
-                    {t.comparisons.axes[axis.id]?.label ?? axis.label}
-                  </span>
+                  {t.comparisons.axes[axis.id]?.label ?? axis.label}
                 </th>
                 {PRODUCTS.map((product) => (
                   <td
                     key={product.id}
-                    className={`px-2 py-2 text-center font-mono font-bold ${product.id === 'tuwa' ? 'text-[var(--tuwa-text-accent)] bg-[var(--tuwa-text-accent)]/[0.05]' : 'text-[var(--tuwa-text-primary)]'}`}
+                    className={`border-b border-l bg-[var(--tuwa-docs-sunken)] px-2 py-2.5 text-center font-mono font-bold ${lineClassName} ${product.id === 'tuwa' ? 'text-[var(--tuwa-text-accent)]' : 'text-[var(--tuwa-text-primary)]'}`}
                   >
                     {axisScore(product, axis.id)}
                   </td>
@@ -62,13 +72,10 @@ export function CriteriaMatrix() {
               {CRITERIA.filter((criterion) => criterion.axis === axis.id).map((criterion) => {
                 const criterionTranslation = t.comparisons.criteria[criterion.id];
                 return (
-                  <tr
-                    key={criterion.id}
-                    className="border-b border-[var(--tuwa-border-primary)]/20 dark:border-white/[0.04] last:border-b-0"
-                  >
+                  <tr key={criterion.id} className="[tbody:last-child>&:last-child>*]:border-b-0">
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 bg-[var(--tuwa-bg-primary)] dark:bg-[#080808] md:dark:bg-[#11152f] text-left font-normal text-[11px] sm:text-xs text-[var(--tuwa-text-secondary)] px-3 sm:px-4 py-2.5 leading-snug"
+                      className={`sticky left-0 z-10 border-b bg-[var(--tuwa-docs-raised)] px-3 py-3 text-left text-[13px] leading-[1.35] font-normal text-[var(--tuwa-text-secondary)] md:px-4 ${lineClassName}`}
                     >
                       {criterionTranslation?.label ?? criterion.label}
                     </th>
@@ -79,7 +86,7 @@ export function CriteriaMatrix() {
                         <td
                           key={product.id}
                           title={`${product.name}: ${localizedNote}`}
-                          className={`px-2 py-2.5 text-center whitespace-nowrap ${product.id === 'tuwa' ? 'bg-[var(--tuwa-text-accent)]/[0.05]' : ''}`}
+                          className={`border-b border-l px-2 py-3 text-center whitespace-nowrap ${lineClassName} ${product.id === 'tuwa' ? tuwaClassName : ''}`}
                         >
                           <MarkIcon mark={item.mark} />
                           <SourceRef index={sources.get(item.sourceUrl) ?? 0} url={item.sourceUrl} />

@@ -13,7 +13,11 @@ import { localizePageMap, prefixPageMapRoutes } from '../pageMap';
 import { type SocialLink } from '../utils';
 import { Footer } from './Footer';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { LogoMotion } from './LogoMotion';
 import { Navbar } from './NavBar';
+import { NavbarThemeSwitch } from './NavbarThemeSwitch';
+import { SmoothAnchors } from './SmoothAnchors';
+import StarryBackground from './StarryBackground';
 
 /**
  * Props of {@link DocsLayout}.
@@ -79,10 +83,11 @@ export interface NextraDocsLayoutProps {
 
 /**
  * The Nextra `Layout` of a TUWA documentation site in a given language: the docs-ui {@link Navbar} with the language
- * switch after the links (the theme switch stays in the Nextra sidebar and the mobile menu), the {@link Footer}, the
- * search, the table of contents, the edit, feedback and last-updated texts and the theme switch options from
- * `labels`. It keeps no state: {@link DocsLayout} renders it with the language of its provider, and the docs hub with
- * its own dictionaries, so every site words and wires its chrome the same way.
+ * switch and then the theme switch after the links (Nextra's own theme select is off: `darkMode: false`), the
+ * {@link Footer}, the search, the table of contents and the edit, feedback and last-updated texts from `labels`, over
+ * the pixel star field of the TUWA documentation (`StarryBackground`, from 768px). It keeps no state: {@link DocsLayout}
+ * renders it with the language of its provider, and the docs hub with its own dictionaries, so every site words and
+ * wires its chrome the same way.
  *
  * @param props - See {@link NextraDocsLayoutProps}.
  * @returns The layout.
@@ -101,46 +106,50 @@ export function NextraDocsLayout({
   children,
 }: NextraDocsLayoutProps) {
   return (
-    <Layout
-      navbar={
-        <Navbar logo={logo} logoLink={logoLink} links={links}>
-          <LocaleSwitcher
-            locale={locale}
-            onSelect={(code) => {
-              const picked = normalizeLocale(code);
-              if (picked) onLocaleChange(picked);
-            }}
-            ariaLabel={labels.selectLanguage}
+    <>
+      {/* A child of the body, which holds it over its paper and under the page */}
+      <StarryBackground />
+      <Layout
+        navbar={
+          <Navbar logo={logo} logoLink={logoLink} links={links}>
+            <LocaleSwitcher
+              locale={locale}
+              onSelect={(code) => {
+                const picked = normalizeLocale(code);
+                if (picked) onLocaleChange(picked);
+              }}
+              ariaLabel={labels.selectLanguage}
+            />
+            <NavbarThemeSwitch ariaLabel={labels.toggleTheme} />
+          </Navbar>
+        }
+        footer={
+          <Footer logo={logo} links={footerLinks} labels={labels.footer} policyLanguage={policyLanguageOf(locale)} />
+        }
+        pageMap={pageMap}
+        docsRepositoryBase={docsRepositoryBase}
+        navigation={{ prev: true, next: true }}
+        {...(sidebar && { sidebar })}
+        editLink={labels.nextra.editThisPage}
+        feedback={{ content: labels.nextra.feedback }}
+        lastUpdated={<LastUpdated locale={locale}>{labels.nextra.lastUpdated}</LastUpdated>}
+        toc={{ title: labels.nextra.onThisPage, backToTop: labels.nextra.scrollToTop }}
+        // One theme switch per page, in the navbar: Nextra's own select in the sidebar and the mobile menu is off
+        darkMode={false}
+        search={
+          <Search
+            placeholder={labels.nextra.searchPlaceholder}
+            emptyResult={labels.nextra.searchEmpty}
+            errorText={labels.nextra.searchError}
+            loading={labels.nextra.searchLoading}
           />
-        </Navbar>
-      }
-      footer={
-        <Footer logo={logo} links={footerLinks} labels={labels.footer} policyLanguage={policyLanguageOf(locale)} />
-      }
-      pageMap={pageMap}
-      docsRepositoryBase={docsRepositoryBase}
-      navigation={{ prev: true, next: true }}
-      {...(sidebar && { sidebar })}
-      editLink={labels.nextra.editThisPage}
-      feedback={{ content: labels.nextra.feedback }}
-      lastUpdated={<LastUpdated locale={locale}>{labels.nextra.lastUpdated}</LastUpdated>}
-      toc={{ title: labels.nextra.onThisPage, backToTop: labels.nextra.scrollToTop }}
-      themeSwitch={{
-        light: labels.nextra.themeLight,
-        dark: labels.nextra.themeDark,
-        system: labels.nextra.themeSystem,
-      }}
-      search={
-        <Search
-          placeholder={labels.nextra.searchPlaceholder}
-          emptyResult={labels.nextra.searchEmpty}
-          errorText={labels.nextra.searchError}
-          loading={labels.nextra.searchLoading}
-        />
-      }
-    >
-      {children}
-    </Layout>
+        }
+      >
+        <SmoothAnchors />
+        <LogoMotion />
+        {children}
+      </Layout>
+    </>
   );
 }
 
@@ -175,7 +184,7 @@ function LocalizedLayout({
 /**
  * The layout of a TUWA project documentation site in three languages (English, Ukrainian, Simplified Chinese):
  * {@link NextraDocsLayout} (the Nextra `Layout` with the docs-ui {@link Navbar}, the language switch after the links,
- * the theme switch in the Nextra sidebar and the mobile menu, the {@link Footer}, the search, the table of contents,
+ * then the theme switch, the {@link Footer}, the search, the table of contents,
  * the edit, feedback and last-updated texts) and the sidebar titles in the language of the reader. Render it in the
  * `<body>` of the root layout, around the page; pages rendered with `createDocsPage` (`@tuwaio/docs-ui/nextra/page`)
  * switch to their translation.

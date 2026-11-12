@@ -27,7 +27,7 @@ Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../
 - **Search:** Pagefind, indexed after every production build, with an index for each language
 - **Languages:** English, Ukrainian and Simplified Chinese at their own URLs: English without a prefix, `/uk/...` and `/zh-CN/...`
 - **Styling:** Tailwind CSS 4+ with PostCSS, plus TUWA design tokens from `@tuwaio/nova-core` and `@tuwaio/docs-ui`
-- **Icons:** `@heroicons/react`
+- **Icons:** the pixel icons of Nova (`@tuwaio/sdk/nova-icons`); `@heroicons/react` only for the Heroicons set the Playground can hand to Nova (`@tuwaio/sdk/nova-core/heroicons`)
 - **Theme:** `next-themes` for dark/light mode
 - **Utilities:** `clsx`, `tailwind-merge`, `nextjs-toploader`
 - **Deployment:** Vercel
@@ -118,7 +118,7 @@ A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last save
 cd ../../tools/configurator-check
 pnpm install --ignore-workspace   # once, and after bumping the versions in its package.json
 pnpm check                        # type-checks the 45 stacks, their install commands and their formatting,
-                                  # and the 3072 variants of the Playground customization
+                                  # and the 4650 variants of the Playground customization
 ```
 
 The generator has no runtime imports and uses only erasable TypeScript, because the check runs it with Node's type stripping.
@@ -173,13 +173,16 @@ apps/docs-hub/
 │   │   ├── comparisons/             # Radar, criteria matrix, methodology of /comparisons
 │   │   ├── configurator/            # Options, code blocks (Shiki), file tabs, full and compact Stack Configurator
 │   │   ├── DocCard.tsx              # Card linking to a project's Docs + GitHub
-│   │   ├── Footer.tsx               # Footer of the main screen
-│   │   ├── Header.tsx               # Fixed glassmorphic header + theme switcher
-│   │   ├── HeroSection.tsx          # Gradient title + subtitle
+│   │   ├── Footer.tsx               # Footer of the hub pages: logo, description, policies in mono caps, copyright
+│   │   ├── Header.tsx               # Fixed paper header: logo, links, language and theme cells; links-only menu below 1024px
+│   │   ├── HeroSection.tsx          # Hero: kicker, mono title, lead, licence, buttons, the plate
+│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), EcosystemBoard (what builds on what, solid and optional links), PixelHandoff (the icons fly from the plate to the board on scroll), SectionHead (head, sticky SectionBar, CrossMark), homeLayout (column, frame)
+│   │   ├── HubShell.tsx             # Frame of the hub pages: skip link, header, main, footer
 │   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers
 │   │   ├── PackageDialog.tsx        # Details of an npm package (Dialog of @tuwaio/nova-core)
 │   │   ├── PackagePreview.tsx       # Hover preview of an npm package
+│   │   ├── PageBackground.tsx       # Paper with Nova's scanlines under the hub pages
 │   │   ├── playground/              # Studio: controls, stage, inspector; nova/: copyable Nova customization
 │   │   ├── QuickStartSection.tsx    # Cosmos Playground CLI quick start, compact Stack Configurator
 │   │   ├── QuasarApiReference.tsx   # Scalar reference of the Quasar API (client only, not in the barrel)
@@ -228,12 +231,13 @@ apps/docs-hub/
 
 ### Adding or Updating an Ecosystem Entry
 
-The timeline of TUWA projects is defined in `src/lib/ecosystem.ts` as a `layers` array, outside the client components, so `llms.txt` reads the same data. Each entry describes one layer of the ecosystem (label, subtitle, accent color, dot gradient, and the `DocCard` items nested under it). To add a new project:
+The stages and projects of the main page are defined in `src/lib/ecosystem.ts` as a `layers` array, outside the client components, so `llms.txt` reads the same data. The hero plate, the board of the architecture and the stage ledgers all read it. To add a new project:
 
 1. Open `src/lib/ecosystem.ts`.
-2. Add a new object to the appropriate layer (or introduce a new layer) with the correct `name`, `tagline`, `icon`, gradient classes, and links (`docsUrl`, `githubUrl`).
-3. If the icon is not yet imported, add it from `@heroicons/react/24/outline`.
-4. The desktop orb is picked by `id`. If the project has no orb of its own in `@tuwaio/docs-ui`, set `orb` to an existing one (the Quasar Community card uses `orb: 'quasar'`).
+2. Add a new object to the appropriate layer (or introduce a new layer) with its `id`, `name`, `tagline`, links (`docsUrl`, `githubUrl`) and `packages` with their layers; `plateName` gives it a shorter name on the hero plate.
+3. Its pixel icon comes from `projectIcons` of `@tuwaio/docs-ui` by `id`. A project without an icon of its own sets `orb` to another project or `pixelIcon` to an icon of `projectIconArt` (the Quasar Community entry uses `pixelIcon: 'server'`).
+4. Place it on the board: its cell in `boardPlaces` and what it builds on in `boardEdges`, by project id, never by package name (`build-data.mjs` would fetch it). `ecosystem.test.ts` fails until it has a place. A new edge takes a default route; give it its own in `routes` of `src/lib/ecosystemBoard.ts` when it should turn elsewhere. The plate of the hero holds eight projects around the counts: a ninth needs another layout.
+5. Add its tagline to `home.entries` in the three dictionaries of `src/i18n/locales`.
 
 An `@tuwaio/` package added to `packages` gets its details, preview and `llms.txt` entry on the next build. To show a project's latest `vX.Y.Z` tag, add its entry id and repository to `RELEASES` in `scripts/build-data.mjs`.
 

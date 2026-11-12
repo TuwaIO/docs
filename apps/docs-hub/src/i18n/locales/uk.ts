@@ -16,20 +16,29 @@ export const uk: DocsHubLabels = {
     theme: 'Тема',
     language: 'Мова',
     selectLanguage: docsLabels.uk.selectLanguage,
-    toggleTheme: 'Перемкнути тему',
+    toggleTheme: docsLabels.uk.toggleTheme,
     openMenu: 'Відкрити меню навігації',
     closeMenu: 'Закрити меню навігації',
     mobileNavAria: 'Розділи документації',
+    mainNavAria: 'Основна навігація',
+    homeAria: 'TUWA Docs, головна сторінка',
+    skipToContent: 'Перейти до змісту',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.uk.footer,
   common: {
+    flight: {
+      ariaLabel: 'План польоту цієї сторінки',
+      overview: 'Огляд',
+      progressLabel: 'Прогрес польоту',
+    },
     packageManager: 'Пакетний менеджер',
     copy: 'Копіювати',
     copied: 'Скопійовано',
     copyCommand: 'Скопіювати команду',
     copyCode: 'Скопіювати код',
     close: 'Закрити',
+    aboutLabel: 'Про «{label}»',
     yes: 'Так',
     partial: 'Частково',
     no: 'Ні',
@@ -38,7 +47,8 @@ export const uk: DocsHubLabels = {
     hero: {
       badge: 'Інтерактивна Web3 документація',
       titlePrefix: 'TUWA',
-      titleHighlight: 'Документація',
+      // "Документація" took twice the width of the column and half the size of the title
+      titleHighlight: 'Довідник',
       description:
         'Open-source TypeScript пакети для EVM і Solana: підключення гаманців, вхід за стандартом CAIP-122 та відстеження транзакцій, з опціональними React-компонентами та хмарним або self-hosted бекендом.',
       license: 'Усі пакети TUWA і Quasar Community Edition мають ліцензію Apache-2.0, і так залишиться.',
@@ -46,6 +56,33 @@ export const uk: DocsHubLabels = {
       searchButton: 'Пошук по всій документації…',
       explorePackages: 'Огляд пакетів',
       tryPlayground: 'Спробувати в Пісочниці',
+    },
+    plate: {
+      ariaLabel: 'Проєкти TUWA',
+      packagesOnNpm: {
+        one: 'пакет у npm',
+        few: 'пакети в npm',
+        many: 'пакетів у npm',
+        other: 'пакета в npm',
+      },
+      products: { one: '{n} продукт', few: '{n} продукти', many: '{n} продуктів', other: '{n} продукту' },
+      stages: { one: '{n} етап', few: '{n} етапи', many: '{n} етапів', other: '{n} етапу' },
+    },
+    board: {
+      section: 'Екосистема',
+      stage: 'Етап',
+      projectsHeading: 'Проєкти і на чому кожен будується',
+      buildsOn: 'Будується на',
+      optional: 'Опціонально',
+      or: 'АБО',
+      cloudOrSelfHosted: 'Хмара або self-hosted',
+      selfHosted: 'Self-hosted',
+      packages: { one: '{n} пакет', few: '{n} пакети', many: '{n} пакетів', other: '{n} пакета' },
+      reExports: 'Реекспортує',
+      relationsLabel: 'На чому будується кожен проєкт',
+      relation: '{project} будується на {base}',
+      relationOptional: '{project} працює разом із {base}; кожен працює й без іншого',
+      relationOr: '{first} або {second}: той самий бекенд, self-hosted або в хмарі',
     },
     timeline: {
       titlePrefix: 'Архітектура',
@@ -55,22 +92,27 @@ export const uk: DocsHubLabels = {
       stages: {
         1: {
           label: 'Етап 1 — Базова автентифікація та примітиви',
+          title: 'Базова автентифікація та примітиви',
           subtitle: 'Автентифікація CAIP-122 та мультичейн-утиліти для EVM і Solana',
         },
         2: {
           label: 'Етап 2 — Стан та підключення',
+          title: 'Стан та підключення',
           subtitle: 'Підключення гаманців та відстеження транзакцій',
         },
         3: {
           label: 'Етап 3 — Бекенд та синхронізація',
+          title: 'Бекенд та синхронізація',
           subtitle: 'Керована хмара або self-hosted бекенд Quasar',
         },
         4: {
           label: 'Етап 4 — Інтерфейс користувача',
+          title: 'Інтерфейс користувача',
           subtitle: 'React-компоненти для Satellite та Pulsar',
         },
         5: {
           label: 'Етап 5 — Рівень інтеграції SDK',
+          title: 'Рівень інтеграції SDK',
           subtitle: 'Єдиний клієнтський SDK та мережеві адаптери',
         },
       },
@@ -101,39 +143,25 @@ export const uk: DocsHubLabels = {
         tagline: 'Єдиний клієнтський SDK та мережеві адаптери для EVM і Solana',
       },
     },
-    docCard: {
-      cloudAndSelfHosted: 'Хмара та self-hosted',
-      onePackage: '1 пакет',
-      packagesCount: '{count} пакети(ів)',
-      readDocs: 'Читати документацію',
-      tryLiveAdmin: 'Демо-адмінка',
-      showPackages: 'Показати пакети {title}',
-      hidePackages: 'Сховати пакети {title}',
+    ledger: {
+      section: 'Пакети',
+      project: 'Проєкт',
+      layer: 'Шар',
+      package: 'Пакет',
+      version: 'Версія',
+      gzip: 'Gzip',
+      docs: 'Довідник',
+      deprecated: 'Застарілий',
     },
-    packagePreview: {
-      installLabel: 'Встановити {name}',
-      copyInstallTitle: 'Скопіювати команду встановлення для {name}',
-      peerDepsTitle: 'Деталі та peer-залежності пакета {name}',
-      deprecated: 'застарілий',
-      standalone: 'Окремі пакети',
-      peersCount: '+{count} peer',
-      peersCountPlural: '+{count} peers',
-      lighterInstallPrefix: 'Потрібен лише {scope}? Встановіть',
-      lighterInstallConjunction: 'або',
+    sizeNote: {
+      title: 'Розмір · gzip',
     },
     packageDialog: {
       deprecatedPrefix: 'Застарілий пакет:',
       install: 'Встановлення',
       copyInstallTitle: 'Скопіювати команду встановлення',
-      peersHint:
-        'Обов’язкові peer-залежності вже включено до команди. Пакети, які вже є у вашому проєкті, оновляться лише за потреби.',
       lighterEntryHeading: 'Потрібна лише одна частина?',
       guidesHeading: 'Посібники',
-      dependenciesHeading: 'Залежності',
-      includedWith: 'Входить до складу',
-      peerDependenciesHeading: 'Peer-залежності',
-      noRuntimeDeps: 'Жодних runtime- або peer-залежностей — працює скрізь, де працює TypeScript.',
-      optional: 'опціонально',
       viewOnNpm: 'Переглянути на npm',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -188,64 +216,30 @@ export const uk: DocsHubLabels = {
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': 'Використовуйте замість нього @tuwaio/siwx-react та @tuwaio/siwx-server.',
       },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk об’єднує всі проєкти TUWA для React, включно з Nova UI Kit. Якщо вам потрібне лише підключення гаманців, відстеження транзакцій або вхід без решти модулів, встановіть відповідні пакети напряму:',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk працює в парі з @tuwaio/sdk. Якщо ви не використовуєте @tuwaio/sdk, встановіть EVM-пакет потрібного рівня напряму:',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk працює в парі з @tuwaio/sdk. Якщо ви не використовуєте @tuwaio/sdk, встановіть Solana-пакет потрібного рівня напряму:',
-      },
     },
     quickStart: {
-      titlePrefix: 'Почніть розробку за',
-      titleHighlight: 'лічені хвилини',
+      section: 'Швидкий старт',
+      title: 'Почніть розробку з Cosmos Playground',
       subtitle:
-        'Оберіть пакети під свій застосунок, зберіть повноцінний React dApp або розгорніть Quasar на власному сервері.',
-      cards: {
-        choosePackages: {
-          title: 'Оберіть свої пакети',
-          description:
-            'Вирішіть між єдиним @tuwaio/sdk та окремими пакетами для підключення гаманців, входу SIWX, відстеження транзакцій і Nova UI.',
-          cta: 'Підібрати стек',
-        },
-        fullStackReact: {
-          title: 'Full-Stack React застосунок',
-          description:
-            'Підключайте гаманці, авторизуйте через SIWX, відстежуйте транзакції з Pulsar і синхронізуйте з Quasar в одному Next.js застосунку для EVM або Solana.',
-          cta: 'Зібрати застосунок',
-        },
-        selfHostQuasar: {
-          title: 'Self-Hosting Quasar',
-          description:
-            'Запустіть Quasar Community Edition (Apache-2.0) на власному сервері через Docker Compose: PostgreSQL, Redis, воркери відстеження та вебхуки.',
-          cta: 'Розгорнути вузол',
-        },
-      },
-      allGuidesPrefix: 'Шукаєте окремий посібник із входу SIWX, відстеження транзакцій або синхронізації з Quasar?',
-      browseAllGuides: 'Переглянути всі посібники',
-      aiBanner: {
-        badge: 'ШІ-асистенти',
-        title: 'Працюєте з Claude Code, Cursor або Windsurf?',
-        description:
-          'Передайте своєму ШІ-агенту файл TUWA_AGENTS.md: один документ із правильними імпортами, налаштуванням сторів, маршрутами SIWX та правилами синхронізації Quasar для всіх пакетів TUWA.',
-        copyUrl: 'Копіювати URL',
-        copied: 'Скопійовано',
-        copyTitle: 'Скопіювати пряме посилання на TUWA_AGENTS.md',
-        viewOnGithub: 'Відкрити на GitHub',
-      },
+        'Одна команда створює повноцінний застосунок на Next.js або Vite для EVM, Solana чи обох мереж: підключення гаманців і відстеження транзакцій уже налаштовано.',
+      steps: { one: '{n} крок', few: '{n} кроки', many: '{n} кроків', other: '{n} кроку' },
     },
     compactConfigurator: {
-      badge: 'Інтерактивно',
       title: 'Налаштуйте свій стек',
       description: 'Оберіть фреймворк, мережі та функції, щоб отримати команду встановлення та файли налаштування.',
       openWithFiles: 'Відкрити з усіма {count} файлами налаштування',
       install: 'Встановлення',
-      filesGenerated: 'Згенеровані файли для цього стеку ({count})',
-      viewCode: 'Переглянути код',
     },
   },
   comparisons: {
+    sections: {
+      radar: 'Радар',
+      criteria: 'Критерії',
+      alternatives: 'Альтернативи',
+      bundle: 'Розмір',
+      method: 'Методика',
+      next: 'Старт',
+    },
     badge: 'Інтерактивне порівняння',
     titlePrefix: 'TUWA та',
     titleHighlight: 'Альтернативи',
@@ -696,6 +690,7 @@ export const uk: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} стек', few: '{n} стеки', many: '{n} стеків', other: '{n} стека' },
     badge: 'Інтерактивно',
     titlePrefix: 'Конфігуратор',
     titleHighlight: 'Конфігуратор',
@@ -722,7 +717,7 @@ export const uk: DocsHubLabels = {
     },
     steps: {
       step1Title: '1. Ваш стек',
-      copyShareLink: 'Скопіювати посилання на конфігурацію',
+      copyShareLink: 'Скопіювати посилання',
       linkCopied: 'Посилання скопійовано',
       tryInPlayground: 'Спробувати в Пісочниці',
       copyPromptForAi: 'Скопіювати промпт для ШІ',
@@ -913,6 +908,7 @@ export const uk: DocsHubLabels = {
         textsLayer: 'Тексти',
         behaviorLayer: 'Поведінка',
         languageLabel: 'Мова',
+        cardGapLabel: 'Відступ між картками гаманців і мереж',
         connectTextLabel: 'Текст кнопки підключення',
         toastPositionLabel: 'Позиція спливаючих сповіщень',
         resetNova: 'Скинути до стандартних налаштувань Nova',
@@ -920,6 +916,11 @@ export const uk: DocsHubLabels = {
         cssCopied: 'CSS скопійовано',
         resetEdits: 'Скинути зміни',
         editedSuffix: 'змінено',
+        themeNone: 'Немає',
+        themeSquare: 'Квадратні',
+        themeRound: 'Круглі',
+        themeOn: 'Увімк.',
+        themeOff: 'Вимк.',
         themeGroups: {
           Surfaces: 'Поверхні',
           Text: 'Текст',
@@ -928,13 +929,14 @@ export const uk: DocsHubLabels = {
           Shape: 'Форма та рамки',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'Стандартна темна тема Nova UI Kit.',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description:
+              'Стандартна темна тема Nova UI Kit: чорнильний папір, прямі кути, блакитний колір логотипа TUWA.',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'Стандартна світла тема Nova UI Kit.',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'Стандартна світла тема Nova UI Kit: теплий папір, чорнило, прямі кути, помаранчевий TUWA.',
           },
           cyberpunk: {
             label: 'Cyberpunk',
@@ -1209,6 +1211,7 @@ export const uk: DocsHubLabels = {
         'Справжні стори TUWA та компоненти Nova працюють у вашому браузері на симульованих гаманцях та симульованому блокчейні: нічого не підписується і не відправляється в реальну мережу.',
       loadingAria: 'Завантаження Пісочниці',
       connectButtonGroup: 'Кнопка підключення',
+      iconsGroup: 'Іконки',
       minimal: 'Мінімальна',
       full: 'Повна',
       nextTxGroup: 'Наступна транзакція',
@@ -1257,6 +1260,8 @@ export const uk: DocsHubLabels = {
           'CSS-змінні --tuwa-* для Nova на сцені. Вкладка Кастомізація › Тема дозволяє редагувати кожну змінну та скопіювати готовий CSS.',
         style:
           'Набори класів для кожного елемента Nova (customization.classNames): стандартна Nova, TUWA Mono або Isometric.',
+        icons:
+          'Набір іконок Nova UI Kit (проп icons її провайдерів): власні піксельні іконки або Heroicons, якими Nova малювала раніше.',
         connectButton:
           'Повна: баланс і перемикач мережі поруч із кнопкою. Мінімальна: лише сама кнопка (withBalance та withChain вимкнені).',
         language:

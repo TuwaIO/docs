@@ -1,13 +1,13 @@
 'use client';
 
+import { cn } from '@tuwaio/nova-core/utils';
 import {
   AdjustmentsHorizontalIcon,
   ArrowPathIcon,
   ChevronDownIcon,
   DevicePhoneMobileIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { cn } from '@tuwaio/nova-core/utils';
+} from '@tuwaio/sdk/nova-icons/24/outline';
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
 import { useEffect, useRef, useState } from 'react';
@@ -22,26 +22,30 @@ import { THEME_PRESETS, type ThemePreset } from '@/lib/playground/themes';
 import { familyOf } from '@/lib/playground/wallets';
 
 import { Choice, Group } from '../configurator/StackOptionsForm';
+import { homeEdgeToEdgeClassName, homeMarginLeftClassName, homeMarginRightClassName } from '../home/homeLayout';
+import { CrossMark } from '../home/SectionHead';
 import { usePlayground } from './PlaygroundContext';
+import {
+  capsClassName,
+  fieldClassName,
+  iconClassName,
+  lineClassName,
+  menuClassName,
+  menuOptionClassName,
+} from './playgroundStyles';
 
 const OUTCOMES: TxOutcome[] = ['success', 'revert', 'replaced', 'rejected'];
 
-// A button or a select in the look of an unpressed `Choice`
-const fieldClass =
-  'rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-border-primary)] transition-colors cursor-pointer';
+// The margins of the column of the page, for a row that runs from line to line of its frame
+const marginsClassName = `${homeMarginLeftClassName} ${homeMarginRightClassName}`;
 
-const divider = 'border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]';
-
-// A theme in one dot: its background and the color of its buttons
+// A theme in one square: its background on the left half, the colour of its buttons on the right
 function Swatch({ preset }: { preset: ThemePreset }) {
   return (
-    <span
-      className="h-3 w-3 shrink-0 rounded-full border border-black/15 dark:border-white/25"
-      style={{
-        background: `linear-gradient(135deg, ${preset.values['--tuwa-bg-primary']} 50%, ${preset.values['--tuwa-button-gradient-from']} 50%)`,
-      }}
-      aria-hidden="true"
-    />
+    <span className="grid h-3 w-3 shrink-0 grid-cols-2 border border-current" aria-hidden="true">
+      <span style={{ background: preset.values['--tuwa-bg-primary'] }} />
+      <span style={{ background: preset.values['--tuwa-button-gradient-from'] }} />
+    </span>
   );
 }
 
@@ -73,17 +77,17 @@ function ThemeMenu() {
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className={cn(fieldClass, 'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs')}
+        className={fieldClassName}
       >
         <Swatch preset={preset} />
         {presetLabel}
-        <ChevronDownIcon className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+        <ChevronDownIcon className={cn(iconClassName, open && 'rotate-180')} aria-hidden="true" />
       </button>
       {open && (
         <div
           role="listbox"
           aria-label={t.playground.inspector.customize.themeLayer}
-          className="absolute top-full left-0 z-30 mt-1 flex w-52 flex-col gap-0.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-1 shadow-xl"
+          className={`${menuClassName} w-56`}
         >
           {Object.values(THEME_PRESETS).map((option) => (
             <button
@@ -95,7 +99,7 @@ function ThemeMenu() {
                 changeSettings({ theme: option.id });
                 setOpen(false);
               }}
-              className="flex items-center gap-2 rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-1.5 text-left text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] aria-selected:bg-[var(--tuwa-text-accent)]/10 aria-selected:text-[var(--tuwa-text-primary)] cursor-pointer"
+              className={menuOptionClassName}
             >
               <Swatch preset={option} />
               {t.playground.inspector.customize.themePresets[option.id]?.label ?? option.label}
@@ -140,18 +144,18 @@ function LanguageMenu() {
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className={cn(fieldClass, 'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs')}
+        className={fieldClassName}
       >
         <span>{current.short}</span>
-        <span className="text-[var(--tuwa-text-tertiary)]">·</span>
+        <span className="text-[var(--tuwa-text-secondary)]">·</span>
         <span>{current.label}</span>
-        <ChevronDownIcon className={cn('h-3 w-3 transition-transform', open && 'rotate-180')} aria-hidden="true" />
+        <ChevronDownIcon className={cn(iconClassName, open && 'rotate-180')} aria-hidden="true" />
       </button>
       {open && (
         <div
           role="listbox"
           aria-label={t.playground.inspector.customize.languageLabel}
-          className="absolute top-full left-0 z-30 mt-1 flex w-44 flex-col gap-0.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-1 shadow-xl"
+          className={`${menuClassName} w-48`}
         >
           {LANGUAGE_OPTIONS.map((option) => (
             <button
@@ -163,10 +167,10 @@ function LanguageMenu() {
                 changeCustomization({ language: option.id });
                 setOpen(false);
               }}
-              className="flex items-center justify-between rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-1.5 text-left text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] aria-selected:bg-[var(--tuwa-text-accent)]/10 aria-selected:text-[var(--tuwa-text-primary)] cursor-pointer"
+              className={`${menuOptionClassName} justify-between`}
             >
               <span>{option.label}</span>
-              <span className="font-mono text-[11px] text-[var(--tuwa-text-tertiary)]">{option.short}</span>
+              <span className="font-medium">{option.short}</span>
             </button>
           ))}
         </div>
@@ -278,6 +282,23 @@ function LookGroups({ compact }: { compact: boolean }) {
               </Choice>
             ))}
           </Group>
+          {/* The names of the two sets are names of products: the same in every language */}
+          <Group label={t.ui.playgroundExtra.iconsGroup} info={t.ui.playgroundExtra.info.icons} compact={compact}>
+            <Choice
+              pressed={customization.icons === 'pixel'}
+              onClick={() => changeCustomization({ icons: 'pixel' })}
+              compact={compact}
+            >
+              Nova
+            </Choice>
+            <Choice
+              pressed={customization.icons === 'classic'}
+              onClick={() => changeCustomization({ icons: 'classic' })}
+              compact={compact}
+            >
+              Heroicons
+            </Choice>
+          </Group>
           {/* Minimal: the connect button alone, without the balance and the network selector */}
           <Group
             label={t.ui.playgroundExtra.connectButtonGroup}
@@ -310,7 +331,7 @@ function LookGroups({ compact }: { compact: boolean }) {
                   onClick={() => changeCustomization({ language: option.id })}
                 >
                   <span>{option.label}</span>
-                  <span className="ml-1 text-[var(--tuwa-text-tertiary)]">({option.short})</span>
+                  <span className="ml-1 font-medium">({option.short})</span>
                 </Choice>
               ))
             )}
@@ -456,9 +477,9 @@ function SessionActions({ className, short }: { className?: string; short?: bool
           type="button"
           onClick={openOnAnotherDevice}
           title={t.playground.controls.openAnotherDeviceHint}
-          className={cn(fieldClass, 'inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs')}
+          className={cn(fieldClassName, 'justify-center')}
         >
-          <DevicePhoneMobileIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <DevicePhoneMobileIcon className={iconClassName} aria-hidden="true" />
           {short ? t.ui.playgroundExtra.otherDeviceShort : t.playground.controls.openAnotherDevice}
         </button>
       )}
@@ -467,9 +488,9 @@ function SessionActions({ className, short }: { className?: string; short?: bool
         onClick={resetPlayground}
         title={t.ui.playgroundExtra.resetTitle}
         aria-label={short ? t.playground.controls.resetPlayground : undefined}
-        className={cn(fieldClass, 'inline-flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs')}
+        className={cn(fieldClassName, 'justify-center')}
       >
-        <ArrowPathIcon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        <ArrowPathIcon className={iconClassName} aria-hidden="true" />
         {!short && t.ui.playgroundExtra.resetShort}
       </button>
     </div>
@@ -481,15 +502,17 @@ function OutcomeHint() {
   const outcome = useStore(scenarioStore, (state) => state.outcome);
   const nextFamily = useNextTxFamily();
   return (
-    <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
+    <p className="m-0 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
       {t.ui.playgroundExtra.outcomeHints[outcomeHintOf(outcome, nextFamily)]}
     </p>
   );
 }
 
 /**
- * The controls above the stage: the stack, the look and the simulation. From 640px they are a panel in two rows; on a
- * phone a bar keeps the next transaction and the session actions, and the rest opens in a sheet from the bottom.
+ * The controls above the stage, from line to line of the frame of the page, on lines of 1px: the stack and the look in
+ * one row, the simulation and the session actions in the next, and what the next transaction will do under them. From
+ * 640px they are these rows; on a phone a bar keeps the next transaction and the session actions, and the rest opens
+ * in a sheet from the bottom.
  */
 export function ControlsPanel() {
   const { t } = useI18n();
@@ -504,42 +527,50 @@ export function ControlsPanel() {
   return (
     <section
       aria-label={t.playground.controls.stackHeading}
-      className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm p-2.5 sm:p-4"
+      className={`relative border-y ${lineClassName} ${homeEdgeToEdgeClassName}`}
     >
-      <div className="hidden flex-col gap-3.5 sm:flex">
-        <div className="flex flex-wrap items-start gap-x-6 gap-y-3.5">
+      <CrossMark x="left" y="top" />
+      <CrossMark x="right" y="top" />
+      <CrossMark x="left" y="bottom" />
+      <CrossMark x="right" y="bottom" />
+
+      <div className="hidden flex-col sm:flex">
+        <div className={`flex flex-wrap items-start gap-x-7 gap-y-4 py-5 ${marginsClassName}`}>
           <StackGroups compact />
           <LookGroups compact />
         </div>
-        <div className={cn('flex flex-wrap items-end gap-x-6 gap-y-3.5 border-t pt-3.5', divider)}>
+        <div className={`flex flex-wrap items-end gap-x-7 gap-y-4 border-t py-5 ${lineClassName} ${marginsClassName}`}>
           <SimulationGroups compact />
           <SessionActions className="ml-auto" />
         </div>
-        <OutcomeHint />
+        <div className={`border-t py-3.5 ${lineClassName} ${marginsClassName}`}>
+          <OutcomeHint />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-2 sm:hidden">
+      <div className={`flex flex-col gap-2.5 py-4 sm:hidden ${marginsClassName}`}>
         <button
           type="button"
           aria-haspopup="dialog"
           onClick={() => sheet.current?.showModal()}
-          className="flex min-h-11 items-center gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-text-accent)]/60 bg-[var(--tuwa-text-accent)]/10 px-3 text-sm font-semibold cursor-pointer"
+          className={`flex min-h-11 cursor-pointer items-center gap-2.5 border border-[var(--tuwa-text-primary)] px-3 text-[var(--tuwa-text-primary)] ${capsClassName}`}
         >
-          <AdjustmentsHorizontalIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+          <AdjustmentsHorizontalIcon className={iconClassName} aria-hidden="true" />
           {t.ui.playgroundExtra.setupButton}
-          <span className="ml-auto truncate text-xs font-medium text-[var(--tuwa-text-secondary)]">
+          <span className="ml-auto truncate font-medium text-[var(--tuwa-text-secondary)]">
             {chains} · {presetLabel}
           </span>
         </button>
-        <div className="flex gap-2">
-          <label className={cn(fieldClass, 'relative flex min-h-11 flex-1 items-center gap-2 pl-2.5')}>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
+        {/* The session actions go under the next transaction when the two do not fit one line of a phone */}
+        <div className="flex flex-wrap gap-2.5">
+          <label className="relative flex min-h-11 min-w-0 flex-1 basis-48 cursor-pointer items-center gap-2.5 border border-[var(--tuwa-border-strong)] pl-3">
+            <span className={`text-[var(--tuwa-text-secondary)] ${capsClassName}`}>
               {t.ui.playgroundExtra.nextTxShort}
             </span>
             <select
               value={outcome}
               onChange={(event) => scenarioStore.setState({ outcome: event.target.value as TxOutcome })}
-              className="min-w-0 flex-1 appearance-none bg-transparent pr-7 text-sm text-[var(--tuwa-text-primary)] outline-none cursor-pointer [&_option]:bg-[var(--tuwa-bg-secondary)]"
+              className="min-w-0 flex-1 cursor-pointer appearance-none bg-transparent pr-8 text-sm text-[var(--tuwa-text-primary)] outline-none [&_option]:bg-[var(--tuwa-docs-raised)]"
             >
               {OUTCOMES.map((id) => (
                 <option key={id} value={id}>
@@ -547,9 +578,12 @@ export function ControlsPanel() {
                 </option>
               ))}
             </select>
-            <ChevronDownIcon className="pointer-events-none absolute right-2.5 h-4 w-4" aria-hidden="true" />
+            <ChevronDownIcon className={`pointer-events-none absolute right-2.5 ${iconClassName}`} aria-hidden="true" />
           </label>
-          <SessionActions short className="[&>button]:min-h-11 [&>button]:min-w-11" />
+          <SessionActions
+            short
+            className="[&:has(>button:nth-child(2))]:grow [&>button]:min-h-11 [&>button]:min-w-11 [&>button:first-child:not(:last-child)]:grow"
+          />
         </div>
         <OutcomeHint />
       </div>
@@ -559,17 +593,17 @@ export function ControlsPanel() {
         ref={sheet}
         aria-label={t.ui.playgroundExtra.setupButton}
         onClick={(event) => event.target === event.currentTarget && event.currentTarget.close()}
-        className="mt-auto mb-0 max-h-[85dvh] w-full max-w-none open:flex open:flex-col rounded-t-[var(--tuwa-rounded-corners)] border-t border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)] p-0 text-[var(--tuwa-text-primary)] backdrop:bg-black/50 backdrop:backdrop-blur-sm sm:hidden"
+        className="mt-auto mb-0 max-h-[85dvh] w-full max-w-none border-t border-[var(--tuwa-text-primary)] bg-[var(--tuwa-docs-paper)] p-0 text-[var(--tuwa-text-primary)] backdrop:bg-black/60 open:flex open:flex-col sm:hidden"
       >
-        <div className={cn('flex items-center justify-between border-b px-4 py-2', divider)}>
-          <span className="font-semibold">{t.ui.playgroundExtra.setupButton}</span>
+        <div className={cn('flex items-center justify-between border-b py-1 pr-1 pl-4', lineClassName)}>
+          <span className={capsClassName}>{t.ui.playgroundExtra.setupButton}</span>
           <button
             type="button"
             onClick={() => sheet.current?.close()}
             aria-label={t.ui.playgroundExtra.closeSetup}
-            className="flex h-11 w-11 items-center justify-center rounded-[var(--tuwa-rounded-corners)] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]"
           >
-            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+            <XMarkIcon className={iconClassName} aria-hidden="true" />
           </button>
         </div>
         <div className="flex flex-col gap-5 overflow-y-auto px-4 pt-4 pb-8">

@@ -4,12 +4,14 @@ import { useI18n } from '@/i18n';
 import type { Mark } from '@/lib/comparisons';
 
 /**
- * A comparison mark: a check for `yes`, a half-filled circle for `partial`, a dash for `no`, with the mark as text for
- * screen readers.
+ * A comparison mark, in paper and ink: a square that is as full as the criterion is met. `yes` is a square of ink with
+ * a check, `partial` a square half of ink, `no` an empty square with a dash; the mark is read out as text.
+ *
  * @param props.mark - The mark.
- * @param props.className - Size classes.
+ * @param props.className - Size classes (default: 16px, on whole pixels).
+ * @returns The mark.
  */
-export function MarkIcon({ mark, className = 'w-4 h-4' }: { mark: Mark; className?: string }) {
+export function MarkIcon({ mark, className = 'h-4 w-4' }: { mark: Mark; className?: string }) {
   const { t } = useI18n();
   const labels: Record<Mark, string> = {
     yes: t.common.yes,
@@ -18,36 +20,45 @@ export function MarkIcon({ mark, className = 'w-4 h-4' }: { mark: Mark; classNam
   };
   return (
     <span className="inline-flex shrink-0 align-middle">
-      <svg viewBox="0 0 20 20" className={className} aria-hidden="true">
+      <svg viewBox="0 0 16 16" className={className} aria-hidden="true">
         {mark === 'yes' && (
           <>
-            <circle cx="10" cy="10" r="9" className="fill-emerald-500/15 stroke-emerald-500" strokeWidth="1.5" />
+            <rect x="1" y="1" width="14" height="14" className="fill-[var(--tuwa-text-primary)]" />
             <path
-              d="M6.2 10.4l2.4 2.4 5.2-5.6"
+              d="M4.5 8.4l2.4 2.4 4.6-5.4"
               fill="none"
-              className="stroke-emerald-500"
+              className="stroke-[var(--tuwa-docs-raised)]"
               strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              strokeLinecap="square"
             />
           </>
         )}
         {mark === 'partial' && (
           <>
-            <circle cx="10" cy="10" r="9" className="fill-amber-500/10 stroke-amber-500" strokeWidth="1.5" />
-            <path d="M10 3.5a6.5 6.5 0 0 1 0 13z" className="fill-amber-500" />
+            <rect
+              x="1.5"
+              y="1.5"
+              width="13"
+              height="13"
+              fill="none"
+              className="stroke-[var(--tuwa-text-primary)]"
+              shapeRendering="crispEdges"
+            />
+            <rect x="1" y="1" width="7" height="14" className="fill-[var(--tuwa-text-primary)]" />
           </>
         )}
         {mark === 'no' && (
           <>
-            <circle
-              cx="10"
-              cy="10"
-              r="9"
-              className="fill-transparent stroke-[var(--tuwa-text-tertiary)]/50"
-              strokeWidth="1.5"
+            <rect
+              x="1.5"
+              y="1.5"
+              width="13"
+              height="13"
+              fill="none"
+              className="stroke-[var(--tuwa-border-strong)]"
+              shapeRendering="crispEdges"
             />
-            <path d="M6.5 10h7" className="stroke-[var(--tuwa-text-tertiary)]" strokeWidth="2" strokeLinecap="round" />
+            <rect x="5" y="7" width="6" height="2" className="fill-[var(--tuwa-text-secondary)]" />
           </>
         )}
       </svg>
@@ -58,15 +69,17 @@ export function MarkIcon({ mark, className = 'w-4 h-4' }: { mark: Mark; classNam
 
 /**
  * A footnote link to a numbered source in the Sources list of the page.
+ *
  * @param props.index - Number of the source.
  * @param props.url - Source URL, shown as the link title.
+ * @returns The link.
  */
 export function SourceRef({ index, url }: { index: number; url: string }) {
   return (
     <a
       href={`#source-${index}`}
       title={url}
-      className="ml-0.5 align-super text-[10px] font-mono text-[var(--tuwa-text-tertiary)] hover:text-[var(--tuwa-text-accent)] no-underline"
+      className="ml-0.5 align-super font-mono text-[10px] text-[var(--tuwa-text-secondary)] no-underline hover:text-[var(--tuwa-text-accent)]"
     >
       [{index}]
     </a>

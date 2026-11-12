@@ -9,6 +9,8 @@ import type { PolicySlug } from './policies';
 export interface DocsLabels {
   /** Accessible name of the language switch in the navbar. */
   selectLanguage: string;
+  /** Accessible name of the theme switch in the navbar. */
+  toggleTheme: string;
   /** The parts of the Nextra layout, passed to its props by `DocsLayout`. */
   nextra: {
     /** Title of the table of contents. */
@@ -29,11 +31,20 @@ export interface DocsLabels {
     searchError: string;
     /** Shown while the search index loads. */
     searchLoading: string;
-    /** The light option of the theme switch. */
+    /**
+     * The light option of Nextra's theme select.
+     * @deprecated Nextra's own theme select is off; the theme switch of the navbar uses {@link DocsLabels.toggleTheme}.
+     */
     themeLight: string;
-    /** The dark option of the theme switch. */
+    /**
+     * The dark option of Nextra's theme select.
+     * @deprecated Nextra's own theme select is off; the theme switch of the navbar uses {@link DocsLabels.toggleTheme}.
+     */
     themeDark: string;
-    /** The system option of the theme switch. */
+    /**
+     * The system option of Nextra's theme select.
+     * @deprecated Nextra's own theme select is off; the theme switch of the navbar uses {@link DocsLabels.toggleTheme}.
+     */
     themeSystem: string;
   };
   /** The texts of the docs-ui `Footer` (its `labels` prop). */
@@ -65,6 +76,7 @@ export interface DocsLabels {
 
 const en: DocsLabels = {
   selectLanguage: 'Select language',
+  toggleTheme: 'Toggle theme',
   nextra: {
     onThisPage: 'On This Page',
     scrollToTop: 'Scroll to top',
@@ -102,6 +114,7 @@ const en: DocsLabels = {
 
 const uk: DocsLabels = {
   selectLanguage: 'Оберіть мову',
+  toggleTheme: 'Перемкнути тему',
   nextra: {
     onThisPage: 'На цій сторінці',
     scrollToTop: 'Прокрутити вгору',
@@ -144,6 +157,7 @@ const uk: DocsLabels = {
 
 const zhCN: DocsLabels = {
   selectLanguage: '选择语言',
+  toggleTheme: '切换主题',
   nextra: {
     onThisPage: '本页目录',
     scrollToTop: '返回顶部',

@@ -4,16 +4,28 @@ import dynamic from 'next/dynamic';
 
 import { useI18n } from '@/i18n';
 
+import { homeBleedClassName } from '../home/homeLayout';
+import { CrossMark, Kicker } from '../home/SectionHead';
+import { capsClassName, lineClassName } from './playgroundStyles';
+
+/**
+ * The layout of the Playground while its packages load: its three parts (the controls, the stage, the inspector) as
+ * empty frames of 1px from line to line of the frame of the page, with a label in mono caps. It does not move.
+ */
 function PlaygroundSkeleton() {
   const { t } = useI18n();
   return (
-    <div aria-busy="true" aria-label={t.ui.playgroundExtra.loadingAria} className="flex flex-col gap-5">
+    <div
+      aria-busy="true"
+      aria-label={t.ui.playgroundExtra.loadingAria}
+      className={`relative flex flex-col gap-8 border-t py-8 ${lineClassName} ${homeBleedClassName}`}
+    >
+      <CrossMark x="left" y="top" />
+      <CrossMark x="right" y="top" />
+      <p className={`m-0 text-[var(--tuwa-text-secondary)] ${capsClassName}`}>{t.ui.playgroundExtra.loadingAria}</p>
       {/* The controls, the stage and the inspector */}
       {['h-36 sm:h-48', 'h-[600px]', 'h-80'].map((size) => (
-        <div
-          key={size}
-          className={`${size} animate-pulse rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.04]`}
-        />
+        <div key={size} className={`${size} border ${lineClassName}`} />
       ))}
     </div>
   );
@@ -23,26 +35,32 @@ function PlaygroundSkeleton() {
 const PlaygroundStudio = dynamic(() => import('./PlaygroundStudio'), { ssr: false, loading: PlaygroundSkeleton });
 
 /**
- * Localized header of `/playground`.
+ * The header of `/playground`, in paper and ink: the kicker (what the stage runs on: simulated wallets and a
+ * simulated chain), the title in large mono ink, the lead and a note that nothing is signed or sent.
+ *
+ * @returns The header.
  */
 export function PlaygroundHeader() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
-    <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight font-geist-mono uppercase tracking-tight">
-        <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
-          {t.playground.titlePrefix} {t.playground.titleHighlight}
-        </span>
+    <header className="pt-12 pb-14 md:pt-16 md:pb-16 xl:pt-20">
+      <Kicker>{t.playground.stage.simulatedLabel}</Kicker>
+      <h1
+        className={`mt-5 font-mono text-[clamp(36px,6.2vw,76px)] leading-[0.98] font-medium text-[var(--tuwa-text-primary)] ${locale === 'uk' ? 'tracking-normal' : 'tracking-[-0.04em]'}`}
+      >
+        {t.playground.titlePrefix} {t.playground.titleHighlight}
       </h1>
-      <p className="mt-6 text-base sm:text-lg text-[var(--tuwa-text-secondary)] leading-relaxed">
+      <p className="mt-7 max-w-[680px] text-lg leading-[1.55] text-[var(--tuwa-text-primary)]">
         {t.playground.description}
       </p>
-      <p className="mt-3 text-sm text-[var(--tuwa-text-tertiary)]">{t.ui.playgroundExtra.subnote}</p>
+      <p className="mt-4 max-w-[680px] text-sm leading-normal text-[var(--tuwa-text-secondary)]">
+        {t.ui.playgroundExtra.subnote}
+      </p>
     </header>
   );
 }
 
-/** Loads the Playground in the browser, with a skeleton of its layout meanwhile. */
+/** Loads the Playground in the browser, with the frames of its layout meanwhile. */
 export function PlaygroundLoader() {
   return <PlaygroundStudio />;
 }

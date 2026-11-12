@@ -8,19 +8,11 @@ import { useI18n } from '@/i18n';
 import { clearEvents, eventLog, type EventSource } from '@/lib/playground/eventLog';
 
 import { JsonTree } from './JsonTree';
+import { capsClassName } from './playgroundStyles';
 
-const SOURCE_CLASS: Record<EventSource, string> = {
-  Wallet: 'bg-slate-500/15 text-slate-700 dark:text-slate-300',
-  Chain: 'bg-zinc-500/15 text-zinc-700 dark:text-zinc-300',
-  Satellite: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
-  Pulsar: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  SIWX: 'bg-teal-500/15 text-teal-700 dark:text-teal-300',
-  Quasar: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  Webhook: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-  Nova: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
-};
-
-const SOURCES = Object.keys(SOURCE_CLASS) as EventSource[];
+// What writes to the log, in the order of a transaction's way. Paper and ink has ink and one accent: the sources are
+// told apart by their names in mono caps, not by a colour each
+const SOURCES: EventSource[] = ['Wallet', 'Chain', 'Satellite', 'Pulsar', 'SIWX', 'Quasar', 'Webhook', 'Nova'];
 
 function time(value: number): string {
   const date = new Date(value);
@@ -47,7 +39,7 @@ export function EventsTab() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-y-2">
         {SOURCES.map((source) => (
           <button
             key={source}
@@ -55,9 +47,11 @@ export function EventsTab() {
             aria-pressed={!hidden.has(source)}
             onClick={() => toggle(source)}
             className={cn(
-              'rounded-[var(--tuwa-rounded-corners)] px-2 py-0.5 text-[11px] font-semibold transition-opacity cursor-pointer',
-              SOURCE_CLASS[source],
-              hidden.has(source) && 'opacity-40',
+              '-mr-px h-7 cursor-pointer border px-2.5 transition-colors',
+              capsClassName,
+              hidden.has(source)
+                ? 'border-[var(--tuwa-border-primary)] text-[var(--tuwa-text-secondary)] line-through opacity-60'
+                : 'relative z-[1] border-[var(--tuwa-text-primary)] text-[var(--tuwa-text-primary)]',
             )}
           >
             {source}
@@ -66,30 +60,28 @@ export function EventsTab() {
         <button
           type="button"
           onClick={clearEvents}
-          className="ml-auto text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer"
+          className={cn(
+            'ml-auto cursor-pointer text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]',
+            capsClassName,
+          )}
         >
           {t.playground.inspector.events.clear}
         </button>
       </div>
 
       {visible.length === 0 ? (
-        <p className="text-sm text-[var(--tuwa-text-tertiary)]">{t.playground.inspector.events.empty}</p>
+        <p className="m-0 text-sm text-[var(--tuwa-text-secondary)]">{t.playground.inspector.events.empty}</p>
       ) : (
         // No live region: a transaction logs several events a second, too many to read aloud
         <ol className="@container flex flex-col gap-1 font-mono text-xs">
           {visible.map((event) => (
             <li key={event.id}>
-              <details className="rounded-[var(--tuwa-rounded-corners)] px-2 py-1 hover:bg-[var(--tuwa-bg-secondary)]/60">
+              <details className="px-2 py-1 hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]">
                 {/* The source column fits the longest source, so the labels start in one column; a narrow panel puts
                     the label under the time and the source */}
-                <summary className="grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] items-start gap-x-2 gap-y-0.5 @md:grid-cols-[auto_5.25rem_minmax(0,1fr)] [&::-webkit-details-marker]:hidden">
-                  <span className="text-[var(--tuwa-text-tertiary)]">{time(event.time)}</span>
-                  <span
-                    className={cn(
-                      'justify-self-start rounded-[var(--tuwa-rounded-corners)] px-1.5 font-semibold',
-                      SOURCE_CLASS[event.source],
-                    )}
-                  >
+                <summary className="grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] items-start gap-x-2 gap-y-0.5 @md:grid-cols-[auto_5.75rem_minmax(0,1fr)] [&::-webkit-details-marker]:hidden">
+                  <span className="text-[var(--tuwa-text-secondary)]">{time(event.time)}</span>
+                  <span className="justify-self-start font-bold tracking-[0.08em] text-[var(--tuwa-text-primary)] uppercase">
                     {event.source}
                   </span>
                   <span className="col-span-2 min-w-0 break-words text-[var(--tuwa-text-primary)] @md:col-span-1">

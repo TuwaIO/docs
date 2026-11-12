@@ -53,6 +53,14 @@ describe('the root entry of @tuwaio/docs-ui', () => {
     expect(nextra).toMatch(/components\/Footer/);
   });
 
+  // The square of a project and its pixel art are for the website and Quasar as well as the hub; Orb stays as its old name
+  it('exports the square of a project, its pixel art and the old name Orb', () => {
+    const index = readFileSync(join(src, 'index.ts'), 'utf8');
+    expect(index).toContain("export * from './components/ProjectSquare';");
+    expect(index).toContain("export * from './projectIcons';");
+    expect(index).toContain("export * from './components/Orb';");
+  });
+
   it('declares what only the Nextra entries need as optional', () => {
     const { peerDependenciesMeta } = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
     for (const name of ['next', 'nextra', 'nextra-theme-docs'])
@@ -95,11 +103,71 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
     expect(css).toContain('--nextra-primary-hue');
   });
 
-  // The classes of the Orb live next to the dead ones: removing by range once took a class in use with it
+  // Classes in use live next to dead ones: removing by range once took a class in use with it. Other repositories pin
+  // some of them too: Quasar's dashboard stills the theme switch through its classes and keyframes
+  // (admin-layout-contract.test.ts) and hands article links their own colours back (docs-ui-article-links.test.ts)
   it('keeps the classes in use', () => {
     const css = readFileSync(join(dist, 'site.css'), 'utf8');
-    for (const name of ['.tuwa-orb__pixel', '.tuwa-theme-switch__knob--to-dark', '.tuwa-footer-link--npm'])
+    for (const name of [
+      '.tuwa-project-square',
+      '.tuwa-project-square__corners',
+      '.tuwa-pixel-art',
+      '.tuwa-pixel-art--assemble',
+      '.tuwa-corner-marks',
+      '.tuwa-theme-switch__knob--to-dark',
+      '.tuwa-theme-switch__knob--to-light',
+      '.tuwa-switch-appear',
+      '.tuwa-footer-link--npm',
+    ])
       expect(css).toContain(name);
+  });
+
+  it.each([
+    ['.tuwa-switch-appear', 'tuwa-switch-appear'],
+    ['.tuwa-theme-switch__knob--to-dark', 'tuwa-knob-to-dark'],
+    ['.tuwa-theme-switch__knob--to-light', 'tuwa-knob-to-light'],
+  ])('moves %s by its keyframes without !important, so an app can still it', (selector, keyframes) => {
+    const css = readFileSync(join(dist, 'site.css'), 'utf8');
+    const index = css.indexOf(`${selector} {`);
+    expect(index).toBeGreaterThan(-1);
+    const rule = css.slice(index, css.indexOf('}', index));
+    expect(rule).toMatch(new RegExp(`animation:\\s*${keyframes}\\s[^;]*both`));
+    expect(rule).not.toContain('!important');
+  });
+
+  it('keeps the accent of article links with !important, which Quasar undoes for its cards', () => {
+    expect(readFileSync(join(dist, 'site.css'), 'utf8')).toMatch(/article a\s*\{[^}]*color:[^;]*!important/);
+  });
+
+  // The labels of paper and ink are monospace caps spaced 0.12em. A rule that made every monospace run tight and one line
+  // high, with !important, flattened them all: it now leaves a part that sets its own tracking or line height alone
+  it.each(['site.css', 'index.css'])('lets a monospace part keep its own tracking and line height (%s)', (file) => {
+    const css = readFileSync(join(dist, file), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+    const rules = [...css.matchAll(/([^{};]+)\{([^{}]*)\}/g)].map((match) => ({
+      selector: (match[1] as string).replace(/\s+/g, ' ').trim(),
+      body: match[2] as string,
+    }));
+    const monospace = rules.filter((rule) => rule.selector.startsWith("[class*='font-mono']"));
+    const tracking = monospace.filter((rule) => /letter-spacing/.test(rule.body));
+    const leading = monospace.filter((rule) => /line-height/.test(rule.body));
+    expect(tracking.map((rule) => rule.selector)).toEqual(["[class*='font-mono']:not([class*='tracking-'])"]);
+    expect(leading.map((rule) => rule.selector)).toEqual(["[class*='font-mono']:not([class*='leading-'])"]);
+    // Ukrainian resets only tight tracking; a label spaced wider keeps its spacing (Nova has a rule of its own for its parts)
+    const ukrainian = rules.filter(
+      (rule) =>
+        rule.selector.startsWith(':lang(uk)') &&
+        !rule.selector.includes('novacore:') &&
+        /letter-spacing/.test(rule.body),
+    );
+    expect(ukrainian).toHaveLength(1);
+    expect(ukrainian[0]!.selector).toContain(":not([class*='tracking-'])");
+    expect(ukrainian[0]!.selector).toContain("[class*='tracking-tight']");
+    // Chinese: no capitals and no tracking on a caps label
+    const chinese = rules.filter((rule) => rule.selector.startsWith(':lang(zh)'));
+    expect(chinese).toHaveLength(1);
+    expect(chinese[0]!.selector).toContain("[class*='uppercase']");
+    expect(chinese[0]!.body).toMatch(/text-transform:\s*none/);
+    expect(chinese[0]!.body).toMatch(/letter-spacing:\s*normal/);
   });
 
   it.each([
@@ -112,6 +180,9 @@ describe('the stylesheets of @tuwaio/docs-ui', () => {
     'tuwa-orb-pulse',
     'tuwa-orb-float',
     'tuwa-orb-spin',
+    'tuwa-orb',
+    'tuwa-orb__pixel',
+    'tuwa-orb__glow',
     'remote-logo',
   ])('drops %s, which nothing uses', (name) => {
     expect(readFileSync(join(dist, 'site.css'), 'utf8')).not.toMatch(new RegExp(`\\.${name}(?![\\w-])`));

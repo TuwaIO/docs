@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useId, useRef, useState } from 'react';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
+import { useEffect, useRef, useState } from 'react';
 
 import { useI18n } from '@/i18n';
 import {
@@ -15,8 +16,8 @@ import {
   TUWA,
 } from '@/lib/comparisons';
 
+import { capsClassName, chipClassName, frameClassName, noteClassName } from './comparisonStyles';
 import { MarkIcon, SourceRef } from './MarkIcon';
-import { SEGMENT_COLORS } from './segmentColors';
 
 // Geometry of the radar, in viewBox units
 const WIDTH = 560;
@@ -26,9 +27,14 @@ const CY = 205;
 const RADIUS = 150;
 const LABEL_RADIUS = RADIUS + 22;
 const RINGS = [25, 50, 75, 100];
+/** The side of the square that marks a score of TUWA, and of the smaller one of the other product. */
+const TUWA_POINT = 8;
+const PRODUCT_POINT = 6;
 
 const sources = sourceIndex();
 const tuwaScores = productScores(TUWA);
+
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
 
 // The angle of an axis: the first one points up, the others follow clockwise
 const angleOf = (index: number) => -Math.PI / 2 + (index * 2 * Math.PI) / AXES.length;
@@ -96,31 +102,41 @@ function labelPlacement(index: number): { x: number; y: number; anchor: 'start' 
   return { x, y: y + dy, anchor };
 }
 
-function ScoreBar({ value, color }: { value: number; color?: string }) {
+/**
+ * A score as a bar of 3px: a track of 1px lines' grey with a solid fill, TUWA's lit, the other product's in the colour
+ * of the text around it.
+ *
+ * @param props.value - The score, from 0 to 100.
+ * @param props.lit - Whether the fill is the accent (TUWA) rather than the colour of the text.
+ * @returns The bar.
+ */
+function ScoreBar({ value, lit = false }: { value: number; lit?: boolean }) {
   return (
-    <span className="relative block h-1 w-full rounded-full bg-[var(--tuwa-border-primary)]/30 dark:bg-white/[0.06] overflow-hidden">
+    <span className="relative block h-[3px] w-full bg-[color-mix(in_srgb,currentColor_22%,transparent)]">
       <span
-        className={`absolute inset-y-0 left-0 rounded-full ${color ? '' : 'bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]'}`}
-        style={{ width: `${value}%`, ...(color && { backgroundColor: color }) }}
+        className={`absolute inset-y-0 left-0 ${lit ? 'bg-[var(--tuwa-docs-lit)]' : 'bg-current'}`}
+        style={{ width: `${value}%` }}
       />
     </span>
   );
 }
 
 /**
- * The Ecosystem Radar of `/comparisons`: TUWA against one competitor on the six axes of `AXES`, a competitor picker
- * grouped by segment, and the criteria of the selected axis with the fact and source of each product.
+ * The Ecosystem Radar of `/comparisons`, in paper and ink: TUWA against one product on the six axes of `AXES`, drawn
+ * with lines of 1px and square points, TUWA lit and solid, the other product in ink and dashed, with no gradient and no
+ * glow; a product picker grouped by segment, square buttons whose chosen one is a block of ink; and, on shared lines
+ * under them, the axes as tabs (the chosen one a block of ink) with the criteria of the chosen axis, the fact and the
+ * source of each product.
+ *
+ * @returns The radar.
  */
 export function ComparisonRadar() {
   const { t } = useI18n();
   const [selectedId, setSelectedId] = useState(COMPETITORS[0].id);
   const [activeAxis, setActiveAxis] = useState<AxisId>('custody');
-  const gradientId = useId();
-  const glowId = useId();
 
   const selected = COMPETITORS.find((product) => product.id === selectedId) ?? COMPETITORS[0];
   const segment = SEGMENTS.find((item) => item.id === selected.segment);
-  const color = SEGMENT_COLORS[selected.segment ?? 'connectors'];
   const selectedScores = productScores(selected);
   const animated = useTweenedScores(selectedScores);
   const axis = AXES.find((item) => item.id === activeAxis) ?? AXES[0];
@@ -132,51 +148,37 @@ export function ComparisonRadar() {
   ).join('; ');
 
   return (
-    <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm shadow-xl shadow-black/[0.03]">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px]">
+    <div className={frameClassName}>
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
         {/* Radar */}
-        <div className="p-3 sm:p-6 lg:border-r border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs font-mono">
-            <span className="inline-flex items-center gap-2 text-[var(--tuwa-text-primary)] font-semibold">
-              <span className="w-3 h-3 rounded-sm bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]" />
+        <div className={`p-4 md:p-6 lg:border-r ${lineClassName}`}>
+          <div
+            className={`flex flex-wrap items-center gap-x-6 gap-y-1.5 text-[var(--tuwa-text-primary)] ${capsClassName}`}
+          >
+            <span className="inline-flex items-center gap-2.5">
+              <span className="h-2.5 w-2.5 bg-[var(--tuwa-docs-lit)]" />
               TUWA
             </span>
-            <span className="inline-flex items-center gap-2 text-[var(--tuwa-text-primary)] font-semibold">
-              <span
-                className="w-3 h-3 rounded-sm border-2 border-dashed"
-                style={{ borderColor: color, backgroundColor: `${color}33` }}
-              />
+            <span className="inline-flex items-center gap-2.5">
+              <span className="h-2.5 w-2.5 border border-dashed border-[var(--tuwa-text-primary)]" />
               {selected.name}
             </span>
           </div>
 
           <svg
             viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-            className="w-full h-auto max-w-[600px] mx-auto select-none"
+            className="mx-auto mt-2 h-auto w-full max-w-[620px] select-none overflow-visible"
             role="img"
             aria-label={`${t.comparisons.radar.chartLabel}: TUWA & ${selected.name}. ${summary}.`}
           >
-            <defs>
-              <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" style={{ stopColor: 'var(--tuwa-hero-gradient-from)' }} />
-                <stop offset="50%" style={{ stopColor: 'var(--tuwa-hero-gradient-via)' }} />
-                <stop offset="100%" style={{ stopColor: 'var(--tuwa-hero-gradient-to)' }} />
-              </linearGradient>
-              <filter id={glowId} x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" />
-              </filter>
-            </defs>
-
-            {/* Rings and spokes */}
+            {/* Rings and spokes: lines of 1px, the outer ring the strongest */}
             {RINGS.map((ring) => (
               <polygon
                 key={ring}
                 points={polygon(AXES.map(() => ring))}
-                fill={ring === 100 ? 'var(--tuwa-text-accent)' : 'none'}
-                fillOpacity={ring === 100 ? 0.025 : 0}
-                className="stroke-[var(--tuwa-border-primary)] dark:stroke-white/15"
-                strokeOpacity={ring === 100 ? 0.9 : 0.55}
-                strokeDasharray={ring === 100 ? undefined : '3 5'}
+                fill="none"
+                className={ring === 100 ? 'stroke-[var(--tuwa-border-strong)]' : 'stroke-[var(--tuwa-border-primary)]'}
+                strokeWidth={1}
               />
             ))}
             {AXES.map((item, index) => {
@@ -188,9 +190,10 @@ export function ComparisonRadar() {
                   y1={CY}
                   x2={x}
                   y2={y}
-                  className="stroke-[var(--tuwa-border-primary)] dark:stroke-white/15"
-                  strokeOpacity={item.id === activeAxis ? 1 : 0.5}
-                  strokeWidth={item.id === activeAxis ? 1.5 : 1}
+                  className={
+                    item.id === activeAxis ? 'stroke-[var(--tuwa-text-primary)]' : 'stroke-[var(--tuwa-border-primary)]'
+                  }
+                  strokeWidth={1}
                 />
               );
             })}
@@ -201,63 +204,57 @@ export function ComparisonRadar() {
                   key={ring}
                   x={CX + 5}
                   y={y + 11}
-                  className="fill-[var(--tuwa-text-tertiary)] text-[9px] font-mono"
+                  className="fill-[var(--tuwa-text-secondary)] font-mono text-[9px]"
                 >
                   {ring}
                 </text>
               );
             })}
 
-            {/* Fills: the competitor under TUWA, TUWA with a soft glow */}
-            <polygon points={polygon(animated)} fill={color} fillOpacity={0.16} />
-            <polygon
-              points={polygon(tuwaScores)}
-              fill={`url(#${gradientId})`}
-              opacity={0.35}
-              filter={`url(#${glowId})`}
-            />
-            <polygon points={polygon(tuwaScores)} fill={`url(#${gradientId})`} fillOpacity={0.2} />
+            {/* Fills: flat, the other product under TUWA */}
+            <polygon points={polygon(animated)} className="fill-[var(--tuwa-text-primary)]" fillOpacity={0.07} />
+            <polygon points={polygon(tuwaScores)} className="fill-[var(--tuwa-docs-lit)]" fillOpacity={0.16} />
 
-            {/* Outlines: TUWA solid, the competitor dashed on top, so both stay visible where they overlap */}
+            {/* Outlines: TUWA solid, the other product dashed on top, so both stay visible where they overlap */}
             <polygon
               points={polygon(tuwaScores)}
               fill="none"
-              stroke={`url(#${gradientId})`}
-              strokeWidth={2.5}
-              strokeLinejoin="round"
+              className="stroke-[var(--tuwa-docs-lit)]"
+              strokeWidth={2}
+              strokeLinejoin="miter"
             />
             <polygon
               points={polygon(animated)}
               fill="none"
-              stroke={color}
-              strokeWidth={2}
-              strokeDasharray="6 4"
-              strokeLinejoin="round"
+              className="stroke-[var(--tuwa-text-primary)]"
+              strokeWidth={1.5}
+              strokeDasharray="5 4"
+              strokeLinejoin="miter"
             />
             {tuwaScores.map((value, index) => {
               const [x, y] = pointAt(index, value);
               return (
-                <circle
+                <rect
                   key={AXES[index].id}
-                  cx={x}
-                  cy={y}
-                  r={4.5}
-                  fill={`url(#${gradientId})`}
-                  className="stroke-[var(--tuwa-bg-primary)]"
-                  strokeWidth={2}
+                  x={x - TUWA_POINT / 2}
+                  y={y - TUWA_POINT / 2}
+                  width={TUWA_POINT}
+                  height={TUWA_POINT}
+                  className="fill-[var(--tuwa-docs-lit)] stroke-[var(--tuwa-docs-raised)]"
+                  strokeWidth={1.5}
                 />
               );
             })}
             {animated.map((value, index) => {
               const [x, y] = pointAt(index, value);
               return (
-                <circle
+                <rect
                   key={AXES[index].id}
-                  cx={x}
-                  cy={y}
-                  r={3.5}
-                  fill={color}
-                  className="stroke-[var(--tuwa-bg-primary)]"
+                  x={x - PRODUCT_POINT / 2}
+                  y={y - PRODUCT_POINT / 2}
+                  width={PRODUCT_POINT}
+                  height={PRODUCT_POINT}
+                  className="fill-[var(--tuwa-text-primary)] stroke-[var(--tuwa-docs-raised)]"
                   strokeWidth={1.5}
                 />
               );
@@ -280,10 +277,10 @@ export function ComparisonRadar() {
                   y={y}
                   textAnchor={anchor}
                   onClick={() => setActiveAxis(item.id)}
-                  className={`cursor-pointer text-[14px] max-sm:text-[21px] font-semibold transition-colors ${isActive ? 'fill-[var(--tuwa-text-accent)]' : 'fill-[var(--tuwa-text-secondary)] hover:fill-[var(--tuwa-text-primary)]'}`}
+                  className={`cursor-pointer font-mono text-[12px] font-bold uppercase tracking-[0.06em] transition-colors max-sm:text-[17px] max-sm:tracking-normal ${isActive ? 'fill-[var(--tuwa-text-accent)]' : 'fill-[var(--tuwa-text-secondary)] hover:fill-[var(--tuwa-text-primary)]'}`}
                 >
                   {lines.map((line, lineIndex) => (
-                    <tspan key={line} x={x} dy={lineIndex === 0 ? `${-shift * 1.1}em` : '1.1em'}>
+                    <tspan key={line} x={x} dy={lineIndex === 0 ? `${-shift * 1.15}em` : '1.15em'}>
                       {line}
                     </tspan>
                   ))}
@@ -293,32 +290,32 @@ export function ComparisonRadar() {
           </svg>
         </div>
 
-        {/* Competitor picker and profile */}
-        <div className="p-4 sm:p-6 flex flex-col gap-5 border-t lg:border-t-0 border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
+        {/* Product picker and profile */}
+        <div className={`flex flex-col gap-6 border-t p-4 md:p-6 lg:border-t-0 ${lineClassName}`}>
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)] mb-3">
+            <p className={`m-0 text-[var(--tuwa-text-secondary)] ${capsClassName}`}>
               {t.ui.comparisonsExtra.compareTuwaWith}
             </p>
-            <div className="flex lg:flex-col gap-2 lg:gap-3 overflow-x-auto lg:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 pb-1 [scrollbar-width:none]">
+            <div className="mt-4 flex flex-col gap-4">
               {SEGMENTS.map((group) => (
-                <div key={group.id} className="flex lg:flex-col gap-2 lg:gap-1.5 shrink-0">
-                  <span className="hidden lg:block text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
+                <div key={group.id} role="group" aria-labelledby={`radar-segment-${group.id}`}>
+                  <p
+                    id={`radar-segment-${group.id}`}
+                    className="m-0 font-mono text-[11px] leading-[1.35] text-[var(--tuwa-text-secondary)]"
+                  >
                     {t.comparisons.segments[group.id]?.label ?? group.label}
-                  </span>
-                  <div className="flex flex-nowrap lg:flex-wrap gap-2">
+                  </p>
+                  <div className="mt-2 flex flex-wrap pr-px pb-px">
                     {COMPETITORS.filter((product) => product.segment === group.id).map((product) => {
                       const isSelected = product.id === selectedId;
-                      const chipColor = SEGMENT_COLORS[group.id];
                       return (
                         <button
                           key={product.id}
                           type="button"
                           aria-pressed={isSelected}
                           onClick={() => setSelectedId(product.id)}
-                          className={`shrink-0 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-all duration-200 cursor-pointer ${isSelected ? 'text-[var(--tuwa-text-primary)] shadow-sm' : 'border-[var(--tuwa-border-primary)]/50 dark:border-white/10 text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-border-primary)]'}`}
-                          style={isSelected ? { borderColor: chipColor, backgroundColor: `${chipColor}1f` } : undefined}
+                          className={`-mr-px -mb-px h-[34px] cursor-pointer border px-3 font-mono text-[11px] font-bold uppercase leading-none tracking-[0.08em] whitespace-nowrap transition-colors ${isSelected ? 'relative z-[1] border-[var(--tuwa-text-primary)] bg-[var(--tuwa-text-primary)] text-[var(--tuwa-docs-paper)]' : 'border-[var(--tuwa-border-strong)] text-[var(--tuwa-text-primary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]'}`}
                         >
-                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: chipColor }} />
                           {product.name}
                         </button>
                       );
@@ -329,16 +326,16 @@ export function ComparisonRadar() {
             </div>
           </div>
 
-          <ProductProfile product={selected} counterpart={segment?.counterpart} color={color} />
+          <ProductProfile product={selected} counterpart={segment?.counterpart} />
         </div>
       </div>
 
       {/* Axis tabs and criteria */}
-      <div className="border-t border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
+      <div className={`border-t ${lineClassName}`}>
         <div
           role="tablist"
           aria-label={t.ui.comparisonsExtra.radarAxesAria}
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-b border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]"
+          className={`grid grid-cols-2 gap-px border-b bg-[var(--tuwa-border-primary)] md:grid-cols-3 lg:grid-cols-6 ${lineClassName}`}
         >
           {AXES.map((item, index) => {
             const isActive = item.id === activeAxis;
@@ -351,57 +348,56 @@ export function ComparisonRadar() {
                 aria-selected={isActive}
                 aria-controls="axis-panel"
                 onClick={() => setActiveAxis(item.id)}
-                className={`relative text-left px-4 py-3 transition-colors cursor-pointer border-[var(--tuwa-border-primary)]/20 dark:border-white/[0.04] [&:not(:last-child)]:border-r ${isActive ? 'bg-[var(--tuwa-text-accent)]/[0.06]' : 'hover:bg-[var(--tuwa-bg-secondary)]/50 dark:hover:bg-white/[0.02]'}`}
+                // On the narrowest phones a tab is 142px wide and the longest word of an axis (Ukrainian, 17 letters) is
+                // wider than its text column: there the tab has smaller margins and its label tighter letters
+                className={`cursor-pointer px-4 py-3.5 text-left transition-colors max-[374px]:px-2.5 ${isActive ? 'bg-[var(--tuwa-text-primary)] text-[var(--tuwa-docs-paper)]' : 'bg-[var(--tuwa-docs-raised)] text-[var(--tuwa-text-secondary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,var(--tuwa-docs-raised))]'}`}
               >
-                {isActive && (
-                  <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)]" />
-                )}
                 <span
-                  className={`block text-xs font-semibold font-geist-mono uppercase tracking-wide ${isActive ? 'text-[var(--tuwa-text-primary)]' : 'text-[var(--tuwa-text-secondary)]'}`}
+                  className={`block max-[374px]:tracking-[0.04em] ${capsClassName} ${isActive ? 'text-[var(--tuwa-docs-paper)]' : 'text-[var(--tuwa-text-primary)]'}`}
                 >
                   {t.comparisons.axes[item.id]?.label ?? item.label}
                 </span>
-                <span className="mt-2 grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 text-[10px] font-mono text-[var(--tuwa-text-tertiary)]">
+                <span className="mt-2.5 grid grid-cols-[auto_1fr] items-center gap-x-2.5 gap-y-1.5 font-mono text-[10px] leading-none">
                   <span>TUWA</span>
-                  <ScoreBar value={tuwaScores[index]} />
+                  <ScoreBar value={tuwaScores[index]} lit />
                   <span className="truncate">{selected.name.split(' ').at(-1)}</span>
-                  <ScoreBar value={selectedScores[index]} color={color} />
+                  <ScoreBar value={selectedScores[index]} />
                 </span>
               </button>
             );
           })}
         </div>
 
-        <div id="axis-panel" role="tabpanel" aria-labelledby={`axis-tab-${activeAxis}`} className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-4">
-            <p className="text-sm text-[var(--tuwa-text-primary)] font-medium">
+        <div id="axis-panel" role="tabpanel" aria-labelledby={`axis-tab-${activeAxis}`} className="p-4 md:p-6">
+          <div className="flex flex-col gap-1.5 md:flex-row md:items-baseline md:justify-between">
+            <p className="m-0 text-[15px] font-medium leading-[1.4] text-[var(--tuwa-text-primary)]">
               {t.comparisons.axes[axis.id]?.question ?? axis.question}
             </p>
-            <p className="text-xs font-mono text-[var(--tuwa-text-tertiary)]">
+            <p className="m-0 font-mono text-xs whitespace-nowrap text-[var(--tuwa-text-secondary)]">
               TUWA {tuwaScores[AXES.indexOf(axis)]} · {selected.name} {selectedScores[AXES.indexOf(axis)]}
             </p>
           </div>
           {axis.favorsHosted && (
-            <p className="mb-4 text-xs leading-relaxed text-[var(--tuwa-text-secondary)] rounded-[var(--tuwa-rounded-corners)] border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2">
+            <p className={`m-0 mt-4 text-[13px] leading-normal text-[var(--tuwa-text-secondary)] ${noteClassName}`}>
               {axis.id === 'onboarding'
                 ? t.ui.comparisonsExtra.favorsHostedOnboarding
                 : t.ui.comparisonsExtra.favorsHostedChains}
             </p>
           )}
 
-          <div className="divide-y divide-[var(--tuwa-border-primary)]/25 dark:divide-white/[0.05]">
+          <div className={`mt-4 border-t ${lineClassName}`}>
             {axisCriteria.map((criterion) => {
               const criterionTranslation = t.comparisons.criteria[criterion.id];
               return (
                 <div
                   key={criterion.id}
-                  className="py-3 grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-x-6 gap-y-2"
+                  className={`grid grid-cols-1 gap-x-6 gap-y-2.5 border-b py-3.5 last:border-b-0 last:pb-0 md:grid-cols-3 ${lineClassName}`}
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[var(--tuwa-text-primary)]">
+                    <p className="m-0 text-sm font-semibold leading-[1.35] text-[var(--tuwa-text-primary)]">
                       {criterionTranslation?.label ?? criterion.label}
                     </p>
-                    <p className="text-xs text-[var(--tuwa-text-secondary)] mt-0.5 leading-relaxed">
+                    <p className="m-0 mt-1 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
                       {criterionTranslation?.description ?? criterion.description}
                     </p>
                   </div>
@@ -410,8 +406,10 @@ export function ComparisonRadar() {
                     const localizedNote = t.comparisons.products[product.id]?.facts[criterion.id] ?? item.note;
                     return (
                       <div key={product.id} className="flex items-start gap-2.5">
-                        <MarkIcon mark={item.mark} className="w-[18px] h-[18px] mt-px" />
-                        <p className="text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
+                        <span className="mt-0.5 inline-flex">
+                          <MarkIcon mark={item.mark} />
+                        </span>
+                        <p className="m-0 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
                           <span className="font-semibold text-[var(--tuwa-text-primary)]">{product.name}: </span>
                           {localizedNote}
                           <SourceRef index={sources.get(item.sourceUrl) ?? 0} url={item.sourceUrl} />
@@ -429,46 +427,49 @@ export function ComparisonRadar() {
   );
 }
 
-function ProductProfile({ product, counterpart, color }: { product: Product; counterpart?: string; color: string }) {
+/**
+ * The profile of the chosen product beside the radar: its name as a link to its site, its licence in a square chip, a
+ * line on what it is, its pricing with the source and the TUWA projects that do the same job.
+ *
+ * @param props.product - The product.
+ * @param props.counterpart - The TUWA projects that do the same job, if the product has a segment.
+ * @returns The profile.
+ */
+function ProductProfile({ product, counterpart }: { product: Product; counterpart?: string }) {
   const { t } = useI18n();
   const productTranslation = t.comparisons.products[product.id];
+  const label = `m-0 text-[var(--tuwa-text-secondary)] ${capsClassName}`;
   return (
-    <div className="flex flex-col gap-3 text-xs">
-      <div className="flex flex-col items-start">
+    <div className={`flex flex-col gap-4 border-t pt-5 ${lineClassName}`}>
+      <div className="flex flex-col items-start gap-2.5">
         <a
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="whitespace-nowrap text-base font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)] hover:text-[var(--tuwa-text-accent)] transition-colors"
+          className="inline-flex items-center gap-2 font-mono text-base font-bold leading-[1.25] text-[var(--tuwa-text-primary)] transition-colors hover:text-[var(--tuwa-text-accent)]"
         >
-          {product.name} ↗
+          {product.name}
+          <ExternalLinkIcon className="h-3 w-3 shrink-0" />
         </a>
-        <span
-          className="mt-1.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-mono"
-          style={{ borderColor: `${color}66`, color }}
-        >
-          {productTranslation?.license ?? product.license}
-        </span>
-        <p className="mt-1.5 leading-relaxed text-[var(--tuwa-text-secondary)]">
+        <span className={chipClassName}>{productTranslation?.license ?? product.license}</span>
+        <p className="m-0 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
           {productTranslation?.summary ?? product.summary}
         </p>
       </div>
-      <dl className="grid gap-2.5">
+      <dl className="m-0 grid gap-3.5">
         <div>
-          <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
-            {t.comparisons.matrix.pricingRow}
-          </dt>
-          <dd className="mt-0.5 leading-relaxed text-[var(--tuwa-text-primary)]">
+          <dt className={label}>{t.comparisons.matrix.pricingRow}</dt>
+          <dd className="m-0 mt-1.5 text-[13px] leading-normal text-[var(--tuwa-text-primary)]">
             {productTranslation?.pricingText ?? product.pricing.text}
             <SourceRef index={sources.get(product.pricing.sourceUrl) ?? 0} url={product.pricing.sourceUrl} />
           </dd>
         </div>
         {counterpart && (
           <div>
-            <dt className="text-[10px] uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
-              {t.ui.comparisonsExtra.tuwaCounterpartLabel}
-            </dt>
-            <dd className="mt-0.5 font-semibold text-[var(--tuwa-text-accent)]">{counterpart}</dd>
+            <dt className={label}>{t.ui.comparisonsExtra.tuwaCounterpartLabel}</dt>
+            <dd className="m-0 mt-1.5 font-mono text-[13px] font-bold leading-[1.35] text-[var(--tuwa-text-accent)]">
+              {counterpart}
+            </dd>
           </div>
         )}
       </dl>

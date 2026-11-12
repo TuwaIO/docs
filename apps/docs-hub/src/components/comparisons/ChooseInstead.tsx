@@ -3,62 +3,63 @@
 import { formatLabel, useI18n } from '@/i18n';
 import { COMPETITORS, SEGMENTS } from '@/lib/comparisons';
 
-import { SEGMENT_COLORS } from './segmentColors';
+import { capsClassName } from './comparisonStyles';
+
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
 
 /**
- * "When to choose them instead": for each segment, the TUWA counterpart, and for each competitor when it is the better
- * choice and how TUWA differs.
+ * "When to choose them instead", in paper and ink: for each segment a head on a line of ink (its name in mono caps, the
+ * TUWA projects that do the same job on the right) and its products as cells on shared lines of 1px, two in a row from
+ * 768px: what the product is, when it is the better choice and how TUWA differs.
+ *
+ * Each segment is a waypoint of the flight plan of the page (`#segment-<id>`).
+ *
+ * @returns The segments.
  */
 export function ChooseInstead() {
   const { t } = useI18n();
+  const label = `m-0 text-[var(--tuwa-text-secondary)] ${capsClassName}`;
+
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-14">
       {SEGMENTS.map((segment) => (
-        <div key={segment.id}>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-4">
-            <h3 className="flex items-center gap-2.5 text-sm font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)]">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: SEGMENT_COLORS[segment.id] }} />
+        <div key={segment.id} id={`segment-${segment.id}`} className="scroll-mt-[120px]">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1.5 border-t border-[var(--tuwa-border-strong)] pt-4 pb-[18px]">
+            <h3 className="m-0 font-mono text-[15px] font-bold uppercase leading-[1.25] tracking-[0.12em] text-[var(--tuwa-text-primary)]">
               {t.comparisons.segments[segment.id]?.label ?? segment.label}
             </h3>
-            <p className="text-xs text-[var(--tuwa-text-secondary)]">
+            <p className="m-0 text-sm leading-[1.4] text-[var(--tuwa-text-secondary)]">
               {t.ui.comparisonsExtra.tuwaCounterpartLabel}:{' '}
-              <span className="font-semibold text-[var(--tuwa-text-accent)]">{segment.counterpart}</span>
+              <span className="font-mono text-[13px] font-bold text-[var(--tuwa-text-accent)]">
+                {segment.counterpart}
+              </span>
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`grid grid-cols-1 border-t border-l md:grid-cols-2 ${lineClassName}`}>
             {COMPETITORS.filter((product) => product.segment === segment.id).map((product) => {
               const productTrans = t.comparisons.products[product.id];
               return (
                 <div
                   key={product.id}
-                  className="relative rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] sm:backdrop-blur-sm p-5 flex flex-col gap-4"
+                  className={`flex flex-col gap-4 border-r border-b bg-[var(--tuwa-docs-raised)] p-5 ${lineClassName}`}
                 >
-                  <span
-                    aria-hidden
-                    className="absolute left-0 top-5 bottom-5 w-0.5 rounded-full"
-                    style={{ backgroundColor: SEGMENT_COLORS[segment.id] }}
-                  />
                   <div>
-                    <p className="text-base font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
+                    <p className="m-0 font-mono text-base font-bold leading-[1.25] text-[var(--tuwa-text-primary)]">
                       {product.name}
                     </p>
-                    <p className="text-xs text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
+                    <p className="m-0 mt-1.5 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
                       {productTrans?.summary ?? product.summary}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
-                      {formatLabel(t.comparisons.chooseInstead.pickWhen, { name: product.name })}
-                    </p>
-                    <p className="text-sm text-[var(--tuwa-text-primary)] mt-1 leading-relaxed">
+                    <p className={label}>{formatLabel(t.comparisons.chooseInstead.pickWhen, { name: product.name })}</p>
+                    <p className="m-0 mt-1.5 text-sm leading-normal text-[var(--tuwa-text-primary)]">
                       {productTrans?.chooseWhen ?? product.chooseWhen}
                     </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--tuwa-text-tertiary)]">
-                      {t.comparisons.chooseInstead.howTuwaDiffers}
-                    </p>
-                    <p className="text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
+                    <p className={label}>{t.comparisons.chooseInstead.howTuwaDiffers}</p>
+                    <p className="m-0 mt-1.5 text-sm leading-normal text-[var(--tuwa-text-secondary)]">
                       {productTrans?.tuwaDifference ?? product.tuwaDifference}
                     </p>
                   </div>

@@ -3,6 +3,7 @@
 import { LocaleSwitcher, ThemeSwitcher } from '@tuwaio/docs-ui';
 import { pathWithoutLocale } from '@tuwaio/docs-ui/locale';
 import { useLocaleRouting } from '@tuwaio/docs-ui/routing';
+import { CloseIcon } from '@tuwaio/nova-core';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { setMenu } from 'nextra-theme-docs';
@@ -15,21 +16,33 @@ import { hasLanguageUrl } from '@/lib/languageUrls';
 
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);
 
+/** A cell of the header: a line of 1px on its left, its control in the middle */
+const cellClassName = 'shrink-0 items-center border-l border-[var(--tuwa-border-primary)] px-2';
+
+/** A row of the menu of phones with a switch: its name in mono caps on the left, the switch on the right */
+const menuRowClassName =
+  'flex min-h-[60px] items-center justify-between gap-4 border-b border-[var(--tuwa-border-primary)] px-5 py-2';
+const menuLabelClassName =
+  'font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[var(--tuwa-text-secondary)]';
+
 /**
- * Glassmorphic fixed header with logo slot, links, locale switcher and theme toggle. Below `lg` (1024px) the links and
- * the controls move to a menu that slides in from the right, as on tuwa.io (at 768px the five links and both switchers
- * need the whole row in Ukrainian). The menu closes on a link click, the backdrop, Escape or a wider window, and locks
- * the page scroll while open. The header blurs what scrolls under it at every width; below `lg` its background is
- * nearly opaque, so the page does not show through the logo and the menu button on phones, in portrait and landscape.
- * The controls follow one order everywhere: the language, then the theme.
- * @param props.logo - Server-rendered logo element passed from layout.
+ * The fixed header of the hub pages, in paper and ink: 56px of the paper of the page with its scanlines and a line of
+ * 1px below, a little clear over a light blur of the page (`tuwa-docs-glass`) at every width. A row of cells on lines
+ * of 1px: the logo (in a cell of 320px from 1280px), then from `lg` (1024px) the links in mono caps, the language and
+ * the theme (the language first, as on every TUWA site). Below `lg` a square menu button opens a panel of the same
+ * glass under the header with the links in mono caps on lines of 1px and, under them, the language and the theme, each
+ * on a row with its name: on a phone the header keeps the logo at the size of tuwa.io and the button (at 768px the five
+ * links and both switchers need the whole row in Ukrainian). The panel closes on a link, the scrim, Escape or a wider
+ * window, and locks the page scroll while open.
+ *
+ * @param props.logo - The logo link, rendered on the server by the layout.
+ * @returns The header and the menu panel.
  */
 export function Header({ logo }: { logo: ReactNode }) {
   const { resolvedTheme, setTheme } = useTheme();
   const { locale, setLocale, resolved, t } = useI18n();
   const selectLocale = useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl });
   const pathname = pathWithoutLocale(usePathname());
-  const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
@@ -41,8 +54,6 @@ export function Header({ logo }: { logo: ReactNode }) {
   ];
 
   useEffect(() => {
-    // eslint-disable-next-line
-    setMounted(true);
     // A link in the Nextra mobile menu that leads here unmounts the Nextra layout with the menu still open, which
     // leaves its scroll lock (`x:max-md:overflow-hidden` on <html>) behind: close that menu
     setMenu(false);
@@ -69,104 +80,86 @@ export function Header({ logo }: { logo: ReactNode }) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 border-b border-[var(--tuwa-border-primary)]/10 dark:border-white/[0.04] bg-[var(--tuwa-bg-primary)]/90 dark:bg-[#0a0e27]/90 lg:bg-[var(--tuwa-bg-primary)]/50 lg:dark:bg-[#030303]/30 backdrop-blur-xl">
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            {logo}
-            <nav aria-label="Main navigation" className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
-                  className="text-sm font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] aria-[current=page]:text-[var(--tuwa-text-primary)] transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
+      <header className="fixed top-0 left-0 right-0 z-50 flex h-[56px] items-stretch border-b border-[var(--tuwa-border-primary)] tuwa-docs-glass tuwa-docs-scan">
+        <div className="flex shrink-0 items-stretch border-r border-[var(--tuwa-border-primary)] xl:w-[320px]">
+          {logo}
+        </div>
 
-          <div className="hidden lg:flex items-center gap-3">
-            <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
-            {mounted && (
-              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
-            )}
-          </div>
+        <nav aria-label={t.nav.mainNavAria} className="hidden lg:flex items-stretch pl-[6px]">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+              className="flex items-center px-[18px] font-mono text-xs font-medium uppercase tracking-[0.12em] text-[var(--tuwa-text-secondary)] transition-colors hover:text-[var(--tuwa-text-primary)] aria-[current=page]:text-[var(--tuwa-text-primary)]"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-          {/* Mobile menu button: two bars that turn into a cross */}
+        <div className="min-w-0 flex-1" />
+
+        <div className={`hidden lg:flex ${cellClassName}`}>
+          <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
+        </div>
+        <div className={`hidden lg:flex ${cellClassName}`}>
+          {/* The switch renders a placeholder of its size while the page hydrates, so the header does not move */}
+          <ThemeSwitcher theme={resolvedTheme ?? 'light'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
+        </div>
+        <div className={`flex lg:hidden ${cellClassName}`}>
           <button
             type="button"
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="lg:hidden relative h-8 w-8 cursor-pointer"
+            className="relative flex h-10 w-10 cursor-pointer items-center justify-center border border-[var(--tuwa-border-strong)] text-[var(--tuwa-text-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]"
             aria-controls="mobile-menu"
             aria-expanded={isMenuOpen}
+            aria-label={isMenuOpen ? t.nav.closeMenu : t.nav.openMenu}
           >
-            <span className="sr-only">{isMenuOpen ? t.nav.closeMenu : t.nav.openMenu}</span>
-            <span className="absolute top-1/2 left-1/2 flex w-6 -translate-x-1/2 -translate-y-1/2 flex-col items-center">
-              <span
-                aria-hidden="true"
-                className={`block h-0.5 w-full bg-[var(--tuwa-text-primary)] transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-y-1 rotate-45' : ''}`}
-              />
-              <span
-                aria-hidden="true"
-                className={`mt-1.5 block h-0.5 w-full bg-[var(--tuwa-text-primary)] transition-transform duration-300 ease-in-out ${isMenuOpen ? '-translate-y-1 -rotate-45' : ''}`}
-              />
-            </span>
+            {isMenuOpen ? (
+              <CloseIcon aria-hidden="true" className="h-5 w-5" />
+            ) : (
+              <>
+                <span aria-hidden="true" className="absolute top-[15px] right-[10px] left-[10px] h-0.5 bg-current" />
+                <span aria-hidden="true" className="absolute top-[21px] right-[10px] left-[10px] h-0.5 bg-current" />
+              </>
+            )}
           </button>
         </div>
       </header>
 
-      {/* Outside the header: its backdrop-filter would make it the containing block of these fixed elements */}
+      {/* Under the header, which stays on top with the menu button: the scrim of Nova's dialogs and the panel */}
       <div
         aria-hidden="true"
         onClick={closeMenu}
-        className={`lg:hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`lg:hidden fixed inset-x-0 top-[56px] bottom-0 z-[44] bg-[rgb(16_16_20/0.5)] transition-opacity duration-200 motion-reduce:transition-none ${isMenuOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       />
       <div
         id="mobile-menu"
         inert={!isMenuOpen}
-        className={`lg:hidden fixed top-0 right-0 z-[70] h-full w-80 max-w-[85vw] flex flex-col border-l border-[var(--tuwa-border-primary)] bg-[var(--tuwa-bg-primary)]/90 dark:bg-[var(--tuwa-bg-primary)]/85 backdrop-blur-xl shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`lg:hidden fixed top-[56px] right-0 bottom-0 z-[45] w-80 max-w-full overflow-y-auto border-l border-[var(--tuwa-border-primary)] tuwa-docs-glass tuwa-docs-scan transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
-        <div className="flex items-center justify-between p-4 border-b border-[var(--tuwa-border-primary)]">
-          <div onClick={closeMenu}>{logo}</div>
-          <button
-            type="button"
-            onClick={closeMenu}
-            className="p-2 rounded-[var(--tuwa-rounded-corners)] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:bg-[var(--tuwa-bg-secondary)] transition-colors cursor-pointer"
-            aria-label={t.nav.closeMenu}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+        <nav aria-label={t.nav.mobileNavAria}>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={closeMenu}
+              aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
+              className="flex h-[52px] items-center border-b border-[var(--tuwa-border-primary)] px-5 font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[var(--tuwa-text-secondary)] transition-colors hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)] hover:text-[var(--tuwa-text-primary)] aria-[current=page]:bg-[var(--tuwa-text-primary)] aria-[current=page]:text-[var(--tuwa-docs-paper)]"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        {/* The language, then the theme, each on a row with its name: on a phone the header has no room for them */}
+        <div className={menuRowClassName}>
+          <span className={menuLabelClassName}>{t.nav.language}</span>
+          <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
         </div>
-
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <nav aria-label={t.nav.mobileNavAria} className="space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={closeMenu}
-                aria-current={isCurrent(pathname, link.href) ? 'page' : undefined}
-                className="block rounded-[var(--tuwa-rounded-corners)] px-4 py-2.5 text-lg font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:bg-[var(--tuwa-bg-secondary)] aria-[current=page]:text-[var(--tuwa-text-primary)] aria-[current=page]:bg-[var(--tuwa-bg-secondary)] transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="mt-4 border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
-            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.language}</span>
-            <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
-          </div>
-          <div className="border-t border-[var(--tuwa-border-primary)] p-4 flex items-center justify-between">
-            <span className="text-lg font-medium text-[var(--tuwa-text-secondary)]">{t.nav.theme}</span>
-            {mounted && (
-              <ThemeSwitcher theme={resolvedTheme || 'dark'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
-            )}
-          </div>
+        <div className={menuRowClassName}>
+          <span className={menuLabelClassName}>{t.nav.theme}</span>
+          <ThemeSwitcher theme={resolvedTheme ?? 'light'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
         </div>
       </div>
     </>

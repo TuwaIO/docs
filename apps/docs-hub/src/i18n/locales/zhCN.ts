@@ -16,20 +16,29 @@ export const zhCN: DocsHubLabels = {
     theme: '主题',
     language: '语言',
     selectLanguage: docsLabels['zh-CN'].selectLanguage,
-    toggleTheme: '切换主题',
+    toggleTheme: docsLabels['zh-CN'].toggleTheme,
     openMenu: '打开导航菜单',
     closeMenu: '关闭导航菜单',
     mobileNavAria: '文档分区',
+    mainNavAria: '主导航',
+    homeAria: 'TUWA Docs 首页',
+    skipToContent: '跳到内容',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels['zh-CN'].footer,
   common: {
+    flight: {
+      ariaLabel: '本页飞行计划',
+      overview: '概览',
+      progressLabel: '飞行进度',
+    },
     packageManager: '包管理器',
     copy: '复制',
     copied: '已复制',
     copyCommand: '复制命令',
     copyCode: '复制代码',
     close: '关闭',
+    aboutLabel: '关于{label}',
     yes: '支持',
     partial: '部分支持',
     no: '不支持',
@@ -47,6 +56,33 @@ export const zhCN: DocsHubLabels = {
       explorePackages: '浏览软件包',
       tryPlayground: '在演练场中体验',
     },
+    plate: {
+      ariaLabel: 'TUWA 项目',
+      packagesOnNpm: {
+        one: 'npm 上的软件包',
+        few: 'npm 上的软件包',
+        many: 'npm 上的软件包',
+        other: 'npm 上的软件包',
+      },
+      products: { one: '{n} 个产品', few: '{n} 个产品', many: '{n} 个产品', other: '{n} 个产品' },
+      stages: { one: '{n} 个阶段', few: '{n} 个阶段', many: '{n} 个阶段', other: '{n} 个阶段' },
+    },
+    board: {
+      section: '生态系统',
+      stage: '阶段',
+      projectsHeading: '各项目及其构建基础',
+      buildsOn: '构建于',
+      optional: '可选',
+      or: '或',
+      cloudOrSelfHosted: '云端或自部署',
+      selfHosted: '自部署',
+      packages: { one: '{n} 个包', few: '{n} 个包', many: '{n} 个包', other: '{n} 个包' },
+      reExports: '重新导出',
+      relationsLabel: '各项目的构建基础',
+      relation: '{project} 构建于 {base}',
+      relationOptional: '{project} 可与 {base} 配合使用；两者也可各自独立使用',
+      relationOr: '{first} 或 {second}：同一后端，自部署或云端',
+    },
     timeline: {
       titlePrefix: '生态系统',
       titleHighlight: '架构全景',
@@ -54,22 +90,27 @@ export const zhCN: DocsHubLabels = {
       stages: {
         1: {
           label: '第 1 阶段 — 核心认证与底层原语',
+          title: '核心认证与底层原语',
           subtitle: '面向 EVM 与 Solana 的 CAIP-122 登录与多链基础工具',
         },
         2: {
           label: '第 2 阶段 — 状态机与连接层',
+          title: '状态机与连接层',
           subtitle: '无头钱包连接与交易生命周期追踪',
         },
         3: {
           label: '第 3 阶段 — 服务端与状态同步',
+          title: '服务端与状态同步',
           subtitle: '托管云或私有化自部署的 Quasar 引擎',
         },
         4: {
           label: '第 4 阶段 — 用户界面组件',
+          title: '用户界面组件',
           subtitle: '面向 Satellite 与 Pulsar 的 React 组件库',
         },
         5: {
           label: '第 5 阶段 — SDK 统一集成层',
+          title: 'SDK 统一集成层',
           subtitle: '核心客户端 SDK 与特定网络适配器',
         },
       },
@@ -100,38 +141,25 @@ export const zhCN: DocsHubLabels = {
         tagline: '统一客户端 SDK 与 EVM/Solana 网络适配器',
       },
     },
-    docCard: {
-      cloudAndSelfHosted: '托管云与自部署',
-      onePackage: '1 个包',
-      packagesCount: '{count} 个包',
-      readDocs: '阅读文档',
-      tryLiveAdmin: '体验演示后台',
-      showPackages: '展开 {title} 的软件包',
-      hidePackages: '收起 {title} 的软件包',
-    },
-    packagePreview: {
-      installLabel: '安装 {name}',
-      copyInstallTitle: '复制 {name} 的安装命令',
-      peerDepsTitle: '查看 {name} 的详情与同伴依赖 (peerDependencies)',
+    ledger: {
+      section: '软件包',
+      project: '项目',
+      layer: '层',
+      package: '软件包',
+      version: '版本',
+      gzip: 'Gzip',
+      docs: '文档',
       deprecated: '已弃用',
-      standalone: '独立安装包',
-      peersCount: '+{count} 个同伴依赖',
-      peersCountPlural: '+{count} 个同伴依赖',
-      lighterInstallPrefix: '只需要 {scope}？直接安装',
-      lighterInstallConjunction: '或',
+    },
+    sizeNote: {
+      title: '大小 · gzip',
     },
     packageDialog: {
       deprecatedPrefix: '已弃用：',
       install: '安装命令',
       copyInstallTitle: '复制安装命令',
-      peersHint: '命令已包含必需的同伴依赖 (peerDependencies)。项目中已安装的包仅在版本不满足时才会更新。',
       lighterEntryHeading: '只需要其中一个模块？',
       guidesHeading: '相关指南',
-      dependenciesHeading: '包含依赖',
-      includedWith: '随附安装',
-      peerDependenciesHeading: '同伴依赖 (Peer dependencies)',
-      noRuntimeDeps: '零运行时与零同伴依赖 —— 只要能运行 TypeScript 的环境均可直接运行。',
-      optional: '可选',
       viewOnNpm: '在 npm 上查看',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -186,62 +214,30 @@ export const zhCN: DocsHubLabels = {
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': '请改用 @tuwaio/siwx-react 与 @tuwaio/siwx-server。',
       },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk 为 React 打包了包含 Nova UI Kit 在内的所有 TUWA 模块。如果您只需要钱包连接、交易追踪或签名登录中的某一项，可以直接安装对应的独立包：',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk 与 @tuwaio/sdk 配合使用。如果不使用 @tuwaio/sdk，可直接安装所需层级的 EVM 独立包：',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk 与 @tuwaio/sdk 配合使用。如果不使用 @tuwaio/sdk，可直接安装所需层级的 Solana 独立包：',
-      },
     },
     quickStart: {
-      titlePrefix: '几分钟内',
-      titleHighlight: '快速上手',
-      subtitle: '挑选适合您应用的软件包，构建完整的 React dApp，或者在您自己的服务器上运行 Quasar。',
-      cards: {
-        choosePackages: {
-          title: '选择您的软件包',
-          description: '在统一的 @tuwaio/sdk 与用于钱包连接、SIWX 登录、交易追踪和 Nova UI 的独立包之间做出选择。',
-          cta: '挑选技术栈',
-        },
-        fullStackReact: {
-          title: '全栈 React 应用',
-          description:
-            '在同一个 Next.js 应用中为 EVM 或 Solana 完成钱包连接、SIWX 登录、Pulsar 交易追踪与 Quasar 同步。',
-          cta: '开始构建应用',
-        },
-        selfHostQuasar: {
-          title: '自部署 Quasar',
-          description:
-            '使用 Docker Compose 在您自己的服务器上运行 Quasar 社区版 (Apache-2.0)：包含 PostgreSQL、Redis、追踪工作进程与 Webhook。',
-          cta: '部署节点',
-        },
-      },
-      allGuidesPrefix: '只想单独了解 SIWX 登录、交易追踪或 Quasar 同步？',
-      browseAllGuides: '浏览全部指南',
-      aiBanner: {
-        badge: 'AI 编程助手',
-        title: '正在使用 Claude Code、Cursor 或 Windsurf 构建项目？',
-        description:
-          '将 TUWA_AGENTS.md 提供给您的编程智能体：单文件涵盖所有 TUWA 软件包的导入路径、状态库接线、SIWX 路由及 Quasar 同步规范。',
-        copyUrl: '复制 URL',
-        copied: '已复制',
-        copyTitle: '复制 TUWA_AGENTS.md 的原始 URL',
-        viewOnGithub: '在 GitHub 上查看',
-      },
+      section: '快速开始',
+      title: '从 Cosmos Playground 开始构建',
+      subtitle:
+        '一条命令即可基于模板创建完整的 Next.js 或 Vite 应用，支持 EVM、Solana 或两者兼有，钱包连接与交易追踪均已接好。',
+      steps: { one: '{n} 个步骤', few: '{n} 个步骤', many: '{n} 个步骤', other: '{n} 个步骤' },
     },
     compactConfigurator: {
-      badge: '交互式配置',
       title: '配置您的技术栈',
       description: '选择框架、区块链网络与所需特性，立即生成安装命令与全套配置文件。',
-      openWithFiles: '打开完整配置器（查看全部 {count} 个文件',
+      openWithFiles: '打开完整配置器，查看全部 {count} 个配置文件',
       install: '安装命令',
-      filesGenerated: '为当前技术栈生成的文件 ({count})',
-      viewCode: '查看代码',
     },
   },
   comparisons: {
+    sections: {
+      radar: '雷达图',
+      criteria: '评估标准',
+      alternatives: '替代方案',
+      bundle: '包体积',
+      method: '评估方法',
+      next: '开始',
+    },
     badge: '交互式对比',
     titlePrefix: 'TUWA 与',
     titleHighlight: '同类方案对比',
@@ -647,6 +643,7 @@ export const zhCN: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} 种技术栈', few: '{n} 种技术栈', many: '{n} 种技术栈', other: '{n} 种技术栈' },
     badge: '交互式工具',
     titlePrefix: '技术栈',
     titleHighlight: '配置器',
@@ -860,6 +857,7 @@ export const zhCN: DocsHubLabels = {
         textsLayer: '多语言文案 (Texts)',
         behaviorLayer: '交互行为 (Behavior)',
         languageLabel: '界面语言',
+        cardGapLabel: '钱包与网络卡片之间的间距',
         connectTextLabel: '连接按钮文案',
         toastPositionLabel: '通知弹窗位置',
         resetNova: '重置为 Nova 默认出厂设置',
@@ -867,6 +865,11 @@ export const zhCN: DocsHubLabels = {
         cssCopied: 'CSS 已复制',
         resetEdits: '重置修改',
         editedSuffix: '已编辑',
+        themeNone: '无',
+        themeSquare: '方形',
+        themeRound: '圆形',
+        themeOn: '开',
+        themeOff: '关',
         themeGroups: {
           Surfaces: '背景与表面',
           Text: '文字颜色',
@@ -875,13 +878,13 @@ export const zhCN: DocsHubLabels = {
           Shape: '圆角与边框',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'Nova UI Kit 默认自带的深色主题。',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description: 'Nova UI Kit 自带的深色主题：墨色纸面、方角，以及 TUWA 标志的青色。',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'Nova UI Kit 默认自带的浅色主题。',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'Nova UI Kit 自带的浅色主题：暖色纸面、墨色文字、方角，以及 TUWA 橙色。',
           },
           cyberpunk: {
             label: 'Cyberpunk',
@@ -1145,6 +1148,7 @@ export const zhCN: DocsHubLabels = {
         '真实的 TUWA 状态仓库与 Nova 组件在您的浏览器中直接运行在模拟钱包与模拟链上：不会签署或广播任何真实链上交易。',
       loadingAria: '正在加载交互演练场',
       connectButtonGroup: '连接按钮',
+      iconsGroup: '图标',
       minimal: '极简',
       full: '完整',
       nextTxGroup: '下一笔交易结果',
@@ -1190,6 +1194,7 @@ export const zhCN: DocsHubLabels = {
         theme: '舞台上 Nova 组件的 --tuwa-* CSS 变量。可在下方“深度定制 › 主题”中逐项微调并复制生成的 CSS。',
         style:
           'Nova 各组件的样式类套件 (customization.classNames)：支持原生 Nova、TUWA Mono 或 Isometric 等距线稿风格。',
+        icons: 'Nova UI Kit 使用的图标集（其 provider 的 icons 属性）：自带的像素图标，或它此前使用的 Heroicons。',
         connectButton:
           '完整：在按钮旁展示余额与网络选择器。极简：仅展示连接按钮本体（关闭 withBalance 与 withChain）。',
         language: 'Nova UI Kit 界面文本与弹窗的语言：英语 (EN)、简体中文 (CN) 或乌克兰语 (UA)。',

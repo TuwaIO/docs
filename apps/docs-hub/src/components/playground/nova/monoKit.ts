@@ -58,6 +58,8 @@ const outlined = cn(
 
 const button = {
   primary: cn(
+    // Filled: the icons in it keep their color under the pointer
+    'tuwa-solid',
     buttonBase,
     'transition-opacity',
     text.strong,
@@ -153,7 +155,7 @@ const connectedModal: ConnectedModalCustomization = {
         walletAvatar: {
           classNames: {
             container: () =>
-              'relative h-32 w-32 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--tuwa-border-primary)]',
+              'relative h-32 w-32 shrink-0 overflow-hidden rounded-[var(--tuwa-rounded-full)] ring-1 ring-[var(--tuwa-border-primary)]',
           },
         },
         nameAndBalance: {
@@ -224,19 +226,23 @@ export const monoConnect: NovaConnectProviderCustomization = {
             },
           },
           connectorsBlock: {
+            // Outlined cards need room between them: Nova's cards share their lines of 1 px instead
             installed: {
               classNames: { title: () => cn(text.strong, text.accent, 'text-xs uppercase tracking-wider') },
               connectCard,
+              config: { layout: { mouseGap: 'gap-2' } },
             },
             popular: {
               classNames: { title: () => cn(text.strong, text.secondary, 'text-xs uppercase tracking-wider') },
               connectCard,
+              config: { layout: { mouseGap: 'gap-2' } },
             },
           },
         },
         networkSelections: {
           classNames: { title: () => cn(text.body, text.primary, 'mb-2') },
           connectCard,
+          config: { scroll: { gap: { mouse: 'gap-2' } } },
         },
         connecting: {
           classNames: {
@@ -249,11 +255,10 @@ export const monoConnect: NovaConnectProviderCustomization = {
             errorMessage: () => cn(text.body, text.error, 'text-center text-sm leading-relaxed'),
           },
         },
-        // The text and the strip behind the indicators take the surface of the modal
+        // The text takes the surface of the modal
         aboutWallets: {
           classNames: {
             contentSection: () => 'bg-[var(--tuwa-bg-secondary)]!',
-            navigation: () => '[&>div:last-child]:bg-[var(--tuwa-bg-secondary)]!',
           },
         },
         rememberWallet: {
@@ -270,7 +275,7 @@ export const monoConnect: NovaConnectProviderCustomization = {
               ),
             tooltip: () =>
               cn(
-                'pointer-events-none absolute right-0 bottom-full z-20 mb-2 w-max max-w-[240px] px-3 py-2 text-left text-xs leading-snug shadow-lg',
+                'pointer-events-none absolute right-0 bottom-full z-20 mb-2 w-max max-w-[240px] px-3 py-2 text-left text-xs leading-snug',
                 corners,
                 text.body,
                 'bg-[var(--tuwa-text-primary)] text-[var(--tuwa-bg-primary)]',
@@ -303,7 +308,9 @@ export const monoConnect: NovaConnectProviderCustomization = {
 
 // A transaction status on the connect button, in a ring of its color
 const statusIcon = (colors: string): StatusIconCustomization => ({
-  classNames: { container: () => cn('flex h-6 w-6 items-center justify-center rounded-full ring-1', colors) },
+  classNames: {
+    container: () => cn('flex h-6 w-6 items-center justify-center rounded-[var(--tuwa-rounded-full)] ring-1', colors),
+  },
 });
 
 /** The `customization` prop of `ConnectButton`, with its network selector and connected state. */
@@ -319,7 +326,7 @@ export const monoConnectButton: ConnectButtonCustomization = {
         'disabled:cursor-not-allowed disabled:opacity-50',
         buttonData.isConnected
           ? cn(surface.base, surface.border, text.primary, 'hover:border-[var(--tuwa-text-accent)]')
-          : 'bg-[var(--tuwa-text-accent)] text-[var(--tuwa-bg-primary)] hover:opacity-90',
+          : 'tuwa-solid bg-[var(--tuwa-text-accent)] text-[var(--tuwa-bg-primary)] hover:opacity-90',
       ),
   },
   childComponents: {
@@ -332,7 +339,7 @@ export const monoConnectButton: ConnectButtonCustomization = {
         walletAvatar: {
           classNames: {
             container: () =>
-              'relative z-2 h-6 w-6 shrink-0 overflow-hidden rounded-full ring-1 ring-[var(--tuwa-border-primary)]',
+              'relative z-2 h-6 w-6 shrink-0 overflow-hidden rounded-[var(--tuwa-rounded-full)] ring-1 ring-[var(--tuwa-border-primary)]',
           },
         },
         statusIcon: {
@@ -372,7 +379,10 @@ export const monoHistory: TransactionsHistoryCustomization<Transaction> = {
       'flex flex-col gap-2 p-3 transition-colors',
       'border-b border-[var(--tuwa-border-primary)] last:border-b-0 hover:bg-[var(--tuwa-bg-muted)]',
     ),
-    itemIconWrapper: cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-full', surface.border),
+    itemIconWrapper: cn(
+      'flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--tuwa-rounded-full)]',
+      surface.border,
+    ),
     itemTitle: cn(text.strong, text.primary, 'text-sm'),
     itemTimestamp: cn(text.body, text.secondary, 'mb-1 block text-xs'),
     itemDescription: cn(text.body, text.secondary, 'mt-1 text-xs'),

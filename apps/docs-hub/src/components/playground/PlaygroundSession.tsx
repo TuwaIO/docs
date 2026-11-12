@@ -99,8 +99,10 @@ export function PlaygroundSession({
       resetQuasar();
       clearEvents();
       scenarioStore.setState({ ...DEFAULT_SCENARIO });
-      resetTheme();
+      // The theme last: resetting the customization may name Nova's theme in place of one drawn for another kit, and
+      // the reset leaves the theme to the hub
       resetCustomization();
+      resetTheme();
     } else {
       logEvent('Quasar', 'New device: no local transactions. Connect the same wallet and sign in to load the history.');
     }
@@ -132,10 +134,13 @@ export function PlaygroundSession({
       <PlaygroundContext value={value}>
         <TransactionsPoolInitializer />
         {settings.quasar && <HistoryLoader />}
-        {/* One column: the controls above the stage, the inspector under it */}
-        <div className="flex flex-col gap-5">
+        {/* One column: the controls above the stage, the inspector under it. The controls and the inspector run from
+            line to line of the frame of the page; the stage is a window between them */}
+        <div className="flex flex-col">
           <ControlsPanel />
-          <Stage />
+          <div className="py-8 md:py-10">
+            <Stage />
+          </div>
           <Inspector />
         </div>
       </PlaygroundContext>

@@ -1,10 +1,18 @@
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 import {
+  BADGE_CORNERS,
   isThemeId,
   LENGTH_VARIABLES,
+  novaThemeFor,
+  OPTIONAL_COLOR_VARIABLES,
   pickStyle,
   pickTheme,
+  scanlineFor,
   THEME_GROUPS,
   THEME_PRESETS,
   THEME_VARIABLES,
@@ -26,15 +34,68 @@ function contrast(first: string, second: string): number {
 }
 
 describe('theme presets', () => {
+  // A color is `#rrggbb` (the editor has a color field for it). Two colors may be `transparent`, and a scanline is a
+  // color with an alpha: Nova's lines are 1.2 to 1.5 percent of ink
   it('set every Nova variable with a valid value', () => {
     for (const preset of Object.values(THEME_PRESETS)) {
       for (const variable of THEME_VARIABLES) {
         const value = preset.values[variable];
-        expect(value, `${preset.id} ${variable}`).toMatch(
-          LENGTH_VARIABLES.includes(variable) ? /^\d+px$/ : /^#[0-9a-f]{6}$/,
-        );
+        const valid = LENGTH_VARIABLES.includes(variable)
+          ? /^\d+px$/
+          : variable === '--tuwa-scanline'
+            ? /^(transparent|rgb\(\d+ \d+ \d+ \/ 0\.0\d+\))$/
+            : OPTIONAL_COLOR_VARIABLES.includes(variable)
+              ? /^(transparent|#[0-9a-f]{6})$/
+              : /^#[0-9a-f]{6}$/;
+        expect(value, `${preset.id} ${variable}`).toMatch(valid);
       }
     }
+  });
+
+  // The presets of Nova itself are the values of its stylesheet: what a reader copies from the editor is the theme of
+  // the package, in both themes
+  it("copies Nova's own light and dark themes from the stylesheet of @tuwaio/nova-core", () => {
+    const css = readFileSync(
+      createRequire(path.resolve(__dirname, '../../../../../packages/docs-ui/package.json')).resolve(
+        '@tuwaio/nova-core/dist/index.css',
+      ),
+      'utf8',
+    );
+    const blockOf = (selector: string) =>
+      Object.fromEntries(
+        [...css.matchAll(new RegExp(`(?:^|[}\\s])${selector.replace('.', '\\.')}\\s*\\{([^{}]*)\\}`, 'g'))].flatMap(
+          (rule) =>
+            [...(rule[1] as string).matchAll(/(--tuwa-[\w-]+)\s*:\s*([^;]+);/g)].map((d) => [d[1], d[2]?.trim()]),
+        ),
+      ) as Record<string, string>;
+    const root = blockOf(':root');
+    const dark = { ...root, ...blockOf('.dark') };
+    // Colors Nova writes as hex or as a plain value; its status colors are `oklch()` there and `#rrggbb` here
+    const literal = /^(#[0-9a-f]{6}|transparent|\d+px|rgb\([^)]+\))$/;
+    for (const [id, nova] of [
+      ['paper-light', root],
+      ['paper-dark', dark],
+    ] as const) {
+      const compared = THEME_VARIABLES.filter((variable) => literal.test(nova[variable] ?? ''));
+      expect(compared.length, id).toBeGreaterThan(20);
+      for (const variable of compared)
+        expect(THEME_PRESETS[id].values[variable], `${id} ${variable}`).toBe(nova[variable]);
+      // The primary button is the start of the button gradient, as in Nova
+      expect(THEME_PRESETS[id].values['--tuwa-button-primary-bg']).toBe(nova['--tuwa-button-gradient-from']);
+    }
+  });
+
+  it('names the theme of Nova for a light and for a dark page, and its scanline', () => {
+    expect(novaThemeFor(true)).toBe('paper-dark');
+    expect(novaThemeFor(false)).toBe('paper-light');
+    expect(scanlineFor(THEME_PRESETS.minimalist.values)).toBe(THEME_PRESETS['paper-light'].values['--tuwa-scanline']);
+    expect(scanlineFor(THEME_PRESETS.cyberpunk.values)).toBe(THEME_PRESETS['paper-dark'].values['--tuwa-scanline']);
+  });
+
+  it('draws badges square in paper and ink and in the line drawings, round in Minimalist', () => {
+    for (const id of ['paper-dark', 'paper-light', 'cyberpunk', 'isometric-light', 'isometric-dark'] as const)
+      expect(THEME_PRESETS[id].values['--tuwa-rounded-full'], id).toBe(BADGE_CORNERS.square);
+    expect(THEME_PRESETS.minimalist.values['--tuwa-rounded-full']).toBe(BADGE_CORNERS.round);
   });
 
   it('put every variable in exactly one editor group', () => {
@@ -60,7 +121,7 @@ describe('theme presets', () => {
       expect(THEME_PRESETS[id].values['--tuwa-rounded-corners']).toBe('0px');
       expect(THEME_PRESETS[id].pairedStyle).toBe('iso');
     }
-    expect(THEME_PRESETS['default-dark'].pairedStyle).toBeUndefined();
+    expect(THEME_PRESETS['paper-dark'].pairedStyle).toBeUndefined();
   });
 
   it('draws Isometric Light in one ink and Isometric Dark in dimmed gray lines', () => {
@@ -111,24 +172,24 @@ describe('themes and style kits', () => {
 
   it('drops the Isometric style for Nova when another theme is picked', () => {
     expect(pickTheme('cyberpunk', 'iso')).toEqual({ theme: 'cyberpunk', style: 'nova' });
-    expect(pickTheme('clean-light', 'iso')).toEqual({ theme: 'clean-light', style: 'nova' });
+    expect(pickTheme('paper-light', 'iso')).toEqual({ theme: 'paper-light', style: 'nova' });
   });
 
   it('keeps a style drawn for every theme', () => {
-    expect(pickTheme('clean-light', 'mono')).toEqual({ theme: 'clean-light', style: 'mono' });
-    expect(pickTheme('default-dark', 'nova')).toEqual({ theme: 'default-dark', style: 'nova' });
+    expect(pickTheme('paper-light', 'mono')).toEqual({ theme: 'paper-light', style: 'mono' });
+    expect(pickTheme('paper-dark', 'nova')).toEqual({ theme: 'paper-dark', style: 'nova' });
   });
 
   it('picks an Isometric theme with the Isometric style, dark after a dark theme', () => {
-    expect(pickStyle('iso', 'default-dark')).toEqual({ theme: 'isometric-dark', style: 'iso' });
+    expect(pickStyle('iso', 'paper-dark')).toEqual({ theme: 'isometric-dark', style: 'iso' });
     expect(pickStyle('iso', 'cyberpunk')).toEqual({ theme: 'isometric-dark', style: 'iso' });
-    expect(pickStyle('iso', 'clean-light')).toEqual({ theme: 'isometric-light', style: 'iso' });
+    expect(pickStyle('iso', 'paper-light')).toEqual({ theme: 'isometric-light', style: 'iso' });
     expect(pickStyle('iso', 'isometric-dark')).toEqual({ theme: 'isometric-dark', style: 'iso' });
   });
 
   it("leaves an Isometric theme for Nova's own when another style is picked", () => {
-    expect(pickStyle('nova', 'isometric-dark')).toEqual({ theme: 'default-dark', style: 'nova' });
-    expect(pickStyle('mono', 'isometric-light')).toEqual({ theme: 'clean-light', style: 'mono' });
+    expect(pickStyle('nova', 'isometric-dark')).toEqual({ theme: 'paper-dark', style: 'nova' });
+    expect(pickStyle('mono', 'isometric-light')).toEqual({ theme: 'paper-light', style: 'mono' });
     expect(pickStyle('mono', 'cyberpunk')).toEqual({ theme: 'cyberpunk', style: 'mono' });
   });
 });

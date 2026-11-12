@@ -16,20 +16,29 @@ export const en: DocsHubLabels = {
     theme: 'Theme',
     language: 'Language',
     selectLanguage: docsLabels.en.selectLanguage,
-    toggleTheme: 'Toggle theme',
+    toggleTheme: docsLabels.en.toggleTheme,
     openMenu: 'Open navigation menu',
     closeMenu: 'Close navigation menu',
     mobileNavAria: 'Documentation sections',
+    mainNavAria: 'Main navigation',
+    homeAria: 'TUWA Docs, main page',
+    skipToContent: 'Skip to content',
   },
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.en.footer,
   common: {
+    flight: {
+      ariaLabel: 'Flight plan of this page',
+      overview: 'Overview',
+      progressLabel: 'Flight progress',
+    },
     packageManager: 'Package manager',
     copy: 'Copy',
     copied: 'Copied',
     copyCommand: 'Copy the command',
     copyCode: 'Copy the code',
     close: 'Close',
+    aboutLabel: 'About {label}',
     yes: 'Yes',
     partial: 'Partial',
     no: 'No',
@@ -47,6 +56,33 @@ export const en: DocsHubLabels = {
       explorePackages: 'Explore Packages',
       tryPlayground: 'Try in the Playground',
     },
+    plate: {
+      ariaLabel: 'The TUWA projects',
+      packagesOnNpm: {
+        one: 'Package on npm',
+        few: 'Packages on npm',
+        many: 'Packages on npm',
+        other: 'Packages on npm',
+      },
+      products: { one: '{n} product', few: '{n} products', many: '{n} products', other: '{n} products' },
+      stages: { one: '{n} stage', few: '{n} stages', many: '{n} stages', other: '{n} stages' },
+    },
+    board: {
+      section: 'Ecosystem',
+      stage: 'Stage',
+      projectsHeading: 'Projects and what each builds on',
+      buildsOn: 'Builds on',
+      optional: 'Optional',
+      or: 'OR',
+      cloudOrSelfHosted: 'Cloud or self-hosted',
+      selfHosted: 'Self-hosted',
+      packages: { one: '{n} package', few: '{n} packages', many: '{n} packages', other: '{n} packages' },
+      reExports: 'Re-exports',
+      relationsLabel: 'What each project builds on',
+      relation: '{project} builds on {base}',
+      relationOptional: '{project} works with {base}; each also works without the other',
+      relationOr: '{first} or {second}: the same backend, self-hosted or in the cloud',
+    },
     timeline: {
       titlePrefix: 'Ecosystem',
       titleHighlight: 'Architecture',
@@ -55,22 +91,27 @@ export const en: DocsHubLabels = {
       stages: {
         1: {
           label: 'Stage 1 — Core Auth & Primitives',
+          title: 'Core Auth & Primitives',
           subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
         },
         2: {
           label: 'Stage 2 — State & Connection',
+          title: 'State & Connection',
           subtitle: 'Transaction tracking & wallet connectivity',
         },
         3: {
           label: 'Stage 3 — Backend & Sync',
+          title: 'Backend & Sync',
           subtitle: 'Managed cloud or self-hosted Quasar engine',
         },
         4: {
           label: 'Stage 4 — User Interface',
+          title: 'User Interface',
           subtitle: 'React components for Satellite & Pulsar',
         },
         5: {
           label: 'Stage 5 — SDK Integration Layer',
+          title: 'SDK Integration Layer',
           subtitle: 'Core SDK & network-specific adapters',
         },
       },
@@ -101,39 +142,25 @@ export const en: DocsHubLabels = {
         tagline: 'Unified client SDK & EVM/Solana network adapters',
       },
     },
-    docCard: {
-      cloudAndSelfHosted: 'Cloud & self-hosted',
-      onePackage: '1 package',
-      packagesCount: '{count} packages',
-      readDocs: 'Read Docs',
-      tryLiveAdmin: 'Try Live Admin',
-      showPackages: 'Show packages of {title}',
-      hidePackages: 'Hide packages of {title}',
+    ledger: {
+      section: 'Packages',
+      project: 'Project',
+      layer: 'Layer',
+      package: 'Package',
+      version: 'Version',
+      gzip: 'Gzip',
+      docs: 'Docs',
+      deprecated: 'Deprecated',
     },
-    packagePreview: {
-      installLabel: 'Install {name}',
-      copyInstallTitle: 'Copy install command for {name}',
-      peerDepsTitle: 'Details and peer dependencies of {name}',
-      deprecated: 'deprecated',
-      standalone: 'Standalone',
-      peersCount: '+{count} peer',
-      peersCountPlural: '+{count} peers',
-      lighterInstallPrefix: 'Only need {scope}? Install',
-      lighterInstallConjunction: 'or',
+    sizeNote: {
+      title: 'Size · gzip',
     },
     packageDialog: {
       deprecatedPrefix: 'Deprecated:',
       install: 'Install',
       copyInstallTitle: 'Copy the install command',
-      peersHint:
-        'Required peer dependencies are included. Packages already in your project will be updated only if needed.',
       lighterEntryHeading: 'Only need one part?',
       guidesHeading: 'Guides',
-      dependenciesHeading: 'Dependencies',
-      includedWith: 'Included with',
-      peerDependenciesHeading: 'Peer dependencies',
-      noRuntimeDeps: 'No runtime or peer dependencies — runs anywhere TypeScript runs.',
-      optional: 'optional',
       viewOnNpm: 'View on npm',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -188,63 +215,30 @@ export const en: DocsHubLabels = {
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': 'Use @tuwaio/siwx-react and @tuwaio/siwx-server instead.',
       },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk bundles every TUWA project for React, including Nova UI Kit. If you only need wallet connection, transaction tracking or sign-in without the rest, install its packages directly:',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk pairs with @tuwaio/sdk. If you are not using @tuwaio/sdk, install the EVM package of the layer you need directly:',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk pairs with @tuwaio/sdk. If you are not using @tuwaio/sdk, install the Solana package of the layer you need directly:',
-      },
     },
     quickStart: {
-      titlePrefix: 'Start Building in',
-      titleHighlight: 'Minutes',
-      subtitle: 'Pick the packages that fit your app, build a complete React dApp, or run Quasar on your own server.',
-      cards: {
-        choosePackages: {
-          title: 'Choose Your Packages',
-          description:
-            'Decide between @tuwaio/sdk and individual packages for wallet connection, SIWX sign-in, transaction tracking and Nova UI.',
-          cta: 'Pick Your Stack',
-        },
-        fullStackReact: {
-          title: 'Full-Stack React App',
-          description:
-            'Connect wallets, sign in with SIWX, track transactions with Pulsar and sync to Quasar in one Next.js app for EVM or Solana.',
-          cta: 'Build the App',
-        },
-        selfHostQuasar: {
-          title: 'Self-Host Quasar',
-          description:
-            'Run Quasar Community Edition (Apache-2.0) on your own server with Docker Compose: PostgreSQL, Redis, tracking workers and webhooks.',
-          cta: 'Deploy a Node',
-        },
-      },
-      allGuidesPrefix: 'Looking for SIWX sign-in, transaction tracking or Quasar sync on its own?',
-      browseAllGuides: 'Browse all guides',
-      aiBanner: {
-        badge: 'AI Assistants',
-        title: 'Building with Claude Code, Cursor or Windsurf?',
-        description:
-          'Give your coding agent TUWA_AGENTS.md: one file with the imports, store wiring, SIWX routes and Quasar sync rules across every TUWA package.',
-        copyUrl: 'Copy URL',
-        copied: 'Copied',
-        copyTitle: 'Copy the raw TUWA_AGENTS.md URL',
-        viewOnGithub: 'View on GitHub',
-      },
+      section: 'Quick start',
+      title: 'Start Building in Cosmos Playground',
+      subtitle:
+        'One command creates a complete Next.js or Vite app for EVM, Solana or both, with wallet connection and transaction tracking already wired.',
+      steps: { one: '{n} step', few: '{n} steps', many: '{n} steps', other: '{n} steps' },
     },
     compactConfigurator: {
-      badge: 'Interactive',
       title: 'Configure Your Stack',
       description: 'Pick your framework, chains and features to get the install command and the setup files.',
       openWithFiles: 'Open with all {count} setup files',
       install: 'Install',
-      filesGenerated: 'Files generated for this stack ({count})',
-      viewCode: 'View code',
     },
   },
   comparisons: {
+    sections: {
+      radar: 'Radar',
+      criteria: 'Criteria',
+      alternatives: 'Alternatives',
+      bundle: 'Bundle size',
+      method: 'Method',
+      next: 'Start',
+    },
     badge: 'Interactive Comparison',
     titlePrefix: 'TUWA and the',
     titleHighlight: 'Alternatives',
@@ -668,6 +662,7 @@ export const en: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} stack', few: '{n} stacks', many: '{n} stacks', other: '{n} stacks' },
     badge: 'Interactive',
     titlePrefix: 'Stack',
     titleHighlight: 'Configurator',
@@ -883,6 +878,7 @@ export const en: DocsHubLabels = {
         textsLayer: 'Texts',
         behaviorLayer: 'Behavior',
         languageLabel: 'Language',
+        cardGapLabel: 'Gap between the wallet and network cards',
         connectTextLabel: 'Connect button text',
         toastPositionLabel: 'Toast position',
         resetNova: 'Reset to Nova as it ships',
@@ -890,6 +886,11 @@ export const en: DocsHubLabels = {
         cssCopied: 'CSS copied',
         resetEdits: 'Reset edits',
         editedSuffix: 'edited',
+        themeNone: 'None',
+        themeSquare: 'Square',
+        themeRound: 'Round',
+        themeOn: 'On',
+        themeOff: 'Off',
         themeGroups: {
           Surfaces: 'Surfaces',
           Text: 'Text',
@@ -898,13 +899,13 @@ export const en: DocsHubLabels = {
           Shape: 'Shape',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'The dark theme Nova UI Kit ships with.',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description: 'The dark theme Nova UI Kit ships with: ink paper, square corners, the cyan of the TUWA logo.',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'The light theme Nova UI Kit ships with.',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'The light theme Nova UI Kit ships with: warm paper, ink, square corners, the TUWA orange.',
           },
           cyberpunk: {
             label: 'Cyberpunk',
@@ -1174,6 +1175,7 @@ export const en: DocsHubLabels = {
         'The real TUWA stores and Nova components run in your browser on simulated wallets and a simulated chain: nothing is signed or sent.',
       loadingAria: 'Loading the Playground',
       connectButtonGroup: 'Connect button',
+      iconsGroup: 'Icons',
       minimal: 'Minimal',
       full: 'Full',
       nextTxGroup: 'Next transaction',
@@ -1220,6 +1222,8 @@ export const en: DocsHubLabels = {
           'The --tuwa-* variables of Nova on the stage. Customize › Theme edits each one and gives the CSS to paste.',
         style:
           'Class names for every Nova part (customization.classNames): Nova as it ships, TUWA Mono, or Isometric, drawn for its own themes.',
+        icons:
+          'The icon set Nova UI Kit draws (the icons prop of its providers): its own pixel icons, or Heroicons, the set it drew before.',
         connectButton:
           'Full: the balance and the network selector next to the button. Minimal: the button alone (withBalance and withChain off).',
         language:

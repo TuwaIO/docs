@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 
 import { useI18n } from '@/i18n';
 import {
+  CARD_GAPS,
+  cardGapOf,
   CONNECT_LABEL_MAX_LENGTH,
   defaultCustomizationFor,
   type NovaCustomization,
@@ -40,17 +42,14 @@ const BEHAVIOR: { flag: Flag; label: string; api: string }[] = [
 
 function Layer({ title, api, open, children }: { title: string; api: string; open?: boolean; children: ReactNode }) {
   return (
-    <details
-      open={open}
-      className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06]"
-    >
+    <details open={open} className="border border-[var(--tuwa-border-primary)]">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 [&::-webkit-details-marker]:hidden">
-        <span className="text-sm font-semibold text-[var(--tuwa-text-primary)]">{title}</span>
-        <code className="truncate font-mono text-[11px] text-[var(--tuwa-text-tertiary)]">{api}</code>
+        <span className="font-mono text-[11px] leading-[1.35] font-bold tracking-[0.12em] text-[var(--tuwa-text-primary)] uppercase">
+          {title}
+        </span>
+        <code className="truncate font-mono text-[11px] text-[var(--tuwa-text-secondary)]">{api}</code>
       </summary>
-      <div className="flex flex-col gap-4 border-t border-[var(--tuwa-border-primary)]/30 p-3 dark:border-white/[0.06]">
-        {children}
-      </div>
+      <div className="flex flex-col gap-4 border-t border-[var(--tuwa-border-primary)] p-3">{children}</div>
     </details>
   );
 }
@@ -73,7 +72,7 @@ function Toggles({ items }: { items: { flag: Flag; label: string; api: string }[
             <span className="text-[var(--tuwa-text-primary)]">
               {t.playground.inspector.customize.flags[flag] ?? label}
             </span>
-            <code className="font-mono text-[11px] text-[var(--tuwa-text-tertiary)]">{api}</code>
+            <code className="font-mono text-[11px] text-[var(--tuwa-text-secondary)]">{api}</code>
           </span>
         </label>
       ))}
@@ -95,7 +94,7 @@ export function CustomizeTab() {
     <div className="flex flex-col gap-3">
       <p className="text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">{cust.intro}</p>
       {settings.ui === 'headless' && (
-        <p className="rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-pending-bg)] px-3 py-2 text-xs text-[var(--tuwa-pending-text)]">
+        <p className="relative m-0 border border-[var(--tuwa-border-primary)] py-2 pr-3 pl-4 text-xs text-[var(--tuwa-text-primary)] before:absolute before:-inset-y-px before:-left-px before:w-[3px] before:bg-[var(--tuwa-docs-lit)]">
           {cust.headlessNotice}
         </p>
       )}
@@ -113,10 +112,10 @@ export function CustomizeTab() {
               aria-pressed={customization.style === kit}
               onClick={() => changeCustomization({ style: kit })}
               className={cn(
-                'flex cursor-pointer flex-col gap-1 rounded-[var(--tuwa-rounded-corners)] border p-3 text-left transition-colors',
+                'flex cursor-pointer flex-col gap-1 border p-3 text-left transition-colors',
                 customization.style === kit
-                  ? 'border-[var(--tuwa-text-accent)]/60 bg-[var(--tuwa-text-accent)]/10'
-                  : 'border-[var(--tuwa-border-primary)]/50 hover:border-[var(--tuwa-border-primary)] dark:border-white/10',
+                  ? 'border-[var(--tuwa-text-primary)] bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]'
+                  : 'border-[var(--tuwa-border-primary)] hover:border-[var(--tuwa-border-strong)]',
                 kit === 'mono' && 'font-mono',
               )}
             >
@@ -128,6 +127,28 @@ export function CustomizeTab() {
               </span>
             </button>
           ))}
+        </div>
+        {/* The gap between the cards of the connect modal, as the corners of the theme: a slider in steps of 4 px */}
+        <div className="grid grid-cols-1 gap-1.5 text-xs text-[var(--tuwa-text-secondary)]">
+          <label htmlFor="nova-card-gap">
+            {cust.cardGapLabel} <code className="font-mono text-[11px]">config.layout.mouseGap</code>
+          </label>
+          <div className="flex min-w-0 max-w-sm items-center gap-3">
+            <input
+              id="nova-card-gap"
+              type="range"
+              min={CARD_GAPS[0]}
+              max={CARD_GAPS.at(-1)}
+              step={4}
+              value={cardGapOf(customization)}
+              onChange={(event) => {
+                const gap = CARD_GAPS.find((value) => value === Number(event.target.value));
+                if (gap !== undefined) changeCustomization({ cardGap: gap });
+              }}
+              className="h-5 min-w-0 flex-1 cursor-pointer accent-[var(--tuwa-text-accent)]"
+            />
+            <span className="w-10 shrink-0 text-right font-mono">{cardGapOf(customization)}px</span>
+          </div>
         </div>
       </Layer>
 
@@ -175,7 +196,7 @@ export function CustomizeTab() {
                   : 'Connect Wallet'
             }
             onChange={(event) => changeCustomization({ connectLabel: event.target.value })}
-            className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 bg-transparent px-3 py-2 text-sm text-[var(--tuwa-text-primary)] outline-none focus:border-[var(--tuwa-text-accent)] dark:border-white/10"
+            className="border border-[var(--tuwa-border-strong)] bg-transparent px-3 py-2 text-sm text-[var(--tuwa-text-primary)] outline-none focus:border-[var(--tuwa-text-accent)]"
           />
         </label>
       </Layer>
@@ -192,7 +213,7 @@ export function CustomizeTab() {
               const position = TOAST_POSITIONS.find((value) => value === event.target.value);
               if (position) changeCustomization({ toastPosition: position });
             }}
-            className="cursor-pointer rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 bg-[var(--tuwa-bg-primary)] px-3 py-2 text-sm text-[var(--tuwa-text-primary)] dark:border-white/10"
+            className="cursor-pointer border border-[var(--tuwa-border-strong)] bg-[var(--tuwa-docs-raised)] px-3 py-2 text-sm text-[var(--tuwa-text-primary)]"
           >
             {TOAST_POSITIONS.map((position) => (
               <option key={position} value={position}>

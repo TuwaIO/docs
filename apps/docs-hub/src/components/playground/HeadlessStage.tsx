@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon } from '@tuwaio/sdk/nova-icons/24/outline';
 import { formatConnectorName, OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { TransactionStatus } from '@tuwaio/sdk/pulsar';
 import { useSatelliteConnectStore } from '@tuwaio/sdk/satellite';
@@ -54,7 +54,9 @@ function Wallets() {
             }
             className={`${buttonClass} inline-flex items-center gap-2`}
           >
-            {connector.icon && <img src={connector.icon} alt="" className="h-5 w-5 rounded" />}
+            {connector.icon && (
+              <img src={connector.icon} alt="" className="h-5 w-5 rounded-[var(--tuwa-rounded-corners)]" />
+            )}
             {connector.name}
           </button>
         )),
@@ -202,7 +204,11 @@ function Transactions() {
                 {tx.pending && tx.confirmations ? (
                   <span className="text-[var(--tuwa-text-secondary)]">{tx.confirmations} conf.</span>
                 ) : null}
-                <span className={`rounded-full px-2 py-0.5 font-semibold ${STATUS_CLASS[status]}`}>{status}</span>
+                <span
+                  className={`rounded-[var(--tuwa-rounded-full)] px-2 py-0.5 font-semibold ${STATUS_CLASS[status]}`}
+                >
+                  {status}
+                </span>
               </span>
             </li>
           );

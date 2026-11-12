@@ -4,6 +4,7 @@ import type { TuwaLocale } from '@tuwaio/docs-ui/locale';
 import type { AxisId, SegmentId } from '../lib/comparisons';
 import type { StyleKit } from '../lib/playground/customization';
 import type { ThemeId } from '../lib/playground/themes';
+import type { PluralLabel } from '../lib/plural';
 
 export type SimulatedOutcomeKey = 'succeed' | 'fail' | 'replace' | 'cancel' | 'reject';
 
@@ -224,6 +225,12 @@ export interface DocsHubLabels {
     openMenu: string;
     closeMenu: string;
     mobileNavAria: string;
+    /** Accessible name of the links of the header */
+    mainNavAria: string;
+    /** Accessible name of the logo link to the main page */
+    homeAria: string;
+    /** The link past the header to the content, the first stop of the keyboard */
+    skipToContent: string;
   };
   footer: {
     description: string;
@@ -234,12 +241,22 @@ export interface DocsHubLabels {
     policyTitles: Record<PolicySlug, string>;
   };
   common: {
+    /** The flight plan of a page: the craft that flies with the scroll, past the parts of the page */
+    flight: {
+      /** The name of the navigation of the rail, for assistive technology */
+      ariaLabel: string;
+      /** The name of the first waypoint, the top of the page */
+      overview: string;
+      /** The name of the progress of the flight, which ends at the last waypoint, for assistive technology */
+      progressLabel: string;
+    };
     packageManager: string;
     copy: string;
     copied: string;
     copyCommand: string;
     copyCode: string;
     close: string;
+    aboutLabel: string;
     yes: string;
     partial: string;
     no: string;
@@ -257,82 +274,101 @@ export interface DocsHubLabels {
       explorePackages: string;
       tryPlayground: string;
     };
+    /** The plate of the projects in the hero: their links around the count of the packages */
+    plate: {
+      /** Accessible name of the plate */
+      ariaLabel: string;
+      /** Under the count of the packages, in the form of the count */
+      packagesOnNpm: PluralLabel;
+      /** The number of products (`{n}`) */
+      products: PluralLabel;
+      /** The number of stages (`{n}`) */
+      stages: PluralLabel;
+    };
+    /** The board of the architecture: what builds on what */
+    board: {
+      /** The name of the section in its bar: "Ecosystem" */
+      section: string;
+      /** Head of the column of the stages */
+      stage: string;
+      /** Head of the column of the projects */
+      projectsHeading: string;
+      /** The legend of a solid trace: a project the other cannot work without */
+      buildsOn: string;
+      /** The legend of a dotted trace: a link that is optional */
+      optional: string;
+      /** The tag between two ways to run the same thing */
+      or: string;
+      /** The legend of the tag */
+      cloudOrSelfHosted: string;
+      /** Instead of the packages of a project that has none on npm */
+      selfHosted: string;
+      /** The number of packages of a project (`{n}`) */
+      packages: PluralLabel;
+      /** Before the marks of the projects the SDK re-exports */
+      reExports: string;
+      /** Heading of the list that reads the traces out to assistive technology */
+      relationsLabel: string;
+      /** A trace read out: `{project}` builds on `{base}` */
+      relation: string;
+      /** A dotted trace read out: `{project}` works with `{base}`, each without the other too */
+      relationOptional: string;
+      /** The tag read out: `{first}` or `{second}` */
+      relationOr: string;
+    };
     timeline: {
       titlePrefix: string;
       titleHighlight: string;
       subtitle: string;
-      stages: Record<number, { label: string; subtitle: string }>;
+      /** Each stage: its label ("Stage 1 — title"), its title alone and its subtitle */
+      stages: Record<number, { label: string; title: string; subtitle: string }>;
     };
     entries: Record<string, { tagline: string; packagesBadgeLabel?: string }>;
-    docCard: {
-      cloudAndSelfHosted: string;
-      onePackage: string;
-      packagesCount: string;
-      readDocs: string;
-      tryLiveAdmin: string;
-      showPackages: string;
-      hidePackages: string;
-    };
-    packagePreview: {
-      installLabel: string;
-      copyInstallTitle: string;
-      peerDepsTitle: string;
+    /** The ledgers of the stages: a project and its packages, row by row */
+    ledger: {
+      /** The name of the section in its bar */
+      section: string;
+      /** The heads of the columns (the licence takes `ui.packageBadges.license`) */
+      project: string;
+      layer: string;
+      package: string;
+      version: string;
+      gzip: string;
+      /** The button to the documentation of a project, beside GitHub */
+      docs: string;
+      /** The marker of a deprecated package, in caps */
       deprecated: string;
-      standalone: string;
-      peersCount: string;
-      peersCountPlural: string;
-      lighterInstallPrefix: string;
-      lighterInstallConjunction: string;
+    };
+    /** The note on the sizes under the last ledger */
+    sizeNote: {
+      title: string;
     };
     packageDialog: {
       deprecatedPrefix: string;
       install: string;
       copyInstallTitle: string;
-      peersHint: string;
       lighterEntryHeading: string;
       guidesHeading: string;
-      dependenciesHeading: string;
-      includedWith: string;
-      peerDependenciesHeading: string;
-      noRuntimeDeps: string;
-      optional: string;
       viewOnNpm: string;
       packageDescriptions: Record<string, string>;
       packageDeprecations: Record<string, string>;
-      lighterDescriptions: Record<string, string>;
     };
     quickStart: {
-      titlePrefix: string;
-      titleHighlight: string;
+      section: string;
+      title: string;
       subtitle: string;
-      cards: {
-        choosePackages: { title: string; description: string; cta: string };
-        fullStackReact: { title: string; description: string; cta: string };
-        selfHostQuasar: { title: string; description: string; cta: string };
-      };
-      allGuidesPrefix: string;
-      browseAllGuides: string;
-      aiBanner: {
-        badge: string;
-        title: string;
-        description: string;
-        copyUrl: string;
-        copied: string;
-        copyTitle: string;
-        viewOnGithub: string;
-      };
+      steps: PluralLabel;
     };
     compactConfigurator: {
-      badge: string;
       title: string;
       description: string;
       openWithFiles: string;
       install: string;
-      filesGenerated: string;
-      viewCode: string;
     };
   };
   comparisons: {
+    /** The short names of the sections of the page, for their bars (`01 / Radar`); `next` names its end, for the flight plan */
+    sections: { radar: string; criteria: string; alternatives: string; bundle: string; method: string; next: string };
     badge: string;
     titlePrefix: string;
     titleHighlight: string;
@@ -387,6 +423,8 @@ export interface DocsHubLabels {
     products: Record<string, ComparisonProductTranslation>;
   };
   configurator: {
+    /** How many stacks the configurator can generate, in its kicker; `{n}` is the count */
+    stacks: PluralLabel;
     badge: string;
     titlePrefix: string;
     titleHighlight: string;
@@ -529,6 +567,8 @@ export interface DocsHubLabels {
         textsLayer: string;
         behaviorLayer: string;
         languageLabel: string;
+        /** The label of the slider of the gap between the cards of the connect modal */
+        cardGapLabel: string;
         connectTextLabel: string;
         toastPositionLabel: string;
         resetNova: string;
@@ -536,6 +576,14 @@ export interface DocsHubLabels {
         cssCopied: string;
         resetEdits: string;
         editedSuffix: string;
+        /** A colour the theme leaves out (`transparent`) */
+        themeNone: string;
+        /** The two shapes of badges and avatars (`--tuwa-rounded-full`) */
+        themeSquare: string;
+        themeRound: string;
+        /** The scanlines, on and off */
+        themeOn: string;
+        themeOff: string;
         themeGroups: Record<string, string>;
         themePresets: Record<ThemeId, { label: string; description: string }>;
         styleKits: Record<StyleKit, { label: string; description: string }>;
@@ -689,6 +737,8 @@ export interface DocsHubLabels {
       subnote: string;
       loadingAria: string;
       connectButtonGroup: string;
+      /** The legend of the icon set switch (Nova pixel icons or Heroicons) */
+      iconsGroup: string;
       minimal: string;
       full: string;
       nextTxGroup: string;
@@ -718,6 +768,7 @@ export interface DocsHubLabels {
         features: string;
         theme: string;
         style: string;
+        icons: string;
         connectButton: string;
         language: string;
         outcome: string;

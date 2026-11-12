@@ -1,7 +1,15 @@
 import { OrbitAdapter } from '@tuwaio/sdk/orbit';
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_SETTINGS, familiesOf, parseSettings, settingsQuery, stackOptionsFor, stageKey } from './settings';
+import {
+  DEFAULT_SETTINGS,
+  familiesOf,
+  hasTheme,
+  parseSettings,
+  settingsQuery,
+  stackOptionsFor,
+  stageKey,
+} from './settings';
 
 describe('Playground settings', () => {
   it('starts with the full stack', () => {
@@ -28,7 +36,30 @@ describe('Playground settings', () => {
   });
 
   it('ignores an unknown theme', () => {
-    expect(parseSettings(new URLSearchParams('theme=__proto__')).theme).toBe('default-dark');
+    expect(parseSettings(new URLSearchParams('theme=__proto__')).theme).toBe('paper-dark');
+  });
+
+  // The presets "Default Dark" and "Clean Light" became Nova's paper themes: a link from before opens the stage in
+  // the theme it would have without a theme
+  it('opens a link that names a preset from before in the theme of the hub', () => {
+    for (const old of ['default-dark', 'clean-light']) {
+      expect(hasTheme(new URLSearchParams(`theme=${old}`))).toBe(false);
+      expect(parseSettings(new URLSearchParams(`theme=${old}`), 'paper-light').theme).toBe('paper-light');
+    }
+  });
+
+  // Until the reader picks a theme, the stage wears Nova's theme for the theme of the hub
+  it('follows the theme of the hub while the query names no theme', () => {
+    expect(parseSettings(new URLSearchParams(''), 'paper-light').theme).toBe('paper-light');
+    expect(parseSettings(new URLSearchParams('chains=evm'), 'paper-light').theme).toBe('paper-light');
+    expect(parseSettings(new URLSearchParams('theme=minimalist'), 'paper-light').theme).toBe('minimalist');
+    expect(hasTheme(new URLSearchParams('theme=minimalist'))).toBe(true);
+    expect(hasTheme(new URLSearchParams('chains=evm'))).toBe(false);
+  });
+
+  it('names the theme in the query only when asked to', () => {
+    expect(new URLSearchParams(settingsQuery(DEFAULT_SETTINGS)).get('theme')).toBe('paper-dark');
+    expect(new URLSearchParams(settingsQuery(DEFAULT_SETTINGS, false)).has('theme')).toBe(false);
   });
 
   it('maps to Stack Configurator options', () => {

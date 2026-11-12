@@ -19,7 +19,7 @@ const themeScriptProps = typeof window === 'undefined' ? undefined : { type: 'te
  */
 export function Providers({ children, urlLocale }: { children: ReactNode; urlLocale?: TuwaLocale }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem scriptProps={themeScriptProps}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem scriptProps={themeScriptProps}>
       <I18nProvider initialLocale={urlLocale}>{children}</I18nProvider>
     </ThemeProvider>
   );

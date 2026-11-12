@@ -3,6 +3,7 @@ import { Navbar as NextraNavbar } from 'nextra-theme-docs';
 import { ReactNode } from 'react';
 
 import { baseNavLinks, type SocialLink } from '../utils';
+import { NavbarScrollArrows } from './NavbarScrollArrows';
 
 /**
  * Props of {@link Navbar} and {@link Footer}.
@@ -24,8 +25,10 @@ export interface NavProps {
  *
  * The row stays on one line of the 64px Nextra header from 320px wide: the links are hidden below 640px and show only
  * their icons below 1024px, so the Nextra search, the top-level pages and `children` such as {@link LocaleSwitcher}
- * keep their room. The logo never shrinks; the top-level pages of Nextra scroll instead. Below 768px the stylesheet
- * (`dist/index.css`) makes the header opaque in the theme background, so the page never shows through it.
+ * keep their room. The logo never shrinks; the top-level pages of Nextra scroll instead, with an arrow over the end
+ * of their row that has more (`NavbarScrollArrows`). The stylesheet
+ * (`dist/index.css`) makes the header opaque paper with faint scanlines and a line of 1px below it at every width, and
+ * sets the links in mono caps, so the page never shows through it.
  *
  * @param props - See {@link NavProps}.
  * @returns The navbar.
@@ -42,7 +45,8 @@ export function Navbar({ links, logo, logoLink, children }: NavProps) {
             rel="noopener noreferrer"
             title={title}
             className={cn(
-              'tuwadocs:hidden tuwadocs:sm:flex tuwadocs:items-center tuwadocs:gap-1 tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:text-sm tuwadocs:font-medium tuwadocs:whitespace-nowrap tuwadocs:transition-colors tuwadocs:text-[var(--tuwa-text-primary)]',
+              // Mono caps, as the labels of paper and ink: secondary ink, full ink under the pointer
+              'tuwadocs:hidden tuwadocs:sm:flex tuwadocs:items-center tuwadocs:gap-1.5 tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:font-mono tuwadocs:text-xs tuwadocs:font-medium tuwadocs:uppercase tuwadocs:tracking-[0.12em] tuwadocs:whitespace-nowrap tuwadocs:transition-colors tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:text-[var(--tuwa-text-primary)]',
               className,
             )}
           >
@@ -51,6 +55,7 @@ export function Navbar({ links, logo, logoLink, children }: NavProps) {
           </a>
         ))}
         {children}
+        <NavbarScrollArrows />
       </div>
     </NextraNavbar>
   );
