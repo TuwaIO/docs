@@ -3,6 +3,8 @@
 import { cn } from '@tuwaio/nova-core/utils';
 import { type CSSProperties, useState, useSyncExternalStore } from 'react';
 
+import { dropAnchor } from '../anchor';
+
 const subscribeNothing = () => () => {};
 
 /**
@@ -59,7 +61,8 @@ const COUNT = Math.max(MOON_PATH.length, SUN_PATH.length);
  * once and a satellite or a planet passes slowly on its orbit, then all is still (it sits in a header); a glow along an
  * edge of the knob, the accent under it in the dark and warm amber over it in the light. Flat, in the TUWA style: the
  * borders, backgrounds and radius of the theme. Only CSS (`site.css`), nothing to install; still at once for reduced
- * motion. It stores no theme itself: pass the resolved theme and a toggle. While the page hydrates it renders an
+ * motion. It stores no theme itself: pass the resolved theme and a toggle. A click removes the anchor (`#…`) from the
+ * address, keeping the page where it is (it replaces the current entry of the browser history). While the page hydrates it renders an
  * invisible placeholder of the same size, so the server output does not depend on the theme; rendered on the client
  * (as after a change of language) it shows at once.
  *
@@ -92,6 +95,8 @@ export function ThemeSwitcher({ theme, onToggle, ariaLabel = 'Toggle theme' }: T
       aria-label={ariaLabel}
       onClick={() => {
         setMoved(true);
+        // A change of the theme leaves the page where it is, without the anchor a link of the page opened
+        dropAnchor();
         onToggle();
       }}
       className={cn(

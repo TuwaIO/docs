@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { addressWithoutAnchor, dropAnchor } from './anchor';
 import {
   DEFAULT_LOCALE,
   localeOfPath,
@@ -73,8 +74,9 @@ export interface LocaleRoutingOptions {
  * and a reader whose language is not English, who opens the English URL of such a page, is taken to the URL of that language.
  * Search engines have no saved language and a browser in English, so they stay on the URL they asked for.
  *
- * Side effects: navigates, with a short crossfade of the page where the browser has view transitions; the provider
- * saves the choice.
+ * Side effects: navigates, with a short crossfade of the page where the browser has view transitions, to the page in the
+ * picked language without the anchor of the current address (a page without language URLs drops the anchor and scrolls
+ * to its top); the provider saves the choice.
  *
  * @param options - See {@link LocaleRoutingOptions}.
  * @returns The function to call with the language the reader picks.
@@ -98,17 +100,21 @@ export function useLocaleRouting({ locale, setLocale, resolved, hasLanguageUrl }
     router.replace(`${localizedPath(base, locale)}${window.location.search}${window.location.hash}`);
   }, [base, hasLanguageUrl, locale, onLanguageUrl, resolved, router]);
 
+  // A language the reader picks opens the page anew, from its top: the anchor a link of the page opened goes (it took
+  // the page in the new language back to that part), the query stays (a shared link of the configurator keeps its stack
+  // in it). The redirect above keeps the anchor: there the reader came by a link to that part
   return (target: string) => {
     const picked = normalizeLocale(target);
     if (!picked) return;
     if (!hasLanguageUrl(base)) {
+      dropAnchor();
       setLocale(picked);
+      window.scrollTo(0, 0);
       return;
     }
     changeSmoothly(() => {
       setLocale(picked);
-      // The query and the anchor stay: a shared link of the configurator keeps its stack in the query
-      router.push(`${localizedPath(base, picked)}${window.location.search}${window.location.hash}`);
+      router.push(addressWithoutAnchor({ pathname: localizedPath(base, picked), search: window.location.search }));
     });
   };
 }

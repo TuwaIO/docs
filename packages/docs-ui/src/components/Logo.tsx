@@ -5,8 +5,7 @@ const DARK_LOGO_URL = 'https://tuwa.io/brand/logo_glow.svg';
 
 export interface SiteLogoProps {
   /**
-   * Width in pixels. Without it the logo fits the navbar of a documentation site by its height: 20px, 22px from 640px
-   * wide, so the logo and both switches fit one row on a 320px phone.
+   * Width in pixels. Without it the logo takes the size of the logo of tuwa.io: 110px wide on phones, 126px from 640px.
    */
   width?: number;
   /** Height attribute in pixels, for the aspect ratio before the image loads (default: 40) */
@@ -38,8 +37,10 @@ export function SiteLogo({
   lightSrc = LIGHT_LOGO_URL,
   darkSrc = DARK_LOGO_URL,
 }: SiteLogoProps) {
-  // A given width is kept, for the headers that size the logo themselves; otherwise the height of the docs navbar
-  const sizeClass = width === undefined ? 'tuwadocs:h-5 tuwadocs:sm:h-[22px] tuwadocs:w-auto' : 'tuwadocs:h-auto';
+  // A given width is kept, for the headers that size the logo themselves; otherwise the size of the logo of tuwa.io,
+  // so the brand reads the same on every TUWA site (at 20px high in the docs navbar it was too small to read)
+  const sizeClass =
+    width === undefined ? 'tuwadocs:w-[110px] tuwadocs:sm:w-[126px] tuwadocs:h-auto' : 'tuwadocs:h-auto';
   const sizeStyle = width === undefined ? {} : { width: `${width}px`, height: 'auto' };
   return (
     <div

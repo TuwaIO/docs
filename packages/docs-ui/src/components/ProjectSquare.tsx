@@ -17,6 +17,11 @@ export interface PixelArtProps extends Omit<SVGAttributes<SVGSVGElement>, 'child
   art: readonly string[];
   /** Whether the pixels fly in to their places once, when it renders (default: `false`); still for reduced motion */
   assemble?: boolean;
+  /**
+   * The icon whose own motion the picture plays while the reader points at it (`startPixelMotion`): the arrow glides
+   * into the door of `sign-in`, a planet goes round `orbit`, and so on (see {@link ProjectIcon}). With `assemble` only.
+   */
+  motion?: ProjectIcon;
 }
 
 /**
@@ -32,26 +37,40 @@ const offsetOf = (index: number, axis: number) => {
  * A pixel picture in paper and ink: square pixels of ink and lit pixels of the accent (each fills a hair more than its
  * cell, so no seam shows), sized by the CSS of the `svg`. The colours come from `--tuwa-pixel-ink` and
  * `--tuwa-pixel-lit`, by default the text colour and the accent of the theme. With `assemble` the pixels fly in to
- * their places once, one after another, when it renders (CSS in `site.css`, nothing for reduced motion). Decorative:
- * hidden from assistive technology.
+ * their places once, one after another, when it renders (CSS in `site.css`, nothing for reduced motion); with `motion`
+ * too, the picture assembles again and plays the motion of its icon while the reader points at it
+ * (`startPixelMotion`). The letters of the picture name the groups of pixels that move (`data-g`). Decorative: hidden
+ * from assistive technology.
  *
  * @param props - See {@link PixelArtProps}.
  * @returns The `svg`.
  */
-export function PixelArt({ art, assemble = false, className, ...props }: PixelArtProps) {
+export function PixelArt({ art, assemble = false, motion, className, ...props }: PixelArtProps) {
   const width = art[0]?.length ?? 0;
   const pixels = art.flatMap((row, y) =>
-    [...row].flatMap((cell, x) => (cell === '.' ? [] : [{ x, y, lit: cell === 'o' || cell !== cell.toLowerCase() }])),
+    [...row].flatMap((cell, x) =>
+      cell === '.'
+        ? []
+        : [
+            {
+              x,
+              y,
+              lit: cell === 'o' || cell !== cell.toLowerCase(),
+              group: /[a-z]/i.test(cell) && cell !== 'o' ? cell.toLowerCase() : undefined,
+            },
+          ],
+    ),
   );
   return (
     <svg
       viewBox={`0 0 ${width} ${art.length}`}
       aria-hidden="true"
       focusable="false"
+      data-motion={(assemble && motion) || undefined}
       className={cn('tuwa-pixel-art', assemble && 'tuwa-pixel-art--assemble', className)}
       {...props}
     >
-      {pixels.map(({ x, y, lit }, index) => (
+      {pixels.map(({ x, y, lit, group }, index) => (
         <rect
           key={`${x}-${y}`}
           x={x}
@@ -59,10 +78,13 @@ export function PixelArt({ art, assemble = false, className, ...props }: PixelAr
           width={1.02}
           height={1.02}
           data-lit={lit || undefined}
+          data-g={group}
           style={
             assemble
               ? ({
                   '--i': index,
+                  '--x': x,
+                  '--y': y,
                   '--dx': `${offsetOf(index, 0)}px`,
                   '--dy': `${offsetOf(index, 1)}px`,
                 } as CSSProperties)
@@ -70,6 +92,12 @@ export function PixelArt({ art, assemble = false, className, ...props }: PixelAr
           }
         />
       ))}
+      {/* The planet of the orbit, on the top of its ring: it shows and goes round while the reader points at the icon */}
+      {assemble && motion === 'orbit' && (
+        <g className="tuwa-pixel-art__spin">
+          <rect className="tuwa-pixel-art__planet" x={3.7} y={-0.3} width={1.6} height={1.6} />
+        </g>
+      )}
     </svg>
   );
 }

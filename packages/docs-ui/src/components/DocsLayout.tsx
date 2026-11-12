@@ -15,6 +15,7 @@ import { Footer } from './Footer';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { Navbar } from './NavBar';
 import { NavbarThemeSwitch } from './NavbarThemeSwitch';
+import { SmoothAnchors } from './SmoothAnchors';
 
 /**
  * Props of {@link DocsLayout}.
@@ -137,6 +138,7 @@ export function NextraDocsLayout({
         />
       }
     >
+      <SmoothAnchors />
       {children}
     </Layout>
   );

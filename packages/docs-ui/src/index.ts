@@ -1,14 +1,17 @@
+export * from './anchor';
 export * from './components/LocaleSwitcher';
 export * from './components/Logo';
 export * from './components/Orb';
 export * from './components/PolicyDocument';
 export * from './components/ProjectSquare';
+export * from './components/SmoothAnchors';
 export { default as StarryBackground } from './components/StarryBackground';
 export * from './components/ThemeSwitcher';
 export * from './docsLabels';
 export * from './i18n';
 export * from './locale';
 export * from './pageMap';
+export * from './pixelMotion';
 export * from './policies';
 export * from './preferences';
 export * from './projectIcons';
