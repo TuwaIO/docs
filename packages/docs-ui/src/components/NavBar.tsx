@@ -3,6 +3,7 @@ import { Navbar as NextraNavbar } from 'nextra-theme-docs';
 import { ReactNode } from 'react';
 
 import { baseNavLinks, type SocialLink } from '../utils';
+import { NavbarScrollArrows } from './NavbarScrollArrows';
 
 /**
  * Props of {@link Navbar} and {@link Footer}.
@@ -24,7 +25,8 @@ export interface NavProps {
  *
  * The row stays on one line of the 64px Nextra header from 320px wide: the links are hidden below 640px and show only
  * their icons below 1024px, so the Nextra search, the top-level pages and `children` such as {@link LocaleSwitcher}
- * keep their room. The logo never shrinks; the top-level pages of Nextra scroll instead. The stylesheet
+ * keep their room. The logo never shrinks; the top-level pages of Nextra scroll instead, with an arrow over the end
+ * of their row that has more (`NavbarScrollArrows`). The stylesheet
  * (`dist/index.css`) makes the header opaque paper with faint scanlines and a line of 1px below it at every width, and
  * sets the links in mono caps, so the page never shows through it.
  *
@@ -53,6 +55,7 @@ export function Navbar({ links, logo, logoLink, children }: NavProps) {
           </a>
         ))}
         {children}
+        <NavbarScrollArrows />
       </div>
     </NextraNavbar>
   );

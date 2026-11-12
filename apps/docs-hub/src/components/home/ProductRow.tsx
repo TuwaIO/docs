@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt, ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, PixelArt, ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
 import { ExternalLinkIcon } from '@tuwaio/nova-core';
 import type { ReactNode } from 'react';
 
@@ -9,7 +9,6 @@ import { useI18n } from '@/i18n';
 import type { StagedEntry } from '@/lib/ecosystem';
 
 import { ledgerCaps, ledgerProductGrid } from './ledgerLayout';
-import { ARROW_RIGHT } from './pixelArrows';
 
 /** A button of the pair under a project: square, a frame of 1px, mono caps */
 const linkClassName = `group/link inline-flex h-8 items-center gap-2 border border-[var(--tuwa-border-strong)] px-3 text-[var(--tuwa-text-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)] hover:text-[var(--tuwa-text-accent)] ${ledgerCaps}`;

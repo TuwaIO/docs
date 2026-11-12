@@ -319,8 +319,9 @@ describe('DocsLayout', () => {
   it('puts the language switch and then the theme switch in the navbar and the texts of the language in the layout', () => {
     const html = render('uk');
     // Language first, then theme: the one theme switch of the page sits in the header, as on the hub and the website
+    // (after them, the hidden anchor of the arrows of the row of pages, which takes no place)
     expect(html).toMatch(
-      /<nav><img alt="TUWA"\/>.*<button data-locale="uk" aria-label="Оберіть мову"><\/button><button data-theme-switch="light" aria-label="Перемкнути тему"><\/button><\/div><\/nav>/,
+      /<nav><img alt="TUWA"\/>.*<button data-locale="uk" aria-label="Оберіть мову"><\/button><button data-theme-switch="light" aria-label="Перемкнути тему"><\/button><span hidden=""><\/span><\/div><\/nav>/,
     );
     expect(html).toContain(`placeholder="${docsLabels.uk.nextra.searchPlaceholder}"`);
     expect(html).toContain(docsLabels.uk.footer.description);

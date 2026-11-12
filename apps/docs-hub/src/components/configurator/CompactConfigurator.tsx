@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt, ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, PixelArt, ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
 import { useState } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -9,7 +9,6 @@ import { DEFAULT_STACK_OPTIONS, generateStack, stackQuery } from '@/lib/configur
 import { installCommand, usePackageManager } from '@/lib/packageManager';
 
 import { CommandLine, PackageManagerSwitch } from '../CommandLine';
-import { ARROW_RIGHT } from '../home/pixelArrows';
 import { StackOptionsForm } from './StackOptionsForm';
 
 /**

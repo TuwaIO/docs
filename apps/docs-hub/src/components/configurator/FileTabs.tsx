@@ -1,12 +1,11 @@
 'use client';
 
+import { ScrollArrow, useScrollArrows } from '@tuwaio/docs-ui';
 import { DocumentTextIcon } from '@tuwaio/sdk/nova-icons/24/outline';
 import { useState } from 'react';
 
 import type { GeneratedFile } from '@/lib/configurator/generate';
 
-import { ScrollArrow } from '../ScrollArrow';
-import { useScrollArrows } from '../useScrollArrows';
 import { CodeBlock } from './CodeBlock';
 
 /**

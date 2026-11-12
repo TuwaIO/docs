@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, PixelArt } from '@tuwaio/docs-ui';
 import { ExternalLinkIcon } from '@tuwaio/nova-core';
 
 import Link from '@/components/LocaleNextLink';
@@ -13,7 +13,6 @@ import type { PackageDetails } from '@/lib/packages';
 
 import { PackagePreview } from '../PackagePreview';
 import { ledgerCaps, ledgerHover, ledgerRowGrid, ledgerRowPadding } from './ledgerLayout';
-import { ARROW_RIGHT } from './pixelArrows';
 
 /** A row of the list of a product: a line of 1px below it, but the last one */
 const itemClassName = 'border-b border-[var(--tuwa-border-secondary)] last:border-b-0';

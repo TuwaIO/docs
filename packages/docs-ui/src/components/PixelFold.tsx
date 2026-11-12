@@ -12,7 +12,7 @@ const offsetOf = (index: number, axis: number) => {
 /**
  * A pixel picture that folds away and unfolds: while `folded` its pixels are scattered around their places, out of
  * sight; when it unfolds they fly in to their places one after another, and when it folds they fly apart the same way
- * (`tuwa-pixel-fold` in `globals.css`; at once for reduced motion). The pixels take the colour of the text
+ * (`tuwa-pixel-fold` in the stylesheet; at once for reduced motion). The pixels take the colour of the text
  * (`currentColor`). Decorative: hidden from assistive technology.
  *
  * @param props.art - The picture, row by row: `.` is empty, any other character a pixel.
@@ -37,7 +37,7 @@ export function PixelFold({
       aria-hidden="true"
       focusable="false"
       data-folded={folded ? '' : undefined}
-      className={`tuwa-pixel-fold overflow-visible fill-current ${className}`}
+      className={`tuwa-pixel-fold tuwadocs:overflow-visible tuwadocs:fill-current ${className}`}
     >
       {art.flatMap((row, y) =>
         [...row].map((pixel, x) => {

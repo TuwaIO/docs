@@ -73,27 +73,6 @@ html[data-handoff='plate'] [data-board-icon] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%238e8e90' fill-opacity='0.7'/%3E%3C/svg%3E");
 }
 
-/* A pixel picture that folds away and unfolds (`PixelFold`, the arrows over a row that scrolls sideways): folded, its
-   pixels are scattered around their places, out of sight; they fly in one after another when it unfolds and fly apart
-   the same way when it folds. Once each way */
-.tuwa-pixel-fold rect {
-  transition:
-    transform 300ms cubic-bezier(0.2, 0.9, 0.25, 1),
-    opacity 220ms linear;
-  transition-delay: calc(var(--i) * 12ms);
-}
-
-.tuwa-pixel-fold[data-folded] rect {
-  transform: translate(var(--dx), var(--dy));
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tuwa-pixel-fold rect {
-    transition: none;
-  }
-}
-
 /* The flight plan of the main page (`FlightPlan`). The flame of its craft flickers, in steps, only while the craft is
    under way (`data-moving`, which the scroll sets and a stop removes): the one motion of the hub that repeats, and it
    ends with the scroll */

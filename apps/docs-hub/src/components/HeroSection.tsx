@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_DOWN, ARROW_RIGHT, PixelArt } from '@tuwaio/docs-ui';
 import type { TuwaLocale } from '@tuwaio/docs-ui/locale';
 
 import Link from '@/components/LocaleNextLink';
@@ -8,7 +8,6 @@ import Link from '@/components/LocaleNextLink';
 import { useI18n } from '../i18n';
 import { primaryButtonClassName, secondaryButtonClassName } from './buttonStyles';
 import { HeroPlate } from './home/HeroPlate';
-import { ARROW_DOWN, ARROW_RIGHT } from './home/pixelArrows';
 import { Kicker } from './home/SectionHead';
 
 /**

@@ -5,13 +5,13 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
+import { ScrollArrow } from '../../../../packages/docs-ui/src/components/ScrollArrow';
+import { ARROW_RIGHT } from '../../../../packages/docs-ui/src/pixelArrows';
+import { scrollEdges, scrollStep } from '../../../../packages/docs-ui/src/scrollEdges';
 import { FileTabs } from '../components/configurator/FileTabs';
 import { ConfiguratorHeader, StackConfigurator } from '../components/configurator/StackConfigurator';
-import { ARROW_RIGHT } from '../components/home/pixelArrows';
-import { ScrollArrow } from '../components/ScrollArrow';
 import { en, I18nProvider, uk, zhCN } from '../i18n';
 import { allStackOptions, DEFAULT_STACK_OPTIONS, generateStack } from './configurator/generate';
-import { scrollEdges, scrollStep } from './scrollEdges';
 
 // The Stack Configurator in paper and ink, on the frame of the main page: the options and the result side by side on a
 // shared line, steps with square numbers, file tabs whose open one is a block of ink, code on the paper of its frame
@@ -20,7 +20,11 @@ const read = (file: string) => readFileSync(path.resolve(__dirname, '..', file),
 const configurator = read('components/configurator/StackConfigurator.tsx');
 const tabsSource = read('components/configurator/FileTabs.tsx');
 const codeSource = read('components/configurator/CodeBlock.tsx');
-const arrowsSource = read('components/ScrollArrow.tsx') + read('components/useScrollArrows.ts');
+// The arrows of a row that scrolls sideways are parts of docs-ui: the navbar of the documentation sites has them too
+const docsUi = (file: string) =>
+  readFileSync(path.resolve(__dirname, '../../../../packages/docs-ui/src', file), 'utf8');
+const arrowsSource = docsUi('components/ScrollArrow.tsx') + docsUi('useScrollArrows.ts');
+const siteCss = docsUi('styles/site.css');
 const globals = read('app/globals.css');
 const inEnglish = (element: ReturnType<typeof createElement>, locale: 'en' | 'uk' | 'zh-CN' = 'en') =>
   renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale, children: element }));
@@ -122,9 +126,9 @@ describe('the file tabs', () => {
     expect(tabsSource).toContain('<ScrollArrow side="left" shown={before} onClick={() => scroll(\'left\')} />');
     expect(tabsSource).toContain('<ScrollArrow side="right" shown={after} onClick={() => scroll(\'right\')} />');
     // Before the row is measured neither arrow shows
-    expect(markup.match(/pointer-events-none opacity-0/g)).toHaveLength(2);
+    expect(markup.match(/tuwadocs:pointer-events-none tuwadocs:opacity-0/g)).toHaveLength(2);
     const shown = inEnglish(createElement(ScrollArrow, { side: 'right', shown: true, onClick: () => {} }));
-    expect(shown).toMatch(/class="[^"]*right-0 border-l opacity-100"/);
+    expect(shown).toMatch(/class="[^"]*tuwadocs:right-0 tuwadocs:border-l tuwadocs:opacity-100"/);
     expect(shown).toContain('tuwa-docs-glass');
     // No gradient shades the row: the glass does
     expect(arrowsSource).not.toMatch(/-gradient|gradient\(|mask-image/);
@@ -150,17 +154,17 @@ describe('the file tabs', () => {
     expect(arrow(false)).not.toMatch(/--dx:0px;--dy:0px/);
     // The cell fades after the pixels have flown apart
     expect(arrow(false)).toContain('delay-[240ms]');
-    expect(globals).toMatch(
+    expect(siteCss).toMatch(
       /\.tuwa-pixel-fold\[data-folded\] rect \{\s*transform: translate\(var\(--dx\), var\(--dy\)\);\s*opacity: 0;/,
     );
-    expect(globals).toMatch(
+    expect(siteCss).toMatch(
       /\.tuwa-pixel-fold rect \{\s*transition:[^}]*transition-delay: calc\(var\(--i\) \* 12ms\);/,
     );
     // Once each way, and at once for reduced motion
-    expect(globals).toMatch(
+    expect(siteCss).toMatch(
       /@media \(prefers-reduced-motion: reduce\) \{\s*\.tuwa-pixel-fold rect \{\s*transition: none;/,
     );
-    expect(read('components/PixelFold.tsx') + arrowsSource).not.toMatch(/animate-|infinite/);
+    expect(docsUi('components/PixelFold.tsx') + arrowsSource).not.toMatch(/animate-|infinite/);
   });
 
   it('move the row smoothly, and at once for reduced motion', () => {

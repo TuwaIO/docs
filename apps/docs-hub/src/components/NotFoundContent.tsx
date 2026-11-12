@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, PixelArt } from '@tuwaio/docs-ui';
 import { ExternalLinkIcon } from '@tuwaio/nova-core';
 import { useSyncExternalStore } from 'react';
 
@@ -22,7 +22,6 @@ import {
   homeMarginLeftClassName,
   homeMarginRightClassName,
 } from './home/homeLayout';
-import { ARROW_RIGHT } from './home/pixelArrows';
 import { CrossMark, Kicker } from './home/SectionHead';
 
 const destinationHrefs = ['/guides', '/quasar', '/configurator', '/playground', '/comparisons', '/policies'] as const;

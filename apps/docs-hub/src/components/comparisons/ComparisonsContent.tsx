@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, PixelArt } from '@tuwaio/docs-ui';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -16,7 +16,6 @@ import {
 } from '../buttonStyles';
 import { FlightPlan, type FlightWaypoint } from '../flight/FlightPlan';
 import { homeContentClassName, homeFrameClassName } from '../home/homeLayout';
-import { ARROW_RIGHT } from '../home/pixelArrows';
 import { CrossMark, Kicker, SectionBar, SectionHead } from '../home/SectionHead';
 import { BundleSizes } from './BundleSizes';
 import { ChooseInstead } from './ChooseInstead';

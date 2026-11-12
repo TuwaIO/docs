@@ -109,15 +109,42 @@ describe('the Nextra header of @tuwaio/docs-ui', () => {
     expect(html).toMatch(
       /<a [^>]*title="Storybook"[^>]*><svg><\/svg><span class="tuwadocs:sr-only tuwadocs:lg:not-sr-only">Storybook<\/span><\/a>/,
     );
-    expect(html).toMatch(/<div class="[^"]*tuwadocs:shrink-0[^"]*">.*<button type="button">EN<\/button><\/div>/);
+    expect(html).toMatch(
+      /<div class="[^"]*tuwadocs:shrink-0[^"]*">.*<button type="button">EN<\/button><span hidden=""><\/span><\/div>/,
+    );
+  });
+
+  // Between the phone menu and a wide window the top-level pages do not fit and their row scrolls sideways: part of
+  // the menu was out of sight with nothing to say so. An arrow stands over the end of the row that has more
+  it('has arrows over the ends of the row of pages, which scrolls sideways when the pages do not fit', () => {
+    const navbar = read('src/components/NavBar.tsx');
+    expect(navbar).toMatch(/\{children\}\s*<NavbarScrollArrows \/>/);
+    const arrows = read('src/components/NavbarScrollArrows.tsx');
+    // The row is found by what the browser does with it, not by a class of Nextra
+    expect(arrows).toContain("['auto', 'scroll'].includes(getComputedStyle(child).overflowX)");
+    expect(arrows).toMatch(
+      /<ScrollArrow\s+side="left"\s+shown=\{before\}\s+onClick=\{\(\) => scroll\('left'\)\}\s+style=\{\{ left: place\.left, bottom: LINE \}\}/,
+    );
+    expect(arrows).toMatch(
+      /<ScrollArrow\s+side="right"\s+shown=\{after\}\s+onClick=\{\(\) => scroll\('right'\)\}\s+style=\{\{ right: place\.right, bottom: LINE \}\}/,
+    );
+    // The cells of the arrows stand on the line under the header, not over it
+    expect(arrows).toContain('const LINE = 1;');
+    // On the server and before the row is found the navbar has no arrow at all
+    const html = renderToStaticMarkup(createElement(Navbar, { links: [] }));
+    expect(html).not.toContain('tuwa-docs-glass');
+    expect(html).toContain('<span hidden=""></span>');
   });
 
   it('has every class of the navbar and the logo in the built stylesheet', () => {
     const css = read('dist/index.css');
     const classes = new Set(
-      ['src/components/NavBar.tsx', 'src/components/Logo.tsx'].flatMap((file) =>
-        [...read(file).matchAll(/tuwadocs:[^\s'"`]+/g)].map(([className]) => className),
-      ),
+      [
+        'src/components/NavBar.tsx',
+        'src/components/Logo.tsx',
+        'src/components/ScrollArrow.tsx',
+        'src/components/PixelFold.tsx',
+      ].flatMap((file) => [...read(file).matchAll(/tuwadocs:[^\s'"`]+/g)].map(([className]) => className)),
     );
     expect(classes.size).toBeGreaterThan(10);
     expect([...classes].filter((className) => !css.includes(selectorOf(className)))).toEqual([]);
