@@ -66,6 +66,24 @@ describe('the shell of the Playground', () => {
     expect(novaStage.match(/icons=\{icons\}/g)).toHaveLength(2);
   });
 
+  // The page has one h1, its title, and no h2 of its own: the heading of the stage and the headings of the inspector
+  // come right under the title, so they are h2. They were h3 and h4, and a heading that skips a level tells a screen
+  // reader of a part that is not there (axe `heading-order`)
+  it('keeps its headings one level under the title of the page', () => {
+    const levels = shell.flatMap((file) =>
+      [...read(`components/playground/${file}`).matchAll(/<h([1-6])[\s>]/g)].map((match) => `${file} h${match[1]}`),
+    );
+    expect(levels.sort()).toEqual([
+      'CodeTab.tsx h2',
+      'CodeTab.tsx h2',
+      'NovaStage.tsx h2',
+      // The history of the stage, under its heading
+      'NovaStage.tsx h3',
+      'PlaygroundLoader.tsx h1',
+      'StateTab.tsx h2',
+    ]);
+  });
+
   // The Isometric kit sets the gap between the wallet cards, and nothing in the Customize tab showed or changed it: a
   // slider under the style kits does, as the slider of the corners of the theme
   it('has a slider for the gap between the cards of the connect modal', () => {

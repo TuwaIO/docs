@@ -93,7 +93,7 @@ export function NovaStage() {
               <ConnectButton customization={nova.connectButtonCustomization} />
             </header>
             <div>
-              <h3 className="text-lg font-bold">{t.playground.stage.novaHeaderSubtitle}</h3>
+              <h2 className="text-lg font-bold">{t.playground.stage.novaHeaderSubtitle}</h2>
               <p className="mt-1 text-sm text-[var(--tuwa-text-secondary)]">
                 {connectedWalletAddress
                   ? t.playground.stage.novaConnectedHint
@@ -105,9 +105,9 @@ export function NovaStage() {
             <ActionButtons withTrackedModal />
             {connectedWalletAddress && (
               <section aria-label={t.playground.stage.historyAria}>
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-secondary)]">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-secondary)]">
                   {t.playground.stage.historyHeading}
-                </h4>
+                </h3>
                 <TransactionsHistory
                   customization={nova.historyCustomization}
                   transactionsPool={transactionsPool}
