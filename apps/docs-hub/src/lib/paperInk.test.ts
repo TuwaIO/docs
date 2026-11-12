@@ -286,6 +286,11 @@ const hubRedrawn = [
   'components/home/HeroPlate.tsx',
   'components/home/SectionHead.tsx',
   'components/home/EcosystemBoard.tsx',
+  'components/home/StageLedgers.tsx',
+  'components/home/StageLedger.tsx',
+  'components/home/ProductRow.tsx',
+  'components/home/PackageRow.tsx',
+  'components/PackagePreview.tsx',
   'app/rootDocument.tsx',
 ];
 

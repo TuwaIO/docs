@@ -7,12 +7,8 @@ import Link from '@/components/LocaleNextLink';
 
 import { useI18n } from '../i18n';
 import { HeroPlate } from './home/HeroPlate';
+import { ARROW_DOWN, ARROW_RIGHT } from './home/pixelArrows';
 import { Kicker } from './home/SectionHead';
-
-// prettier-ignore
-const ARROW_DOWN = ['...#...', '...#...', '...#...', '#..#..#', '.#.#.#.', '..###..', '...#...'];
-// prettier-ignore
-const ARROW_RIGHT = ['...#...', '....#..', '.....#.', '#######', '.....#.', '....#..', '...#...'];
 
 /**
  * The size and tracking of the title by language, the size as a share of the width of its column (container query

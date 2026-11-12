@@ -169,7 +169,8 @@ export type ProjectSquareProps = (
  * The square of a TUWA project, in paper and ink: a frame of 1px in the strong line colour with the pixel icon of the
  * project inside (or an SVG `svgIcon`), and four corner marks 5px outside it that turn to the accent when the square is
  * `active` or under the pointer inside an element with the `group` class. The pixels assemble once when it renders
- * (CSS in `site.css`), still for reduced motion and visible without JavaScript; a server can render it.
+ * (CSS in `site.css`), still for reduced motion and visible without JavaScript; a server can render it. With `assemble`,
+ * `startPixelMotion` on a part around it plays the motion of its project until `stopPixelMotion`.
  *
  * @param props - See {@link ProjectSquareProps}.
  * @param ref - Ref of the root `div`.
@@ -191,7 +192,13 @@ export const ProjectSquare = React.forwardRef<HTMLDivElement, ProjectSquareProps
         {Icon ? (
           <Icon aria-hidden className="tuwa-project-square__art" />
         ) : (
-          <PixelArt art={projectIconArt[iconName]} assemble={assemble} className="tuwa-project-square__art" />
+          // With `assemble`, the icon plays the motion of its project while the reader points at it (`startPixelMotion`)
+          <PixelArt
+            art={projectIconArt[iconName]}
+            assemble={assemble}
+            motion={iconName}
+            className="tuwa-project-square__art"
+          />
         )}
         <CornerMarks width={size + 10} height={size + 10} className="tuwa-project-square__corners" />
       </div>

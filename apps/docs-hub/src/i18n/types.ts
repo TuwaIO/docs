@@ -314,25 +314,24 @@ export interface DocsHubLabels {
       stages: Record<number, { label: string; title: string; subtitle: string }>;
     };
     entries: Record<string, { tagline: string; packagesBadgeLabel?: string }>;
-    docCard: {
-      cloudAndSelfHosted: string;
-      onePackage: string;
-      packagesCount: string;
-      readDocs: string;
-      tryLiveAdmin: string;
-      showPackages: string;
-      hidePackages: string;
-    };
-    packagePreview: {
-      installLabel: string;
-      copyInstallTitle: string;
-      peerDepsTitle: string;
+    /** The ledgers of the stages: a project and its packages, row by row */
+    ledger: {
+      /** The name of the section in its bar */
+      section: string;
+      /** The heads of the columns (the licence takes `ui.packageBadges.license`) */
+      project: string;
+      layer: string;
+      package: string;
+      version: string;
+      gzip: string;
+      /** The button to the documentation of a project, beside GitHub */
+      docs: string;
+      /** The marker of a deprecated package, in caps */
       deprecated: string;
-      standalone: string;
-      peersCount: string;
-      peersCountPlural: string;
-      lighterInstallPrefix: string;
-      lighterInstallConjunction: string;
+    };
+    /** The note on the sizes under the last ledger */
+    sizeNote: {
+      title: string;
     };
     packageDialog: {
       deprecatedPrefix: string;

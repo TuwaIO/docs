@@ -22,16 +22,12 @@ export interface PackageBadge {
  */
 export interface DocEntry {
   id: string;
-  /** The project whose icon the entry shows; defaults to `id`. Lets an entry without its own icon reuse another's. */
-  orb?: PackageType;
   /** Pixel icon of the entry; defaults to the icon of its project */
   pixelIcon?: ProjectIcon;
   name: string;
   /** The short name on the plate of the hero (default: `name`) */
   plateName?: string;
   tagline: string;
-  gradientFrom: string;
-  gradientTo: string;
   docsUrl: string;
   githubUrl: string;
   packages?: PackageBadge[];
@@ -43,8 +39,6 @@ export interface DocEntry {
 export interface EcosystemLayer {
   label: string;
   subtitle: string;
-  accentClass: string;
-  dotGradient: string;
   entries: DocEntry[];
 }
 
@@ -54,16 +48,12 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 1 — Core Auth & Primitives',
     subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
-    accentClass: 'text-emerald-600 dark:text-emerald-400',
-    dotGradient: 'from-emerald-600 to-teal-600 dark:from-emerald-400 dark:to-teal-500',
     entries: [
       {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         plateName: 'SIWX',
         tagline: 'CAIP-122 authentication engine & adapters',
-        gradientFrom: 'from-emerald-600 dark:from-emerald-400',
-        gradientTo: 'to-teal-600 dark:to-emerald-500',
         docsUrl: 'https://siwx.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/siwx',
         packages: [
@@ -78,8 +68,6 @@ export const layers: EcosystemLayer[] = [
         id: 'orbit',
         name: 'Orbit Utils',
         tagline: 'Multi-chain utilities for EVM & Solana',
-        gradientFrom: 'from-emerald-600 dark:from-emerald-400',
-        gradientTo: 'to-teal-700 dark:to-teal-500',
         docsUrl: 'https://orbit.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/orbit',
         packages: [
@@ -93,15 +81,11 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 2 — State & Connection',
     subtitle: 'Transaction tracking & wallet connectivity',
-    accentClass: 'text-[#0052ff] dark:text-blue-400',
-    dotGradient: 'from-[#0052ff] to-amber-500 dark:from-blue-500 dark:to-amber-400',
     entries: [
       {
         id: 'satellite',
         name: 'Satellite Connect',
         tagline: 'Headless wallet connection store for EVM & Solana',
-        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
-        gradientTo: 'to-sky-600 dark:to-sky-400',
         docsUrl: 'https://satellite.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/satellite-connect',
         packages: [
@@ -116,8 +100,6 @@ export const layers: EcosystemLayer[] = [
         id: 'pulsar',
         name: 'Pulsar',
         tagline: 'Transaction tracking that survives reloads',
-        gradientFrom: 'from-amber-500 dark:from-amber-400',
-        gradientTo: 'to-orange-600 dark:to-orange-500',
         docsUrl: 'https://pulsar.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/pulsar-core',
         packages: [
@@ -132,15 +114,11 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 3 — Backend & Sync',
     subtitle: 'Managed cloud or self-hosted Quasar engine',
-    accentClass: 'text-blue-700 dark:text-sky-400',
-    dotGradient: 'from-[#0052ff] to-sky-600 dark:from-blue-500 dark:to-sky-400',
     entries: [
       {
         id: 'quasar',
         name: 'Quasar Cloud',
         tagline: 'Managed cloud · Transaction indexing & sync',
-        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
-        gradientTo: 'to-blue-800 dark:to-sky-300',
         docsUrl: '/quasar',
         githubUrl: 'https://github.com/TuwaIO/quasar-client',
         packages: [
@@ -150,12 +128,9 @@ export const layers: EcosystemLayer[] = [
       },
       {
         id: 'quasar-community',
-        orb: 'quasar',
         pixelIcon: 'server',
         name: 'Quasar Community',
         tagline: 'Self-hosted engine & admin · Apache-2.0',
-        gradientFrom: 'from-teal-600 dark:from-teal-400',
-        gradientTo: 'to-blue-700 dark:to-sky-400',
         docsUrl: '/quasar/self-hosting',
         githubUrl: 'https://github.com/TuwaIO/quasar-community',
         packages: [
@@ -168,15 +143,11 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 4 — User Interface',
     subtitle: 'React components for Satellite & Pulsar',
-    accentClass: 'text-[#0052ff] dark:text-sky-400',
-    dotGradient: 'from-[#0052ff] to-sky-600 dark:from-blue-500 dark:to-sky-400',
     entries: [
       {
         id: 'nova',
         name: 'Nova UI Kit',
         tagline: 'Design system & component library',
-        gradientFrom: 'from-[#0052ff] dark:from-blue-500',
-        gradientTo: 'to-sky-600 dark:to-sky-300',
         docsUrl: 'https://stories.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/nova-uikit',
         packages: [
@@ -191,15 +162,11 @@ export const layers: EcosystemLayer[] = [
   {
     label: 'Stage 5 — SDK Integration Layer',
     subtitle: 'Core SDK & network-specific adapters',
-    accentClass: 'text-blue-700 dark:text-blue-400',
-    dotGradient: 'from-blue-700 to-[#0052ff] dark:from-blue-500 dark:to-sky-300',
     entries: [
       {
         id: 'sdk',
         name: 'TUWA SDK',
         tagline: 'Unified client SDK & EVM/Solana network adapters',
-        gradientFrom: 'from-blue-700 dark:from-blue-500',
-        gradientTo: 'to-[#0052ff] dark:to-sky-300',
         docsUrl: 'https://sdk.docs.tuwa.io/',
         githubUrl: 'https://github.com/TuwaIO/sdk',
         packages: [
@@ -212,6 +179,20 @@ export const layers: EcosystemLayer[] = [
     ],
   },
 ];
+
+/**
+ * What a link row of a project shows of its target, on the right of the ledger: the path of a page of the hub
+ * (`/quasar/self-hosting`), or the host and the path of another site without its query and anchor
+ * (`github.com/TuwaIO/quasar-community`, `quasar.tuwa.io`).
+ *
+ * @param url - The target of the row.
+ * @returns The text.
+ */
+export function linkHost(url: string): string {
+  if (url.startsWith('/')) return url.split(/[?#]/)[0]!;
+  const { host, pathname } = new URL(url);
+  return `${host}${pathname}`.replace(/\/$/, '');
+}
 
 /**
  * The layer badge (`L4`) of each npm package listed on the main page.
@@ -237,7 +218,7 @@ export function stagedEntries(): StagedEntry[] {
     layer.entries.map((entry) => ({
       ...entry,
       stage: index + 1,
-      icon: entry.pixelIcon ?? projectIcons[entry.orb ?? (entry.id as PackageType)],
+      icon: entry.pixelIcon ?? projectIcons[entry.id as PackageType],
     })),
   );
 }
