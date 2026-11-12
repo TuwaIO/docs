@@ -6,19 +6,27 @@ import '@tuwaio/solana-sdk/nova-connect';
 import '@tuwaio/sdk/styles/nova-transactions.css';
 import '@tuwaio/sdk/styles/nova-connect.css';
 
+import { useTheme } from 'next-themes';
 import { useEffect, useMemo, useState } from 'react';
 
 import { useI18n } from '@/i18n';
 import { DEFAULT_CUSTOMIZATION, defaultCustomizationFor, type NovaCustomization } from '@/lib/playground/customization';
 import {
-  DEFAULT_SETTINGS,
+  hasTheme,
   normalizeSettings,
   parseSettings,
   type PlaygroundSettings,
   settingsQuery,
   stageKey,
 } from '@/lib/playground/settings';
-import { pickStyle, pickTheme, THEME_PRESETS, type ThemeId, type ThemeValues } from '@/lib/playground/themes';
+import {
+  novaThemeFor,
+  pickStyle,
+  pickTheme,
+  THEME_PRESETS,
+  type ThemeId,
+  type ThemeValues,
+} from '@/lib/playground/themes';
 import { replaceQuery, useQueryString } from '@/lib/queryState';
 
 import { PlaygroundSession } from './PlaygroundSession';
@@ -28,11 +36,19 @@ import { PlaygroundSession } from './PlaygroundSession';
  * the TUWA packages load on this page only. The settings live in the query string; a change of chains, UI or features
  * starts a new session (new stores and providers); the theme and the customization of Nova keep it. A theme drawn for
  * one style kit (Isometric) and that kit are picked together: see `pickTheme` and `pickStyle`.
+ *
+ * Until the reader picks a theme, the stage wears Nova's own theme for the theme of the hub (Paper Light on a light
+ * page, Paper Dark on a dark one) and changes with it; the query string then names no theme. A picked theme is named in
+ * the query string and stays; "reset" goes back to following the hub.
  */
 export default function PlaygroundStudio() {
   const { locale } = useI18n();
   const query = useQueryString();
-  const settings = useMemo(() => parseSettings(new URLSearchParams(query)), [query]);
+  const { resolvedTheme } = useTheme();
+  const hubTheme = novaThemeFor(resolvedTheme !== 'light');
+  // Whether the reader has picked a theme: the query string names it
+  const themePicked = useMemo(() => hasTheme(new URLSearchParams(query)), [query]);
+  const settings = useMemo(() => parseSettings(new URLSearchParams(query), hubTheme), [query, hubTheme]);
   const [generation, setGeneration] = useState(0);
   const [themeEdits, setThemeEdits] = useState<Partial<ThemeValues>>({});
   const [customization, setCustomization] = useState<NovaCustomization>(() => ({
@@ -52,7 +68,8 @@ export default function PlaygroundStudio() {
       const { style } = pickTheme(patch.theme, customization.style);
       if (style !== customization.style) setCustomization((current) => ({ ...current, style }));
     }
-    replaceQuery(settingsQuery(normalizeSettings({ ...settings, ...patch })));
+    // A change of the stack leaves the theme to the hub while the reader has picked none
+    replaceQuery(settingsQuery(normalizeSettings({ ...settings, ...patch }), themePicked || !!patch.theme));
   };
 
   // A theme picked together with a style kit, without the pairing of `changeSettings`
@@ -60,6 +77,12 @@ export default function PlaygroundStudio() {
     if (theme === settings.theme) return;
     setThemeEdits({});
     replaceQuery(settingsQuery(normalizeSettings({ ...settings, theme })));
+  };
+
+  // Back to the theme of the hub: the query string names no theme
+  const followHubTheme = () => {
+    setThemeEdits({});
+    replaceQuery(settingsQuery(normalizeSettings(settings), false));
   };
 
   const changeCustomization = (patch: Partial<NovaCustomization>) => {
@@ -76,12 +99,14 @@ export default function PlaygroundStudio() {
       changeSettings={changeSettings}
       editTheme={(variable, value) => setThemeEdits((edits) => ({ ...edits, [variable]: value }))}
       resetThemeEdits={() => setThemeEdits({})}
-      resetTheme={() => changeSettings({ theme: DEFAULT_SETTINGS.theme })}
+      resetTheme={followHubTheme}
       customization={customization}
       changeCustomization={changeCustomization}
       resetCustomization={() => {
         setCustomization(defaultCustomizationFor(locale));
-        switchTheme(pickStyle(DEFAULT_CUSTOMIZATION.style, settings.theme).theme);
+        // The default kit fits every theme: only a theme drawn for another kit gives way
+        const { theme } = pickStyle(DEFAULT_CUSTOMIZATION.style, settings.theme);
+        if (theme !== settings.theme) switchTheme(theme);
       }}
       restart={() => setGeneration((value) => value + 1)}
     />

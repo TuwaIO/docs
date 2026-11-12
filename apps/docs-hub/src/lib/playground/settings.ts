@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: PlaygroundSettings = {
   evm: true,
   solana: true,
   ui: 'nova',
-  theme: 'default-dark',
+  theme: 'paper-dark',
   siwx: true,
   quasar: true,
 };
@@ -37,21 +37,47 @@ export function normalizeSettings(settings: PlaygroundSettings): PlaygroundSetti
 }
 
 /**
- * Reads the settings from a query string. The parameters are those of the Stack Configurator (`chains`, `ui`,
- * `auth=siwx`, `quasar=1`) plus `theme`; a query without `chains` gives {@link DEFAULT_SETTINGS}.
+ * Whether a query string names a theme of the Playground. Without one the stage follows the theme of the hub.
+ *
+ * @param params - The query string.
+ * @returns Whether `theme` is a preset id.
  */
-export function parseSettings(params: URLSearchParams): PlaygroundSettings {
-  const theme = params.get('theme');
-  if (!params.has('chains')) return { ...DEFAULT_SETTINGS, theme: isThemeId(theme) ? theme : DEFAULT_SETTINGS.theme };
-  const { evm, solana, ui, siwx, quasar } = parseStackOptions(params);
-  return normalizeSettings({ evm, solana, ui, siwx, quasar, theme: isThemeId(theme) ? theme : DEFAULT_SETTINGS.theme });
+export function hasTheme(params: URLSearchParams): boolean {
+  return isThemeId(params.get('theme'));
 }
 
-/** The query string of the settings, the inverse of {@link parseSettings}. */
-export function settingsQuery(settings: PlaygroundSettings): string {
+/**
+ * Reads the settings from a query string. The parameters are those of the Stack Configurator (`chains`, `ui`,
+ * `auth=siwx`, `quasar=1`) plus `theme`; a query without `chains` gives {@link DEFAULT_SETTINGS}.
+ *
+ * @param params - The query string.
+ * @param fallbackTheme - The theme when the query names none, or an unknown one (a link from before a preset was
+ * renamed): Nova's theme for the theme of the hub (default: the theme of {@link DEFAULT_SETTINGS}).
+ * @returns The settings.
+ */
+export function parseSettings(
+  params: URLSearchParams,
+  fallbackTheme: ThemeId = DEFAULT_SETTINGS.theme,
+): PlaygroundSettings {
+  const named = params.get('theme');
+  const theme = isThemeId(named) ? named : fallbackTheme;
+  if (!params.has('chains')) return { ...DEFAULT_SETTINGS, theme };
+  const { evm, solana, ui, siwx, quasar } = parseStackOptions(params);
+  return normalizeSettings({ evm, solana, ui, siwx, quasar, theme });
+}
+
+/**
+ * The query string of the settings, the inverse of {@link parseSettings}.
+ *
+ * @param settings - The settings.
+ * @param withTheme - Whether the query names the theme (default: `true`). Without it the stage keeps following the
+ * theme of the hub.
+ * @returns The query string.
+ */
+export function settingsQuery(settings: PlaygroundSettings, withTheme = true): string {
   const params = new URLSearchParams(stackQuery(stackOptionsFor(settings, 'next')));
   params.delete('fw');
-  params.set('theme', settings.theme);
+  if (withTheme) params.set('theme', settings.theme);
   return params.toString();
 }
 

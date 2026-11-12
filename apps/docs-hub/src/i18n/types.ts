@@ -574,6 +574,14 @@ export interface DocsHubLabels {
         cssCopied: string;
         resetEdits: string;
         editedSuffix: string;
+        /** A colour the theme leaves out (`transparent`) */
+        themeNone: string;
+        /** The two shapes of badges and avatars (`--tuwa-rounded-full`) */
+        themeSquare: string;
+        themeRound: string;
+        /** The scanlines, on and off */
+        themeOn: string;
+        themeOff: string;
         themeGroups: Record<string, string>;
         themePresets: Record<ThemeId, { label: string; description: string }>;
         styleKits: Record<StyleKit, { label: string; description: string }>;

@@ -885,6 +885,11 @@ export const en: DocsHubLabels = {
         cssCopied: 'CSS copied',
         resetEdits: 'Reset edits',
         editedSuffix: 'edited',
+        themeNone: 'None',
+        themeSquare: 'Square',
+        themeRound: 'Round',
+        themeOn: 'On',
+        themeOff: 'Off',
         themeGroups: {
           Surfaces: 'Surfaces',
           Text: 'Text',
@@ -893,13 +898,13 @@ export const en: DocsHubLabels = {
           Shape: 'Shape',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'The dark theme Nova UI Kit ships with.',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description: 'The dark theme Nova UI Kit ships with: ink paper, square corners, the cyan of the TUWA logo.',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'The light theme Nova UI Kit ships with.',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'The light theme Nova UI Kit ships with: warm paper, ink, square corners, the TUWA orange.',
           },
           cyberpunk: {
             label: 'Cyberpunk',

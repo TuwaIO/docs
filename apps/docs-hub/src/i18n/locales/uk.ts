@@ -915,6 +915,11 @@ export const uk: DocsHubLabels = {
         cssCopied: 'CSS скопійовано',
         resetEdits: 'Скинути зміни',
         editedSuffix: 'змінено',
+        themeNone: 'Немає',
+        themeSquare: 'Квадратні',
+        themeRound: 'Круглі',
+        themeOn: 'Увімк.',
+        themeOff: 'Вимк.',
         themeGroups: {
           Surfaces: 'Поверхні',
           Text: 'Текст',
@@ -923,13 +928,14 @@ export const uk: DocsHubLabels = {
           Shape: 'Форма та рамки',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'Стандартна темна тема Nova UI Kit.',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description:
+              'Стандартна темна тема Nova UI Kit: чорнильний папір, прямі кути, блакитний колір логотипа TUWA.',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'Стандартна світла тема Nova UI Kit.',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'Стандартна світла тема Nova UI Kit: теплий папір, чорнило, прямі кути, помаранчевий TUWA.',
           },
           cyberpunk: {
             label: 'Cyberpunk',

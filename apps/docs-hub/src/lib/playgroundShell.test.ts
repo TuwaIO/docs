@@ -41,6 +41,12 @@ describe('the shell of the Playground', () => {
     );
   });
 
+  // The titles of the hub pages were transparent text over a gradient kept in globals.css: the last of them (this page)
+  // is ink now, and the gradient is gone with it
+  it('leaves no title gradient in the stylesheet of the hub', () => {
+    expect(read('app/globals.css')).not.toMatch(/--tuwa-hero-gradient/);
+  });
+
   it('takes every icon from Nova, none from heroicons', () => {
     for (const file of shell) expect(read(`components/playground/${file}`), file).not.toContain('@heroicons/react');
     expect(controls).toContain("} from '@tuwaio/sdk/nova-icons/24/outline';");

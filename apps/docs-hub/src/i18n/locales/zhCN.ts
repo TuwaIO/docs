@@ -864,6 +864,11 @@ export const zhCN: DocsHubLabels = {
         cssCopied: 'CSS 已复制',
         resetEdits: '重置修改',
         editedSuffix: '已编辑',
+        themeNone: '无',
+        themeSquare: '方形',
+        themeRound: '圆形',
+        themeOn: '开',
+        themeOff: '关',
         themeGroups: {
           Surfaces: '背景与表面',
           Text: '文字颜色',
@@ -872,13 +877,13 @@ export const zhCN: DocsHubLabels = {
           Shape: '圆角与边框',
         },
         themePresets: {
-          'default-dark': {
-            label: 'Default Dark',
-            description: 'Nova UI Kit 默认自带的深色主题。',
+          'paper-dark': {
+            label: 'Paper Dark',
+            description: 'Nova UI Kit 自带的深色主题：墨色纸面、方角，以及 TUWA 标志的青色。',
           },
-          'clean-light': {
-            label: 'Clean Light',
-            description: 'Nova UI Kit 默认自带的浅色主题。',
+          'paper-light': {
+            label: 'Paper Light',
+            description: 'Nova UI Kit 自带的浅色主题：暖色纸面、墨色文字、方角，以及 TUWA 橙色。',
           },
           cyberpunk: {
             label: 'Cyberpunk',

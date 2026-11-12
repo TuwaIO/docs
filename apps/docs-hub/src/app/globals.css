@@ -22,22 +22,6 @@
   }
 }
 
-/* The gradient of the titles of the hub pages, which docs-ui no longer carries. The titles are transparent text over it:
-   it goes with the last of them, when their pages are redrawn in paper and ink (without it they would not show). In the
-   shades of the accent until then: the TUWA orange, the cyan of the dark logo */
-:root {
-  --tuwa-hero-gradient-from: #b93b0a;
-  --tuwa-hero-gradient-via: #cf440b;
-  --tuwa-hero-gradient-to: #e34f0d;
-}
-
-html.dark,
-.dark {
-  --tuwa-hero-gradient-from: #22c3e6;
-  --tuwa-hero-gradient-via: #3ed2ec;
-  --tuwa-hero-gradient-to: #8ef5ff;
-}
-
 /* The handoff of the main page (`PixelHandoff`): while the pixels of the project icons fly from the plate of the hero to
    the board, both sets of icons hide; before it the board waits without its icons. Without the script, or for reduced
    motion, nothing sets the attribute and every icon shows */

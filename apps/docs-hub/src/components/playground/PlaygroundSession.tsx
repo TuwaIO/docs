@@ -99,8 +99,10 @@ export function PlaygroundSession({
       resetQuasar();
       clearEvents();
       scenarioStore.setState({ ...DEFAULT_SCENARIO });
-      resetTheme();
+      // The theme last: resetting the customization may name Nova's theme in place of one drawn for another kit, and
+      // the reset leaves the theme to the hub
       resetCustomization();
+      resetTheme();
     } else {
       logEvent('Quasar', 'New device: no local transactions. Connect the same wallet and sign in to load the history.');
     }
