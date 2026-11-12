@@ -189,3 +189,66 @@ export function spreadLabels(places: readonly number[], gap: number, from: numbe
   }
   return groups.flatMap((group) => Array.from({ length: group.size }, (_, index) => group.start + index * step));
 }
+
+/** The place of the link of a waypoint along the track: where it starts and how tall it is, in whole pixels. */
+export interface FlightLinkBox {
+  /** The top of the link */
+  top: number;
+  /** Its height */
+  height: number;
+}
+
+/**
+ * The places of the links of the waypoints along the track, so that every link is a pointer target of its own: a row
+ * tall wherever the links next to it leave the room, and never over the link of another waypoint.
+ *
+ * A link with a label stands around the middle of its row, a row tall; only labels whose rows are nearer than a row (a
+ * track too short for them) get what lies between their rows. A link without a label keeps to its mark: it takes the
+ * row around the mark, ends at the link of a label and half way to the next mark without a label, and where one side
+ * is cut short it reaches as far to the other side, so two marks a few pixels apart still get a row each. Waypoints on
+ * one row (a stage that shares the mark of its section) are one place and get one link box.
+ *
+ * @param rows - The middle of the row of each waypoint, in whole pixels.
+ * @param labelled - Whether the label of each waypoint shows in the margin.
+ * @param row - The height of a row, in pixels: the most a link takes.
+ * @returns The place of the link of each waypoint; its height is from 1 to `row`.
+ */
+export function linkBoxes(rows: readonly number[], labelled: readonly boolean[], row: number): FlightLinkBox[] {
+  const half = Math.floor(row / 2);
+  const ascending = (a: number, b: number) => a - b;
+
+  // The links with labels: their text stands in the middle of the link, so the link stays around its row
+  const labelRows = [...new Set(rows.filter((_, index) => labelled[index]))].sort(ascending);
+  const fixed = new Map<number, FlightLinkBox>();
+  labelRows.forEach((place, index) => {
+    const nearest = Math.min(
+      row,
+      place - (labelRows[index - 1] ?? -Infinity),
+      (labelRows[index + 1] ?? Infinity) - place,
+    );
+    const height = Math.max(1, Math.floor(nearest));
+    fixed.set(place, { top: place - Math.floor(height / 2), height });
+  });
+
+  // The links without labels: between the links with labels and the middles to the marks next to them
+  const freeRows = [...new Set(rows.filter((place) => !fixed.has(place)))].sort(ascending);
+  const free = new Map<number, FlightLinkBox>();
+  freeRows.forEach((place, index) => {
+    const before = freeRows[index - 1];
+    const after = freeRows[index + 1];
+    let from = before === undefined ? -Infinity : Math.ceil((before + place) / 2);
+    let to = after === undefined ? Infinity : Math.ceil((place + after) / 2);
+    for (const [labelRow, box] of fixed) {
+      if (labelRow < place) from = Math.max(from, box.top + box.height);
+      else to = Math.min(to, box.top);
+    }
+    // The row around the mark; cut short on one side, it reaches as far to the other
+    const start = Math.max(from, place - half);
+    const end = Math.min(to, start + row);
+    const top = Math.max(from, end - row);
+    // No room at all between the links around it: a line on its mark, which is a part of the link itself
+    free.set(place, end - top >= 1 ? { top, height: end - top } : { top: place, height: 1 });
+  });
+
+  return rows.map((place) => (fixed.get(place) ?? free.get(place)) as FlightLinkBox);
+}

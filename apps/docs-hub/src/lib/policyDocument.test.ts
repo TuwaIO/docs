@@ -70,4 +70,30 @@ describe('the page of a policy', () => {
     expect(rule('.tuwadocs-policy code')).not.toMatch(/radius/);
     expect(rule('.tuwadocs-policy ul')).toContain('list-style: square;');
   });
+
+  // A table of Markdown always has a row of heads, and a table of names and values (the details of processing of the
+  // DPA) leaves it empty: heads without a text name no column for a screen reader (axe `empty-table-header`) and
+  // draw an empty row above the table
+  it('leaves out the row of heads of a table when none of them has a text', () => {
+    const table = (head: string) =>
+      renderToStaticMarkup(
+        createElement(PolicyDocument, {
+          slug: 'dpa',
+          content: {
+            ...content,
+            html: `<table><thead><tr>${head}</tr></thead><tbody><tr><td>Duration</td><td>While in use</td></tr></tbody></table>`,
+          },
+        }),
+      );
+    const empty = table('<th align="left"></th><th align="left"> \n</th>');
+    expect(empty).not.toContain('<thead');
+    expect(empty).not.toContain('<th');
+    expect(empty).toContain('<tbody><tr><td>Duration</td><td>While in use</td></tr></tbody>');
+    // A row with a head, even one, stays as it is
+    const named = table('<th></th><th>Measure</th>');
+    expect(named).toContain('<thead><tr><th></th><th>Measure</th></tr></thead>');
+    expect(table('<th><strong>Role</strong></th><th></th>')).toContain('<thead>');
+    // A head that holds a picture is not empty
+    expect(table('<th><img src="/mark.png" alt="Mark"/></th><th></th>')).toContain('<thead>');
+  });
 });

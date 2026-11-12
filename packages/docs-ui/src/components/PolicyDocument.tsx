@@ -1,6 +1,6 @@
 import { cn } from '@tuwaio/nova-core/utils';
 import { ArrowDownTrayIcon } from '@tuwaio/nova-icons/24/outline';
-import parse, { type DOMNode, Element } from 'html-react-parser';
+import parse, { type DOMNode, Element, Text } from 'html-react-parser';
 
 import {
   formatPolicyDate,
@@ -73,10 +73,23 @@ export interface PolicyDocumentProps {
 const capsClassName =
   'tuwadocs:font-mono tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:uppercase tuwadocs:leading-[1.35] tuwadocs:tracking-[0.12em]';
 
+// The rows and the cells of a table: what a row of heads without a text is made of
+const TABLE_PARTS = new Set(['tr', 'th', 'td']);
+
+// Whether a part of a table holds nothing for a reader: no text, and no element but rows and cells
+const isEmptyPart = (node: DOMNode): boolean => {
+  if (node instanceof Text) return !node.data.trim();
+  if (node instanceof Element) return TABLE_PARTS.has(node.name) && (node.children as DOMNode[]).every(isEmptyPart);
+  return true;
+};
+
 // Drops elements and attributes a policy never needs and opens external links in a new tab
 function sanitize(node: DOMNode) {
   if (!(node instanceof Element)) return undefined;
   if (BLOCKED_ELEMENTS.has(node.name)) return <></>;
+  // A table of Markdown always has a row of heads; a table of names and values leaves it empty. Heads without a text
+  // name no column for a screen reader and draw an empty row above the table, so such a row is left out
+  if (node.name === 'thead' && (node.children as DOMNode[]).every(isEmptyPart)) return <></>;
 
   for (const name of Object.keys(node.attribs)) {
     if (name.toLowerCase().startsWith('on')) delete node.attribs[name];
@@ -106,8 +119,9 @@ function sanitize(node: DOMNode) {
  * generated from the same source.
  *
  * Load the content on the server with `loadPolicy` and render the page inside the layout of the site. The body is
- * HTML from `TuwaIO/workflows`: scripts, styles, frames, forms and event attributes are dropped, and external links
- * open in a new tab. Headings scroll below a sticky header (`scroll-margin-top`), so `/refund#how-to-request-a-refund`
+ * HTML from `TuwaIO/workflows`: scripts, styles, frames, forms and event attributes are dropped, external links open
+ * in a new tab, and the row of heads of a table is left out when none of its heads has a text (a table of names and
+ * values). Headings scroll below a sticky header (`scroll-margin-top`), so `/refund#how-to-request-a-refund`
  * opens at its section.
  *
  * @param props - See {@link PolicyDocumentProps}.

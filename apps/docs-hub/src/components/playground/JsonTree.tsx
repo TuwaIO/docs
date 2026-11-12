@@ -21,7 +21,8 @@ function Key({ name }: { name?: string }) {
 
 /**
  * A collapsible view of a value: objects and arrays fold (the first two levels start open), functions show as `ƒ()`
- * and long `data:` URIs as their media type and length.
+ * and long `data:` URIs as their media type and length. Every row is 24px tall, the size of a pointer target for the
+ * rows that fold.
  * It uses `<details>`, so a re-render keeps what the user opened.
  * @param props.value - The value.
  * @param props.name - Its key in the parent.
@@ -30,7 +31,7 @@ function Key({ name }: { name?: string }) {
 export function JsonTree({ value, name, depth = 0 }: { value: unknown; name?: string; depth?: number }) {
   if (typeof value !== 'object' || value === null) {
     return (
-      <div className="pl-4 [overflow-wrap:anywhere]">
+      <div className="pl-4 leading-6 [overflow-wrap:anywhere]">
         <Key name={name} />
         <Value value={value} />
       </div>
@@ -42,9 +43,12 @@ export function JsonTree({ value, name, depth = 0 }: { value: unknown; name?: st
     : Object.entries(value);
   return (
     <details open={depth < 2} className="pl-4">
-      <summary className="-ml-4 cursor-pointer select-none [overflow-wrap:anywhere]">
+      {/* A row that folds is a pointer target: a line of 24px, the least side of one. The rows between them take the
+          same line, so the tree keeps one rhythm */}
+      <summary className="-ml-4 cursor-pointer leading-6 select-none [overflow-wrap:anywhere]">
         <Key name={name} />
-        <span className="text-[var(--tuwa-text-tertiary)]">
+        {/* The count is a text: the secondary ink, which reads on the paper (the tertiary one is for marks) */}
+        <span className="text-[var(--tuwa-text-secondary)]">
           {Array.isArray(value) ? `Array(${entries.length})` : `{${entries.length}}`}
         </span>
       </summary>

@@ -4,6 +4,7 @@ import { Pre, withIcons } from 'nextra/components';
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import type { HighlighterCore } from 'shiki/core';
 
+import { CODE_COLOR_REPLACEMENTS } from '@/lib/codeColors';
 import { extractMdxCodeBlocks, type MdxCodeBlock } from '@/lib/mdxCodeBlocks';
 
 const NextraPre = withIcons(Pre);
@@ -107,6 +108,7 @@ export function CodeSnippet({
           lang: normLang,
           themes: { light: 'github-light', dark: 'github-dark' },
           defaultColor: false,
+          colorReplacements: CODE_COLOR_REPLACEMENTS,
         });
         const match = fullHtml.match(/<code[^>]*>([\s\S]*?)<\/code>/);
         const inner = (match ? match[1] : code).replace(/<\/span>\n<span class="line">/g, '</span><span class="line">');

@@ -55,15 +55,15 @@ export function CodeTab() {
           Vite + React
         </Choice>
       </div>
-      <h4 className={headingClass}>{t.playground.inspector.code.stackSetup}</h4>
+      <h2 className={headingClass}>{t.playground.inspector.code.stackSetup}</h2>
       <div className={frameClass}>
         <FileTabs files={stack.files} label={t.playground.inspector.code.setupFilesAria} />
       </div>
-      <h4 className={headingClass}>
+      <h2 className={headingClass}>
         {settings.ui === 'nova'
           ? t.playground.inspector.code.novaCustomization
           : t.playground.inspector.code.themeHeading}
-      </h4>
+      </h2>
       <p className="-mt-2 text-xs leading-relaxed text-[var(--tuwa-text-secondary)]">
         {t.playground.inspector.code.importThemeNote}{' '}
         {settings.ui === 'nova' && t.playground.inspector.code.passObjectsNote}

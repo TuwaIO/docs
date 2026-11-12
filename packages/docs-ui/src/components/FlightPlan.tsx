@@ -13,7 +13,7 @@ import {
   STRIP_CELL,
   STRIP_SHIP,
 } from '../flightArt';
-import { spreadLabels } from '../flightPlan';
+import { type FlightLinkBox, linkBoxes, spreadLabels } from '../flightPlan';
 import { type FlightHeading, type FlightMeasure, useFlight } from '../useFlight';
 import { CornerMarks } from './ProjectSquare';
 
@@ -82,8 +82,11 @@ const SECTION_MARK = 9;
 const STAGE_MARK = 5;
 /** How many divisions the ruler has: a short tick every 5% of the flight, a long one every 25%. */
 const TICKS = 20;
-/** The height of the row of a label, and the least distance between two rows. */
-const LABEL_ROW = 18;
+/**
+ * The height of the row of a label, and the least distance between two rows: the least side of a pointer target (WCAG
+ * 2.5.8), so the link of a label is a target of that size and no two labels are nearer than that.
+ */
+const LABEL_ROW = 24;
 /** Where the tag of the craft starts and how wide it is: the lane between the line and the labels is kept for it. */
 const TAG_AT = LINE + SHIP_HALF + 1 + 5;
 const TAG_WIDTH = 35;
@@ -275,6 +278,11 @@ function Ruler({ travel, colour }: { travel: number; colour: string }) {
  * reader points at its mark or reaches it by the keyboard. Only the labels that show take rows, so a hidden name never
  * moves a number off its mark.
  *
+ * A link is named by what it holds, in the order it shows it: the name, then the number (the name beside the line
+ * holds both, the number first, where the margin shows neither). The rows of the labels are 24px tall and 24px apart,
+ * the size of a pointer target; the link of a mark without a label is as tall wherever the links next to it leave it
+ * the room (`linkBoxes`), and never lies over the link of another mark.
+ *
  * @param props.waypoints - The parts of the page, from the top; the last one is the Earth.
  * @param props.measure - The measure of the page, or `null` before it.
  * @param props.here - The index of the waypoint the craft has locked on: the part the reader reads.
@@ -337,6 +345,9 @@ function FlightRail({
     const place = spread.indexOf(index);
     return place < 0 ? middle : Math.round(spreadRows[place] as number);
   });
+  // Where the link of each waypoint is: a row tall wherever the links next to it leave the room, and never over the
+  // link of another waypoint, so a click beside a mark follows the link of that mark
+  const boxes = linkBoxes(rows, waypoints.map(labelled), LABEL_ROW);
 
   return (
     <nav
@@ -392,6 +403,9 @@ function FlightRail({
           const size = isStage && !shared ? STAGE_MARK : SECTION_MARK;
           const middle = middles[index] as number;
           const row = rows[index] as number;
+          const box = boxes[index] as FlightLinkBox;
+          // The middle of the row inside the link: its own middle under a label, anywhere beside a mark without one
+          const mid = row - box.top;
           const shift = middle - row;
           // The name shows in the margin where it has room; elsewhere beside the line, while the mark is pointed at
           const nameShown = isStage ? stagesShown : namesShown;
@@ -405,19 +419,30 @@ function FlightRail({
           return (
             <li
               key={waypoint.id}
-              className="tuwadocs:absolute tuwadocs:h-[18px] tuwadocs:w-0"
-              style={{ right: CLEAR, top: row - LABEL_ROW / 2 }}
+              className="tuwadocs:absolute tuwadocs:w-0"
+              style={{ right: CLEAR, top: box.top, height: box.height }}
             >
+              {/* The link is named by what it holds, in the order it shows it: the name, then the number next to the
+                  line. A name of its own (`aria-label`) held the number first, so it did not hold the text the link
+                  shows, and a reader who speaks to the page says what they see */}
               <a
                 href={`#${waypoint.id}`}
-                aria-label={text}
                 aria-current={isHere ? 'location' : undefined}
                 className={`tuwadocs:group/waypoint tuwadocs:pointer-events-auto tuwadocs:absolute tuwadocs:inset-y-0 tuwadocs:right-0 tuwadocs:flex tuwadocs:items-center tuwadocs:justify-end tuwadocs:font-mono tuwadocs:leading-none tuwadocs:whitespace-nowrap tuwadocs:uppercase tuwadocs:transition-colors ${labelColour(state)}`}
                 style={{ minWidth: LABELS_AT - CLEAR, paddingRight: (isStage ? NAMES_AT : LABELS_AT) - CLEAR }}
               >
-                {nameShown && (
+                {/* The name: in the margin where it has room; elsewhere beside the line, shown while the mark is pointed
+                    at or reached by the keyboard, and always there for assistive technology */}
+                {nameShown ? (
                   <span className={isStage ? stageNameClassName : sectionNameClassName}>{waypoint.name}</span>
-                )}
+                ) : (
+                  <span
+                    className="tuwadocs:pointer-events-none tuwadocs:absolute tuwadocs:-translate-y-1/2 tuwadocs:border tuwadocs:border-[var(--tuwa-border-strong)] tuwadocs:bg-[var(--tuwa-docs-raised)] tuwadocs:px-2 tuwadocs:py-1.5 tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:tracking-[0.12em] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-150 tuwadocs:group-hover/waypoint:opacity-100 tuwadocs:group-focus-visible/waypoint:opacity-100 tuwadocs:motion-reduce:transition-none"
+                    style={{ right: (numbersShown ? NAMES_AT : LABELS_AT) - CLEAR, top: mid }}
+                  >
+                    {numbersShown && !isStage ? waypoint.name : text}
+                  </span>
+                )}{' '}
                 {/* The number stands next to the line. A part without one keeps its place: its name ends where the
                     names above it end */}
                 {!isStage && numbersShown && (
@@ -428,7 +453,6 @@ function FlightRail({
                     {waypoint.number}
                   </span>
                 )}
-
                 {/* The leader from the mark to its label, across the lane of the tag */}
                 {leaderShown && (
                   <span
@@ -437,7 +461,7 @@ function FlightRail({
                     style={{
                       right: markEnd + 2 - CLEAR,
                       width: LABELS_AT - 4 - markEnd - 2,
-                      top: LABEL_ROW / 2 + shift,
+                      top: mid + shift,
                     }}
                   />
                 )}
@@ -447,19 +471,18 @@ function FlightRail({
                     className="tuwadocs:absolute tuwadocs:w-px tuwadocs:bg-[var(--tuwa-border-primary)]"
                     style={{
                       right: LABELS_AT - 5 - CLEAR,
-                      top: LABEL_ROW / 2 + Math.min(0, shift),
+                      top: mid + Math.min(0, shift),
                       height: Math.abs(shift) + 1,
                     }}
                   />
                 )}
-
                 {!isEarth && !shared && (
                   <span
                     aria-hidden="true"
                     className={`tuwadocs:absolute tuwadocs:border tuwadocs:transition-colors tuwadocs:duration-200 tuwadocs:motion-reduce:transition-none ${markColour(isReached)}`}
                     style={{
                       right: LINE - (size - 1) / 2 - CLEAR,
-                      top: LABEL_ROW / 2 + shift - (size - 1) / 2,
+                      top: mid + shift - (size - 1) / 2,
                       width: size,
                       height: size,
                     }}
@@ -472,19 +495,8 @@ function FlightRail({
                     height={2 * bay + 1}
                     arm={6}
                     className="tuwa-flight-lock tuwadocs:absolute tuwadocs:text-[var(--tuwa-docs-lit)]"
-                    style={{ right: LINE - bay - CLEAR, top: LABEL_ROW / 2 + shift - bay }}
+                    style={{ right: LINE - bay - CLEAR, top: mid + shift - bay }}
                   />
-                )}
-
-                {/* The name beside the line, where the margin has no room for it */}
-                {!nameShown && (
-                  <span
-                    aria-hidden="true"
-                    className="tuwadocs:pointer-events-none tuwadocs:absolute tuwadocs:-translate-y-1/2 tuwadocs:border tuwadocs:border-[var(--tuwa-border-strong)] tuwadocs:bg-[var(--tuwa-docs-raised)] tuwadocs:px-2 tuwadocs:py-1.5 tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:tracking-[0.12em] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-150 tuwadocs:group-hover/waypoint:opacity-100 tuwadocs:group-focus-visible/waypoint:opacity-100 tuwadocs:motion-reduce:transition-none"
-                    style={{ right: (numbersShown ? NAMES_AT : LABELS_AT) - CLEAR, top: LABEL_ROW / 2 }}
-                  >
-                    {numbersShown && !isStage ? waypoint.name : text}
-                  </span>
                 )}
               </a>
             </li>
