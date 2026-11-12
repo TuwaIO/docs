@@ -1,12 +1,21 @@
 'use client';
 
-import { PixelArt, projectIconArt } from '@tuwaio/docs-ui';
-import { type CSSProperties, type RefObject, useEffect, useRef, useState } from 'react';
+import { PixelArt, projectIconArt, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
+import {
+  type CSSProperties,
+  type FocusEvent,
+  type MouseEvent,
+  type RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { formatLabel, useI18n } from '@/i18n';
 import {
   boardEdges,
   boardPlaces,
+  ecosystemCounts,
   entryLayerRange,
   layers,
   sdkReExports,
@@ -17,13 +26,27 @@ import {
 import { type BoardTrace, boardTraces, type NodeBox, traceEnds, tracePath } from '@/lib/ecosystemBoard';
 import { formatPlural } from '@/lib/plural';
 
-import { SectionHead } from './SectionHead';
+import { SectionBar, SectionHead } from './SectionHead';
 
 /** The width from which the board lays the projects on three lanes and draws its traces (Tailwind's `lg`) */
 const DESKTOP = '(min-width: 64rem)';
 
 const capsClassName = 'font-mono text-[11px] font-bold uppercase leading-none tracking-[0.12em]';
 const orTagClassName = `h-5 items-center border border-[var(--tuwa-border-strong)] bg-[var(--tuwa-docs-raised)] px-1.5 text-[var(--tuwa-text-secondary)] ${capsClassName}`;
+
+/**
+ * A sample of a trace for the legend: a line of 1px between two squares, solid for a project another cannot work
+ * without, dotted for a link that is optional.
+ */
+function TraceSample({ dotted }: { dotted?: boolean }) {
+  return (
+    <svg width="34" height="6" className="shrink-0" shapeRendering="crispEdges" aria-hidden="true">
+      <rect x="0" y="1" width="4" height="4" fill="currentColor" />
+      <path d="M5 3.5h24" stroke="currentColor" strokeDasharray={dotted ? '1 3' : undefined} />
+      <rect x="30" y="1" width="4" height="4" fill="currentColor" />
+    </svg>
+  );
+}
 
 /**
  * The traces of the board, measured from its nodes from 1024px: again when the board changes size, when the window
@@ -91,14 +114,15 @@ const packageCount = (entry: StagedEntry) =>
   (entry.packages ?? []).filter((pkg) => pkg.name.startsWith('@tuwaio/') && !pkg.isDeprecated).length;
 
 /**
- * The board of the architecture of the main page, in paper and ink: what builds on what. Below its head (the kicker
- * with the number of stages, the title, the lead), a board of raised paper on lines of 1px with a row per stage (its
- * number, the layers of its packages and its title, a link to its ledger) and the projects as nodes (a pixel tile, the
- * name, the packages and their layers; the SDK with the projects it re-exports), each a link to its row. From 1024px
- * the projects sit on three lanes and dotted traces with square ends run from each project to the projects that build
- * on it, measured in the browser; under the pointer or the keyboard a project lights its traces and its neighbours.
- * From 600px a stage lists its projects two by two, on phones one under another on a dotted line. The traces are
- * hidden from assistive technology, which reads a list of what builds on what instead.
+ * The board of the architecture of the main page, in paper and ink: what builds on what. It opens with the bar of the
+ * section (`01 / Ecosystem`, with the numbers of products, stages and packages), then the title, the lead and a board
+ * of raised paper on lines of 1px with a row per stage (its number, the layers of its packages and its title in mono, a
+ * link to its ledger) and the projects as nodes (a pixel tile, the name in mono, the packages and their layers; the SDK
+ * with the projects it re-exports), each a link to its row. From 1024px the projects sit on three lanes and traces with
+ * square ends run from each project to the projects that build on it, measured in the browser: solid where a project
+ * cannot work without the other, dotted where the link is optional. Under the pointer or the keyboard a project lights
+ * its traces and its neighbours. From 600px a stage lists its projects two by two, on phones one under another on a
+ * dotted line. The traces are hidden from assistive technology, which reads a list of what builds on what instead.
  *
  * Side effects: a `ResizeObserver` on the board and a listener of the 1024px media query while it is mounted.
  *
@@ -112,28 +136,46 @@ export function EcosystemBoard() {
   const [active, setActive] = useState<string | null>(null);
 
   const entries = stagedEntries();
+  const counts = ecosystemCounts();
   const nameOf = (id: string) => entries.find((entry) => entry.id === id)?.name ?? id;
   const lit = new Set(
     active
       ? boardEdges.filter((edge) => edge.from === active || edge.to === active).flatMap((edge) => [edge.from, edge.to])
       : [],
   );
-  const point = (id: string) => ({
-    onMouseEnter: () => setActive(id),
-    onMouseLeave: () => setActive((current) => (current === id ? null : current)),
-    onFocus: () => setActive(id),
-    onBlur: () => setActive((current) => (current === id ? null : current)),
-  });
+  // A project under the pointer or the keyboard lights its traces and its neighbours, and its icon assembles again and
+  // moves in the way of its project until the pointer or the focus leaves
+  const point = (id: string) => {
+    const enter = (event: MouseEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
+      setActive(id);
+      startPixelMotion(event.currentTarget);
+    };
+    const leave = (event: MouseEvent<HTMLElement> | FocusEvent<HTMLElement>) => {
+      setActive((current) => (current === id ? null : current));
+      stopPixelMotion(event.currentTarget);
+    };
+    return { onMouseEnter: enter, onMouseLeave: leave, onFocus: enter, onBlur: leave };
+  };
 
   return (
-    <section id="ecosystem" aria-labelledby="ecosystem-title" className="scroll-mt-24 pt-[104px]">
-      <SectionHead
-        id="ecosystem-title"
-        kicker={formatPlural(board.kicker, layers.length, locale)}
-        title={`${t.home.timeline.titlePrefix} ${t.home.timeline.titleHighlight}`}
-        lead={t.home.timeline.subtitle}
-        code="@tuwaio/sdk"
+    <section id="ecosystem" aria-labelledby="ecosystem-title" className="mt-[104px] scroll-mt-[56px]">
+      <SectionBar
+        number={1}
+        name={board.section}
+        meta={[
+          formatPlural(t.home.plate.products, counts.products, locale),
+          formatPlural(t.home.plate.stages, counts.stages, locale),
+          formatPlural(board.packages, counts.packages, locale),
+        ]}
       />
+      <div className="pt-12">
+        <SectionHead
+          id="ecosystem-title"
+          title={`${t.home.timeline.titlePrefix} ${t.home.timeline.titleHighlight}`}
+          lead={t.home.timeline.subtitle}
+          code="@tuwaio/sdk"
+        />
+      </div>
 
       <div
         ref={boardRef}
@@ -152,12 +194,12 @@ export function EcosystemBoard() {
           <span className={`px-4 ${capsClassName}`}>{board.projectsHeading}</span>
           <span className={`flex items-center gap-[18px] px-4 ${capsClassName}`}>
             <span className="inline-flex items-center gap-2">
-              <svg width="34" height="6" className="shrink-0" shapeRendering="crispEdges">
-                <rect x="0" y="1" width="4" height="4" fill="currentColor" />
-                <path d="M5 3.5h24" stroke="currentColor" strokeDasharray="1 3" />
-                <rect x="30" y="1" width="4" height="4" fill="currentColor" />
-              </svg>
+              <TraceSample />
               {board.buildsOn}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <TraceSample dotted />
+              {board.optional}
             </span>
             <span className="inline-flex items-center gap-2">
               <span className={`inline-flex ${orTagClassName}`}>{board.or}</span>
@@ -199,7 +241,7 @@ export function EcosystemBoard() {
                     {stageLayerRange(stage)}
                   </span>
                 </span>
-                <span className="flex-1 font-sans text-sm font-semibold leading-[1.3] text-[var(--tuwa-text-primary)]">
+                <span className="flex-1 font-mono text-[13px] font-semibold leading-[1.3] tracking-[-0.02em] text-[var(--tuwa-text-primary)]">
                   {t.home.timeline.stages[stage]?.title}
                 </span>
               </a>
@@ -236,10 +278,16 @@ export function EcosystemBoard() {
                         className={`absolute top-[28px] -left-[22px] h-px w-[21px] bg-[var(--tuwa-text-secondary)] opacity-60 lg:hidden ${position === 1 ? 'min-[600px]:hidden' : ''}`}
                       />
                       <span className="grid h-[38px] w-[38px] flex-none place-items-center border border-[var(--tuwa-border-primary)]">
-                        <PixelArt art={projectIconArt[entry.icon]} assemble className="h-[27px] w-[27px]" />
+                        <PixelArt
+                          art={projectIconArt[entry.icon]}
+                          assemble
+                          motion={entry.icon}
+                          data-board-icon={entry.id}
+                          className="h-[27px] w-[27px]"
+                        />
                       </span>
                       <span className="flex min-w-0 flex-col gap-1">
-                        <span className="font-sans text-[15px] font-semibold leading-[1.25] text-[var(--tuwa-text-primary)]">
+                        <span className="font-mono text-sm font-semibold leading-[1.25] tracking-[-0.02em] text-[var(--tuwa-text-primary)]">
                           {entry.name}
                         </span>
                         <span className="font-mono text-[11px] font-bold uppercase leading-[1.2] tracking-[0.1em] text-[var(--tuwa-text-secondary)]">
@@ -286,17 +334,23 @@ export function EcosystemBoard() {
         >
           {traces.map((trace) => {
             const isLit = active !== null && (trace.from === active || trace.to === active);
+            // Solid where a project cannot work without the other, dotted where the link is optional, lit or not; a
+            // solid line rests in the grey of the strong lines, a dotted one in the grey of the text (its dots are
+            // sparse)
+            const isOptional = trace.kind === 'optional';
+            const rest = isOptional ? 'text-[var(--tuwa-text-secondary)]' : 'text-[var(--tuwa-border-strong)]';
             return (
               <g
                 key={`${trace.from}>${trace.to}`}
-                className={`transition-colors duration-150 ${isLit ? 'text-[var(--tuwa-text-accent)]' : 'text-[var(--tuwa-text-secondary)]'}`}
+                data-kind={trace.kind ?? 'required'}
+                className={`transition-colors duration-150 ${isLit ? 'text-[var(--tuwa-text-accent)]' : rest}`}
               >
                 <path
                   d={tracePath(trace.points)}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={1}
-                  strokeDasharray={isLit ? undefined : '1 3'}
+                  strokeDasharray={isOptional ? '1 3' : undefined}
                 />
                 {traceEnds(trace.points).map(([x, y]) => (
                   <rect key={`${x}-${y}`} x={x} y={y} width={4} height={4} fill="currentColor" />
@@ -328,7 +382,10 @@ export function EcosystemBoard() {
           <li key={`${edge.from}>${edge.to}`}>
             {edge.kind === 'or'
               ? formatLabel(board.relationOr, { first: nameOf(edge.from), second: nameOf(edge.to) })
-              : formatLabel(board.relation, { project: nameOf(edge.to), base: nameOf(edge.from) })}
+              : formatLabel(edge.kind === 'optional' ? board.relationOptional : board.relation, {
+                  project: nameOf(edge.to),
+                  base: nameOf(edge.from),
+                })}
           </li>
         ))}
       </ul>

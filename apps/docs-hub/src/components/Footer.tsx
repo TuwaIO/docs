@@ -10,7 +10,8 @@ import { homeContentClassName } from './home/homeLayout';
 const policyClassName = 'font-mono text-[11px] leading-[1.3] uppercase tracking-[0.12em] transition-colors';
 
 /**
- * The footer of the hub pages, in paper and ink: a rule of ink above; the logo and the description of TUWA on the left;
+ * The footer of the hub pages, in paper and ink: a line of 1px above, in the grey of every rule of the page (a line of
+ * ink drew too much attention); the logo, at the size of the logo of tuwa.io, and the description of TUWA on the left;
  * the policies in force on tuwa.io and the list of all policies (`/policies`, in ink) on the right, in mono caps; the
  * copyright and the address of the hub in mono below a line of 1px. On phones the parts stack and the links wrap.
  *
@@ -21,11 +22,11 @@ export function Footer() {
   const policyLanguage = policyLanguageOf(locale);
 
   return (
-    <footer className="relative z-10 mt-[120px] border-t border-[var(--tuwa-text-primary)]">
+    <footer className="relative z-10 mt-[120px] border-t border-[var(--tuwa-border-primary)]">
       <div className={`${homeContentClassName} pt-7 pb-9 md:pt-8 md:pb-10 xl:pb-11`}>
         <div className="grid gap-[22px] md:grid-cols-2 md:items-start">
           <div className="grid justify-items-start gap-3.5">
-            <SiteLogo width={57} />
+            <SiteLogo />
             <p className="m-0 max-w-[460px] text-sm text-[var(--tuwa-text-secondary)]">{t.footer.description}</p>
           </div>
           <nav

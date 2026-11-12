@@ -15,23 +15,29 @@ const ARROW_DOWN = ['...#...', '...#...', '...#...', '#..#..#', '.#.#.#.', '..##
 const ARROW_RIGHT = ['...#...', '....#..', '.....#.', '#######', '.....#.', '....#..', '...#...'];
 
 /**
- * The size of the title by language, as a share of the width of its column (container query units): "TUWA Docs" and
- * "TUWA 文档" fill the column on one line; "TUWA Документація" is twice as long and takes a smaller size on one line.
+ * The size and tracking of the title by language, the size as a share of the width of its column (container query
+ * units), measured on Geist Mono so the title fills the column on one line: "TUWA Docs", "TUWA 文档" (its two CJK
+ * glyphs are wider than two Latin ones) and "TUWA Довідник", longer and smaller. Cyrillic keeps the normal tracking:
+ * drawn tighter, its glyphs touch.
  */
 const titleSize: Record<TuwaLocale, string> = {
-  en: 'text-[19cqi]',
-  uk: 'text-[10.5cqi]',
-  'zh-CN': 'text-[19cqi]',
+  en: 'text-[19.6cqi] tracking-[-0.04em]',
+  uk: 'text-[12.6cqi] tracking-normal',
+  'zh-CN': 'text-[20.9cqi] tracking-[-0.04em]',
 };
 
 const buttonClassName =
-  'inline-flex h-11 items-center gap-2.5 whitespace-nowrap px-[18px] font-mono text-xs font-bold uppercase leading-none tracking-[0.12em] transition-colors';
+  'group inline-flex h-11 items-center gap-2.5 whitespace-nowrap px-[18px] font-mono text-xs font-bold uppercase leading-none tracking-[0.12em] transition-colors';
+
+/** The pixel arrow of a button: it steps the way it points while the button is under the pointer or the keyboard */
+const arrowClassName =
+  'h-3.5 w-3.5 [--tuwa-pixel-ink:currentColor] transition-transform duration-200 ease-out motion-reduce:transition-none motion-reduce:!translate-none';
 
 /**
- * The hero of the main page, in paper and ink: the kicker with a lit square, the title "TUWA Docs" in large sans set
+ * The hero of the main page, in paper and ink: the kicker with a lit square, the title "TUWA Docs" in large mono set
  * to the width of its column, the lead, the licence with an Apache-2.0 chip, and two buttons in mono caps with pixel
- * arrows (to the packages of the first stage, and to the Playground); beside it from 1024px, below it on narrower
- * screens, the plate of the eight projects.
+ * arrows (to the packages of the first stage, and to the Playground) that step the way they point under the pointer or
+ * the keyboard; beside it from 1024px, below it on narrower screens, the plate of the eight projects.
  *
  * @returns The hero section.
  */
@@ -49,7 +55,7 @@ export function HeroSection() {
         <Kicker>{hero.badge}</Kicker>
         <h1
           id="hero-title"
-          className={`mt-5 whitespace-nowrap font-sans font-medium leading-[0.92] tracking-[-0.05em] text-[var(--tuwa-text-primary)] ${titleSize[locale]}`}
+          className={`mt-5 whitespace-nowrap font-mono font-medium leading-[0.92] text-[var(--tuwa-text-primary)] ${titleSize[locale]}`}
         >
           {hero.titlePrefix} {hero.titleHighlight}
         </h1>
@@ -66,14 +72,20 @@ export function HeroSection() {
             className={`${buttonClassName} bg-[var(--tuwa-button-primary-bg)] text-[var(--tuwa-text-on-accent)] hover:bg-[var(--tuwa-button-primary-bg-hover)]`}
           >
             {hero.explorePackages}
-            <PixelArt art={ARROW_DOWN} className="h-3.5 w-3.5 [--tuwa-pixel-ink:currentColor]" />
+            <PixelArt
+              art={ARROW_DOWN}
+              className={`${arrowClassName} group-hover:translate-y-[3px] group-focus-visible:translate-y-[3px]`}
+            />
           </a>
           <Link
             href="/playground"
             className={`${buttonClassName} border border-[var(--tuwa-border-strong)] text-[var(--tuwa-text-primary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]`}
           >
             {hero.tryPlayground}
-            <PixelArt art={ARROW_RIGHT} className="h-3.5 w-3.5 [--tuwa-pixel-ink:currentColor]" />
+            <PixelArt
+              art={ARROW_RIGHT}
+              className={`${arrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
+            />
           </Link>
         </div>
       </div>

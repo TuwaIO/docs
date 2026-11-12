@@ -41,7 +41,8 @@ export const uk: DocsHubLabels = {
     hero: {
       badge: 'Інтерактивна Web3 документація',
       titlePrefix: 'TUWA',
-      titleHighlight: 'Документація',
+      // "Документація" took twice the width of the column and half the size of the title
+      titleHighlight: 'Довідник',
       description:
         'Open-source TypeScript пакети для EVM і Solana: підключення гаманців, вхід за стандартом CAIP-122 та відстеження транзакцій, з опціональними React-компонентами та хмарним або self-hosted бекендом.',
       license: 'Усі пакети TUWA і Quasar Community Edition мають ліцензію Apache-2.0, і так залишиться.',
@@ -62,15 +63,11 @@ export const uk: DocsHubLabels = {
       stages: { one: '{n} етап', few: '{n} етапи', many: '{n} етапів', other: '{n} етапу' },
     },
     board: {
-      kicker: {
-        one: 'Екосистема · {n} етап',
-        few: 'Екосистема · {n} етапи',
-        many: 'Екосистема · {n} етапів',
-        other: 'Екосистема · {n} етапу',
-      },
+      section: 'Екосистема',
       stage: 'Етап',
       projectsHeading: 'Проєкти і на чому кожен будується',
       buildsOn: 'Будується на',
+      optional: 'Опціонально',
       or: 'АБО',
       cloudOrSelfHosted: 'Хмара або self-hosted',
       selfHosted: 'Self-hosted',
@@ -78,6 +75,7 @@ export const uk: DocsHubLabels = {
       reExports: 'Реекспортує',
       relationsLabel: 'На чому будується кожен проєкт',
       relation: '{project} будується на {base}',
+      relationOptional: '{project} працює разом із {base}; кожен працює й без іншого',
       relationOr: '{first} або {second}: той самий бекенд, self-hosted або в хмарі',
     },
     timeline: {

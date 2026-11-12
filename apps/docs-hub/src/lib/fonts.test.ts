@@ -149,6 +149,32 @@ describe('the fonts of the documentation sites', () => {
     expect(lastValue(css, '.font-geist-mono', 'font-family')?.value).toBe('var(--tuwa-font-mono) !important');
   });
 
+  // Every heading of TUWA is in Geist Mono: the headings of the articles of every docs site (docs-ui) and the headings
+  // of the hub pages; the body reads in Geist
+  it.each([
+    ['source', path.join(docsUi, 'src/styles/site.css')],
+    ['build', path.join(docsUi, 'dist/site.css')],
+  ])('sets the headings of an article in Geist Mono (%s)', (_, file) => {
+    const rule = rulesOf(read(file)).find((candidate) => candidate.selector.startsWith('article h1,'));
+    expect(rule?.selector).toBe('article h1, article h2, article h3, article h4, article h5, article h6');
+    expect(declarationsOf(rule!.body)).toContainEqual({
+      property: 'font-family',
+      value: 'var(--tuwa-font-mono) !important',
+    });
+  });
+
+  it('sets every heading of the hub in Geist Mono, and no heading of the main page back in sans', () => {
+    const rule = rulesOf(read(globalsFile)).find((candidate) => candidate.selector.startsWith(':is(h1, h2, h3'));
+    expect(rule).toBeDefined();
+    expect(declarationsOf(rule!.body)).toContainEqual({ property: 'font-family', value: 'var(--tuwa-font-mono)' });
+    for (const file of ['../components/HeroSection.tsx', '../components/home/SectionHead.tsx']) {
+      const source = read(path.resolve(__dirname, file));
+      const headings = [...source.matchAll(/<h[1-6][\s\S]*?>/g)].map(([tag]) => tag);
+      expect(headings.length, file).toBeGreaterThan(0);
+      for (const heading of headings) expect(heading, file).not.toContain('font-sans');
+    }
+  });
+
   // The sizes of paper and ink are drawn on the browser's 16px root: a smaller root shrank every rem of the pages
   it.each([
     ['docs-ui site.css', path.join(docsUi, 'src/styles/site.css')],

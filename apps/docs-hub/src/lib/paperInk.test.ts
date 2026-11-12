@@ -47,6 +47,11 @@ const drawnDetails: { selector: RegExp; property: RegExp; why: string }[] = [
     property: /^box-shadow$/,
     why: 'a hair edge of 0.5px that keeps a flag in shape on paper, not a shadow',
   },
+  {
+    selector: /^\.(tuwa-docs-glass|nextra-navbar-blur)$/,
+    property: /^(-webkit-)?backdrop-filter$/,
+    why: 'the glass of what stays over the page as it scrolls (the headers, the bars of sections, the menu): a light blur under paper a little clear',
+  },
 ];
 const isDrawnDetail = (selector: string, property: string) =>
   drawnDetails.some((detail) => detail.selector.test(selector) && detail.property.test(property));
@@ -234,10 +239,15 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
     expect(cssViolation(selector, property, value)).toBeUndefined();
   });
 
-  // Motions play once: a page of documentation is read, and nothing on it moves for ever
-  it('has no motion that repeats for ever', () => {
-    const css = withoutCssComments(read(siteCssFile));
-    expect(css.match(/[^;{}]*\binfinite\b[^;{}]*/g) ?? []).toEqual([]);
+  // Motions play once: a page of documentation is read, and nothing on it moves for ever. The one exception is the
+  // icon of a project while the reader points at it (`.tuwa-pixel-art--live`): it moves in its own way until the
+  // pointer leaves
+  it('has no motion that repeats for ever, but an icon the reader points at', () => {
+    const endless = rulesOf(read(siteCssFile)).filter((rule) => /\binfinite\b/.test(rule.body));
+    expect(endless.length).toBeGreaterThan(0);
+    for (const rule of endless)
+      for (const selector of rule.selector.split(','))
+        expect(selector.trim(), 'an endless motion outside a pointed icon').toMatch(/^\.tuwa-pixel-art--live\b/);
   });
 
   it('draws its scanlines as Nova draws them', () => {

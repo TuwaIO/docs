@@ -32,23 +32,40 @@ describe('the traces of the board', () => {
     );
   });
 
-  it('runs every trace on lines across and down, from the edge of one node to the edge of the other', () => {
+  // A point on the outline of a node, not at a corner, and the step from it away from the node
+  const onOutline = ([x, y]: [number, number], box: NodeBox) =>
+    ((x === box.left || x === box.right) && y > box.top && y < box.bottom) ||
+    ((y === box.top || y === box.bottom) && x > box.left && x < box.right);
+  const outward = ([x, y]: [number, number], [nextX, nextY]: [number, number], box: NodeBox) =>
+    (x === box.left && nextX < x) ||
+    (x === box.right && nextX > x) ||
+    (y === box.top && nextY < y) ||
+    (y === box.bottom && nextY > y);
+
+  it('runs every trace on lines across and down, from the outline of one node out to the outline of the other', () => {
     for (const trace of traces) {
       const [from, to] = [boxes[trace.from]!, boxes[trace.to]!];
-      const [first, last] = [trace.points[0]!, trace.points[trace.points.length - 1]!];
-      expect(isOrthogonal(trace.points), trace.from).toBe(true);
-      if (trace.kind === 'or') {
-        expect(first[0]).toBe(from.right);
-        expect(last[0]).toBe(to.left);
-      } else {
-        expect(first[1]).toBe(from.bottom);
-        expect(last[1]).toBe(to.top);
-        expect(first[0]).toBeGreaterThan(from.left);
-        expect(first[0]).toBeLessThan(from.right);
-        expect(last[0]).toBeGreaterThan(to.left);
-        expect(last[0]).toBeLessThan(to.right);
-      }
+      const { points } = trace;
+      const label = `${trace.from}>${trace.to}`;
+      expect(isOrthogonal(points), label).toBe(true);
+      expect(onOutline(points[0]!, from), label).toBe(true);
+      expect(onOutline(points[points.length - 1]!, to), label).toBe(true);
+      expect(outward(points[0]!, points[1]!, from), label).toBe(true);
+      expect(outward(points[points.length - 1]!, points[points.length - 2]!, to), label).toBe(true);
     }
+  });
+
+  // Nova cannot work without Orbit: the board shows the edge, which runs down the margin past the third lane
+  it('links Orbit to Nova and to SIWX, and draws the optional links of SIWX and Pulsar as such', () => {
+    const kinds = Object.fromEntries(traces.map((trace) => [`${trace.from}>${trace.to}`, trace.kind ?? 'required']));
+    expect(kinds).toMatchObject({
+      'orbit>siwx': 'required',
+      'orbit>nova': 'required',
+      'siwx>nova': 'optional',
+      'siwx>satellite': 'optional',
+      'pulsar>quasar': 'optional',
+      'quasar-community>quasar': 'or',
+    });
   });
 
   // A trace that crossed a node would read as an edge to it
@@ -115,6 +132,18 @@ describe('the traces of the board', () => {
     ).toEqual([
       [10, 28.5],
       [46, 28.5],
+    ]);
+    // Out of the left side of one node, down, and into the right side of another: each square stays outside its node
+    expect(
+      traceEnds([
+        [100, 20.5],
+        [90.5, 20.5],
+        [90.5, 80.5],
+        [60, 80.5],
+      ]),
+    ).toEqual([
+      [96, 18.5],
+      [60, 78.5],
     ]);
   });
 });

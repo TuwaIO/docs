@@ -19,6 +19,9 @@ const crisp = (value: number) => Math.round(value) + 0.5;
 /** A point along the width of a node, as a share of it (0 the left edge, 1 the right one). */
 const along = (box: NodeBox, share: number) => crisp(box.left + share * (box.right - box.left));
 
+/** The middle of the height of a node. */
+const middle = (box: NodeBox) => crisp((box.top + box.bottom) / 2);
+
 type Route = (boxes: Record<string, NodeBox>, laneEdge: (index: number) => number) => [number, number][];
 
 /**
@@ -27,6 +30,14 @@ type Route = (boxes: Record<string, NodeBox>, laneEdge: (index: number) => numbe
  * {@link defaultRoute}.
  */
 const routes: Record<string, Route> = {
+  // Across the first row, through the empty middle lane
+  'orbit>siwx': ({ orbit, siwx }) => {
+    const y = crisp((Math.max(orbit!.top, siwx!.top) + Math.min(orbit!.bottom, siwx!.bottom)) / 2);
+    return [
+      [orbit!.left, y],
+      [siwx!.right, y],
+    ];
+  },
   'siwx>satellite': ({ siwx, satellite }) => [
     [along(siwx!, 0.5), siwx!.bottom],
     [along(siwx!, 0.5), satellite!.top],
@@ -60,6 +71,26 @@ const routes: Record<string, Route> = {
     [along(nova!, 0.6), crisp(nova!.top - 28)],
     [along(nova!, 0.6), nova!.top],
   ],
+  // Down the margin on the right of the third lane, past Pulsar and Quasar Cloud, into the right side of Nova
+  'orbit>nova': ({ orbit, nova }, laneEdge) => {
+    const x = crisp((orbit!.right + laneEdge(3)) / 2);
+    return [
+      [orbit!.right, middle(orbit!)],
+      [x, middle(orbit!)],
+      [x, middle(nova!)],
+      [nova!.right, middle(nova!)],
+    ];
+  },
+  // Down the margin on the left of the first lane, past Satellite Connect, into the left side of Nova
+  'siwx>nova': ({ siwx, nova }, laneEdge) => {
+    const x = crisp((laneEdge(0) + siwx!.left) / 2);
+    return [
+      [siwx!.left, middle(siwx!)],
+      [x, middle(siwx!)],
+      [x, middle(nova!)],
+      [nova!.left, middle(nova!)],
+    ];
+  },
   'nova>sdk': ({ nova, sdk }) => [
     [along(nova!, 0.45), nova!.bottom],
     [along(nova!, 0.45), sdk!.top],
@@ -67,10 +98,9 @@ const routes: Record<string, Route> = {
   'quasar-community>quasar': (boxes) => {
     const community = boxes['quasar-community']!;
     const quasar = boxes.quasar!;
-    const middle = crisp((quasar.top + quasar.bottom) / 2);
     return [
-      [community.right, middle],
-      [quasar.left, middle],
+      [community.right, middle(quasar)],
+      [quasar.left, middle(quasar)],
     ];
   },
 };
@@ -85,17 +115,17 @@ const routes: Record<string, Route> = {
  * @param kind - The kind of the edge.
  * @returns The points of the route.
  */
-export function defaultRoute(from: NodeBox, to: NodeBox, kind?: 'or'): [number, number][] {
+export function defaultRoute(from: NodeBox, to: NodeBox, kind?: BoardEdge['kind']): [number, number][] {
   if (kind === 'or') {
-    const middle = crisp((to.top + to.bottom) / 2);
+    const y = middle(to);
     return from.right <= to.left
       ? [
-          [from.right, middle],
-          [to.left, middle],
+          [from.right, y],
+          [to.left, y],
         ]
       : [
-          [from.left, middle],
-          [to.right, middle],
+          [from.left, y],
+          [to.right, y],
         ];
   }
   const start = along(from, 0.5);
@@ -148,22 +178,16 @@ export function tracePath(points: [number, number][]): string {
 }
 
 /**
- * The two squares of 4px that end a trace, on its line: at its start against the first node and at its end against
- * the second.
+ * The two squares of 4px that end a trace, on its line and outside its nodes: at its start, where it leaves the first
+ * node (down, up, left or right), and at its end, where it enters the second.
  *
  * @param points - The points of the trace.
  * @returns The top left corners of the two squares.
  */
 export function traceEnds(points: [number, number][]): [number, number][] {
-  const [first, last] = [points[0]!, points[points.length - 1]!];
-  const horizontal = first[1] === last[1] && points.length === 2;
-  return horizontal
-    ? [
-        [first[0], first[1] - 2],
-        [last[0] - 4, last[1] - 2],
-      ]
-    : [
-        [first[0] - 2, first[1]],
-        [last[0] - 2, last[1] - 4],
-      ];
+  const square = ([x, y]: [number, number], [toX, toY]: [number, number]): [number, number] =>
+    x === toX ? [x - 2, toY > y ? y : y - 4] : [toX > x ? x : x - 4, y - 2];
+  const [first, second] = [points[0]!, points[1]!];
+  const [last, beforeLast] = [points[points.length - 1]!, points[points.length - 2]!];
+  return [square(first, second), square(last, beforeLast)];
 }

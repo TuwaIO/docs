@@ -181,6 +181,7 @@ export const layers: EcosystemLayer[] = [
         githubUrl: 'https://github.com/TuwaIO/nova-uikit',
         packages: [
           { name: '@tuwaio/nova-core', layer: 'L6' },
+          { name: '@tuwaio/nova-icons', layer: 'L6' },
           { name: '@tuwaio/nova-connect', layer: 'L7' },
           { name: '@tuwaio/nova-transactions', layer: 'L7' },
         ],
@@ -203,6 +204,7 @@ export const layers: EcosystemLayer[] = [
         githubUrl: 'https://github.com/TuwaIO/sdk',
         packages: [
           { name: '@tuwaio/sdk', layer: 'L8' },
+          { name: '@tuwaio/create-cosmos-playground', layer: 'L8' },
           { name: '@tuwaio/evm-sdk', layer: 'L9' },
           { name: '@tuwaio/solana-sdk', layer: 'L9' },
         ],
@@ -283,23 +285,32 @@ export const boardPlaces: Readonly<Record<string, BoardPlace>> = {
 };
 
 /**
- * An edge of the board of the architecture, by project ids: `to` builds on `from`; with the kind `or`, the two are two
- * ways to run the same thing (Quasar self-hosted or in the cloud).
+ * An edge of the board of the architecture, by project ids: `to` builds on `from` and cannot work without it; with the
+ * kind `optional`, the two work together and each works without the other (a solid line and a dotted one on the board);
+ * with the kind `or`, the two are two ways to run the same thing (Quasar self-hosted or in the cloud).
  */
 export interface BoardEdge {
   from: string;
   to: string;
-  kind?: 'or';
+  kind?: 'optional' | 'or';
 }
 
-/** What builds on what, top to bottom: the traces of the board and the list that reads them out. */
+/**
+ * What builds on what, top to bottom: the traces of the board and the list that reads them out. Taken from the
+ * dependencies of the packages: SIWX, Satellite, Pulsar and Nova import Orbit; Nova imports Satellite and Pulsar; the SDK
+ * imports Nova. A sign-in with SIWX is optional to Satellite and Nova, and Pulsar syncs with Quasar only when an app
+ * gives it a backend.
+ */
 export const boardEdges: readonly BoardEdge[] = [
-  { from: 'siwx', to: 'satellite' },
+  { from: 'orbit', to: 'siwx' },
+  { from: 'siwx', to: 'satellite', kind: 'optional' },
   { from: 'orbit', to: 'satellite' },
   { from: 'orbit', to: 'pulsar' },
-  { from: 'pulsar', to: 'quasar' },
+  { from: 'pulsar', to: 'quasar', kind: 'optional' },
   { from: 'satellite', to: 'nova' },
   { from: 'pulsar', to: 'nova' },
+  { from: 'orbit', to: 'nova' },
+  { from: 'siwx', to: 'nova', kind: 'optional' },
   { from: 'nova', to: 'sdk' },
   { from: 'quasar-community', to: 'quasar', kind: 'or' },
 ];

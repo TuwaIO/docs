@@ -5,7 +5,9 @@ import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata'
 
 import { HeroSection } from '../../../components/HeroSection';
 import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
-import { homeContentClassName } from '../../../components/home/homeLayout';
+import { homeContentClassName, homeFrameClassName } from '../../../components/home/homeLayout';
+import { PixelHandoff } from '../../../components/home/PixelHandoff';
+import { CrossMark } from '../../../components/home/SectionHead';
 import { JsonLd } from '../../../components/JsonLd';
 import { LayerTimeline } from '../../../components/LayerTimeline';
 import { PageBackground } from '../../../components/PageBackground';
@@ -46,9 +48,15 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <PageBackground />
 
       <div className="relative z-10 pb-16">
-        <div className={homeContentClassName}>
+        <PixelHandoff />
+        {/* The frame of the column: its sides meet the line under the header and its bottom with a cross */}
+        <div className={`${homeContentClassName} ${homeFrameClassName} pb-16 xl:border-b`}>
+          <CrossMark x="left" y="top" />
+          <CrossMark x="right" y="top" />
           <HeroSection />
           <EcosystemBoard />
+          <CrossMark x="left" y="bottom" />
+          <CrossMark x="right" y="bottom" />
         </div>
         <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6 pt-24">
           <LayerTimeline releases={getReleases()} packages={getPackageDetails()} />

@@ -12,6 +12,16 @@
   --font-mono: var(--tuwa-font-mono);
 }
 
+/* Every heading of the hub in Geist Mono, as the headings of TUWA: the body reads in Geist. Nova draws its own parts
+   (the Playground shows it as apps get it), which keep the fonts Nova gives them */
+@layer base {
+  :is(h1, h2, h3, h4, h5, h6):not(
+    :is([class*='novacore:'], [class*='novacon:'], [class*='novatx:'], [class*='novapay:'])
+  ) {
+    font-family: var(--tuwa-font-mono);
+  }
+}
+
 /* The gradient of the titles of the hub pages, which docs-ui no longer carries. The titles are transparent text over it:
    it goes with the last of them, when their pages are redrawn in paper and ink (without it they would not show) */
 :root {
@@ -25,6 +35,30 @@ html.dark,
   --tuwa-hero-gradient-from: #2563eb;
   --tuwa-hero-gradient-via: #3b82f6;
   --tuwa-hero-gradient-to: #7dd3fc;
+}
+
+/* The handoff of the main page (`PixelHandoff`): while the pixels of the project icons fly from the plate of the hero to
+   the board, both sets of icons hide; before it the board waits without its icons. Without the script, or for reduced
+   motion, nothing sets the attribute and every icon shows */
+html[data-handoff='flight'] :is([data-plate-icon], [data-board-icon]),
+html[data-handoff='plate'] [data-board-icon] {
+  visibility: hidden;
+}
+
+/* A pixel in flight: a square of 1px that the handoff moves and scales, in the colours of the pixel art of docs-ui */
+.tuwa-handoff-pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  transform-origin: 0 0;
+  background-color: var(--tuwa-pixel-ink, var(--tuwa-text-primary));
+  will-change: transform;
+}
+
+.tuwa-handoff-pixel--lit {
+  background-color: var(--tuwa-pixel-lit, var(--tuwa-text-accent));
 }
 
 /* A dotted line of the main page, the stages of the board on phones and tablets: a dot of 1px every 8px, in the colour

@@ -277,14 +277,16 @@ export interface DocsHubLabels {
     };
     /** The board of the architecture: what builds on what */
     board: {
-      /** Above the title: "The ecosystem · {n} stages" */
-      kicker: PluralLabel;
+      /** The name of the section in its bar: "Ecosystem" */
+      section: string;
       /** Head of the column of the stages */
       stage: string;
       /** Head of the column of the projects */
       projectsHeading: string;
-      /** The legend of a dotted trace */
+      /** The legend of a solid trace: a project the other cannot work without */
       buildsOn: string;
+      /** The legend of a dotted trace: a link that is optional */
+      optional: string;
       /** The tag between two ways to run the same thing */
       or: string;
       /** The legend of the tag */
@@ -299,6 +301,8 @@ export interface DocsHubLabels {
       relationsLabel: string;
       /** A trace read out: `{project}` builds on `{base}` */
       relation: string;
+      /** A dotted trace read out: `{project}` works with `{base}`, each without the other too */
+      relationOptional: string;
       /** The tag read out: `{first}` or `{second}` */
       relationOr: string;
     };

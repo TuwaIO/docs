@@ -1,6 +1,6 @@
 'use client';
 
-import { PixelArt, projectIconArt } from '@tuwaio/docs-ui';
+import { PixelArt, projectIconArt, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
 
 import { useI18n } from '@/i18n';
 import { ecosystemCounts, stagedEntries, type StagedEntry } from '@/lib/ecosystem';
@@ -10,17 +10,30 @@ import { formatPlural } from '@/lib/plural';
 const cellClassName =
   'min-h-[128px] min-w-0 border-r border-b border-[var(--tuwa-border-primary)] flex flex-col md:min-h-[136px]';
 
-/** A project on the plate: its stage, its icon assembling once and its short name, a link to its row below. */
+/**
+ * A project on the plate: its stage, its icon assembling once and its short name, a link to its row below. While the
+ * reader points at it, its icon assembles again and moves in the way of its project.
+ */
 function PlateLink({ entry }: { entry: StagedEntry }) {
   return (
     <a
       href={`#p-${entry.id}`}
+      onMouseEnter={(event) => startPixelMotion(event.currentTarget)}
+      onMouseLeave={(event) => stopPixelMotion(event.currentTarget)}
+      onFocus={(event) => startPixelMotion(event.currentTarget)}
+      onBlur={(event) => stopPixelMotion(event.currentTarget)}
       className={`group relative ${cellClassName} items-center gap-3 px-2.5 pt-[30px] pb-3.5 text-center transition-colors hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]`}
     >
       <span className="absolute top-[9px] left-2.5 font-mono text-[11px] font-medium leading-none text-[var(--tuwa-text-secondary)]">
         {String(entry.stage).padStart(2, '0')}
       </span>
-      <PixelArt art={projectIconArt[entry.icon]} assemble className="h-9 w-9" />
+      <PixelArt
+        art={projectIconArt[entry.icon]}
+        assemble
+        motion={entry.icon}
+        data-plate-icon={entry.id}
+        className="h-9 w-9"
+      />
       <span className="font-mono text-xs font-medium leading-[1.3] tracking-normal text-[var(--tuwa-text-primary)] [overflow-wrap:anywhere] group-hover:text-[var(--tuwa-text-accent)]">
         {entry.plateName ?? entry.name}
       </span>

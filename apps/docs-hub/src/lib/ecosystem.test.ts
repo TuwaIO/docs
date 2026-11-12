@@ -21,7 +21,8 @@ const buildData = readFileSync(path.resolve(__dirname, '../../scripts/build-data
 describe('the counts of the hero', () => {
   it('come from the data: the packages on npm that are not deprecated, the products and the stages', () => {
     const counts = ecosystemCounts();
-    expect(counts).toEqual({ packages: 23, products: 8, stages: 5 });
+    // nova-icons (a dependency of nova-core) and create-cosmos-playground (the CLI of the SDK) joined the 23 of before
+    expect(counts).toEqual({ packages: 25, products: 8, stages: 5 });
     const npm = layers.flatMap((layer) => layer.entries.flatMap((entry) => entry.packages ?? []));
     expect(npm.filter((pkg) => pkg.isDeprecated).map((pkg) => pkg.name)).toEqual(['@tuwaio/satellite-siwe-next-auth']);
   });
@@ -97,8 +98,9 @@ describe('the board of the architecture', () => {
       expect(ids.has(edge.from), edge.from).toBe(true);
       expect(ids.has(edge.to), edge.to).toBe(true);
       const [from, to] = [boardPlaces[edge.from]!, boardPlaces[edge.to]!];
+      // SIWX builds on Orbit in the same stage: an edge may run across its row
       if (edge.kind === 'or') expect(from.row).toBe(to.row);
-      else expect(from.row).toBeLessThan(to.row);
+      else expect(from.row).toBeLessThanOrEqual(to.row);
     }
     const next = (id: string) => boardEdges.filter((edge) => edge.from === id).map((edge) => edge.to);
     const visit = (id: string, path: string[]): void => {
@@ -106,13 +108,16 @@ describe('the board of the architecture', () => {
       for (const to of next(id)) visit(to, [...path, id]);
     };
     for (const id of ids) visit(id, []);
-    expect(boardEdges.map((edge) => `${edge.from}>${edge.to}${edge.kind === 'or' ? ' or' : ''}`)).toEqual([
-      'siwx>satellite',
+    expect(boardEdges.map((edge) => `${edge.from}>${edge.to}${edge.kind ? ` ${edge.kind}` : ''}`)).toEqual([
+      'orbit>siwx',
+      'siwx>satellite optional',
       'orbit>satellite',
       'orbit>pulsar',
-      'pulsar>quasar',
+      'pulsar>quasar optional',
       'satellite>nova',
       'pulsar>nova',
+      'orbit>nova',
+      'siwx>nova optional',
       'nova>sdk',
       'quasar-community>quasar or',
     ]);

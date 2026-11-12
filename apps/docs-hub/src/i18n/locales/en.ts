@@ -62,15 +62,11 @@ export const en: DocsHubLabels = {
       stages: { one: '{n} stage', few: '{n} stages', many: '{n} stages', other: '{n} stages' },
     },
     board: {
-      kicker: {
-        one: 'The ecosystem · {n} stage',
-        few: 'The ecosystem · {n} stages',
-        many: 'The ecosystem · {n} stages',
-        other: 'The ecosystem · {n} stages',
-      },
+      section: 'Ecosystem',
       stage: 'Stage',
       projectsHeading: 'Projects and what each builds on',
       buildsOn: 'Builds on',
+      optional: 'Optional',
       or: 'OR',
       cloudOrSelfHosted: 'Cloud or self-hosted',
       selfHosted: 'Self-hosted',
@@ -78,6 +74,7 @@ export const en: DocsHubLabels = {
       reExports: 'Re-exports',
       relationsLabel: 'What each project builds on',
       relation: '{project} builds on {base}',
+      relationOptional: '{project} works with {base}; each also works without the other',
       relationOr: '{first} or {second}: the same backend, self-hosted or in the cloud',
     },
     timeline: {

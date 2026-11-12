@@ -10,8 +10,9 @@ import { Navbar } from '../../../../packages/docs-ui/src/components/NavBar';
 
 // The headers of the documentation sites never cover the page (owner request 2026-10-28: on phones the header
 // overlapped the content). The layout itself is checked in the browser at 320-2560px; these tests keep the parts that
-// make it work: an opaque Nextra header below 768px, a logo that never shrinks under the next items, navbar links that
-// show only their icons below 1024px, and the hub header that blurs and hides the page under it on phones.
+// make it work: a header of paper a little clear over a light blur, under which the page shows only as a haze, a logo
+// that never shrinks under the next items, navbar links that show only their icons below 1024px, and the switches of
+// the hub header in its menu on phones.
 
 vi.mock('nextra-theme-docs', () => ({
   // The Nextra navbar needs the Nextra layout; this stand-in renders its logo link, class name and children
@@ -38,34 +39,55 @@ function topLevelRuleOf(css: string, selector: string): string | undefined {
   return undefined;
 }
 
+/**
+ * The body of a top-level rule by its exact selector, nested blocks included: the build writes a fallback for
+ * `color-mix()` inside the rule (`@supports (…) { … }`).
+ */
+function ruleBlockOf(css: string, selector: string): string | undefined {
+  const source = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const start = source.search(new RegExp(`(^|[}\\s])${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{`));
+  if (start === -1) return undefined;
+  const open = source.indexOf('{', start);
+  let depth = 0;
+  for (let index = open; index < source.length; index++) {
+    if (source[index] === '{') depth++;
+    else if (source[index] === '}' && --depth === 0) return source.slice(open + 1, index);
+  }
+  return undefined;
+}
+
 /** The selector Tailwind writes for a class name: every character other than letters, digits, `_` and `-` escaped. */
 const selectorOf = (className: string) => `.${className.replace(/[^\w-]/g, (char) => `\\${char}`)}`;
 
 describe('the Nextra header of @tuwaio/docs-ui', () => {
+  // The header stays over the page as it scrolls: the paper a little clear over a light blur of the page, with the
+  // scanlines, at every width. The glass is on Nextra's own layer under the header, not on the header itself, whose
+  // fixed menus a backdrop filter would pin to it
   it.each([
     ['source', 'src/styles/site.css'],
     ['build', 'dist/index.css'],
-  ])('is opaque paper with scanlines and no glass at every width (%s)', (_, file) => {
+  ])('is paper a little clear over a light blur, with scanlines, at every width (%s)', (_, file) => {
     const css = read(file);
     const navbar = topLevelRuleOf(css, '.nextra-navbar');
     expect(navbar).toMatch(/backdrop-filter:\s*none/);
-    expect(navbar).toMatch(/background:\s*rgb\(var\(--nextra-bg/);
-    const glass = topLevelRuleOf(css, '.nextra-navbar-blur');
-    expect(glass).toMatch(/backdrop-filter:\s*none/);
-    expect(glass).toMatch(/background-color:\s*rgb\(var\(--nextra-bg/);
+    expect(navbar).toMatch(/background:\s*transparent/);
+    const glass = ruleBlockOf(css, '.nextra-navbar-blur');
+    expect(glass).toMatch(/background-color:\s*color-mix\(in srgb,\s*var\(--tuwa-docs-paper\) 86%,\s*transparent\)/);
+    expect(glass).toMatch(/(^|[;\s])backdrop-filter:\s*blur\(12px\)/);
     expect(glass).toMatch(/background-image:\s*var\(--tuwa-docs-scan\)/);
-    // No width brings the glass back
+    // No width brings another look
     expect(mediaBlockOf(css, '.nextra-navbar {')).toBeUndefined();
   });
 
-  // The logo and both switches fit one row of the navbar on a 320px phone: the logo is sized by its height there
-  it('fits the logo to the navbar by its height, and keeps it from shrinking', () => {
+  // The logo of the docs is the logo of tuwa.io, at its size there (110px on phones, 126px from 640px): at 20px high it
+  // was too small to read. The row of the navbar still fits a 320px phone, checked in the browser
+  it('gives the logo the size of the logo of tuwa.io, and keeps it from shrinking', () => {
     const html = renderToStaticMarkup(createElement(SiteLogo, {}));
     const images = html.match(/<img [^>]*>/g) ?? [];
     expect(images).toHaveLength(2);
     for (const image of images) {
       expect(image).toContain('tuwadocs:max-w-none');
-      expect(image).toContain('tuwadocs:h-5 tuwadocs:sm:h-[22px] tuwadocs:w-auto');
+      expect(image).toContain('tuwadocs:w-[110px] tuwadocs:sm:w-[126px] tuwadocs:h-auto');
       expect(image).not.toContain('width:126px');
     }
   });
@@ -108,14 +130,14 @@ describe('the header of the hub pages', () => {
   const headerMarkup = source.slice(source.indexOf('<header'), source.indexOf('</header>'));
   const drawerMarkup = source.slice(source.indexOf('id="mobile-menu"'));
 
-  // Paper and ink: the header is the paper of the page with its scanlines and a line of 1px below, at every width, so
-  // nothing shows through it on a phone or a desktop; no glass, no translucent colour
-  it('is opaque paper with scanlines and a 1px line, with no glass at any width', () => {
+  // Paper and ink: the header is the glass of the docs (the paper a little clear over a light blur) with its
+  // scanlines and a line of 1px below, at every width; no other blur, shadow or translucent colour
+  it('is the glass of the docs with scanlines and a 1px line, at every width', () => {
     expect(headerClasses).toEqual(
       expect.arrayContaining([
         'fixed',
         'h-[56px]',
-        'bg-[var(--tuwa-docs-paper)]',
+        'tuwa-docs-glass',
         'tuwa-docs-scan',
         'border-b',
         'border-[var(--tuwa-border-primary)]',
@@ -124,22 +146,27 @@ describe('the header of the hub pages', () => {
     expect(headerClasses.filter((name) => /backdrop-|blur|shadow|\/\d+$|\/\[/.test(name))).toEqual([]);
   });
 
-  // The language, then the theme (as on every TUWA site), each in its own cell of the header at every width; the menu
-  // of phones holds only the links
-  it('puts the language before the theme, once, in the header, and keeps both out of the menu', () => {
-    const order = [...source.matchAll(/<(LocaleSwitcher|ThemeSwitcher)\b/g)].map(([, name]) => name);
-    expect(order).toEqual(['LocaleSwitcher', 'ThemeSwitcher']);
-    expect(headerMarkup).toContain('<LocaleSwitcher');
-    expect(headerMarkup).toContain('<ThemeSwitcher');
-    expect(drawerMarkup).not.toMatch(/<(LocaleSwitcher|ThemeSwitcher)\b/);
+  // The language, then the theme (as on every TUWA site): in cells of the header from 1024px, and below it in the menu,
+  // each on a row with its name, so a phone header keeps the logo at the size of tuwa.io and the menu button
+  it('puts the language before the theme, in the header from 1024px and in the menu below it', () => {
+    const order = (markup: string) =>
+      [...markup.matchAll(/<(LocaleSwitcher|ThemeSwitcher)\b/g)].map(([, name]) => name);
+    expect(order(headerMarkup)).toEqual(['LocaleSwitcher', 'ThemeSwitcher']);
+    expect(order(drawerMarkup)).toEqual(['LocaleSwitcher', 'ThemeSwitcher']);
+    const cells = [
+      ...headerMarkup.matchAll(/<div className=\{`hidden lg:flex \$\{cellClassName\}`\}>\s*(?:\{[^}]*\}\s*)?<(\w+)/g),
+    ].map(([, name]) => name);
+    expect(cells).toEqual(['LocaleSwitcher', 'ThemeSwitcher']);
+    expect(drawerMarkup).toContain('{t.nav.language}');
+    expect(drawerMarkup).toContain('{t.nav.theme}');
   });
 
   it('switches between the inline links and the menu at one breakpoint, 1024px', () => {
     // Between 768 and 1024px the five links and both switchers need the whole row in Ukrainian; at `md` they touched
-    const shown = [...source.matchAll(/"hidden (\w+):flex/g)].map(([, breakpoint]) => breakpoint);
-    const hidden = [...source.matchAll(/[`"](\w+):hidden /g)].map(([, breakpoint]) => breakpoint);
-    expect(shown).toEqual(['lg']);
-    expect(hidden).toEqual(['lg', 'lg', 'lg']);
+    const shown = [...source.matchAll(/hidden (\w+):flex/g)].map(([, breakpoint]) => breakpoint);
+    const hidden = [...source.matchAll(/[`" ](\w+):hidden /g)].map(([, breakpoint]) => breakpoint);
+    expect(shown).toEqual(['lg', 'lg', 'lg']);
+    expect(new Set(hidden)).toEqual(new Set(['lg']));
     // The menu closes when the window reaches the breakpoint of Tailwind's `lg` (64rem)
     expect(source).toContain("window.matchMedia('(min-width: 64rem)')");
   });

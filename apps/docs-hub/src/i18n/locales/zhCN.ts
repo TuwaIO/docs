@@ -62,15 +62,11 @@ export const zhCN: DocsHubLabels = {
       stages: { one: '{n} 个阶段', few: '{n} 个阶段', many: '{n} 个阶段', other: '{n} 个阶段' },
     },
     board: {
-      kicker: {
-        one: '生态系统 · {n} 个阶段',
-        few: '生态系统 · {n} 个阶段',
-        many: '生态系统 · {n} 个阶段',
-        other: '生态系统 · {n} 个阶段',
-      },
+      section: '生态系统',
       stage: '阶段',
       projectsHeading: '各项目及其构建基础',
       buildsOn: '构建于',
+      optional: '可选',
       or: '或',
       cloudOrSelfHosted: '云端或自部署',
       selfHosted: '自部署',
@@ -78,6 +74,7 @@ export const zhCN: DocsHubLabels = {
       reExports: '重新导出',
       relationsLabel: '各项目的构建基础',
       relation: '{project} 构建于 {base}',
+      relationOptional: '{project} 可与 {base} 配合使用；两者也可各自独立使用',
       relationOr: '{first} 或 {second}：同一后端，自部署或云端',
     },
     timeline: {

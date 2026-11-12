@@ -17,16 +17,23 @@ import { hasLanguageUrl } from '@/lib/languageUrls';
 const isCurrent = (pathname: string | null, href: string) => pathname === href || !!pathname?.startsWith(`${href}/`);
 
 /** A cell of the header: a line of 1px on its left, its control in the middle */
-const cellClassName = 'flex shrink-0 items-center border-l border-[var(--tuwa-border-primary)] px-2';
+const cellClassName = 'shrink-0 items-center border-l border-[var(--tuwa-border-primary)] px-2';
+
+/** A row of the menu of phones with a switch: its name in mono caps on the left, the switch on the right */
+const menuRowClassName =
+  'flex min-h-[60px] items-center justify-between gap-4 border-b border-[var(--tuwa-border-primary)] px-5 py-2';
+const menuLabelClassName =
+  'font-mono text-[13px] font-medium uppercase tracking-[0.12em] text-[var(--tuwa-text-secondary)]';
 
 /**
  * The fixed header of the hub pages, in paper and ink: 56px of the paper of the page with its scanlines and a line of
- * 1px below, opaque at every width. A row of cells on lines of 1px: the logo (as wide as the flight plan of the main
- * page from 1280px, so the two line up), the links in mono caps from `lg` (1024px), then the language and the theme,
- * which stay in the header at every width (the language first, as on every TUWA site). Below `lg` a square menu button
- * opens a panel of paper under the header with the links only, in mono caps on lines of 1px (at 768px the five links
- * and both switchers need the whole row in Ukrainian). The panel closes on a link, the scrim, Escape or a wider window,
- * and locks the page scroll while open.
+ * 1px below, a little clear over a light blur of the page (`tuwa-docs-glass`) at every width. A row of cells on lines
+ * of 1px: the logo (as wide as the flight plan of the main page from 1280px, so the two line up), then from `lg`
+ * (1024px) the links in mono caps, the language and the theme (the language first, as on every TUWA site). Below `lg` a
+ * square menu button opens a panel of the same glass under the header with the links in mono caps on lines of 1px and,
+ * under them, the language and the theme, each on a row with its name: on a phone the header keeps the logo at the size
+ * of tuwa.io and the button (at 768px the five links and both switchers need the whole row in Ukrainian). The panel
+ * closes on a link, the scrim, Escape or a wider window, and locks the page scroll while open.
  *
  * @param props.logo - The logo link, rendered on the server by the layout.
  * @returns The header and the menu panel.
@@ -73,7 +80,7 @@ export function Header({ logo }: { logo: ReactNode }) {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex h-[56px] items-stretch border-b border-[var(--tuwa-border-primary)] bg-[var(--tuwa-docs-paper)] tuwa-docs-scan">
+      <header className="fixed top-0 left-0 right-0 z-50 flex h-[56px] items-stretch border-b border-[var(--tuwa-border-primary)] tuwa-docs-glass tuwa-docs-scan">
         <div className="flex shrink-0 items-stretch border-r border-[var(--tuwa-border-primary)] xl:w-[320px]">
           {logo}
         </div>
@@ -93,14 +100,14 @@ export function Header({ logo }: { logo: ReactNode }) {
 
         <div className="min-w-0 flex-1" />
 
-        <div className={cellClassName}>
+        <div className={`hidden lg:flex ${cellClassName}`}>
           <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
         </div>
-        <div className={cellClassName}>
+        <div className={`hidden lg:flex ${cellClassName}`}>
           {/* The switch renders a placeholder of its size while the page hydrates, so the header does not move */}
           <ThemeSwitcher theme={resolvedTheme ?? 'light'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
         </div>
-        <div className={`lg:hidden ${cellClassName}`}>
+        <div className={`flex lg:hidden ${cellClassName}`}>
           <button
             type="button"
             onClick={() => setIsMenuOpen((open) => !open)}
@@ -130,7 +137,7 @@ export function Header({ logo }: { logo: ReactNode }) {
       <div
         id="mobile-menu"
         inert={!isMenuOpen}
-        className={`lg:hidden fixed top-[56px] right-0 bottom-0 z-[45] w-80 max-w-full overflow-y-auto border-l border-[var(--tuwa-border-primary)] bg-[var(--tuwa-docs-paper)] tuwa-docs-scan transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`lg:hidden fixed top-[56px] right-0 bottom-0 z-[45] w-80 max-w-full overflow-y-auto border-l border-[var(--tuwa-border-primary)] tuwa-docs-glass tuwa-docs-scan transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <nav aria-label={t.nav.mobileNavAria}>
           {navLinks.map((link) => (
@@ -145,6 +152,15 @@ export function Header({ logo }: { logo: ReactNode }) {
             </Link>
           ))}
         </nav>
+        {/* The language, then the theme, each on a row with its name: on a phone the header has no room for them */}
+        <div className={menuRowClassName}>
+          <span className={menuLabelClassName}>{t.nav.language}</span>
+          <LocaleSwitcher locale={locale} onSelect={selectLocale} ariaLabel={t.nav.selectLanguage} />
+        </div>
+        <div className={menuRowClassName}>
+          <span className={menuLabelClassName}>{t.nav.theme}</span>
+          <ThemeSwitcher theme={resolvedTheme ?? 'light'} onToggle={toggleTheme} ariaLabel={t.nav.toggleTheme} />
+        </div>
       </div>
     </>
   );
