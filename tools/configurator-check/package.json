@@ -20,7 +20,7 @@
     "@tuwaio/satellite-core": "^0.12.0",
     "@tuwaio/satellite-evm": "^0.11.1",
     "@tuwaio/satellite-solana": "^0.11.4",
-    "@tuwaio/sdk": "^0.8.0",
+    "@tuwaio/sdk": "^0.9.0",
     "@tuwaio/siwx-core": "^0.7.2",
     "@tuwaio/siwx-evm": "^0.5.4",
     "@tuwaio/siwx-server": "^0.8.2",
