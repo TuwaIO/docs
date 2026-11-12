@@ -609,6 +609,10 @@ describe('the flight plan on the page', () => {
     expect(read('components/comparisons/ComparisonsContent.tsx')).toContain('<PageFlightPlan waypoints={waypoints} />');
     for (const locale of ['en', 'uk', 'zh-CN'] as const)
       expect(docsLabels[locale].nextra.scrollToTop.length).toBeGreaterThan(3);
+    // At the end of the page it stood over the address of the hub, the right part of the last line of the footer:
+    // below 1280px that line keeps to the left
+    expect(footer).toMatch(/<p className="mt-7 flex flex-wrap gap-x-6 gap-y-1 [^"]*xl:justify-between">/);
+    expect(footer).not.toMatch(/<p className="mt-7 flex flex-wrap justify-between/);
   });
 
   // The strip lies over the line of the header: inside the page, which is under the header, it could not
