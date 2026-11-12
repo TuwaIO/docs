@@ -549,10 +549,10 @@ export function LocaleSwitcher({
   const defaultStyles =
     'tuwadocs:bg-transparent tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_5%,transparent)]';
 
-  // Constant static dimensions to prevent any layout shift across languages
-  // The narrowest phones (below 400px) take a smaller switch, so the navbar holds one row at 320px
-  const staticSize =
-    'tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem] tuwadocs:max-[400px]:h-[34px] tuwadocs:max-[400px]:w-[4.25rem] tuwadocs:max-[360px]:w-[3.75rem]';
+  // Constant static dimensions to prevent any layout shift across languages. `tuwa-locale-switch` names the switch for
+  // `site.css`, which makes it smaller on the narrowest phones in the navbar of Nextra only: in a menu, where the switch
+  // has a row of its own, it keeps this size at every width
+  const staticSize = 'tuwa-locale-switch tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem]';
 
   if (!mounted) {
     return (
@@ -639,7 +639,7 @@ export function LocaleSwitcher({
         {/* Nova-Style Animated Chevron Arrow */}
         <ChevronArrowWithAnim
           isOpen={isOpen}
-          className="tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:group-hover:text-[var(--tuwa-text-primary)] tuwadocs:max-[360px]:hidden"
+          className="tuwa-locale-switch__chevron tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:group-hover:text-[var(--tuwa-text-primary)]"
         />
       </button>
 

@@ -498,9 +498,10 @@ article .nextra-border a:hover {
     height: 32px;
   }
 }
-/* The narrowest phones: the logo, both switches and the menu button fit one row of the navbar at 320px */
+/* The narrowest phones, in the navbar of Nextra: the logo, both switches and the menu button fit one row at 320px.
+   Only there: in a menu, where a switch has a row of its own, it keeps its size at every width */
 @media (max-width: 399.98px) {
-  .tuwa-theme-switch {
+  .nextra-navbar .tuwa-theme-switch {
     --knob: 28px;
     --pixel-step: 2.5px;
     --orbit-path: path('M 1.95 16.47 A 11 4 -24 1 0 22.05 7.53 A 11 4 -24 1 0 1.95 16.47');
@@ -757,10 +758,24 @@ article .nextra-border a:hover {
     height: 26px;
   }
 }
+/* As the theme switch: smaller on the narrowest phones in the navbar of Nextra only */
 @media (max-width: 399.98px) {
-  .tuwa-locale-switch__knob {
+  .nextra-navbar .tuwa-locale-switch {
+    width: 4.25rem;
+    height: 34px;
+  }
+  .nextra-navbar .tuwa-locale-switch__knob {
     width: 28px;
     height: 28px;
+  }
+}
+@media (max-width: 360px) {
+  .nextra-navbar .tuwa-locale-switch {
+    width: 3.75rem;
+  }
+  /* The narrower switch has no room for its chevron */
+  .nextra-navbar .tuwa-locale-switch__chevron {
+    display: none;
   }
 }
 /* The line in colour: quiet, it sits in a header */

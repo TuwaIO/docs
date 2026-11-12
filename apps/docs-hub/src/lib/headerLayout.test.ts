@@ -188,3 +188,49 @@ describe('the frame of the hub pages', () => {
     expect(shell).toMatch(/<main id="content"/);
   });
 });
+
+describe('the size of the switches on narrow phones', () => {
+  const siteCss = readFileSync(path.resolve(__dirname, '../../../../packages/docs-ui/src/styles/site.css'), 'utf8');
+  const switcher = readFileSync(
+    path.resolve(__dirname, '../../../../packages/docs-ui/src/components/LocaleSwitcher.tsx'),
+    'utf8',
+  );
+  /** The rules inside every media query of the given condition. */
+  const mediaRules = (condition: string) =>
+    [...siteCss.matchAll(new RegExp(`@media \\(${condition}\\) \\{\\n([\\s\\S]*?)\\n\\}\\n`, 'g'))]
+      .map((match) => match[1] ?? '')
+      .join('\n');
+
+  // Below 400px the language and the theme switch took a smaller size, so that the navbar of Nextra holds its row at
+  // 320px. The rule reached the menu of the hub too, where each switch has a row of its own and room to spare: there
+  // they keep the size they have on a wider phone
+  it('makes them smaller in the navbar of Nextra only, never in a menu', () => {
+    const narrow = mediaRules('max-width: 399\\.98px');
+    const selectors = [...narrow.matchAll(/^\s*([.\w][^{}\n]*) \{$/gm)].map((match) => (match[1] ?? '').trim());
+    expect(selectors.sort()).toEqual([
+      '.nextra-navbar .tuwa-locale-switch',
+      '.nextra-navbar .tuwa-locale-switch__knob',
+      '.nextra-navbar .tuwa-theme-switch',
+    ]);
+    const narrowest = [...mediaRules('max-width: 360px').matchAll(/^\s*([.\w][^{}\n]*) \{$/gm)].map((match) =>
+      (match[1] ?? '').trim(),
+    );
+    for (const selector of narrowest) expect(selector).toMatch(/^\.nextra-navbar /);
+    expect(narrowest.length).toBeGreaterThan(0);
+  });
+
+  it('gives the language switch no width of its own for a narrow screen', () => {
+    expect(switcher).not.toMatch(/max-\[\d+px\]/);
+    expect(switcher).toContain(
+      "'tuwa-locale-switch tuwadocs:h-10 tuwadocs:w-[5.25rem] tuwadocs:md:h-8 tuwadocs:md:w-[4.75rem]'",
+    );
+    expect(switcher).toContain('className="tuwa-locale-switch__chevron ');
+  });
+
+  it('keeps the switches of the hub out of the navbar of Nextra: in the menu on phones', () => {
+    const header = readFileSync(path.resolve(__dirname, '../components/Header.tsx'), 'utf8');
+    expect(header).not.toContain('nextra-navbar');
+    expect(header).toMatch(/<LocaleSwitcher/);
+    expect(header).toMatch(/<ThemeSwitcher/);
+  });
+});
