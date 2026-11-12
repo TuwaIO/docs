@@ -17,10 +17,7 @@ const read = (file: string) => readFileSync(file, 'utf8');
 const novaCss = read(createRequire(path.join(docsUi, 'package.json')).resolve('@tuwaio/nova-core/dist/index.css'));
 
 /** The parts of docs-ui not yet redrawn in paper and ink: their rules of site.css and their components. */
-const notYetRedrawn = [
-  { part: 'the star field (StarryBackground)', selector: /\.tuwa-starry/, files: ['StarryBackground.tsx'] },
-  { part: 'the policy pages', selector: /\.tuwadocs-policy/, files: ['PolicyDocument.tsx'] },
-];
+const notYetRedrawn = [{ part: 'the policy pages', selector: /\.tuwadocs-policy/, files: ['PolicyDocument.tsx'] }];
 
 /**
  * The few drawn details of the redrawn switches, the same as in the Nova Storybook, that the rules below would flag: each
@@ -307,7 +304,7 @@ function hubViolations(file: string) {
   if (/(linear|radial|conic)-gradient\(/.test(source)) found.push('a gradient in a style');
   for (const match of source.matchAll(/\b(boxShadow|backdropFilter|filter|textShadow)\s*:\s*(['"`])([^'"`]*)\2/g))
     if (match[3] !== 'none') found.push(`${match[1]}: ${match[3]}`);
-  for (const colour of [/#0a0e27/i, /#030303/i, /#38bdf8/i, /\bStarryBackground\b/, /\bdark:bg-\[#/])
+  for (const colour of [/#0a0e27/i, /#030303/i, /#38bdf8/i, /\bdark:bg-\[#/])
     if (colour.test(source)) found.push(`${colour}`);
   return found;
 }
@@ -318,7 +315,7 @@ describe('paper and ink in the hub', () => {
   });
 
   // The guard itself: it would catch what the hub had before
-  it('flags the glass header and the starry background of the look before', () => {
+  it('flags the glass header and the gradients of the look before', () => {
     expect(classViolation('backdrop-blur-xl')).toBeDefined();
     expect(classViolation('lg:dark:bg-gradient-to-r')).toBeDefined();
     expect(classViolation('rounded-full')).toBeDefined();

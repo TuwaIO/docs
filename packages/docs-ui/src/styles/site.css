@@ -957,6 +957,12 @@ body {
   background-color: var(--tuwa-docs-paper);
 }
 
+/* The body holds the layers of its page: the star field (StarryBackground, `z-index: -10`) shows over the paper of the
+   body and under the content. Without it, the field would fall behind the paper of the body and never show */
+body {
+  isolation: isolate;
+}
+
 article:focus {
   outline: 2px solid var(--tuwa-primary);
   outline-offset: 2px;

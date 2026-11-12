@@ -16,6 +16,7 @@ import { LocaleSwitcher } from './LocaleSwitcher';
 import { Navbar } from './NavBar';
 import { NavbarThemeSwitch } from './NavbarThemeSwitch';
 import { SmoothAnchors } from './SmoothAnchors';
+import StarryBackground from './StarryBackground';
 
 /**
  * Props of {@link DocsLayout}.
@@ -82,8 +83,10 @@ export interface NextraDocsLayoutProps {
 /**
  * The Nextra `Layout` of a TUWA documentation site in a given language: the docs-ui {@link Navbar} with the language
  * switch and then the theme switch after the links (Nextra's own theme select is off: `darkMode: false`), the
- * {@link Footer}, the search, the table of contents and the edit, feedback and last-updated texts from `labels`. It keeps no state: {@link DocsLayout} renders it with the language of its provider, and the docs hub with
- * its own dictionaries, so every site words and wires its chrome the same way.
+ * {@link Footer}, the search, the table of contents and the edit, feedback and last-updated texts from `labels`, over
+ * the pixel star field of the TUWA documentation (`StarryBackground`, from 768px). It keeps no state: {@link DocsLayout}
+ * renders it with the language of its provider, and the docs hub with its own dictionaries, so every site words and
+ * wires its chrome the same way.
  *
  * @param props - See {@link NextraDocsLayoutProps}.
  * @returns The layout.
@@ -102,45 +105,49 @@ export function NextraDocsLayout({
   children,
 }: NextraDocsLayoutProps) {
   return (
-    <Layout
-      navbar={
-        <Navbar logo={logo} logoLink={logoLink} links={links}>
-          <LocaleSwitcher
-            locale={locale}
-            onSelect={(code) => {
-              const picked = normalizeLocale(code);
-              if (picked) onLocaleChange(picked);
-            }}
-            ariaLabel={labels.selectLanguage}
+    <>
+      {/* A child of the body, which holds it over its paper and under the page */}
+      <StarryBackground />
+      <Layout
+        navbar={
+          <Navbar logo={logo} logoLink={logoLink} links={links}>
+            <LocaleSwitcher
+              locale={locale}
+              onSelect={(code) => {
+                const picked = normalizeLocale(code);
+                if (picked) onLocaleChange(picked);
+              }}
+              ariaLabel={labels.selectLanguage}
+            />
+            <NavbarThemeSwitch ariaLabel={labels.toggleTheme} />
+          </Navbar>
+        }
+        footer={
+          <Footer logo={logo} links={footerLinks} labels={labels.footer} policyLanguage={policyLanguageOf(locale)} />
+        }
+        pageMap={pageMap}
+        docsRepositoryBase={docsRepositoryBase}
+        navigation={{ prev: true, next: true }}
+        {...(sidebar && { sidebar })}
+        editLink={labels.nextra.editThisPage}
+        feedback={{ content: labels.nextra.feedback }}
+        lastUpdated={<LastUpdated locale={locale}>{labels.nextra.lastUpdated}</LastUpdated>}
+        toc={{ title: labels.nextra.onThisPage, backToTop: labels.nextra.scrollToTop }}
+        // One theme switch per page, in the navbar: Nextra's own select in the sidebar and the mobile menu is off
+        darkMode={false}
+        search={
+          <Search
+            placeholder={labels.nextra.searchPlaceholder}
+            emptyResult={labels.nextra.searchEmpty}
+            errorText={labels.nextra.searchError}
+            loading={labels.nextra.searchLoading}
           />
-          <NavbarThemeSwitch ariaLabel={labels.toggleTheme} />
-        </Navbar>
-      }
-      footer={
-        <Footer logo={logo} links={footerLinks} labels={labels.footer} policyLanguage={policyLanguageOf(locale)} />
-      }
-      pageMap={pageMap}
-      docsRepositoryBase={docsRepositoryBase}
-      navigation={{ prev: true, next: true }}
-      {...(sidebar && { sidebar })}
-      editLink={labels.nextra.editThisPage}
-      feedback={{ content: labels.nextra.feedback }}
-      lastUpdated={<LastUpdated locale={locale}>{labels.nextra.lastUpdated}</LastUpdated>}
-      toc={{ title: labels.nextra.onThisPage, backToTop: labels.nextra.scrollToTop }}
-      // One theme switch per page, in the navbar: Nextra's own select in the sidebar and the mobile menu is off
-      darkMode={false}
-      search={
-        <Search
-          placeholder={labels.nextra.searchPlaceholder}
-          emptyResult={labels.nextra.searchEmpty}
-          errorText={labels.nextra.searchError}
-          loading={labels.nextra.searchLoading}
-        />
-      }
-    >
-      <SmoothAnchors />
-      {children}
-    </Layout>
+        }
+      >
+        <SmoothAnchors />
+        {children}
+      </Layout>
+    </>
   );
 }
 
