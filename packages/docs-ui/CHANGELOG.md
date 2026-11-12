@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.0...docs-ui-v0.12.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* **docs-ui:** the links of the flight plan are named by what they show, on rows 24px tall ([#76](https://github.com/TuwaIO/docs/issues/76)) ([0e8db4e](https://github.com/TuwaIO/docs/commit/0e8db4e403d27eb312196455aeef3e9473b81847))
+
 ## [0.12.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.11.0...docs-ui-v0.12.0) (2026-11-12)
 
 
