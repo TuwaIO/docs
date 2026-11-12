@@ -21,6 +21,7 @@ import {
   flightEnd,
   flightPercent,
   flightProgress,
+  linkBoxes,
   READING_LINE,
   readingStops,
   spreadLabels,
@@ -47,6 +48,18 @@ const page = read('app/(default)/(home)/page.tsx');
 const footer = read('components/Footer.tsx');
 const shell = read('components/HubShell.tsx');
 const globals = read('app/globals.css');
+/**
+ * The name of a link as assistive technology computes it from what the link holds: its text without what is hidden
+ * from assistive technology (`aria-hidden`).
+ */
+const linkName = (inner: string) =>
+  inner
+    .replace(/<svg[\s\S]*?<\/svg>/g, '')
+    .replace(/<span[^>]*aria-hidden="true"[^>]*>[^<]*<\/span>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
 const render = (locale: 'en' | 'uk' | 'zh-CN' = 'en') =>
   renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale, children: createElement(HomeFlightPlan) }));
 
@@ -300,6 +313,103 @@ describe('the rows of the labels', () => {
   });
 });
 
+// The link of a waypoint is a pointer target: 24px tall wherever it has the room (WCAG 2.5.8), and never over the link
+// of another waypoint. At 18px, rows that close failed the target size, and links 24px tall around marks nearer than
+// that would lie over each other: a click on a mark would follow the link of the mark under it
+describe('the places of the links', () => {
+  const all = (count: number, value: boolean) => Array.from({ length: count }, () => value);
+  const box = (top: number, height = 24) => ({ top, height });
+
+  it('are a row around the middle of each row where the rows are a row apart or more', () => {
+    for (const labelled of [true, false]) {
+      expect(linkBoxes([13, 133, 253, 650], all(4, labelled), 24)).toEqual([box(1), box(121), box(241), box(638)]);
+      expect(linkBoxes([12, 36, 60], all(3, labelled), 24)).toEqual([box(0), box(24), box(48)]);
+      expect(linkBoxes([40], all(1, labelled), 24)).toEqual([box(28)]);
+      expect(linkBoxes([], [], 24)).toEqual([]);
+    }
+  });
+
+  // A section and its first stage a few pixels below: both links are a row tall, the one of the stage after the one of
+  // the section, around its mark
+  it('give two marks nearer than a row a row each, the links reaching away from each other', () => {
+    // No label: the links meet half way between the marks
+    expect(linkBoxes([100, 117], [false, false], 24)).toEqual([box(85), box(109)]);
+    expect(linkBoxes([100, 101], [false, false], 24)).toEqual([box(77), box(101)]);
+    // The label of the section keeps its row; the link of the stage starts where it ends
+    expect(linkBoxes([100, 119], [true, false], 24)).toEqual([box(88), box(112)]);
+    expect(linkBoxes([100, 119], [false, true], 24)).toEqual([box(83), box(107)]);
+  });
+
+  it('share what lies between marks that are closer still', () => {
+    // Three marks 6px apart: the one in the middle has what lies between the middles to the others
+    expect(linkBoxes([13, 19, 25, 300], all(4, false), 24)).toEqual([box(-8), box(16, 6), box(22), box(288)]);
+    // A mark inside the link of a label: its link starts after that link
+    expect(linkBoxes([100, 105], [true, false], 24)).toEqual([box(88), box(112)]);
+    // No room between two labels: a line on the mark
+    expect(linkBoxes([100, 112, 124], [true, false, true], 24)).toEqual([box(88), box(112, 1), box(112)]);
+  });
+
+  // Labels on a track too short for them stand nearer than a row: their links share it and stay around their rows
+  it('keep the links of labels around their rows on a track too short for them', () => {
+    expect(linkBoxes([0, 10, 20, 30], all(4, true), 24)).toEqual([box(-5, 10), box(5, 10), box(15, 10), box(25, 10)]);
+    expect(linkBoxes([100, 123], [true, true], 24)).toEqual([box(89, 23), box(112, 23)]);
+  });
+
+  // A stage that starts where its section does shares its mark and, without a label, its row: the two are one place
+  it('are one place for waypoints on one row', () => {
+    expect(linkBoxes([100, 100, 300], [true, false, true], 24)).toEqual([box(88), box(88), box(288)]);
+    expect(linkBoxes([50, 50, 50], all(3, false), 24)).toEqual([box(38), box(38), box(38)]);
+    expect(linkBoxes([100, 100, 110], all(3, false), 24)).toEqual([box(81), box(81), box(105)]);
+  });
+
+  it('never reach into another link, whatever the rows and the labels', () => {
+    const sets: [number[], boolean[]][] = [];
+    // Rows in rising order with gaps from 0 to 40px, labels in every third, second and no place, by simple arithmetic
+    for (let seed = 1; seed <= 60; seed++) {
+      const rows: number[] = [];
+      let place = seed % 7;
+      for (let index = 0; index < 9; index++) {
+        place += (seed * (index + 3) * 7919) % 41;
+        rows.push(place);
+      }
+      sets.push([rows, rows.map((_, index) => seed % 3 === 0 || (seed % 3 === 1 && index % 3 === 0))]);
+    }
+    for (const [rows, labelled] of sets) {
+      // The labels are a row apart, as `spreadLabels` leaves them: where the arithmetic put two nearer, one has no label
+      const marks = labelled.map(
+        (label, index) => label && !rows.some((other, at) => at < index && labelled[at] && rows[index]! - other < 24),
+      );
+      const boxes = linkBoxes(rows, marks, 24);
+      expect(boxes).toHaveLength(rows.length);
+      boxes.forEach((link, index) => {
+        const place = rows[index] as number;
+        expect(Number.isInteger(link.top) && Number.isInteger(link.height), `${rows}`).toBe(true);
+        expect(link.height).toBeGreaterThanOrEqual(1);
+        expect(link.height).toBeLessThanOrEqual(24);
+        // The link of a label is a row around its row
+        if (marks[index]) expect(link).toEqual(box(place - 12));
+        // A link with room for more than a line holds its mark, or starts where the link of a label ends
+        else if (link.height > 1 && !(link.top <= place && place < link.top + link.height))
+          expect(
+            boxes.some(
+              (other, at) =>
+                marks[at] && (other.top + other.height === link.top || other.top === link.top + link.height),
+            ),
+            `${rows} ${index}`,
+          ).toBe(true);
+      });
+      // Two links on different rows never share a pixel, but for the line of a mark that has no room at all
+      for (let a = 0; a < boxes.length; a++)
+        for (let b = a + 1; b < boxes.length; b++) {
+          const [one, two] = [boxes[a] as (typeof boxes)[number], boxes[b] as (typeof boxes)[number]];
+          if (rows[a] === rows[b]) expect(one).toEqual(two);
+          else if (one.height > 1 && two.height > 1)
+            expect(one.top + one.height <= two.top || two.top + two.height <= one.top, `${rows} ${a} ${b}`).toBe(true);
+        }
+    }
+  });
+});
+
 describe('the pixel pictures', () => {
   const pictures = {
     'the craft of the rail, ahead': RAIL_SHIP.ahead,
@@ -404,6 +514,9 @@ describe('the flight plan on the page', () => {
     expect(plan).toContain('const LABELS_AT = 84;');
     expect(plan).toMatch(/paddingRight: \(isStage \? NAMES_AT : LABELS_AT\) - CLEAR/);
     expect(plan).toMatch(/tuwadocs:justify-end tuwadocs:font-mono/);
+    // A row is as tall as a pointer target, and so is the least distance between two rows
+    expect(plan).toContain('const LABEL_ROW = 24;');
+    expect(plan).toContain('const boxes = linkBoxes(rows, waypoints.map(labelled), LABEL_ROW);');
     // The ticks of the ruler are on the side of the edge of the screen
     expect(plan).toContain(
       'style={{ right: LINE - length, width: length, top: SHIP_HALF + Math.round((tick * travel) / TICKS) }}',
@@ -525,11 +638,13 @@ describe('the flight plan on the page', () => {
     expect(plan).toContain("aria-current={isHere ? 'location' : undefined}");
   });
 
-  it('links the parts of the page in their order, each with its name', () => {
-    const links = [...markup.matchAll(/<a href="#([\w-]+)" aria-label="([^"]+)"/g)].map((match) => [
-      match[1],
-      match[2]?.replace(/&amp;/g, '&'),
-    ]);
+  // A link is named by what it holds: a name of its own (`aria-label`, the number before the name) did not hold the
+  // text the link shows, the name before the number (WCAG 2.5.3, axe `label-content-name-mismatch`)
+  it('links the parts of the page in their order, each named by what it holds', () => {
+    const links = [...markup.matchAll(/<a href="#([\w-]+)"([^>]*)>(.*?)<\/a>/g)].map((match) => {
+      expect(match[2]).not.toContain('aria-label');
+      return [match[1], linkName(match[3] ?? '')];
+    });
     expect(links).toEqual([
       ['overview', '00 Overview'],
       ['ecosystem', '01 Ecosystem'],
@@ -568,7 +683,7 @@ describe('the flight plan on the page', () => {
       const html = render(locale);
       expect(html).toContain(`<nav data-flight-rail="" aria-label="${flight.ariaLabel}"`);
       expect(html).toContain(`role="progressbar" aria-label="${flight.progressLabel}"`);
-      expect(html).toContain(`aria-label="00 ${flight.overview}"`);
+      expect(linkName(html.match(/<a href="#overview"[^>]*>(.*?)<\/a>/)?.[1] ?? '')).toBe(`00 ${flight.overview}`);
     }
     // The tag of the craft of the rail shows once the margin is measured; the strip is a progress bar from the start
     expect(markup.match(/aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"/g)).toHaveLength(1);

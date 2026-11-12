@@ -171,11 +171,22 @@ describe('the comparisons page', () => {
   // The flight plan of the main page flies here too: from the top of the page past its sections, and the segments of
   // the alternatives, to its end, where the reader starts: the Earth
   it('has the flight plan of the main page, to the buttons at its end', () => {
+    // A link of the rail is named by what it holds (it has no `aria-label`): its text, without what is hidden from
+    // assistive technology
     const links = [
       ...markup.matchAll(
-        /<a href="#([\w-]+)" aria-label="([^"]+)"(?: aria-current="location")? class="tuwadocs:group\/waypoint/g,
+        /<a href="#([\w-]+)"(?: aria-current="location")? class="tuwadocs:group\/waypoint[^>]*>(.*?)<\/a>/g,
       ),
-    ].map((match) => [match[1], match[2]?.replace(/&amp;/g, '&')]);
+    ].map((match) => [
+      match[1],
+      (match[2] ?? '')
+        .replace(/<svg[\s\S]*?<\/svg>/g, '')
+        .replace(/<span[^>]*aria-hidden="true"[^>]*>[^<]*<\/span>/g, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ]);
     expect(links).toEqual([
       ['overview', '00 Overview'],
       ['radar', '01 Radar'],
