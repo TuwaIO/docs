@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.10.1...docs-ui-v0.11.0) (2026-11-12)
+
+
+### Features
+
+* **docs-ui:** paper and ink for the hub and the Nextra sites, and the playground on Nova 0.15 ([#71](https://github.com/TuwaIO/docs/issues/71)) ([5086948](https://github.com/TuwaIO/docs/commit/508694843337f0294a915dc089dc87da173da37c))
+
 ## [0.10.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.10.0...docs-ui-v0.10.1) (2026-11-09)
 
 
