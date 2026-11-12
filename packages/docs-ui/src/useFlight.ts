@@ -12,7 +12,7 @@ import {
   turnsBack,
   WAYPOINT_REACH,
   waypointStops,
-} from '@/lib/flightPlan';
+} from './flightPlan';
 
 /** What the flight plan knows of the page once it has measured it. */
 export interface FlightMeasure {

@@ -1,6 +1,6 @@
 'use client';
 
-import { ARROW_RIGHT, PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, FlightPlan, type FlightWaypoint, PixelArt } from '@tuwaio/docs-ui';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -14,7 +14,6 @@ import {
   primaryButtonClassName,
   secondaryButtonClassName,
 } from '../buttonStyles';
-import { FlightPlan, type FlightWaypoint } from '../flight/FlightPlan';
 import { homeContentClassName, homeFrameClassName } from '../home/homeLayout';
 import { CrossMark, Kicker, SectionBar, SectionHead } from '../home/SectionHead';
 import { BundleSizes } from './BundleSizes';
@@ -104,7 +103,7 @@ export function ComparisonsContent() {
   return (
     <>
       {/* Outside the page below: its strip lies over the line of the header */}
-      <FlightPlan waypoints={waypoints} />
+      <FlightPlan waypoints={waypoints} labels={t.common.flight} />
       <div className="relative z-10">
         <div className={`${homeContentClassName} ${homeFrameClassName}`}>
           <CrossMark x="left" y="top" />

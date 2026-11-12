@@ -176,7 +176,7 @@ apps/docs-hub/
 │   │   ├── Footer.tsx               # Footer of the hub pages: logo, description, policies in mono caps, copyright
 │   │   ├── Header.tsx               # Fixed paper header: logo, links, language and theme cells; links-only menu below 1024px
 │   │   ├── HeroSection.tsx          # Hero: kicker, mono title, lead, licence, buttons, the plate
-│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), EcosystemBoard (what builds on what, solid and optional links), PixelHandoff (the icons fly from the plate to the board on scroll), SectionHead (head, sticky SectionBar, CrossMark), homeLayout (column, frame)
+│   │   ├── home/                    # Parts of the main page: HeroPlate (the eight projects around the counts), EcosystemBoard (what builds on what, solid and optional links), HomePixelHandoff (the icons fly from the plate to the board on scroll: `PixelHandoff` of docs-ui with the range of this page), HomeFlightPlan (the waypoints of the page for `FlightPlan` of docs-ui), SectionHead (head, sticky SectionBar, CrossMark), homeLayout (column, frame)
 │   │   ├── HubShell.tsx             # Frame of the hub pages: skip link, header, main, footer
 │   │   ├── JsonLd.tsx               # Structured data script
 │   │   ├── LayerTimeline.tsx        # Vertical timeline of ecosystem layers

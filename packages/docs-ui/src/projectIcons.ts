@@ -6,11 +6,21 @@ export type PackageType = 'orbit' | 'pulsar' | 'satellite' | 'nova' | 'quasar' |
 /**
  * A pixel icon of a TUWA project, drawn on a 9 × 9 grid: `sign-in` (an arrow into a door: SIWX), `orbit` (a star in
  * its orbit: Orbit Utils), `satellite` (Satellite Connect), `pulsar` (a neutron star with its two beams), `cloud`
- * (Quasar Cloud), `server` (two racks: Quasar Community), `supernova` (Nova UI Kit), `terminal` (a prompt: the TUWA
- * SDK), `rocket` and `gear` (a stack to configure).
+ * (Quasar Cloud), `server` (two racks: Quasar Community), `card` (a payment card with its chip: Quasar Client),
+ * `supernova` (Nova UI Kit), `terminal` (a prompt: the TUWA SDK), `rocket` and `gear` (a stack to configure).
  */
 export type ProjectIcon =
-  'sign-in' | 'orbit' | 'satellite' | 'pulsar' | 'cloud' | 'server' | 'supernova' | 'terminal' | 'rocket' | 'gear';
+  | 'sign-in'
+  | 'orbit'
+  | 'satellite'
+  | 'pulsar'
+  | 'cloud'
+  | 'server'
+  | 'card'
+  | 'supernova'
+  | 'terminal'
+  | 'rocket'
+  | 'gear';
 
 /**
  * The pictures of the {@link ProjectIcon}s, row by row, for `PixelArt`: `.` is empty, `#` or a small letter a
@@ -83,6 +93,17 @@ export const projectIconArt: Readonly<Record<ProjectIcon, readonly string[]>> = 
     '.#######.',
     '.#B.####.',
     '.#######.',
+    '.........',
+  ],
+  card: [
+    '.........',
+    '#########',
+    '#.......#',
+    '#########',
+    '#.......#',
+    '#.BB....#',
+    '#.BB.c.c#',
+    '#########',
     '.........',
   ],
   supernova: [

@@ -61,6 +61,16 @@ describe('the root entry of @tuwaio/docs-ui', () => {
     expect(index).toContain("export * from './components/Orb';");
   });
 
+  // The flight plan and the handoff are for every TUWA site (the hub and tuwa.io fly them): they come from the root
+  // entry and load neither Next.js nor Nextra
+  it('exports the flight plan and the handoff of the pixel icons', () => {
+    const index = readFileSync(join(src, 'index.ts'), 'utf8');
+    expect(index).toContain("export * from './components/FlightPlan';");
+    expect(index).toContain("export * from './components/PixelHandoff';");
+    for (const entry of ['components/FlightPlan.tsx', 'components/PixelHandoff.tsx'])
+      expect(packagesOf(entry).filter((name) => /^(next|nextra)(\/|-|$)/.test(name))).toEqual([]);
+  });
+
   it('declares what only the Nextra entries need as optional', () => {
     const { peerDependenciesMeta } = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
     for (const name of ['next', 'nextra', 'nextra-theme-docs'])

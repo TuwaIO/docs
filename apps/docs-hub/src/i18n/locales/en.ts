@@ -27,11 +27,7 @@ export const en: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.en.footer,
   common: {
-    flight: {
-      ariaLabel: 'Flight plan of this page',
-      overview: 'Overview',
-      progressLabel: 'Flight progress',
-    },
+    flight: docsLabels.en.flight,
     packageManager: 'Package manager',
     copy: 'Copy',
     copied: 'Copied',

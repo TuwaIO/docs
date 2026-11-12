@@ -1,3 +1,8 @@
+/**
+ * @file The handoff of a page (`PixelHandoff`), as numbers: how far it has gone at a scroll position and where each
+ * pixel is on its way. Pure functions: the browser is read and written in the component.
+ */
+
 /** A square of a pixel in the coordinates of the page: its top left corner and its side. */
 export interface PixelBox {
   x: number;
@@ -5,7 +10,7 @@ export interface PixelBox {
   size: number;
 }
 
-/** A pixel that flies from its cell on the plate of the hero to its cell on the board, with its seed. */
+/** A pixel that flies from its cell on the icon it leaves to its cell on the icon it lands on, with its seed. */
 export interface HandoffPixel {
   from: PixelBox;
   to: PixelBox;
@@ -30,7 +35,7 @@ const ease = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
  * How far the handoff has gone at a scroll position.
  *
  * @param scrollY - The scroll position of the page.
- * @param range - The scroll positions where the pixels leave the plate and where they rest on the board.
+ * @param range - The scroll positions where the pixels leave their icons and where they rest on the others.
  * @param range.start - Where they leave.
  * @param range.end - Where they rest.
  * @returns 0 before the start, 1 after the end, the share between.
@@ -41,9 +46,9 @@ export function handoffProgress(scrollY: number, range: { start: number; end: nu
 }
 
 /**
- * Where a pixel of the handoff is: it leaves its cell on the plate a little after or before the others, flies on an arc
- * of its own (out to one side and back, as the icon scatters and gathers) and grows or shrinks to the size of its cell on
- * the board. At 0 it is on its cell on the plate, at 1 on its cell on the board.
+ * Where a pixel of the handoff is: it leaves its cell a little after or before the others, flies on an arc of its own
+ * (out to one side and back, as the icon scatters and gathers) and grows or shrinks to the size of the cell it lands
+ * on. At 0 it is on the cell it leaves, at 1 on the cell it lands on.
  *
  * @param pixel - The pixel.
  * @param progress - How far the handoff has gone, from 0 to 1.

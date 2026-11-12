@@ -69,6 +69,21 @@ describe('the motion of a project icon under the pointer', () => {
       expect(css, icon).toContain(`.tuwa-pixel-art--live[data-motion='${icon}']`);
   });
 
+  // Quasar Client is on the orbits and in the lineup of tuwa.io, not on the main page of the hub: its card moves as the
+  // other icons do, its chip and the marks of its number blinking in turn
+  it('has a motion for the card of Quasar Client', () => {
+    expect(projectIconArt.card.join('')).toMatch(/B.*c/);
+    expect(css).toMatch(
+      /\.tuwa-pixel-art--live\[data-motion='card'\] rect\[data-g\] \{\s*animation:\s*var\(--again\),\s*tuwa-pixel-blink /,
+    );
+    const card = renderToStaticMarkup(
+      createElement(PixelArt, { art: projectIconArt.card, assemble: true, motion: 'card' }),
+    );
+    expect(card).toContain('data-motion="card"');
+    expect(card.match(/data-g="b"/g)).toHaveLength(4);
+    expect(card.match(/data-g="c"/g)).toHaveLength(2);
+  });
+
   it('stays still for reduced motion', () => {
     expect(css).toMatch(
       /\.tuwa-pixel-art--assemble rect,\s*\.tuwa-pixel-art--live,\s*\.tuwa-pixel-art--live rect,\s*\.tuwa-pixel-art--live \.tuwa-pixel-art__spin \{\s*animation: none;/,

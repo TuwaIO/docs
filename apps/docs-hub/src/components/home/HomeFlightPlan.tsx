@@ -1,12 +1,12 @@
 'use client';
 
+import { FlightPlan, type FlightWaypoint } from '@tuwaio/docs-ui';
+
 import { useI18n } from '@/i18n';
 import { layers } from '@/lib/ecosystem';
 
-import { FlightPlan, type FlightWaypoint } from '../flight/FlightPlan';
-
 /**
- * The flight plan of the main page (`FlightPlan`): from the overview past the sections with a bar (Ecosystem,
+ * The flight plan of the main page (`FlightPlan` of docs-ui): from the overview past the sections with a bar (Ecosystem,
  * Packages) and the five stage ledgers to the quick start, the Earth. The ledger of the stage the reader reads takes
  * `data-flight="here"`, which turns the square of its number to the accent.
  *
@@ -25,5 +25,5 @@ export function HomeFlightPlan() {
     })),
     { id: 'quick-start', kind: 'section', number: '03', name: t.home.quickStart.section },
   ];
-  return <FlightPlan waypoints={waypoints} />;
+  return <FlightPlan waypoints={waypoints} labels={t.common.flight} />;
 }

@@ -1,4 +1,4 @@
-import type { PolicySlug } from '@tuwaio/docs-ui';
+import type { DocsLabels, PolicySlug } from '@tuwaio/docs-ui';
 import type { TuwaLocale } from '@tuwaio/docs-ui/locale';
 
 import type { AxisId, SegmentId } from '../lib/comparisons';
@@ -241,15 +241,8 @@ export interface DocsHubLabels {
     policyTitles: Record<PolicySlug, string>;
   };
   common: {
-    /** The flight plan of a page: the craft that flies with the scroll, past the parts of the page */
-    flight: {
-      /** The name of the navigation of the rail, for assistive technology */
-      ariaLabel: string;
-      /** The name of the first waypoint, the top of the page */
-      overview: string;
-      /** The name of the progress of the flight, which ends at the last waypoint, for assistive technology */
-      progressLabel: string;
-    };
+    /** The flight plan of a page (`FlightPlan` of docs-ui): its texts are those of docs-ui, the same on every site */
+    flight: DocsLabels['flight'];
     packageManager: string;
     copy: string;
     copied: string;

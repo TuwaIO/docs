@@ -1,10 +1,6 @@
 'use client';
 
-import { CornerMarks } from '@tuwaio/docs-ui';
 import type { CSSProperties } from 'react';
-
-import { useI18n } from '@/i18n';
-import { spreadLabels } from '@/lib/flightPlan';
 
 import {
   EARTH,
@@ -16,8 +12,10 @@ import {
   SHIP_FLAME_CELLS,
   STRIP_CELL,
   STRIP_SHIP,
-} from './flightArt';
-import { type FlightHeading, type FlightMeasure, useFlight } from './useFlight';
+} from '../flightArt';
+import { spreadLabels } from '../flightPlan';
+import { type FlightHeading, type FlightMeasure, useFlight } from '../useFlight';
+import { CornerMarks } from './ProjectSquare';
 
 /** A part of a page the craft of its flight plan passes. */
 export interface FlightWaypoint {
@@ -34,6 +32,32 @@ export interface FlightWaypoint {
   /** The name of the part */
   name: string;
 }
+
+/** Props of {@link FlightPlan}. */
+export interface FlightPlanProps {
+  /** The parts of the page, from the top: the first is where the craft starts, the last is the Earth */
+  waypoints: readonly FlightWaypoint[];
+  /** The names of the flight plan for assistive technology, in the language of the page (`docsLabels[locale].flight`) */
+  labels: {
+    /** The name of the navigation of the rail */
+    ariaLabel: string;
+    /** The name of the progress of the flight */
+    progressLabel: string;
+  };
+  /**
+   * Classes that make a part as wide as the column of the page (its `max-width`), in the styles of the page: the rail
+   * stands in the margin on the right of the column and shows what that margin has room for. Default: the column of
+   * the docs hub, 1120px wide and 1232px from 1600px.
+   */
+  columnClassName?: string;
+  /** The height of the fixed header of the page in pixels: the strip lies on its line (default: `56`) */
+  headerHeight?: number;
+}
+
+/** The column of the docs hub, the default of {@link FlightPlanProps.columnClassName}. */
+const HUB_COLUMN = 'tuwadocs:max-w-[1120px] tuwadocs:min-[1600px]:max-w-[1232px]';
+/** The space between the header and the top of the rail. */
+const RAIL_BELOW_HEADER = 24;
 
 // ── The rail, in pixels from its right edge (the right edge of the screen) and its top ──
 /**
@@ -80,16 +104,16 @@ const STRIP_FIXED = STRIP_SHIP_LENGTH + 3 + STRIP_EARTH + 4;
 
 /** The colours of the pixels of the craft: the hull in ink, the cockpit and the flames lit. */
 const shipPixels = {
-  '#': 'fill-[var(--tuwa-text-primary)]',
-  o: 'fill-[var(--tuwa-docs-lit)]',
-  A: 'fill-[var(--tuwa-docs-lit)] opacity-0 transition-opacity duration-200 group-data-[moving]/flight:opacity-100 motion-reduce:transition-none',
-  b: 'fill-[var(--tuwa-docs-lit)] opacity-0 transition-opacity duration-200 group-data-[moving]/flight:animate-[tuwa-flight-flicker_180ms_steps(1)_infinite] group-data-[moving]/flight:opacity-100 motion-reduce:animate-none motion-reduce:transition-none',
+  '#': 'tuwadocs:fill-[var(--tuwa-text-primary)]',
+  o: 'tuwadocs:fill-[var(--tuwa-docs-lit)]',
+  A: 'tuwadocs:fill-[var(--tuwa-docs-lit)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-200 tuwadocs:group-data-[moving]/flight:opacity-100 tuwadocs:motion-reduce:transition-none',
+  b: 'tuwadocs:fill-[var(--tuwa-docs-lit)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-200 tuwadocs:group-data-[moving]/flight:animate-[tuwa-flight-flicker_180ms_steps(1)_infinite] tuwadocs:group-data-[moving]/flight:opacity-100 tuwadocs:motion-reduce:animate-none tuwadocs:motion-reduce:transition-none',
 };
 
 /** The Earth in grey until the craft arrives; then its outline is ink and its continents are lit. */
 const earthPixels = {
-  '#': 'fill-[var(--tuwa-text-secondary)] transition-[fill] duration-300 group-data-[arrived]/flight:fill-[var(--tuwa-text-primary)] motion-reduce:transition-none',
-  o: 'fill-[var(--tuwa-border-strong)] transition-[fill] duration-300 group-data-[arrived]/flight:fill-[var(--tuwa-docs-lit)] motion-reduce:transition-none',
+  '#': 'tuwadocs:fill-[var(--tuwa-text-secondary)] tuwadocs:transition-[fill] tuwadocs:duration-300 tuwadocs:group-data-[arrived]/flight:fill-[var(--tuwa-text-primary)] tuwadocs:motion-reduce:transition-none',
+  o: 'tuwadocs:fill-[var(--tuwa-border-strong)] tuwadocs:transition-[fill] tuwadocs:duration-300 tuwadocs:group-data-[arrived]/flight:fill-[var(--tuwa-docs-lit)] tuwadocs:motion-reduce:transition-none',
 };
 
 /**
@@ -104,7 +128,7 @@ const offsetOf = (index: number, axis: number) => {
 /**
  * A pixel picture of the flight plan, in square cells on whole pixels (`flightArt.ts`). With `assemble` its pixels of
  * ink and its lit pixels fly in to their places once, one after another, when it renders (`tuwa-flight-assemble` in
- * `globals.css`; nothing for reduced motion): a craft that turns around is drawn anew this way. Its flames never fly.
+ * `site.css`; nothing for reduced motion): a craft that turns around is drawn anew this way. Its flames never fly.
  *
  * @param props.art - The picture, row by row.
  * @param props.pixels - The classes of each kind of pixel, by its letter.
@@ -139,7 +163,7 @@ function Pixels({
       aria-hidden="true"
       focusable="false"
       shapeRendering="crispEdges"
-      className={`absolute max-w-none overflow-visible ${assemble ? 'tuwa-flight-assemble' : ''} ${className}`}
+      className={`tuwadocs:absolute tuwadocs:max-w-none tuwadocs:overflow-visible ${assemble ? 'tuwa-flight-assemble' : ''} ${className}`}
       style={style}
     >
       {art.flatMap((row, y) =>
@@ -193,19 +217,19 @@ function sharesMark(waypoints: readonly FlightWaypoint[], places: readonly numbe
 /** The colours of a label by the state of its waypoint: ahead, passed or the one the craft has locked on. */
 const labelColour = (state: 'ahead' | 'passed' | 'here') =>
   state === 'here'
-    ? 'text-[var(--tuwa-text-accent)]'
+    ? 'tuwadocs:text-[var(--tuwa-text-accent)]'
     : state === 'passed'
-      ? 'text-[var(--tuwa-text-primary)]'
-      : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]';
+      ? 'tuwadocs:text-[var(--tuwa-text-primary)]'
+      : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:text-[var(--tuwa-text-primary)]';
 
 /** The square of a waypoint on the line: paper in a grey outline ahead of the craft, lit once it is reached. */
 const markColour = (reached: boolean) =>
   reached
-    ? 'border-[var(--tuwa-docs-lit)] bg-[var(--tuwa-docs-lit)]'
-    : 'border-[var(--tuwa-text-secondary)] bg-[var(--tuwa-docs-paper)]';
+    ? 'tuwadocs:border-[var(--tuwa-docs-lit)] tuwadocs:bg-[var(--tuwa-docs-lit)]'
+    : 'tuwadocs:border-[var(--tuwa-text-secondary)] tuwadocs:bg-[var(--tuwa-docs-paper)]';
 
-const sectionNameClassName = 'text-[11px] font-bold tracking-[0.12em]';
-const stageNameClassName = 'text-[10px] font-medium tracking-[0.06em]';
+const sectionNameClassName = 'tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:tracking-[0.12em]';
+const stageNameClassName = 'tuwadocs:text-[10px] tuwadocs:font-medium tuwadocs:tracking-[0.06em]';
 
 /**
  * The line of the rail with the ticks of its ruler: a tick every 5% of the flight, a longer one every 25%, on the side
@@ -219,7 +243,7 @@ function Ruler({ travel, colour }: { travel: number; colour: string }) {
   return (
     <>
       <span
-        className={`absolute w-px ${colour}`}
+        className={`tuwadocs:absolute tuwadocs:w-px ${colour}`}
         style={{ right: LINE, top: SHIP_HALF, bottom: EARTH_SIZE + EARTH_BAY }}
       />
       {Array.from({ length: TICKS + 1 }, (_, tick) => {
@@ -227,7 +251,7 @@ function Ruler({ travel, colour }: { travel: number; colour: string }) {
         return (
           <span
             key={tick}
-            className={`absolute h-px ${colour}`}
+            className={`tuwadocs:absolute tuwadocs:h-px ${colour}`}
             style={{ right: LINE - length, width: length, top: SHIP_HALF + Math.round((tick * travel) / TICKS) }}
           />
         );
@@ -258,6 +282,7 @@ function Ruler({ travel, colour }: { travel: number; colour: string }) {
  * @param props.heading - Where the craft heads.
  * @param props.ariaLabel - The name of the navigation.
  * @param props.progressLabel - The name of the tag of the craft, a progress bar, for assistive technology.
+ * @param props.top - Where the rail starts, in pixels from the top of the window: under the header.
  * @returns The rail.
  */
 function FlightRail({
@@ -268,6 +293,7 @@ function FlightRail({
   heading,
   ariaLabel,
   progressLabel,
+  top,
 }: {
   waypoints: readonly FlightWaypoint[];
   measure: FlightMeasure | null;
@@ -276,6 +302,7 @@ function FlightRail({
   heading: FlightHeading;
   ariaLabel: string;
   progressLabel: string;
+  top: number;
 }) {
   const travel = measure?.railTravel ?? 0;
   const margin = measure?.margin ?? 0;
@@ -315,15 +342,19 @@ function FlightRail({
     <nav
       data-flight-rail=""
       aria-label={ariaLabel}
-      className="pointer-events-none fixed top-[80px] right-0 bottom-6 z-20 hidden w-0 opacity-0 transition-opacity duration-300 group-data-[ready]/flight:opacity-100 motion-reduce:transition-none xl:block print:!hidden [@media(max-height:599px)]:!hidden"
+      className="tuwadocs:pointer-events-none tuwadocs:fixed tuwadocs:right-0 tuwadocs:bottom-6 tuwadocs:z-20 tuwadocs:hidden tuwadocs:w-0 tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-300 tuwadocs:group-data-[ready]/flight:opacity-100 tuwadocs:motion-reduce:transition-none tuwadocs:xl:block tuwadocs:print:!hidden tuwadocs:[@media(max-height:599px)]:!hidden"
+      style={{ top }}
     >
       {/* The names as the labels set them, out of sight: `useFlight` reads how wide the longest of each kind is */}
-      <div aria-hidden="true" className="invisible absolute top-0 left-0 font-mono whitespace-nowrap uppercase">
+      <div
+        aria-hidden="true"
+        className="tuwadocs:invisible tuwadocs:absolute tuwadocs:top-0 tuwadocs:left-0 tuwadocs:font-mono tuwadocs:whitespace-nowrap tuwadocs:uppercase"
+      >
         {waypoints.map((waypoint) => (
           <span
             key={waypoint.id}
             data-flight-name={waypoint.kind}
-            className={`absolute top-0 left-0 ${waypoint.kind === 'stage' ? stageNameClassName : sectionNameClassName}`}
+            className={`tuwadocs:absolute tuwadocs:top-0 tuwadocs:left-0 ${waypoint.kind === 'stage' ? stageNameClassName : sectionNameClassName}`}
           >
             {waypoint.name}
           </span>
@@ -331,20 +362,24 @@ function FlightRail({
       </div>
 
       {/* The ruler, and over it the same ruler lit, as far as the craft has flown: all of it once it has arrived */}
-      <div aria-hidden="true" className="absolute inset-y-0 right-0" style={{ width: LINE + 1 }}>
-        <Ruler travel={travel} colour="bg-[var(--tuwa-border-strong)]" />
+      <div
+        aria-hidden="true"
+        className="tuwadocs:absolute tuwadocs:inset-y-0 tuwadocs:right-0"
+        style={{ width: LINE + 1 }}
+      >
+        <Ruler travel={travel} colour="tuwadocs:bg-[var(--tuwa-border-strong)]" />
       </div>
       <div
         aria-hidden="true"
-        className="absolute inset-y-0 right-0 group-data-[arrived]/flight:![clip-path:none]"
+        className="tuwadocs:absolute tuwadocs:inset-y-0 tuwadocs:right-0 tuwadocs:group-data-[arrived]/flight:![clip-path:none]"
         style={{ width: LINE + 1, clipPath: `inset(0 0 calc(100% - var(--flight-y, 0px) - ${SHIP_HALF + 1}px) 0)` }}
       >
-        <Ruler travel={travel} colour="bg-[var(--tuwa-docs-lit)]" />
+        <Ruler travel={travel} colour="tuwadocs:bg-[var(--tuwa-docs-lit)]" />
       </div>
 
       <Pixels art={EARTH} pixels={earthPixels} style={{ right: LINE - EARTH_HALF, bottom: EARTH_BAY }} />
 
-      <ol className="m-0 list-none p-0">
+      <ol className="tuwadocs:m-0 tuwadocs:list-none tuwadocs:p-0">
         {waypoints.map((waypoint, index) => {
           // Locked on: its part is being read. Reached: the craft has docked at its mark
           const isHere = index === here;
@@ -368,12 +403,16 @@ function FlightRail({
           const text = waypoint.number ? `${waypoint.number} ${waypoint.name}` : waypoint.name;
 
           return (
-            <li key={waypoint.id} className="absolute h-[18px] w-0" style={{ right: CLEAR, top: row - LABEL_ROW / 2 }}>
+            <li
+              key={waypoint.id}
+              className="tuwadocs:absolute tuwadocs:h-[18px] tuwadocs:w-0"
+              style={{ right: CLEAR, top: row - LABEL_ROW / 2 }}
+            >
               <a
                 href={`#${waypoint.id}`}
                 aria-label={text}
                 aria-current={isHere ? 'location' : undefined}
-                className={`group/waypoint pointer-events-auto absolute inset-y-0 right-0 flex items-center justify-end font-mono leading-none whitespace-nowrap uppercase transition-colors ${labelColour(state)}`}
+                className={`tuwadocs:group/waypoint tuwadocs:pointer-events-auto tuwadocs:absolute tuwadocs:inset-y-0 tuwadocs:right-0 tuwadocs:flex tuwadocs:items-center tuwadocs:justify-end tuwadocs:font-mono tuwadocs:leading-none tuwadocs:whitespace-nowrap tuwadocs:uppercase tuwadocs:transition-colors ${labelColour(state)}`}
                 style={{ minWidth: LABELS_AT - CLEAR, paddingRight: (isStage ? NAMES_AT : LABELS_AT) - CLEAR }}
               >
                 {nameShown && (
@@ -382,7 +421,10 @@ function FlightRail({
                 {/* The number stands next to the line. A part without one keeps its place: its name ends where the
                     names above it end */}
                 {!isStage && numbersShown && (
-                  <span className="text-right text-[11px] font-medium tracking-[0.04em]" style={{ width: NUMBER + 8 }}>
+                  <span
+                    className="tuwadocs:text-right tuwadocs:text-[11px] tuwadocs:font-medium tuwadocs:tracking-[0.04em]"
+                    style={{ width: NUMBER + 8 }}
+                  >
                     {waypoint.number}
                   </span>
                 )}
@@ -391,7 +433,7 @@ function FlightRail({
                 {leaderShown && (
                   <span
                     aria-hidden="true"
-                    className="absolute h-px bg-[var(--tuwa-border-primary)]"
+                    className="tuwadocs:absolute tuwadocs:h-px tuwadocs:bg-[var(--tuwa-border-primary)]"
                     style={{
                       right: markEnd + 2 - CLEAR,
                       width: LABELS_AT - 4 - markEnd - 2,
@@ -402,7 +444,7 @@ function FlightRail({
                 {leaderShown && shift !== 0 && (
                   <span
                     aria-hidden="true"
-                    className="absolute w-px bg-[var(--tuwa-border-primary)]"
+                    className="tuwadocs:absolute tuwadocs:w-px tuwadocs:bg-[var(--tuwa-border-primary)]"
                     style={{
                       right: LABELS_AT - 5 - CLEAR,
                       top: LABEL_ROW / 2 + Math.min(0, shift),
@@ -414,7 +456,7 @@ function FlightRail({
                 {!isEarth && !shared && (
                   <span
                     aria-hidden="true"
-                    className={`absolute border transition-colors duration-200 motion-reduce:transition-none ${markColour(isReached)}`}
+                    className={`tuwadocs:absolute tuwadocs:border tuwadocs:transition-colors tuwadocs:duration-200 tuwadocs:motion-reduce:transition-none ${markColour(isReached)}`}
                     style={{
                       right: LINE - (size - 1) / 2 - CLEAR,
                       top: LABEL_ROW / 2 + shift - (size - 1) / 2,
@@ -429,7 +471,7 @@ function FlightRail({
                     width={2 * bay + 1}
                     height={2 * bay + 1}
                     arm={6}
-                    className="tuwa-flight-lock absolute text-[var(--tuwa-docs-lit)]"
+                    className="tuwa-flight-lock tuwadocs:absolute tuwadocs:text-[var(--tuwa-docs-lit)]"
                     style={{ right: LINE - bay - CLEAR, top: LABEL_ROW / 2 + shift - bay }}
                   />
                 )}
@@ -438,7 +480,7 @@ function FlightRail({
                 {!nameShown && (
                   <span
                     aria-hidden="true"
-                    className="pointer-events-none absolute -translate-y-1/2 border border-[var(--tuwa-border-strong)] bg-[var(--tuwa-docs-raised)] px-2 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[var(--tuwa-text-primary)] opacity-0 transition-opacity duration-150 group-hover/waypoint:opacity-100 group-focus-visible/waypoint:opacity-100 motion-reduce:transition-none"
+                    className="tuwadocs:pointer-events-none tuwadocs:absolute tuwadocs:-translate-y-1/2 tuwadocs:border tuwadocs:border-[var(--tuwa-border-strong)] tuwadocs:bg-[var(--tuwa-docs-raised)] tuwadocs:px-2 tuwadocs:py-1.5 tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:tracking-[0.12em] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-150 tuwadocs:group-hover/waypoint:opacity-100 tuwadocs:group-focus-visible/waypoint:opacity-100 tuwadocs:motion-reduce:transition-none"
                     style={{ right: (numbersShown ? NAMES_AT : LABELS_AT) - CLEAR, top: LABEL_ROW / 2 }}
                   >
                     {numbersShown && !isStage ? waypoint.name : text}
@@ -452,7 +494,7 @@ function FlightRail({
 
       {/* The craft: its hull moves down the line; its flames and its exhaust are behind it, whichever way it heads */}
       <div
-        className="absolute top-0"
+        className="tuwadocs:absolute tuwadocs:top-0"
         style={{ right: LINE - SHIP_HALF, width: SHIP, height: SHIP, transform: 'translateY(var(--flight-y, 0px))' }}
       >
         <svg
@@ -462,7 +504,7 @@ function FlightRail({
           aria-hidden="true"
           focusable="false"
           shapeRendering="crispEdges"
-          className="absolute left-0 max-w-none fill-[var(--tuwa-docs-lit)] opacity-0 transition-opacity duration-[420ms] group-data-[moving]/flight:opacity-100 motion-reduce:transition-none"
+          className="tuwadocs:absolute tuwadocs:left-0 tuwadocs:max-w-none tuwadocs:fill-[var(--tuwa-docs-lit)] tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-[420ms] tuwadocs:group-data-[moving]/flight:opacity-100 tuwadocs:motion-reduce:transition-none"
           style={{ top: heading === 'ahead' ? -FLAMES - SHIP_EXHAUST_LENGTH : SHIP + FLAMES }}
         >
           {SHIP_EXHAUST.map(([x, distance, side, opacity]) => (
@@ -489,7 +531,7 @@ function FlightRail({
           <>
             <span
               aria-hidden="true"
-              className="absolute h-px w-[5px] bg-[var(--tuwa-docs-lit)]"
+              className="tuwadocs:absolute tuwadocs:h-px tuwadocs:w-[5px] tuwadocs:bg-[var(--tuwa-docs-lit)]"
               style={{ right: SHIP, top: SHIP_HALF }}
             />
             <span
@@ -498,11 +540,11 @@ function FlightRail({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={0}
-              className="absolute flex h-[18px] items-center gap-px border border-[var(--tuwa-docs-lit)] bg-[var(--tuwa-docs-paper)] px-1 font-mono text-[10px] leading-none font-bold tracking-[0.02em] text-[var(--tuwa-text-primary)] tabular-nums"
+              className="tuwadocs:absolute tuwadocs:flex tuwadocs:h-[18px] tuwadocs:items-center tuwadocs:gap-px tuwadocs:border tuwadocs:border-[var(--tuwa-docs-lit)] tuwadocs:bg-[var(--tuwa-docs-paper)] tuwadocs:px-1 tuwadocs:font-mono tuwadocs:text-[10px] tuwadocs:leading-none tuwadocs:font-bold tuwadocs:tracking-[0.02em] tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:tabular-nums"
               style={{ right: SHIP + 5, top: SHIP_HALF - 8 }}
             >
               <span data-flight-percent="">000</span>
-              <span className="font-medium text-[var(--tuwa-text-secondary)]">%</span>
+              <span className="tuwadocs:font-medium tuwadocs:text-[var(--tuwa-text-secondary)]">%</span>
             </span>
           </>
         )}
@@ -523,6 +565,7 @@ function FlightRail({
  * @param props.reached - The index of the last waypoint the craft has reached.
  * @param props.heading - Where the craft heads.
  * @param props.progressLabel - The name of the strip, a progress bar, for assistive technology.
+ * @param props.top - Where the line of the header is, in pixels from the top of the window.
  * @returns The strip.
  */
 function FlightStrip({
@@ -531,12 +574,14 @@ function FlightStrip({
   reached,
   heading,
   progressLabel,
+  top,
 }: {
   waypoints: readonly FlightWaypoint[];
   measure: FlightMeasure | null;
   reached: number;
   heading: FlightHeading;
   progressLabel: string;
+  top: number;
 }) {
   const travel = measure?.stripTravel ?? 0;
   const middle = STRIP_SHIP_LENGTH / 2;
@@ -550,11 +595,12 @@ function FlightStrip({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={0}
-      className="pointer-events-none fixed inset-x-0 top-[56px] z-[55] h-0 opacity-0 transition-opacity duration-300 group-data-[ready]/flight:opacity-100 motion-reduce:transition-none xl:hidden print:hidden"
+      className="tuwadocs:pointer-events-none tuwadocs:fixed tuwadocs:inset-x-0 tuwadocs:z-[55] tuwadocs:h-0 tuwadocs:opacity-0 tuwadocs:transition-opacity tuwadocs:duration-300 tuwadocs:group-data-[ready]/flight:opacity-100 tuwadocs:motion-reduce:transition-none tuwadocs:xl:hidden tuwadocs:print:hidden"
+      style={{ top }}
     >
       <span
         aria-hidden="true"
-        className="absolute -top-px left-0 h-px w-full bg-[var(--tuwa-docs-lit)] group-data-[arrived]/flight:![clip-path:none]"
+        className="tuwadocs:absolute tuwadocs:-top-px tuwadocs:left-0 tuwadocs:h-px tuwadocs:w-full tuwadocs:bg-[var(--tuwa-docs-lit)] tuwadocs:group-data-[arrived]/flight:![clip-path:none]"
         style={{ clipPath: `inset(0 calc(100% - var(--flight-x, 0px) - ${middle}px) 0 0)` }}
       />
       {waypoints.map((waypoint, index) => {
@@ -565,7 +611,7 @@ function FlightStrip({
           <span
             key={waypoint.id}
             aria-hidden="true"
-            className={`absolute border transition-colors duration-200 motion-reduce:transition-none ${markColour(index <= reached)}`}
+            className={`tuwadocs:absolute tuwadocs:border tuwadocs:transition-colors tuwadocs:duration-200 tuwadocs:motion-reduce:transition-none ${markColour(index <= reached)}`}
             style={{
               left: (places[index] as number) - (size + 1) / 2,
               top: -(size + 1) / 2,
@@ -579,11 +625,11 @@ function FlightStrip({
         art={EARTH_SMALL}
         pixels={earthPixels}
         cell={STRIP_CELL}
-        className="right-1"
+        className="tuwadocs:right-1"
         style={{ top: -STRIP_EARTH / 2 }}
       />
       <span
-        className="absolute left-0"
+        className="tuwadocs:absolute tuwadocs:left-0"
         style={{
           top: -STRIP_SHIP_HEIGHT / 2,
           width: STRIP_SHIP_LENGTH,
@@ -606,39 +652,37 @@ function FlightStrip({
 }
 
 /**
- * The flight plan of a page of the hub: the page as one flight, from its top to its last waypoint, the Earth, where the
- * reader starts building. The reader who goes down the page flies a pixel spacecraft down a ruler in the right margin of
- * the page (from 1280px, `FlightRail`) or along the line under the header (narrower, `FlightStrip`); going back up the
- * page turns the craft around. The waypoints are the parts of the page, each an element with its `id`; the part the
- * reader reads takes `data-flight="here"`. The craft follows the scroll eased, its flames burning only while it moves;
- * for reduced motion it is where the scroll is at once, with no flames and no pixels in flight.
+ * The flight plan of a page: the page as one flight, from its top to its last waypoint, the Earth, where the reader
+ * starts building. The reader who goes down the page flies a pixel spacecraft down a ruler in the right margin of the
+ * page (from 1280px, where a page has a margin beside its column) or along the line under the header (narrower); going
+ * back up the page turns the craft around. The waypoints are the parts of the page, each an element with its `id`; the
+ * part the reader reads takes `data-flight="here"`. The craft follows the scroll eased, its flames burning only while it
+ * moves; for reduced motion it is where the scroll is at once, with no flames and no pixels in flight.
  *
- * It stands outside the content of the page, which lies under the header: so its strip lies over the line of the
- * header.
+ * Place it outside the content of the page, which lies under the header: so its strip lies over the line of the
+ * header. The page needs the paper and ink of `site.css` and a fixed header of `headerHeight`.
  *
- * Side effects: those of `useFlight` (scroll and resize listeners, a `ResizeObserver`, attributes and custom
- * properties written outside React).
+ * Side effects: scroll and resize listeners on the window, a `ResizeObserver` on the body and on its tracks, a listener
+ * on the reduced-motion media query; it writes custom properties and attributes on its own root and
+ * `data-flight="here"` on the part of the page the reader reads, outside React.
  *
- * @param props.waypoints - The parts of the page, from the top: the first is where the craft starts, the last is the
- * Earth.
+ * @param props - See {@link FlightPlanProps}.
  * @returns The rail and the strip; CSS shows the one the width of the screen has room for.
  */
-export function FlightPlan({ waypoints }: { waypoints: readonly FlightWaypoint[] }) {
-  const { t } = useI18n();
-  const flight = t.common.flight;
+export function FlightPlan({ waypoints, labels, columnClassName = HUB_COLUMN, headerHeight = 56 }: FlightPlanProps) {
   const { rootRef, measure, here, reached, heading } = useFlight(
     waypoints.map((waypoint) => waypoint.id),
     { rail: RAIL_FIXED, strip: STRIP_FIXED },
   );
 
   return (
-    <div ref={rootRef} className="group/flight">
+    <div ref={rootRef} className="tuwadocs:group/flight">
       {/* As wide as the column of the page and in its place: from its right edge to that of the screen is the margin
           the rail has */}
       <div
         data-flight-column=""
         aria-hidden="true"
-        className="pointer-events-none invisible fixed inset-x-0 top-0 mx-auto h-0 w-full max-w-[1120px] min-[1600px]:max-w-[1232px]"
+        className={`tuwadocs:pointer-events-none tuwadocs:invisible tuwadocs:fixed tuwadocs:inset-x-0 tuwadocs:top-0 tuwadocs:mx-auto tuwadocs:h-0 tuwadocs:w-full ${columnClassName}`}
       />
       <FlightRail
         waypoints={waypoints}
@@ -646,15 +690,17 @@ export function FlightPlan({ waypoints }: { waypoints: readonly FlightWaypoint[]
         here={here}
         reached={reached}
         heading={heading}
-        ariaLabel={flight.ariaLabel}
-        progressLabel={flight.progressLabel}
+        ariaLabel={labels.ariaLabel}
+        progressLabel={labels.progressLabel}
+        top={headerHeight + RAIL_BELOW_HEADER}
       />
       <FlightStrip
         waypoints={waypoints}
         measure={measure}
         reached={reached}
         heading={heading}
-        progressLabel={flight.progressLabel}
+        progressLabel={labels.progressLabel}
+        top={headerHeight}
       />
     </div>
   );

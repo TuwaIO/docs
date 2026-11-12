@@ -287,7 +287,7 @@ export function EcosystemBoard() {
                           art={projectIconArt[entry.icon]}
                           assemble
                           motion={entry.icon}
-                          data-board-icon={entry.id}
+                          data-handoff-to={entry.id}
                           className="h-[27px] w-[27px]"
                         />
                       </span>
