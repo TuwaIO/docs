@@ -7,7 +7,7 @@ import { HeroSection } from '../../../components/HeroSection';
 import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
 import { HomeFlightPlan } from '../../../components/home/HomeFlightPlan';
 import { homeContentClassName, homeFrameClassName } from '../../../components/home/homeLayout';
-import { PixelHandoff } from '../../../components/home/PixelHandoff';
+import { HomePixelHandoff } from '../../../components/home/HomePixelHandoff';
 import { CrossMark } from '../../../components/home/SectionHead';
 import { StageLedgers } from '../../../components/home/StageLedgers';
 import { JsonLd } from '../../../components/JsonLd';
@@ -51,7 +51,7 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <HomeFlightPlan />
 
       <div className="relative z-10">
-        <PixelHandoff />
+        <HomePixelHandoff />
         {/* The frame of the column: its sides meet the line under the header with a cross and run on into the footer
             (`Footer framed`), so it has no bottom line of its own */}
         <div className={`${homeContentClassName} ${homeFrameClassName}`}>

@@ -27,11 +27,7 @@ export const uk: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.uk.footer,
   common: {
-    flight: {
-      ariaLabel: 'План польоту цієї сторінки',
-      overview: 'Огляд',
-      progressLabel: 'Прогрес польоту',
-    },
+    flight: docsLabels.uk.flight,
     packageManager: 'Пакетний менеджер',
     copy: 'Копіювати',
     copied: 'Скопійовано',

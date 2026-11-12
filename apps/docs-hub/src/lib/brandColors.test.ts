@@ -38,7 +38,8 @@ describe('the brand colors of the docs', () => {
       siteCss.match(/fill: var\(--tuwa-pixel-lit, var\(--tuwa-icon-accent, var\(--tuwa-text-accent\)\)\);/g),
     ).toHaveLength(2);
     expect(withoutComments(siteCss)).not.toMatch(/var\(--tuwa-pixel-lit, var\(--tuwa-text-accent\)\)/);
-    expect(globalsCss).toContain(
+    // A pixel of the handoff in flight, lit as the pixel it comes from
+    expect(siteCss).toContain(
       'background-color: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));',
     );
   });

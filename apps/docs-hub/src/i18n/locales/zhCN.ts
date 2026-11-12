@@ -27,11 +27,7 @@ export const zhCN: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels['zh-CN'].footer,
   common: {
-    flight: {
-      ariaLabel: '本页飞行计划',
-      overview: '概览',
-      progressLabel: '飞行进度',
-    },
+    flight: docsLabels['zh-CN'].flight,
     packageManager: '包管理器',
     copy: '复制',
     copied: '已复制',

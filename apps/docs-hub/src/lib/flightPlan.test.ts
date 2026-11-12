@@ -5,6 +5,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
+import { docsLabels } from '../../../../packages/docs-ui/src/docsLabels';
 import {
   EARTH,
   EARTH_SMALL,
@@ -13,9 +14,7 @@ import {
   SHIP_EXHAUST_LENGTH,
   SHIP_FLAME_CELLS,
   STRIP_SHIP,
-} from '../components/flight/flightArt';
-import { HomeFlightPlan } from '../components/home/HomeFlightPlan';
-import { en, I18nProvider, uk, zhCN } from '../i18n';
+} from '../../../../packages/docs-ui/src/flightArt';
 import {
   activeWaypoint,
   approach,
@@ -28,15 +27,21 @@ import {
   turnsBack,
   WAYPOINT_REACH,
   waypointStops,
-} from './flightPlan';
+} from '../../../../packages/docs-ui/src/flightPlan';
+import { HomeFlightPlan } from '../components/home/HomeFlightPlan';
+import { en, I18nProvider, uk, zhCN } from '../i18n';
 
-// The flight plan of the main page: a pixel spacecraft that flies with the scroll, down a ruler in the left margin of
-// the page from 1280px and along the line under the header on narrower screens, past the parts of the page to the Earth
+// The flight plan of a page (`FlightPlan` of docs-ui, which the main page and the comparisons fly): a pixel spacecraft
+// that flies with the scroll, down a ruler in the right margin of the page from 1280px and along the line under the
+// header on narrower screens, past the parts of the page to the Earth
 
 const read = (file: string) => readFileSync(path.resolve(__dirname, '..', file), 'utf8');
-const plan = read('components/flight/FlightPlan.tsx');
+const readUi = (file: string) =>
+  readFileSync(path.resolve(__dirname, '../../../../packages/docs-ui/src', file), 'utf8');
+const plan = readUi('components/FlightPlan.tsx');
 const homePlan = read('components/home/HomeFlightPlan.tsx');
-const hook = read('components/flight/useFlight.ts');
+const hook = readUi('useFlight.ts');
+const siteCss = readUi('styles/site.css');
 const page = read('app/(default)/(home)/page.tsx');
 const footer = read('components/Footer.tsx');
 const shell = read('components/HubShell.tsx');
@@ -383,8 +388,13 @@ describe('the flight plan on the page', () => {
     expect(plan).toContain("transform: 'translateY(var(--flight-y, 0px))'");
     expect(plan).not.toContain('* -1');
     const rail = markup.match(/<nav data-flight-rail=""[^>]*class="([^"]*)"/)?.[1] ?? '';
-    expect(rail.split(' ')).toEqual(expect.arrayContaining(['fixed', 'right-0', 'top-[80px]', 'bottom-6']));
-    expect(rail.split(' ')).not.toContain('left-0');
+    expect(rail.split(' ')).toEqual(
+      expect.arrayContaining(['tuwadocs:fixed', 'tuwadocs:right-0', 'tuwadocs:bottom-6']),
+    );
+    expect(rail.split(' ')).not.toContain('tuwadocs:left-0');
+    // It starts under the header of the page, whose height the page gives (56px by default)
+    expect(markup).toMatch(/<nav data-flight-rail=""[^>]*style="top:80px"/);
+    expect(plan).toContain('top={headerHeight + RAIL_BELOW_HEADER}');
     // The line, the craft and the Earth are placed from the right edge of the screen
     expect(plan).toContain('style={{ right: LINE, top: SHIP_HALF, bottom: EARTH_SIZE + EARTH_BAY }}');
     expect(plan).toMatch(/style=\{\{ right: LINE - SHIP_HALF, width: SHIP, height: SHIP, transform:/);
@@ -392,7 +402,7 @@ describe('the flight plan on the page', () => {
     // line and the name before it
     expect(plan).toContain('const LABELS_AT = 84;');
     expect(plan).toMatch(/paddingRight: \(isStage \? NAMES_AT : LABELS_AT\) - CLEAR/);
-    expect(plan).toMatch(/justify-end font-mono/);
+    expect(plan).toMatch(/tuwadocs:justify-end tuwadocs:font-mono/);
     // The ticks of the ruler are on the side of the edge of the screen
     expect(plan).toContain(
       'style={{ right: LINE - length, width: length, top: SHIP_HALF + Math.round((tick * travel) / TICKS) }}',
@@ -403,8 +413,8 @@ describe('the flight plan on the page', () => {
   it('draws the rail as a ruler, lit behind the craft', () => {
     expect(plan).toContain('const TICKS = 20;');
     expect(plan).toContain('const length = tick % 5 === 0 ? 8 : 4;');
-    expect(plan).toContain('<Ruler travel={travel} colour="bg-[var(--tuwa-border-strong)]" />');
-    expect(plan).toContain('<Ruler travel={travel} colour="bg-[var(--tuwa-docs-lit)]" />');
+    expect(plan).toContain('<Ruler travel={travel} colour="tuwadocs:bg-[var(--tuwa-border-strong)]" />');
+    expect(plan).toContain('<Ruler travel={travel} colour="tuwadocs:bg-[var(--tuwa-docs-lit)]" />');
     expect(plan).toContain('clipPath: `inset(0 0 calc(100% - var(--flight-y, 0px) - ${SHIP_HALF + 1}px) 0)`');
     expect(plan).toContain('group-data-[arrived]/flight:![clip-path:none]');
   });
@@ -432,11 +442,11 @@ describe('the flight plan on the page', () => {
     expect(plan).toContain('art={RAIL_SHIP[heading]}');
     expect(plan).toContain('art={STRIP_SHIP[heading]}');
     expect(plan).toContain(
-      "className={`absolute max-w-none overflow-visible ${assemble ? 'tuwa-flight-assemble' : ''} ${className}`}",
+      "className={`tuwadocs:absolute tuwadocs:max-w-none tuwadocs:overflow-visible ${assemble ? 'tuwa-flight-assemble' : ''} ${className}`}",
     );
     expect(hook).toContain('const nextBack = turnsBack(back, shown, target, Math.max(railTravel, stripTravel));');
     expect(hook).toContain("setHeading(back ? 'back' : 'ahead');");
-    expect(globals).toMatch(/\.tuwa-flight-assemble \[data-fly\] \{\s*animation: tuwa-flight-assemble 380ms/);
+    expect(siteCss).toMatch(/\.tuwa-flight-assemble \[data-fly\] \{\s*animation: tuwa-flight-assemble 380ms/);
     // The flames of the craft do not fly: they burn or they do not
     expect(plan).toContain("const flies = assemble && (pixel === '#' || pixel === 'o');");
     // The craft of the server render heads ahead, its pixels marked to fly
@@ -457,9 +467,10 @@ describe('the flight plan on the page', () => {
   it('flies the craft of the strip along the line under the header, to the Earth on the right', () => {
     expect(plan).toContain("transform: 'translateX(var(--flight-x, 0px))'");
     expect(markup).toMatch(
-      /data-flight-strip="" role="progressbar"[^>]*class="[^"]*fixed inset-x-0 top-\[56px\][^"]* h-0 /,
+      /data-flight-strip="" role="progressbar"[^>]*class="[^"]*tuwadocs:fixed tuwadocs:inset-x-0 [^"]*tuwadocs:h-0 [^"]*" style="top:56px"/,
     );
-    expect(plan).toMatch(/<Pixels\s+art=\{EARTH_SMALL\}[\s\S]{0,120}className="right-1"/);
+    expect(plan).toContain('top={headerHeight}');
+    expect(plan).toMatch(/<Pixels\s+art=\{EARTH_SMALL\}[\s\S]{0,120}className="tuwadocs:right-1"/);
     expect(plan).toContain('clipPath: `inset(0 calc(100% - var(--flight-x, 0px) - ${middle}px) 0 0)`');
   });
 
@@ -467,19 +478,24 @@ describe('the flight plan on the page', () => {
   it('shows the rail from 1280px and the strip below, never both', () => {
     const rail = markup.match(/<nav data-flight-rail=""[^>]*class="([^"]*)"/)?.[1] ?? '';
     const strip = markup.match(/data-flight-strip=""[^>]*class="([^"]*)"/)?.[1] ?? '';
-    expect(rail.split(' ')).toEqual(expect.arrayContaining(['hidden', 'xl:block', 'pointer-events-none']));
-    expect(strip.split(' ')).toEqual(expect.arrayContaining(['xl:hidden', 'pointer-events-none']));
-    expect(strip.split(' ')).not.toContain('hidden');
+    expect(rail.split(' ')).toEqual(
+      expect.arrayContaining(['tuwadocs:hidden', 'tuwadocs:xl:block', 'tuwadocs:pointer-events-none']),
+    );
+    expect(strip.split(' ')).toEqual(expect.arrayContaining(['tuwadocs:xl:hidden', 'tuwadocs:pointer-events-none']));
+    expect(strip.split(' ')).not.toContain('tuwadocs:hidden');
   });
 
   // What the rail shows depends on the margin beside the column of the page, measured from a part as wide as the column
   it('measures the margin of the page from a part as wide as its column', () => {
     const column = markup.match(/data-flight-column="" aria-hidden="true" class="([^"]*)"/)?.[1] ?? '';
     const home = read('components/home/homeLayout.ts');
+    // The column of the hub is the default of the flight plan: the same widths as the column of the main page
     for (const width of ['max-w-[1120px]', 'min-[1600px]:max-w-[1232px]', 'mx-auto', 'w-full']) {
-      expect(column.split(' ')).toContain(width);
+      expect(column.split(' ')).toContain(`tuwadocs:${width}`);
       expect(home).toContain(width);
     }
+    // Another site gives the widths of its own column
+    expect(plan).toMatch(/tuwadocs:mx-auto tuwadocs:h-0 tuwadocs:w-full \$\{columnClassName\}`\}/);
     // The margin on the right of the column, without the scrollbar
     expect(hook).toContain('document.documentElement.clientWidth - column.getBoundingClientRect().right');
   });
@@ -558,6 +574,25 @@ describe('the flight plan on the page', () => {
     expect(plan.match(/role="progressbar"/g)).toHaveLength(2);
   });
 
+  // Every site that flies the flight plan words it the same way: the names are those of docs-ui, which the dictionaries
+  // of the hub take as they are
+  it('takes its names from docs-ui', () => {
+    for (const [locale, dictionary] of [
+      ['en', en],
+      ['uk', uk],
+      ['zh-CN', zhCN],
+    ] as const) {
+      expect(dictionary.common.flight).toEqual(docsLabels[locale].flight);
+      for (const name of Object.values(docsLabels[locale].flight)) expect(name.length).toBeGreaterThan(1);
+    }
+    for (const file of ['en', 'uk', 'zhCN'])
+      expect(read(`i18n/locales/${file}.ts`)).toMatch(/\n {4}flight: docsLabels/);
+    // The component takes them as a prop: it has no dictionary of its own
+    expect(plan).toContain('ariaLabel={labels.ariaLabel}');
+    expect(plan).not.toMatch(/useI18n|from '\.\.\/docsLabels'/);
+    expect(homePlan).toContain('<FlightPlan waypoints={waypoints} labels={t.common.flight} />');
+  });
+
   // The strip lies over the line of the header: inside the page, which is under the header, it could not
   it('stands outside the page, so its strip lies over the line of the header', () => {
     expect(page).toMatch(
@@ -571,10 +606,14 @@ describe('the flight plan on the page', () => {
   it('lets nothing move for ever but the flame of a craft under way', () => {
     const endless = [...plan.matchAll(/\S*infinite\S*/g)].map((match) => match[0]);
     expect(endless).toHaveLength(1);
-    expect(endless[0]).toMatch(/^group-data-\[moving\]\/flight:animate-\[tuwa-flight-flicker_/);
+    expect(endless[0]).toMatch(/^tuwadocs:group-data-\[moving\]\/flight:animate-\[tuwa-flight-flicker_/);
     expect(plan).toContain('motion-reduce:animate-none');
     expect(globals).not.toMatch(/\binfinite\b/);
-    expect(globals).toMatch(
+    // The styles of the flight plan, the last part of the styles of docs-ui
+    const flightCss = siteCss.slice(siteCss.indexOf('/* The flight plan of a page (`FlightPlan`)'));
+    expect(flightCss).toContain('@keyframes tuwa-flight-flicker');
+    expect(flightCss).not.toMatch(/\binfinite\b/);
+    expect(flightCss).toMatch(
       /@media \(prefers-reduced-motion: reduce\) \{\s*\.tuwa-flight-lock,\s*\.tuwa-flight-assemble \[data-fly\] \{\s*animation: none;/,
     );
   });

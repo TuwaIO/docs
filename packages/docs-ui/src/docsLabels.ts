@@ -72,6 +72,18 @@ export interface DocsLabels {
    * `Overview`). Empty for English.
    */
   sidebar: Record<string, string>;
+  /** The texts of the flight plan of a page (`FlightPlan`): the craft that flies with the scroll, past its parts. */
+  flight: {
+    /** The name of the navigation of the rail, for assistive technology (the `labels.ariaLabel` of `FlightPlan`). */
+    ariaLabel: string;
+    /** The name of the first waypoint, the top of the page. */
+    overview: string;
+    /**
+     * The name of the progress of the flight, which ends at the last waypoint, for assistive technology (the
+     * `labels.progressLabel` of `FlightPlan`).
+     */
+    progressLabel: string;
+  };
 }
 
 const en: DocsLabels = {
@@ -110,6 +122,11 @@ const en: DocsLabels = {
   englishOnly:
     'This page is in English only: package READMEs and the API reference are generated from the source code and are not translated.',
   sidebar: {},
+  flight: {
+    ariaLabel: 'Flight plan of this page',
+    overview: 'Overview',
+    progressLabel: 'Flight progress',
+  },
 };
 
 const uk: DocsLabels = {
@@ -153,6 +170,11 @@ const uk: DocsLabels = {
     Guides: 'Посібники',
     Overview: 'Огляд',
   },
+  flight: {
+    ariaLabel: 'План польоту цієї сторінки',
+    overview: 'Огляд',
+    progressLabel: 'Прогрес польоту',
+  },
 };
 
 const zhCN: DocsLabels = {
@@ -193,6 +215,11 @@ const zhCN: DocsLabels = {
     Packages: '软件包',
     Guides: '指南',
     Overview: '概览',
+  },
+  flight: {
+    ariaLabel: '本页飞行计划',
+    overview: '概览',
+    progressLabel: '飞行进度',
   },
 };
 

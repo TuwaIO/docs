@@ -1292,6 +1292,15 @@ article:focus {
 .tuwa-pixel-art--live[data-motion='server'] rect[data-g='b'] {
   --led: 1.4s;
 }
+/* Card: its chip is read, then the marks of its number blink */
+.tuwa-pixel-art--live[data-motion='card'] rect[data-g] {
+  animation:
+    var(--again),
+    tuwa-pixel-blink 1.6s ease-in-out var(--led, 600ms) infinite;
+}
+.tuwa-pixel-art--live[data-motion='card'] rect[data-g='c'] {
+  --led: 1.4s;
+}
 /* Supernova: the star flares and throws a shock wave out, the tips of its rays catching the light */
 .tuwa-pixel-art--live[data-motion='supernova'] rect[data-g] {
   animation:
@@ -1533,6 +1542,77 @@ html {
 
 @media (prefers-reduced-motion: reduce) {
   .tuwa-landed {
+    animation: none;
+  }
+}
+
+/* The handoff of a page (`PixelHandoff`): while the pixels of the icons fly from one part of the page to another, both
+   sets of icons hide; before it the icons the pixels land on wait without their pixels. The attribute stands on a pixel
+   picture or on a part around one. Without the script, or for reduced motion, nothing sets `data-handoff` and every
+   icon shows */
+html[data-handoff='flight']
+  .tuwa-pixel-art:is([data-handoff-from], [data-handoff-to], [data-handoff-from] *, [data-handoff-to] *),
+html[data-handoff='from'] .tuwa-pixel-art:is([data-handoff-to], [data-handoff-to] *) {
+  visibility: hidden;
+}
+
+/* A pixel in flight: a square of 1px that the handoff moves and scales, in the colours of the pixel art */
+.tuwa-handoff-pixel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  transform-origin: 0 0;
+  background-color: var(--tuwa-pixel-ink, var(--tuwa-text-primary));
+  will-change: transform;
+}
+
+.tuwa-handoff-pixel--lit {
+  background-color: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
+}
+
+/* The flight plan of a page (`FlightPlan`). The flame of its craft flickers, in steps, only while the craft is under
+   way (`data-moving`, which the scroll sets and a stop removes): the one motion of a page that repeats, and it ends
+   with the scroll */
+@keyframes tuwa-flight-flicker {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* A craft that turns around is drawn anew: its pixels fly in to their places, one after another, once */
+@keyframes tuwa-flight-assemble {
+  from {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+}
+
+.tuwa-flight-assemble [data-fly] {
+  animation: tuwa-flight-assemble 380ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation-delay: calc(var(--i) * 5ms);
+}
+
+/* The corner marks close in on the waypoint the craft has locked on, once */
+@keyframes tuwa-flight-lock {
+  from {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.tuwa-flight-lock {
+  animation: tuwa-flight-lock 560ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-flight-lock,
+  .tuwa-flight-assemble [data-fly] {
     animation: none;
   }
 }

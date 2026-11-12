@@ -31,7 +31,7 @@ function PlateLink({ entry }: { entry: StagedEntry }) {
         art={projectIconArt[entry.icon]}
         assemble
         motion={entry.icon}
-        data-plate-icon={entry.id}
+        data-handoff-from={entry.id}
         className="h-9 w-9"
       />
       <span className="font-mono text-xs font-medium leading-[1.3] tracking-normal text-[var(--tuwa-text-primary)] [overflow-wrap:anywhere] group-hover:text-[var(--tuwa-text-accent)]">

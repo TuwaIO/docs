@@ -1,5 +1,5 @@
 /**
- * @file The flight plan of the main page, as numbers: how far the reader has scrolled on the way to the last waypoint,
+ * @file The flight plan of a page (`FlightPlan`), as numbers: how far the reader has scrolled on the way to the last waypoint,
  * where on that way each part of the page starts, which part the craft has reached, how the craft eases after the
  * scroll, when it turns around and where the labels of the parts stand so that none covers another. Pure functions: the
  * browser is read and written in `useFlight`.

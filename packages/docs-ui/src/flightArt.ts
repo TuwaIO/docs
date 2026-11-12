@@ -1,5 +1,5 @@
 /**
- * @file The pixel pictures of the flight plan of the main page, row by row: `.` is empty, `#` a pixel of ink, `o` a lit
+ * @file The pixel pictures of the flight plan of a page (`FlightPlan`), row by row: `.` is empty, `#` a pixel of ink, `o` a lit
  * pixel (the accent), `A` a pixel of a flame and `b` a pixel of a flame that flickers. Every picture is an odd number of
  * cells across the line it sits on, so its middle cell lies on that line.
  */

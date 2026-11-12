@@ -3,10 +3,13 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { handoffPixel, handoffProgress } from './pixelHandoff';
+import { handoffPixel, handoffProgress } from '../../../../packages/docs-ui/src/pixelHandoff';
 
 // Scrolling from the hero to the ecosystem, the pixels of the project icons scatter from the plate and gather into the
-// icons of the board; scrolling back takes them back. No motion for reduced motion.
+// icons of the board; scrolling back takes them back. No motion for reduced motion. The handoff is `PixelHandoff` of
+// docs-ui.
+
+const docsUi = path.resolve(__dirname, '../../../../packages/docs-ui/src');
 
 const pixel = (seed: number) => ({
   from: { x: 100, y: 200, size: 4 },
@@ -45,10 +48,34 @@ describe('the handoff of the project icons', () => {
   });
 
   it('hides the icons only while their pixels fly, and draws nothing for reduced motion', () => {
-    const css = readFileSync(path.resolve(__dirname, '../app/globals.css'), 'utf8');
-    expect(css).toMatch(/html\[data-handoff='flight'\] :is\(\[data-plate-icon\], \[data-board-icon\]\)/);
-    expect(css).toMatch(/html\[data-handoff='plate'\] \[data-board-icon\]/);
-    const source = readFileSync(path.resolve(__dirname, '../components/home/PixelHandoff.tsx'), 'utf8');
+    const css = readFileSync(path.resolve(docsUi, 'styles/site.css'), 'utf8');
+    expect(css).toMatch(
+      /html\[data-handoff='flight'\]\s+\.tuwa-pixel-art:is\(\[data-handoff-from\], \[data-handoff-to\], \[data-handoff-from\] \*, \[data-handoff-to\] \*\),\s*html\[data-handoff='from'\] \.tuwa-pixel-art:is\(\[data-handoff-to\], \[data-handoff-to\] \*\) \{\s*visibility: hidden;/,
+    );
+    const source = readFileSync(path.resolve(docsUi, 'components/PixelHandoff.tsx'), 'utf8');
     expect(source).toContain("matchMedia('(prefers-reduced-motion: reduce)').matches) return;");
+  });
+
+  // The component is that of docs-ui, which other sites fly too: the main page gives it its two ends and its range
+  it('flies from the plate of the hero to the board of the ecosystem', () => {
+    const read = (file: string) => readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+    expect(read('components/home/HeroPlate.tsx')).toContain('data-handoff-from={entry.id}');
+    expect(read('components/home/EcosystemBoard.tsx')).toContain('data-handoff-to={entry.id}');
+    const home = read('components/home/HomePixelHandoff.tsx');
+    expect(home).toContain('return <PixelHandoff range={plateToBoard} />;');
+    expect(home).toContain("document.querySelector('[data-handoff-from]')?.closest('nav')");
+    expect(home).toContain("document.querySelector('#ecosystem [data-lanes]')");
+    expect(read('app/(default)/(home)/page.tsx')).toContain('<HomePixelHandoff />');
+  });
+
+  // A page may move the icons its pixels leave (the orbits of tuwa.io): the pixels leave from where the icons stand
+  it('measures the icons when the pixels take off, after the attribute that stops their motion is set', () => {
+    const source = readFileSync(path.resolve(docsUi, 'components/PixelHandoff.tsx'), 'utf8');
+    const change = source.slice(source.indexOf('if (next !== state) {'), source.indexOf('state = next;'));
+    expect(change.indexOf('root.dataset.handoff = next;')).toBeGreaterThan(0);
+    expect(change.indexOf('root.dataset.handoff = next;')).toBeLessThan(
+      change.indexOf("if (next === 'flight') takeOff();"),
+    );
+    expect(source).toContain("const next = !range ? '' : progress <= 0 ? 'from' : progress >= 1 ? 'to' : 'flight';");
   });
 });
