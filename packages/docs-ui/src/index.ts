@@ -1,6 +1,7 @@
 export * from './anchor';
 export * from './components/LocaleSwitcher';
 export * from './components/Logo';
+export * from './components/LogoMotion';
 export * from './components/Orb';
 export * from './components/PolicyDocument';
 export * from './components/ProjectSquare';
@@ -10,6 +11,7 @@ export * from './components/ThemeSwitcher';
 export * from './docsLabels';
 export * from './i18n';
 export * from './locale';
+export * from './logoMotion';
 export * from './pageMap';
 export * from './pixelMotion';
 export * from './policies';

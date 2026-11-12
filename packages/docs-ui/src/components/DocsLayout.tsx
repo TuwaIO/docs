@@ -13,6 +13,7 @@ import { localizePageMap, prefixPageMapRoutes } from '../pageMap';
 import { type SocialLink } from '../utils';
 import { Footer } from './Footer';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { LogoMotion } from './LogoMotion';
 import { Navbar } from './NavBar';
 import { NavbarThemeSwitch } from './NavbarThemeSwitch';
 import { SmoothAnchors } from './SmoothAnchors';
@@ -145,6 +146,7 @@ export function NextraDocsLayout({
         }
       >
         <SmoothAnchors />
+        <LogoMotion />
         {children}
       </Layout>
     </>

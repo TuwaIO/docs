@@ -1,6 +1,6 @@
 'use client';
 
-import { SiteLogo, SmoothAnchors } from '@tuwaio/docs-ui';
+import { LogoMotion, SiteLogo, SmoothAnchors } from '@tuwaio/docs-ui';
 import { pathWithoutLocale } from '@tuwaio/docs-ui/locale';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -17,7 +17,8 @@ const FRAMED_PAGES = ['/', '/comparisons', '/configurator'];
 /**
  * The frame of the React pages of the Docs Hub (the main page, comparisons, configurator, playground, policies and the
  * 404 page): a link past the header to the content, first for the keyboard, the fixed header with the logo, the content
- * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`). Under a page
+ * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`) and the pixels
+ * of the logo tremble under the pointer (`LogoMotion`). Under a page
  * whose column has the frame of the main page, in every language, the footer takes the sides of that frame (`framed`).
  *
  * @param props.children - The page.
@@ -41,6 +42,7 @@ export function HubShell({ children }: { children: ReactNode }) {
         {t.nav.skipToContent}
       </a>
       <SmoothAnchors />
+      <LogoMotion />
       <Header logo={navbarLogo} />
       <main id="content" className="flex-1 pt-[56px]">
         {children}

@@ -466,6 +466,12 @@ article .nextra-border a:hover {
   font-size: 0.875em;
 }
 
+/* The TUWA logo in motion (`LogoMotion`): while its pixels tremble under the pointer, or fly apart on a press, a filter
+   moves what its images show; at rest it has no filter at all */
+.tuwa-logo[data-pixels] {
+  filter: url(#tuwa-logo-pixels);
+}
+
 /* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and in paper and ink: a frame of 1px with no fill,
    no shadows or halos around the knob. The sizes of the switch before it (80 × 40 on a phone, 64 × 32 from md), a knob
    that slides with a spring and stretches on its way (the sun on the left, the moon on the right), pixel art that
