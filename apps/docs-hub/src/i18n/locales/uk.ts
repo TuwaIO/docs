@@ -717,7 +717,7 @@ export const uk: DocsHubLabels = {
     },
     steps: {
       step1Title: '1. Ваш стек',
-      copyShareLink: 'Скопіювати посилання на конфігурацію',
+      copyShareLink: 'Скопіювати посилання',
       linkCopied: 'Посилання скопійовано',
       tryInPlayground: 'Спробувати в Пісочниці',
       copyPromptForAi: 'Скопіювати промпт для ШІ',

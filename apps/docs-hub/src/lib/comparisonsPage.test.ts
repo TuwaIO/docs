@@ -88,6 +88,29 @@ describe('the comparisons page', () => {
     }
   });
 
+  // The tabs of the axes stand two in a row on phones, on shared lines, in a frame of 1px inside the margins of the
+  // page (16px): at 320px a tab is 142.5px wide, and the Ukrainian «Некастодіальність» in mono caps of 11px with a
+  // tracking of 0.12em ran out of it. Below 375px a tab has margins of 10px and its label a tracking of 0.04em; from
+  // 375px the usual margins of 16px and tracking of 0.12em have room
+  it('fits the longest word of an axis in its tab on the narrowest phones, in every language', () => {
+    const radar = read('ComparisonRadar.tsx');
+    expect(radar).toContain('px-4 py-3.5 text-left transition-colors max-[374px]:px-2.5');
+    expect(radar).toContain('className={`block max-[374px]:tracking-[0.04em] ${capsClassName}');
+    const tab = (screen: number) => (screen - 2 * 16 - 2 - 1) / 2;
+    // A letter of Geist Mono is 0.6em wide, a Chinese character 1em, and each is followed by its tracking
+    const width = (word: string, tracking: number) =>
+      [...word].reduce((sum, letter) => sum + ((letter.codePointAt(0) ?? 0) > 0x2e80 ? 1 : 0.6) + tracking, 0) * 11;
+    for (const texts of [en, uk, zhCN])
+      for (const axis of AXES) {
+        const label = texts.comparisons.axes[axis.id]?.label ?? axis.label;
+        for (const word of label.split(/\s+/)) {
+          expect(width(word, 0.04), word).toBeLessThanOrEqual(tab(320) - 2 * 10);
+          expect(width(word, 0.12), word).toBeLessThanOrEqual(tab(375) - 2 * 16);
+        }
+      }
+    expect(width('Некастодіальність', 0.12)).toBeGreaterThan(tab(320) - 2 * 16);
+  });
+
   it('draws the radar in lines and square points, with no gradient and no glow', () => {
     const radar = read('ComparisonRadar.tsx');
     expect(radar).not.toMatch(/<circle|linearGradient|feGaussianBlur|<filter|<defs/);

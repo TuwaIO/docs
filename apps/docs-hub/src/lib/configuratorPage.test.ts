@@ -70,6 +70,29 @@ describe('the configurator page', () => {
     expect(configurator).not.toMatch(/rounded-full|shadow-md/);
   });
 
+  // The two copy buttons under the options are as wide as the column of the options, 284px at its narrowest (372px
+  // less the margins of the column from 1600px; the same on a phone of 320px), and their text is one line of mono caps
+  // of 11px: a Ukrainian label of 36 letters ran out of its frame. What is left for the text is the button less its
+  // paddings (12px each), its icon (16px) and the gap after it (8px)
+  it('has copy buttons whose labels fit them in every language', () => {
+    expect(configurator).toContain(
+      'className={`w-full justify-center disabled:cursor-default ${smallButtonClassName} ${secondaryButtonClassName}`}',
+    );
+    const room = 284 - 2 * 12 - 16 - 8;
+    // A letter of Geist Mono is 0.6em wide, a Chinese character 1em, and each is followed by 0.12em of tracking
+    const width = (label: string) =>
+      [...label].reduce((sum, letter) => sum + ((letter.codePointAt(0) ?? 0) > 0x2e80 ? 1 : 0.6) + 0.12, 0) * 11;
+    for (const { configurator: texts } of [en, uk, zhCN])
+      for (const label of [
+        texts.steps.copyPromptForAi,
+        texts.steps.promptCopied,
+        texts.steps.copyShareLink,
+        texts.steps.linkCopied,
+      ])
+        expect(width(label), label).toBeLessThanOrEqual(room);
+    expect(width('Скопіювати посилання на конфігурацію')).toBeGreaterThan(room);
+  });
+
   it('takes its icons from Nova, none from heroicons', () => {
     for (const source of [configurator, tabsSource, codeSource]) expect(source).not.toContain('@heroicons');
     expect(configurator).toMatch(/import \{ CpuChipIcon, LinkIcon \} from '@tuwaio\/sdk\/nova-icons\/24\/outline'/);

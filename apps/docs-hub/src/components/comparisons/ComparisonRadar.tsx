@@ -348,10 +348,12 @@ export function ComparisonRadar() {
                 aria-selected={isActive}
                 aria-controls="axis-panel"
                 onClick={() => setActiveAxis(item.id)}
-                className={`cursor-pointer px-4 py-3.5 text-left transition-colors ${isActive ? 'bg-[var(--tuwa-text-primary)] text-[var(--tuwa-docs-paper)]' : 'bg-[var(--tuwa-docs-raised)] text-[var(--tuwa-text-secondary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,var(--tuwa-docs-raised))]'}`}
+                // On the narrowest phones a tab is 142px wide and the longest word of an axis (Ukrainian, 17 letters) is
+                // wider than its text column: there the tab has smaller margins and its label tighter letters
+                className={`cursor-pointer px-4 py-3.5 text-left transition-colors max-[374px]:px-2.5 ${isActive ? 'bg-[var(--tuwa-text-primary)] text-[var(--tuwa-docs-paper)]' : 'bg-[var(--tuwa-docs-raised)] text-[var(--tuwa-text-secondary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,var(--tuwa-docs-raised))]'}`}
               >
                 <span
-                  className={`block ${capsClassName} ${isActive ? 'text-[var(--tuwa-docs-paper)]' : 'text-[var(--tuwa-text-primary)]'}`}
+                  className={`block max-[374px]:tracking-[0.04em] ${capsClassName} ${isActive ? 'text-[var(--tuwa-docs-paper)]' : 'text-[var(--tuwa-text-primary)]'}`}
                 >
                   {t.comparisons.axes[item.id]?.label ?? item.label}
                 </span>
