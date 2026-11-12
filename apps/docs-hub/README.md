@@ -118,7 +118,7 @@ A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last save
 cd ../../tools/configurator-check
 pnpm install --ignore-workspace   # once, and after bumping the versions in its package.json
 pnpm check                        # type-checks the 45 stacks, their install commands and their formatting,
-                                  # and the 4626 variants of the Playground customization
+                                  # and the 4650 variants of the Playground customization
 ```
 
 The generator has no runtime imports and uses only erasable TypeScript, because the check runs it with Node's type stripping.
