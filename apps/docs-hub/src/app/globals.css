@@ -23,18 +23,19 @@
 }
 
 /* The gradient of the titles of the hub pages, which docs-ui no longer carries. The titles are transparent text over it:
-   it goes with the last of them, when their pages are redrawn in paper and ink (without it they would not show) */
+   it goes with the last of them, when their pages are redrawn in paper and ink (without it they would not show). In the
+   shades of the accent until then: the TUWA orange, the cyan of the dark logo */
 :root {
-  --tuwa-hero-gradient-from: #0052ff;
-  --tuwa-hero-gradient-via: #1d4ed8;
-  --tuwa-hero-gradient-to: #0284c7;
+  --tuwa-hero-gradient-from: #b93b0a;
+  --tuwa-hero-gradient-via: #cf440b;
+  --tuwa-hero-gradient-to: #e34f0d;
 }
 
 html.dark,
 .dark {
-  --tuwa-hero-gradient-from: #2563eb;
-  --tuwa-hero-gradient-via: #3b82f6;
-  --tuwa-hero-gradient-to: #7dd3fc;
+  --tuwa-hero-gradient-from: #22c3e6;
+  --tuwa-hero-gradient-via: #3ed2ec;
+  --tuwa-hero-gradient-to: #8ef5ff;
 }
 
 /* The handoff of the main page (`PixelHandoff`): while the pixels of the project icons fly from the plate of the hero to
@@ -58,7 +59,7 @@ html[data-handoff='plate'] [data-board-icon] {
 }
 
 .tuwa-handoff-pixel--lit {
-  background-color: var(--tuwa-pixel-lit, var(--tuwa-text-accent));
+  background-color: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
 }
 
 /* A dotted line of the main page, the stages of the board on phones and tablets: a dot of 1px every 8px, in the colour

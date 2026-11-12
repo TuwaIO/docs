@@ -16,14 +16,17 @@
   --tuwa-docs-paper: var(--tuwa-bg-secondary);
   --tuwa-docs-raised: var(--tuwa-bg-primary);
   --tuwa-docs-sunken: var(--tuwa-bg-muted);
-  /* What is lit or reached: the accent on paper, the cyan of the dark logo in the dark theme */
-  --tuwa-docs-lit: var(--tuwa-text-accent);
+  /* What is lit or reached: the bright fill of the brand on paper (Nova's `--tuwa-icon-accent`, the TUWA orange), the
+     light cyan of the dark logo in the dark theme */
+  --tuwa-docs-lit: var(--tuwa-icon-accent, var(--tuwa-text-accent));
   /* The paper again, as the channels Nextra reads: `rgb(var(--nextra-bg))`, and `rgba(var(--nextra-bg), 0.8)` behind a
      zoomed image, which needs the commas its own `Head` writes */
   --nextra-bg: 242, 241, 238;
 
   --tuwa-primary: var(--tuwa-text-accent);
-  --tuwa-secondary: #0047de;
+  /* A link under the pointer: the TUWA orange, deeper (7.8:1 on paper). A plain color: a mix here made the build nest a
+     fallback in the root rule */
+  --tuwa-secondary: #8f2d06;
   --tuwa-success: #10b981;
   --tuwa-warning: #f59e0b;
   --tuwa-error: #ef4444;
@@ -46,10 +49,10 @@
   --x-radius-lg: var(--tuwa-rounded-corners);
   --x-radius-xl: var(--tuwa-rounded-corners);
 
-  /* The accent as Nextra describes it, for the selection: #0052ff */
-  --nextra-primary-hue: 221deg;
-  --nextra-primary-saturation: 100%;
-  --nextra-primary-lightness: 50%;
+  /* The accent as Nextra describes it, for the selection: the deep TUWA orange, #b93b0a */
+  --nextra-primary-hue: 17deg;
+  --nextra-primary-saturation: 90%;
+  --nextra-primary-lightness: 38%;
 }
 
 .dark {
@@ -61,12 +64,13 @@
 
   /* Set again, so that they follow the accent of the theme wherever the class sits */
   --tuwa-primary: var(--tuwa-text-accent);
-  --tuwa-secondary: #93c5fd;
+  /* A link under the pointer: the light cyan of the dark logo */
+  --tuwa-secondary: #8ef5ff;
 
-  /* #60a5fa */
-  --nextra-primary-hue: 213deg;
-  --nextra-primary-saturation: 94%;
-  --nextra-primary-lightness: 68%;
+  /* The cyan of the dark logo, #3ed2ec */
+  --nextra-primary-hue: 189deg;
+  --nextra-primary-saturation: 82%;
+  --nextra-primary-lightness: 58%;
 }
 
 /* Values built from the tokens of the theme, declared on `.dark` as well: a variable resolves where it is declared, and
@@ -84,8 +88,9 @@
   --tuwa-footer-npm-hover: var(--tuwa-text-primary);
   --tuwa-footer-github-hover: var(--tuwa-text-primary);
 
-  /* The scale Nextra colours its links, active items and focus with, on the accent of Nova (#0052ff in light, #60a5fa in
-     dark) and shaped as Nextra shapes its own: the accent at 600, lighter below, darker above */
+  /* The scale Nextra colours its links, active items and focus with, on the accent of Nova (the deep TUWA orange in
+     light, the cyan of the logo in dark) and shaped as Nextra shapes its own: the accent at 600, lighter below, darker
+     above */
   --x-color-primary-50: color-mix(in srgb, var(--tuwa-text-accent) 6%, #ffffff);
   --x-color-primary-100: color-mix(in srgb, var(--tuwa-text-accent) 12%, #ffffff);
   --x-color-primary-200: color-mix(in srgb, var(--tuwa-text-accent) 26%, #ffffff);
@@ -968,7 +973,7 @@ article:focus {
   fill: var(--tuwa-pixel-ink, var(--tuwa-text-primary));
 }
 .tuwa-pixel-art rect[data-lit] {
-  fill: var(--tuwa-pixel-lit, var(--tuwa-text-accent));
+  fill: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
 }
 /* The pixels fly in to their places once, one after another, from a short way off (Nova's assemble motion) */
 .tuwa-pixel-art--assemble rect {
@@ -1040,7 +1045,7 @@ article:focus {
 }
 .tuwa-pixel-art__planet {
   visibility: hidden;
-  fill: var(--tuwa-pixel-lit, var(--tuwa-text-accent));
+  fill: var(--tuwa-pixel-lit, var(--tuwa-icon-accent, var(--tuwa-text-accent)));
 }
 .tuwa-pixel-art--live .tuwa-pixel-art__planet {
   visibility: visible;
