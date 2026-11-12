@@ -265,6 +265,8 @@ export function EcosystemBoard() {
                       {formatPlural(board.packages, count, locale)} ·{' '}
                       <span className="whitespace-nowrap">{entryLayerRange(entry.id)}</span>
                     </>
+                  ) : entry.hosting === 'managed' ? (
+                    board.managed
                   ) : (
                     board.selfHosted
                   );

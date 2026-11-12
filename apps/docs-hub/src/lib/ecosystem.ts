@@ -9,7 +9,7 @@ import { type PackageType, type ProjectIcon, projectIcons } from '@tuwaio/docs-u
 export interface PackageBadge {
   /** npm name (`@tuwaio/...`) or the label of a link */
   name: string;
-  /** TUWA layer of an npm package (`L1`–`L9`) */
+  /** TUWA layer of an npm package (`L1`–`L10`) */
   layer?: string;
   /** Target of a link row; npm rows link to npm when they have no details */
   url?: string;
@@ -30,6 +30,11 @@ export interface DocEntry {
   tagline: string;
   docsUrl: string;
   githubUrl: string;
+  /**
+   * How a project that is a service or a server, not a set of packages, is run: `managed` by TUWA (Quasar Cloud) or
+   * `self-hosted` (Quasar Community). The board says it where the other projects count their packages.
+   */
+  hosting?: 'managed' | 'self-hosted';
   packages?: PackageBadge[];
 }
 
@@ -50,6 +55,18 @@ export const layers: EcosystemLayer[] = [
     subtitle: 'Chain-agnostic CAIP-122 auth & multi-chain primitives',
     entries: [
       {
+        id: 'orbit',
+        name: 'Orbit Utils',
+        tagline: 'Multi-chain utilities for EVM & Solana',
+        docsUrl: 'https://orbit.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/orbit',
+        packages: [
+          { name: '@tuwaio/orbit-core', layer: 'L1' },
+          { name: '@tuwaio/orbit-evm', layer: 'L2' },
+          { name: '@tuwaio/orbit-solana', layer: 'L2' },
+        ],
+      },
+      {
         id: 'siwx',
         name: 'Sign-In With X (SIWX)',
         plateName: 'SIWX',
@@ -64,24 +81,25 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/siwx-server', layer: 'L2' },
         ],
       },
-      {
-        id: 'orbit',
-        name: 'Orbit Utils',
-        tagline: 'Multi-chain utilities for EVM & Solana',
-        docsUrl: 'https://orbit.docs.tuwa.io/',
-        githubUrl: 'https://github.com/TuwaIO/orbit',
-        packages: [
-          { name: '@tuwaio/orbit-core', layer: 'L1' },
-          { name: '@tuwaio/orbit-evm', layer: 'L2' },
-          { name: '@tuwaio/orbit-solana', layer: 'L2' },
-        ],
-      },
     ],
   },
   {
     label: 'Stage 2 — State & Connection',
     subtitle: 'Transaction tracking & wallet connectivity',
     entries: [
+      {
+        id: 'pulsar',
+        name: 'Pulsar',
+        tagline: 'Transaction tracking that survives reloads',
+        docsUrl: 'https://pulsar.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/pulsar-core',
+        packages: [
+          { name: '@tuwaio/pulsar-core', layer: 'L3' },
+          { name: '@tuwaio/pulsar-evm', layer: 'L4' },
+          { name: '@tuwaio/pulsar-solana', layer: 'L4' },
+          { name: '@tuwaio/pulsar-react', layer: 'L4' },
+        ],
+      },
       {
         id: 'satellite',
         name: 'Satellite Connect',
@@ -96,24 +114,11 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/satellite-siwe-next-auth', layer: 'L4', isDeprecated: true },
         ],
       },
-      {
-        id: 'pulsar',
-        name: 'Pulsar',
-        tagline: 'Transaction tracking that survives reloads',
-        docsUrl: 'https://pulsar.docs.tuwa.io/',
-        githubUrl: 'https://github.com/TuwaIO/pulsar-core',
-        packages: [
-          { name: '@tuwaio/pulsar-core', layer: 'L3' },
-          { name: '@tuwaio/pulsar-evm', layer: 'L4' },
-          { name: '@tuwaio/pulsar-solana', layer: 'L4' },
-          { name: '@tuwaio/pulsar-react', layer: 'L4' },
-        ],
-      },
     ],
   },
   {
     label: 'Stage 3 — Backend & Sync',
-    subtitle: 'Managed cloud or self-hosted Quasar engine',
+    subtitle: 'Managed cloud or self-hosted Quasar engine, and its API client',
     entries: [
       {
         id: 'quasar',
@@ -121,10 +126,8 @@ export const layers: EcosystemLayer[] = [
         tagline: 'Managed cloud · Transaction indexing & sync',
         docsUrl: '/quasar',
         githubUrl: 'https://github.com/TuwaIO/quasar-client',
-        packages: [
-          { name: '@tuwaio/quasar-sdk', layer: 'L5' },
-          { name: 'Quasar Dashboard', url: QUASAR_DASHBOARD_URL },
-        ],
+        hosting: 'managed',
+        packages: [{ name: 'Quasar Dashboard', url: QUASAR_DASHBOARD_URL }],
       },
       {
         id: 'quasar-community',
@@ -133,16 +136,28 @@ export const layers: EcosystemLayer[] = [
         tagline: 'Self-hosted engine & admin · Apache-2.0',
         docsUrl: '/quasar/self-hosting',
         githubUrl: 'https://github.com/TuwaIO/quasar-community',
+        hosting: 'self-hosted',
         packages: [
           { name: 'Self-Hosting Guide', url: '/quasar/self-hosting' },
           { name: 'Live Showcase', url: 'https://github.com/TuwaIO/quasar-community#live-community-showcase' },
         ],
       },
+      // The client side of Quasar, a repository of its own. Its packages stand where their layers are: the API client
+      // here, `nova-payments` with Nova UI Kit and `payments-sdk` with the TUWA SDK
+      {
+        id: 'quasar-client',
+        pixelIcon: 'card',
+        name: 'Quasar Client',
+        tagline: 'API client, webhook verification & relay CLI',
+        docsUrl: 'https://payments.docs.tuwa.io/',
+        githubUrl: 'https://github.com/TuwaIO/quasar-client',
+        packages: [{ name: '@tuwaio/quasar-sdk', layer: 'L5' }],
+      },
     ],
   },
   {
     label: 'Stage 4 — User Interface',
-    subtitle: 'React components for Satellite & Pulsar',
+    subtitle: 'React components for Satellite, Pulsar & Quasar Payments',
     entries: [
       {
         id: 'nova',
@@ -155,13 +170,15 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/nova-icons', layer: 'L6' },
           { name: '@tuwaio/nova-connect', layer: 'L7' },
           { name: '@tuwaio/nova-transactions', layer: 'L7' },
+          // One layer above the rest of Nova: the checkout uses the whole of Nova UI Kit
+          { name: '@tuwaio/nova-payments', layer: 'L8' },
         ],
       },
     ],
   },
   {
     label: 'Stage 5 — SDK Integration Layer',
-    subtitle: 'Core SDK & network-specific adapters',
+    subtitle: 'Core SDK, network add-ons & the Payments module',
     entries: [
       {
         id: 'sdk',
@@ -174,6 +191,8 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/create-cosmos-playground', layer: 'L8' },
           { name: '@tuwaio/evm-sdk', layer: 'L9' },
           { name: '@tuwaio/solana-sdk', layer: 'L9' },
+          // One layer above the add-ons: it goes on top of @tuwaio/sdk (L8) and, for Solana, of @tuwaio/solana-sdk (L9)
+          { name: '@tuwaio/payments-sdk', layer: 'L10' },
         ],
       },
     ],
@@ -221,6 +240,32 @@ export function stagedEntries(): StagedEntry[] {
       icon: entry.pixelIcon ?? projectIcons[entry.id as PackageType],
     })),
   );
+}
+
+/**
+ * The order of the projects wherever they are listed one after another (the plate of the hero, the lists of their
+ * sites), by project id: the order they build on one another. It is the order of the stages but for Quasar Client,
+ * which stands last: its API client is of the backend stage, and its checkout builds on Nova UI Kit and on the SDK.
+ */
+export const productOrder: readonly string[] = [
+  'orbit',
+  'siwx',
+  'pulsar',
+  'satellite',
+  'quasar',
+  'quasar-community',
+  'nova',
+  'sdk',
+  'quasar-client',
+];
+
+/**
+ * The projects of the main page in {@link productOrder}, each with its stage and its icon.
+ *
+ * @returns The projects.
+ */
+export function productsInOrder(): StagedEntry[] {
+  return [...stagedEntries()].sort((a, b) => productOrder.indexOf(a.id) - productOrder.indexOf(b.id));
 }
 
 const packageProjects: ReadonlyMap<string, StagedEntry> = new Map(
@@ -274,6 +319,7 @@ export const boardPlaces: Readonly<Record<string, BoardPlace>> = {
   orbit: { row: 1, lane: 3 },
   satellite: { row: 2, lane: 1 },
   pulsar: { row: 2, lane: 3 },
+  'quasar-client': { row: 3, lane: 1 },
   'quasar-community': { row: 3, lane: 2 },
   quasar: { row: 3, lane: 3 },
   nova: { row: 4, lane: 2 },
@@ -295,7 +341,8 @@ export interface BoardEdge {
  * What builds on what, top to bottom: the traces of the board and the list that reads them out. Taken from the
  * dependencies of the packages: SIWX, Satellite, Pulsar and Nova import Orbit; Nova imports Satellite and Pulsar; the SDK
  * imports Nova. A sign-in with SIWX is optional to Satellite and Nova, and Pulsar syncs with Quasar only when an app
- * gives it a backend.
+ * gives it a backend. Quasar Client calls the API of Quasar, self-hosted or in the cloud: its trace starts at the one
+ * beside it.
  */
 export const boardEdges: readonly BoardEdge[] = [
   { from: 'orbit', to: 'siwx' },
@@ -309,6 +356,7 @@ export const boardEdges: readonly BoardEdge[] = [
   { from: 'siwx', to: 'nova', kind: 'optional' },
   { from: 'nova', to: 'sdk' },
   { from: 'quasar-community', to: 'quasar', kind: 'or' },
+  { from: 'quasar-community', to: 'quasar-client' },
 ];
 
 /** The projects whose packages the TUWA SDK re-exports, by id, in the order of its marks on the board. */

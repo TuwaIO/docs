@@ -65,12 +65,12 @@ describe('the motion of a project icon under the pointer', () => {
   });
 
   it('has a motion for every icon of a project on the main page', () => {
-    for (const icon of ['sign-in', 'orbit', 'satellite', 'pulsar', 'cloud', 'server', 'supernova', 'terminal'])
+    for (const icon of ['sign-in', 'orbit', 'satellite', 'pulsar', 'cloud', 'server', 'card', 'supernova', 'terminal'])
       expect(css, icon).toContain(`.tuwa-pixel-art--live[data-motion='${icon}']`);
   });
 
-  // Quasar Client is on the orbits and in the lineup of tuwa.io, not on the main page of the hub: its card moves as the
-  // other icons do, its chip and the marks of its number blinking in turn
+  // Quasar Client joined the projects after the others: its card moves as the other icons do, its chip and the marks
+  // of its number blinking in turn
   it('has a motion for the card of Quasar Client', () => {
     expect(projectIconArt.card.join('')).toMatch(/B.*c/);
     expect(css).toMatch(

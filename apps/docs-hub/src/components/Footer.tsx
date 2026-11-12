@@ -66,7 +66,9 @@ export function Footer({ framed = false }: { framed?: boolean }) {
               </Link>
             </nav>
           </div>
-          <p className="mt-7 flex flex-wrap justify-between gap-3 border-t border-[var(--tuwa-border-primary)] pt-4 font-mono text-xs leading-[1.4] text-[var(--tuwa-text-secondary)]">
+          {/* Below 1280px the button to the top stands over the lower right corner of the window (`PageFlightPlan`):
+              the address of the hub follows the copyright there, so at the end of the page the button covers nothing */}
+          <p className="mt-7 flex flex-wrap gap-x-6 gap-y-1 border-t border-[var(--tuwa-border-primary)] pt-4 font-mono text-xs leading-[1.4] text-[var(--tuwa-text-secondary)] xl:justify-between">
             <span>
               © 2025–{new Date().getFullYear()} TUWA. {t.footer.copyright}
             </span>

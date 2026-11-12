@@ -57,7 +57,7 @@ describe('the markup of the ledgers', () => {
     for (const source of [ledger, product]) expect(source).toContain('scroll-mt-[120px]');
     expect(ledgers).toContain('<SectionBar');
     expect(layers).toHaveLength(5);
-    expect(stagedEntries()).toHaveLength(8);
+    expect(stagedEntries()).toHaveLength(9);
   });
 
   // A button may hold no block of content: the preview is a sibling of the row's button, inside its list item

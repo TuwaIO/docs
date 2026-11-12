@@ -5,7 +5,7 @@ import { getPolicyPageUrl, publishedPolicies } from '@tuwaio/docs-ui';
 
 import packageReadmes from '../generated/package-readmes.json';
 import { AXES, axisScore, COMPETITORS, CRITERIA, PRODUCTS, SEGMENTS, verifiedAsOf } from './comparisons';
-import { layers } from './ecosystem';
+import { layers, productsInOrder } from './ecosystem';
 import { getHubPages, type HubPage, readPageSource } from './hubPages';
 import { getPackageDetails, type PackageDetails } from './packages';
 import { SITE_NAME, SITE_URL, TUWA_AGENTS_URL, TUWA_SUMMARY } from './site';
@@ -106,9 +106,7 @@ export async function getLlmsIndex(): Promise<string> {
     return lines.length > 0 ? `### ${layer.label}\n\n${lines.join('\n')}` : null;
   });
 
-  const sites = layers.flatMap((layer) =>
-    layer.entries.map((entry) => `- [${entry.name}](${absolute(entry.docsUrl)}): ${entry.tagline}`),
-  );
+  const sites = productsInOrder().map((entry) => `- [${entry.name}](${absolute(entry.docsUrl)}): ${entry.tagline}`);
 
   return `# TUWA
 
@@ -156,7 +154,6 @@ ${sites.join('\n')}
 
 - [Quasar API (OpenAPI)](${OPENAPI_URL}): The endpoints that \`@tuwaio/quasar-sdk\` calls, as an OpenAPI 3 document
 - [Nova UI Kit Storybook](https://stories.tuwa.io/): Live examples of the Nova components
-- [Quasar Client](https://payments.docs.tuwa.io/): The live checkout of Nova Payments and the reference of \`@tuwaio/quasar-sdk\`, \`@tuwaio/nova-payments\` and \`@tuwaio/payments-sdk\`
 - [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground): Source of the starter templates
 - [Quasar Community Edition](https://github.com/TuwaIO/quasar-community): The self-hosted Quasar
 - [TUWA website](https://tuwa.io): Product overview and Quasar Cloud

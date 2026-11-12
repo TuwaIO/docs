@@ -40,6 +40,7 @@ const readUi = (file: string) =>
   readFileSync(path.resolve(__dirname, '../../../../packages/docs-ui/src', file), 'utf8');
 const plan = readUi('components/FlightPlan.tsx');
 const homePlan = read('components/home/HomeFlightPlan.tsx');
+const pagePlan = read('components/PageFlightPlan.tsx');
 const hook = readUi('useFlight.ts');
 const siteCss = readUi('styles/site.css');
 const page = read('app/(default)/(home)/page.tsx');
@@ -590,7 +591,28 @@ describe('the flight plan on the page', () => {
     // The component takes them as a prop: it has no dictionary of its own
     expect(plan).toContain('ariaLabel={labels.ariaLabel}');
     expect(plan).not.toMatch(/useI18n|from '\.\.\/docsLabels'/);
-    expect(homePlan).toContain('<FlightPlan waypoints={waypoints} labels={t.common.flight} />');
+    expect(homePlan).toContain('<PageFlightPlan waypoints={waypoints} />');
+    expect(pagePlan).toContain('<FlightPlan waypoints={waypoints} labels={t.common.flight} />');
+  });
+
+  // The rail has a link to every part of the page, the first of them its top; the strip, which stands in for it below
+  // 1280px, has none: there the button of Nova takes the reader back to the top, and from 1280px the page has none
+  it('gives the reader a way back to the top where the strip stands in for the rail', () => {
+    expect(pagePlan).toContain("import { ScrollToTopButton } from '@tuwaio/nova-core';");
+    const button = pagePlan.match(/<ScrollToTopButton [^>]*\/>/)?.[0] ?? '';
+    expect(button).toContain('label={docsLabels[locale].nextra.scrollToTop}');
+    // Gone where the rail stands, and under the menu of the header (z-45), with rules the styles of Nova cannot undo
+    expect(button).toMatch(/className="[^"]*\bxl:!hidden\b/);
+    expect(button).toMatch(/className="[^"]*!z-40\b/);
+    // Both pages that fly the plan have it
+    expect(homePlan).toContain('<PageFlightPlan waypoints={waypoints} />');
+    expect(read('components/comparisons/ComparisonsContent.tsx')).toContain('<PageFlightPlan waypoints={waypoints} />');
+    for (const locale of ['en', 'uk', 'zh-CN'] as const)
+      expect(docsLabels[locale].nextra.scrollToTop.length).toBeGreaterThan(3);
+    // At the end of the page it stood over the address of the hub, the right part of the last line of the footer:
+    // below 1280px that line keeps to the left
+    expect(footer).toMatch(/<p className="mt-7 flex flex-wrap gap-x-6 gap-y-1 [^"]*xl:justify-between">/);
+    expect(footer).not.toMatch(/<p className="mt-7 flex flex-wrap justify-between/);
   });
 
   // The strip lies over the line of the header: inside the page, which is under the header, it could not
