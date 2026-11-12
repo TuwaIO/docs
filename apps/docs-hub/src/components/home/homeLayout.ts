@@ -12,6 +12,18 @@ export const homeContentClassName =
 export const homeFrameClassName = 'relative xl:border-x xl:border-[var(--tuwa-border-primary)]';
 
 /**
+ * How the sections of the main page lie over one another, by the number of the section: an earlier section lies over a
+ * later one. What floats below a row of a section (the preview of a package) reaches into the next section, and without
+ * this the bar of that section, drawn later, would lie over it. Inside its own section such a part stays under the bar
+ * of that section, which sticks above it.
+ */
+export const homeSectionLayer: Readonly<Record<1 | 2 | 3, string>> = {
+  1: 'relative z-[3]',
+  2: 'relative z-[2]',
+  3: 'relative z-[1]',
+};
+
+/**
  * A part that runs across the whole column, over its side margins (from line to line of the frame from 1280px), with
  * its content on the margins of the column.
  */

@@ -26,6 +26,7 @@ import {
 import { type BoardTrace, boardTraces, type NodeBox, traceEnds, tracePath } from '@/lib/ecosystemBoard';
 import { formatPlural } from '@/lib/plural';
 
+import { homeSectionLayer } from './homeLayout';
 import { SectionBar, SectionHead } from './SectionHead';
 
 /** The width from which the board lays the projects on three lanes and draws its traces (Tailwind's `lg`) */
@@ -158,7 +159,11 @@ export function EcosystemBoard() {
   };
 
   return (
-    <section id="ecosystem" aria-labelledby="ecosystem-title" className="mt-[104px] scroll-mt-[56px]">
+    <section
+      id="ecosystem"
+      aria-labelledby="ecosystem-title"
+      className={`mt-[104px] scroll-mt-[56px] ${homeSectionLayer[1]}`}
+    >
       <SectionBar
         number={1}
         name={board.section}

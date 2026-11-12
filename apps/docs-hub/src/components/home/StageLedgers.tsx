@@ -11,6 +11,7 @@ import type { PackageDetails } from '@/lib/packages';
 import { formatPlural } from '@/lib/plural';
 
 import { PackageDialog } from '../PackageDialog';
+import { homeSectionLayer } from './homeLayout';
 import { DeprecatedPackageRow, LinkRow, NpmPackageRow } from './PackageRow';
 import { ProductRow } from './ProductRow';
 import { SectionBar } from './SectionHead';
@@ -44,7 +45,11 @@ export function StageLedgers({
   const openPackage = (name: string) => setDialog({ name, open: true });
 
   return (
-    <section id="packages" aria-label={t.home.ledger.section} className="mt-[104px] scroll-mt-[56px]">
+    <section
+      id="packages"
+      aria-label={t.home.ledger.section}
+      className={`mt-[104px] scroll-mt-[56px] ${homeSectionLayer[2]}`}
+    >
       <SectionBar
         number={2}
         name={t.home.ledger.section}

@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { homeSectionLayer } from '../components/home/homeLayout';
 import { layers, linkHost, stagedEntries } from './ecosystem';
 import { sizeMeasuredAt, splitPackageNames } from './ledger';
 
@@ -87,6 +88,26 @@ describe('the markup of the ledgers', () => {
     expect(deprecated).toContain('{t.home.ledger.deprecated}');
     expect(deprecated).toContain('text-[var(--tuwa-error-text)]');
     expect(deprecated).toContain('splitPackageNames(note)');
+  });
+
+  // The preview of the last packages of the section reaches into the next section, and the bar of that section lay over
+  // it: a row under the pointer lifts itself above the rows under it only, and the bar of a later section is drawn
+  // later. An earlier section lies over a later one; inside its own section the preview stays under the bar, which
+  // sticks above it
+  it('lay the preview of the last packages over the bar of the next section', () => {
+    expect(homeSectionLayer).toEqual({ 1: 'relative z-[3]', 2: 'relative z-[2]', 3: 'relative z-[1]' });
+    expect(read('../components/home/EcosystemBoard.tsx')).toMatch(
+      /<section\s+id="ecosystem"[^>]*\$\{homeSectionLayer\[1\]\}/,
+    );
+    expect(read('../components/home/StageLedgers.tsx')).toMatch(
+      /<section\s+id="packages"[^>]*\$\{homeSectionLayer\[2\]\}/,
+    );
+    expect(read('../components/QuickStartSection.tsx')).toMatch(
+      /<section\s+id="quick-start"[^>]*\$\{homeSectionLayer\[3\]\}/,
+    );
+    // Under the bar of its own section: the row that holds the preview lies lower than the bar
+    expect(read('../components/home/PackageRow.tsx')).toContain('group/row relative hover:z-10 focus-within:z-10');
+    expect(read('../components/home/SectionHead.tsx')).toMatch(/className=\{`sticky top-\[56px\] z-30 /);
   });
 
   it('open the preview below the row only, from 1024px on devices that hover', () => {

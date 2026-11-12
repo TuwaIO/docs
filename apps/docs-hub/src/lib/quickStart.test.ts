@@ -26,7 +26,7 @@ describe('the quick start section', () => {
   it('is the third section of the framed column', () => {
     // It closes the column: the frame has no bottom line, its sides run on into the footer
     expect(page).toMatch(/<StageLedgers[^>]*\/>\s*<QuickStartSection \/>\s*<\/div>/);
-    expect(section).toMatch(/<section id="quick-start" aria-labelledby="quick-start-title"/);
+    expect(section).toMatch(/<section\s+id="quick-start"\s+aria-labelledby="quick-start-title"/);
     expect(section).toMatch(/<SectionBar\s+number=\{3\}\s+name=\{texts\.section\}/);
   });
 

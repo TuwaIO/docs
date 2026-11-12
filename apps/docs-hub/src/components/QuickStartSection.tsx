@@ -8,6 +8,7 @@ import { formatPlural } from '@/lib/plural';
 import { useI18n } from '../i18n';
 import { CommandLine } from './CommandLine';
 import { CompactConfigurator } from './configurator/CompactConfigurator';
+import { homeSectionLayer } from './home/homeLayout';
 import { SectionBar, SectionHead } from './home/SectionHead';
 
 /** The command that creates an app from a template of Cosmos Playground */
@@ -54,7 +55,11 @@ export function QuickStartSection() {
   ];
 
   return (
-    <section id="quick-start" aria-labelledby="quick-start-title" className="mt-[104px] scroll-mt-[56px]">
+    <section
+      id="quick-start"
+      aria-labelledby="quick-start-title"
+      className={`mt-[104px] scroll-mt-[56px] ${homeSectionLayer[3]}`}
+    >
       <SectionBar
         number={3}
         name={texts.section}
