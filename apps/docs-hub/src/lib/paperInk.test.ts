@@ -281,7 +281,7 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
  * other source file of the hub is checked.
  */
 const hubNotYetRedrawn: { files: RegExp; why: string }[] = [
-  { files: /^components\/playground\//, why: 'the playground, redrawn with its own stage' },
+  { files: /^components\/playground\/nova\//, why: 'the kits of the playground, redrawn with its themes' },
 ];
 
 /** Every source file of the hub (not its tests, nor the data its scripts generate), by its path under `src`. */

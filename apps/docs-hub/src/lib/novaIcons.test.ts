@@ -29,13 +29,9 @@ describe('the copy and link icons of the hub', () => {
 
 // The icons of the hub and of docs-ui are the pixel icons of Nova (`@tuwaio/nova-icons`, in the hub through
 // `@tuwaio/sdk/nova-icons`), which have the names and the props of heroicons. Heroicons stay only where they are listed
-// here, with the reason
-const heroiconsAllowed: { file: RegExp; why: string }[] = [
-  {
-    file: /^apps\/docs-hub\/src\/components\/playground\/(ActionButtons|ControlsPanel|HeadlessStage|Inspector|Stage)\.tsx$/,
-    why: 'the shell of the playground, redrawn with the playground',
-  },
-];
+// here, with the reason: nowhere now. (The Playground may hand Nova its classic icons through
+// `@tuwaio/sdk/nova-core/heroicons`, which is an import of the SDK, not of heroicons)
+const heroiconsAllowed: { file: RegExp; why: string }[] = [];
 const repo = path.resolve(root, '../../..');
 
 function allSourceFiles(dir: string): string[] {

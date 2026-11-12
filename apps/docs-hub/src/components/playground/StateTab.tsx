@@ -15,9 +15,9 @@ import { usePlayground } from './PlaygroundContext';
 function Section({ title, source, children }: { title: string; source: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-1">
-      <h3 className="flex flex-wrap items-baseline gap-2 text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-primary)]">
+      <h3 className="m-0 flex flex-wrap items-baseline gap-2 font-mono text-[11px] leading-[1.35] font-bold tracking-[0.12em] text-[var(--tuwa-text-primary)] uppercase">
         {title}
-        <code className="font-mono text-[10px] font-normal normal-case tracking-normal text-[var(--tuwa-text-tertiary)]">
+        <code className="font-mono text-[11px] font-normal tracking-normal text-[var(--tuwa-text-secondary)] normal-case">
           {source}
         </code>
       </h3>

@@ -132,10 +132,13 @@ export function PlaygroundSession({
       <PlaygroundContext value={value}>
         <TransactionsPoolInitializer />
         {settings.quasar && <HistoryLoader />}
-        {/* One column: the controls above the stage, the inspector under it */}
-        <div className="flex flex-col gap-5">
+        {/* One column: the controls above the stage, the inspector under it. The controls and the inspector run from
+            line to line of the frame of the page; the stage is a window between them */}
+        <div className="flex flex-col">
           <ControlsPanel />
-          <Stage />
+          <div className="py-8 md:py-10">
+            <Stage />
+          </div>
           <Inspector />
         </div>
       </PlaygroundContext>

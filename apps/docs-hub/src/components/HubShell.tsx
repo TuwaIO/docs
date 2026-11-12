@@ -12,7 +12,7 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 
 /** The pages whose column has the frame of the main page: under them the footer takes the sides of that frame. */
-const FRAMED_PAGES = ['/', '/comparisons', '/configurator', '/policies'];
+const FRAMED_PAGES = ['/', '/comparisons', '/configurator', '/policies', '/playground'];
 
 /**
  * The frame of the React pages of the Docs Hub (the main page, comparisons, configurator, playground, policies and the

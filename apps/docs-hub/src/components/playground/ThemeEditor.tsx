@@ -6,6 +6,7 @@ import { useI18n } from '@/i18n';
 import { LENGTH_VARIABLES, THEME_GROUPS, THEME_PRESETS, themeCss, type ThemeVariable } from '@/lib/playground/themes';
 
 import { usePlayground } from './PlaygroundContext';
+import { capsClassName, fieldClassName } from './playgroundStyles';
 
 const LENGTH_LIMITS: Partial<Record<ThemeVariable, number>> = {
   '--tuwa-rounded-corners': 24,
@@ -33,10 +34,10 @@ export function ThemeEditor() {
             aria-pressed={settings.theme === option.id}
             onClick={() => changeSettings({ theme: option.id })}
             className={cn(
-              'flex flex-col gap-2 rounded-[var(--tuwa-rounded-corners)] border p-3 text-left transition-colors cursor-pointer',
+              'flex cursor-pointer flex-col gap-2 border p-3 text-left transition-colors',
               settings.theme === option.id
-                ? 'border-[var(--tuwa-text-accent)]/60 bg-[var(--tuwa-text-accent)]/10'
-                : 'border-[var(--tuwa-border-primary)]/50 dark:border-white/10 hover:border-[var(--tuwa-border-primary)]',
+                ? 'border-[var(--tuwa-text-primary)] bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]'
+                : 'border-[var(--tuwa-border-primary)] hover:border-[var(--tuwa-border-strong)]',
             )}
           >
             <span className="flex gap-1" aria-hidden="true">
@@ -50,7 +51,7 @@ export function ThemeEditor() {
               ).map((variable) => (
                 <span
                   key={variable}
-                  className="h-4 w-4 rounded-full border border-black/10 dark:border-white/20"
+                  className="h-4 w-4 border border-[var(--tuwa-border-strong)]"
                   style={{ background: option.values[variable] }}
                 />
               ))}
@@ -70,7 +71,7 @@ export function ThemeEditor() {
           type="button"
           onClick={() => copy(themeCss(theme, themeEdited ? `${preset.label} ${cust.editedSuffix}` : preset.label))}
           disabled={isCopied}
-          className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 px-3 py-1.5 text-xs font-semibold text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 cursor-pointer disabled:cursor-default"
+          className={cn(fieldClassName, 'disabled:cursor-default')}
         >
           <CopyIcon copied={isCopied} className="h-4 w-4" />
           {isCopied ? cust.cssCopied : cust.copyCss}
@@ -88,7 +89,7 @@ export function ThemeEditor() {
 
       {THEME_GROUPS.map((group) => (
         <fieldset key={group.label} className="min-w-0">
-          <legend className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
+          <legend className={cn('mb-2 text-[var(--tuwa-text-secondary)]', capsClassName)}>
             {cust.themeGroups[group.label] ?? group.label}
           </legend>
           {/* Label and control side by side when the panel is wide enough, stacked on narrow screens */}
@@ -98,7 +99,7 @@ export function ThemeEditor() {
               const label = variable.replace('--tuwa-', '');
               const row = 'grid grid-cols-1 gap-1.5 @2xs:grid-cols-[9rem_minmax(0,1fr)] @2xs:items-center @2xs:gap-3';
               const labelClass = 'font-mono text-xs text-[var(--tuwa-text-secondary)]';
-              const valueClass = 'font-mono text-xs text-[var(--tuwa-text-tertiary)]';
+              const valueClass = 'font-mono text-xs text-[var(--tuwa-text-secondary)]';
               if (LENGTH_VARIABLES.includes(variable)) {
                 return (
                   <div key={variable} className={row}>
@@ -131,7 +132,7 @@ export function ThemeEditor() {
                       type="color"
                       value={theme[variable]}
                       onChange={(event) => editTheme(variable, event.target.value)}
-                      className="h-7 w-10 shrink-0 cursor-pointer rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 bg-transparent"
+                      className="h-7 w-10 shrink-0 cursor-pointer border border-[var(--tuwa-border-strong)] bg-transparent"
                     />
                     <span className={valueClass}>{theme[variable]}</span>
                   </div>

@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
+import { homeContentClassName, homeFrameClassName } from '../../../../components/home/homeLayout';
+import { CrossMark } from '../../../../components/home/SectionHead';
 import { JsonLd } from '../../../../components/JsonLd';
 import { PageBackground } from '../../../../components/PageBackground';
 import { PlaygroundHeader, PlaygroundLoader } from '../../../../components/playground/PlaygroundLoader';
@@ -40,8 +42,8 @@ const structuredData = {
 };
 
 /**
- * `/playground`: the Interactive Web3 Playground. The page is static; the Playground itself loads in the browser
- * only, with its TUWA packages (`PlaygroundLoader`).
+ * `/playground`: the Interactive Web3 Playground, on the frame of the main page. The page is static; the Playground
+ * itself loads in the browser only, with its TUWA packages (`PlaygroundLoader`).
  */
 export default async function PlaygroundPage({ params }: LanguagePageProps) {
   const { lang } = await params;
@@ -51,8 +53,10 @@ export default async function PlaygroundPage({ params }: LanguagePageProps) {
       <PageBackground />
 
       {/* Above the footer (z-10): the fixed Nova toasts of the stage render inside this layer */}
-      <div className="relative z-20 pt-14 sm:pt-16 pb-16">
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6">
+      <div className="relative z-20">
+        <div className={`${homeContentClassName} ${homeFrameClassName}`}>
+          <CrossMark x="left" y="top" />
+          <CrossMark x="right" y="top" />
           <PlaygroundHeader />
           <PlaygroundLoader />
         </div>

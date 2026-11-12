@@ -17,9 +17,9 @@ import { usePlayground } from './PlaygroundContext';
 
 const STACKBLITZ_URL = 'https://stackblitz.com/github/TuwaIO/cosmos-playground/tree/main/examples/vite-tuwa';
 
-const frameClass =
-  'overflow-hidden rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06]';
-const headingClass = 'text-[11px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]';
+const frameClass = 'overflow-hidden border border-[var(--tuwa-border-primary)]';
+const headingClass =
+  'm-0 font-mono text-[11px] leading-[1.35] font-bold tracking-[0.12em] text-[var(--tuwa-text-secondary)] uppercase';
 
 /**
  * The stage as code for a real app: the setup of its stack, from the Stack Configurator generator, and the Nova
