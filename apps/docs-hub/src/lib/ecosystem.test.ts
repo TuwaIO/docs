@@ -4,6 +4,7 @@ import path from 'node:path';
 import { projectIconArt } from '@tuwaio/docs-ui';
 import { describe, expect, it } from 'vitest';
 
+import { en, uk, zhCN } from '../i18n';
 import {
   boardEdges,
   boardPlaces,
@@ -79,6 +80,48 @@ describe('the data that build-data reads', () => {
       ),
     ].sort();
     expect(fetched).toEqual(packages);
+  });
+});
+
+// The dialog and the preview of a package read its description from the dictionary of the language, and fall back to
+// the English one of npm: a package added without its three descriptions showed English on the Ukrainian and Chinese
+// pages (the icons of Nova, the CLI of the SDK and the two checkout packages did)
+describe('the descriptions of the packages', () => {
+  const dictionaries = { en, uk, 'zh-CN': zhCN };
+  const packages = layers.flatMap((layer) =>
+    layer.entries.flatMap((entry) =>
+      (entry.packages ?? []).filter((pkg) => pkg.name.startsWith('@tuwaio/')).map((pkg) => pkg),
+    ),
+  );
+
+  it.each(Object.keys(dictionaries))('describe every package of the stages in %s, and nothing else', (locale) => {
+    const descriptions = dictionaries[locale as keyof typeof dictionaries].home.packageDialog.packageDescriptions;
+    expect(Object.keys(descriptions).sort()).toEqual(packages.map((pkg) => pkg.name).sort());
+    for (const text of Object.values(descriptions)) expect(text.length).toBeGreaterThan(40);
+  });
+
+  it('name the layer the stages give the package, in every language', () => {
+    for (const [locale, dictionary] of Object.entries(dictionaries))
+      for (const pkg of packages.filter((item) => !item.isDeprecated))
+        expect(dictionary.home.packageDialog.packageDescriptions[pkg.name], `${locale} ${pkg.name}`).toContain(
+          pkg.layer,
+        );
+  });
+
+  it('say every project and every stage in every language', () => {
+    for (const [locale, dictionary] of Object.entries(dictionaries)) {
+      expect(Object.keys(dictionary.home.entries).sort(), locale).toEqual(
+        stagedEntries()
+          .map((entry) => entry.id)
+          .sort(),
+      );
+      expect(Object.keys(dictionary.home.timeline.stages), locale).toEqual(layers.map((_, index) => String(index + 1)));
+    }
+    // The English of the data is the English of the dictionary
+    for (const [index, layer] of layers.entries()) {
+      expect(en.home.timeline.stages[index + 1]?.subtitle).toBe(layer.subtitle);
+      for (const entry of layer.entries) expect(en.home.entries[entry.id]?.tagline, entry.id).toBe(entry.tagline);
+    }
   });
 });
 

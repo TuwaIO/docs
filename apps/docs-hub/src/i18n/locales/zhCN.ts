@@ -98,17 +98,17 @@ export const zhCN: DocsHubLabels = {
         3: {
           label: '第 3 阶段 — 服务端与状态同步',
           title: '服务端与状态同步',
-          subtitle: '托管云或私有化自部署的 Quasar 引擎',
+          subtitle: '托管云或私有化自部署的 Quasar 引擎及其 API 客户端',
         },
         4: {
           label: '第 4 阶段 — 用户界面组件',
           title: '用户界面组件',
-          subtitle: '面向 Satellite 与 Pulsar 的 React 组件库',
+          subtitle: '面向 Satellite、Pulsar 与 Quasar Payments 的 React 组件库',
         },
         5: {
           label: '第 5 阶段 — SDK 统一集成层',
           title: 'SDK 统一集成层',
-          subtitle: '核心客户端 SDK 与特定网络适配器',
+          subtitle: '核心客户端 SDK、网络扩展包与 Payments 模块',
         },
       },
     },
@@ -132,7 +132,7 @@ export const zhCN: DocsHubLabels = {
         tagline: '私有化自部署引擎与管理后台 · Apache-2.0',
       },
       'quasar-client': {
-        tagline: 'API 客户端、Webhook 验签与中继 CLI',
+        tagline: 'API 客户端、Webhook 验证与转发 CLI',
       },
       nova: {
         tagline: '设计系统与开箱即用的 React 组件库',
@@ -162,12 +162,18 @@ export const zhCN: DocsHubLabels = {
       guidesHeading: '相关指南',
       viewOnNpm: '在 npm 上查看',
       packageDescriptions: {
+        '@tuwaio/create-cosmos-playground':
+          'TUWA SDK 的 L8 命令行工具：生成基于 Next.js 或 Vite 的入门应用，内置面向 EVM、Solana 或两者的 TUWA 技术栈，可选是否启用 Quasar 同步。',
         '@tuwaio/evm-sdk':
           'TUWA SDK 的 L9 EVM 扩展包：通过子路径统一重导出 Orbit Utils、SIWX、Satellite Connect、Pulsar 与 Nova Connect 的 EVM 模块。',
         '@tuwaio/nova-connect':
           'Nova UI Kit (TUWA) 的 L7 钱包连接组件包：提供连接按钮、连接与账户模态框、网络切换器以及 EVM 和 Solana 的 SIWX 登录，内置英文、乌克兰语与简体中文文案，构建于 @tuwaio/satellite-react 之上。',
         '@tuwaio/nova-core':
           'Nova UI Kit (TUWA) 的 L6 核心包：包含 --tuwa-* 主题 CSS 变量、通用对话框、网络与钱包图标，以及 Nova 组件共享的 Hook 与工具函数。',
+        '@tuwaio/nova-icons':
+          'Nova UI Kit (TUWA) 的 L6 图标包：TUWA 复古像素风格的 React 图标组件，绘制在像素网格上，颜色跟随文字，名称、导入路径与属性均与 Heroicons 一致。',
+        '@tuwaio/nova-payments':
+          'Nova UI Kit (TUWA) 的 L8 支付组件包：Quasar Payments 发票的结账组件，支持钱包支付或二维码支付，可在模态框、页面内嵌或独立页面中展示。',
         '@tuwaio/nova-transactions':
           'Nova UI Kit (TUWA) 的 L7 交易组件包：为 Pulsar 追踪的交易提供弹窗提示 (Toast)、支持加速与取消的追踪模态框以及交易历史列表。',
         '@tuwaio/orbit-core':
@@ -176,6 +182,8 @@ export const zhCN: DocsHubLabels = {
           'Orbit Utils (TUWA) 的 L2 EVM 包：基于 viem 与 @wagmi/core 构建的缓存客户端、切链工具、ENS 解析以及 ERC-4337 智能账户（Solady 配合 Pimlico Bundler 与 Paymaster）。',
         '@tuwaio/orbit-solana':
           'Orbit Utils (TUWA) 的 L2 Solana 包：带缓存的 @solana/kit RPC 客户端、Wallet Standard 钱包发现、集群与区块浏览器工具，以及 SNS 域名与头像解析。',
+        '@tuwaio/payments-sdk':
+          'TUWA SDK 的 L9 Payments 模块：基于 @tuwaio/sdk，提供 Nova Payments 结账组件与 Quasar 结账客户端。',
         '@tuwaio/pulsar-core':
           'Pulsar (TUWA) 的 L3 核心包：支持 localStorage 持久化的无头、框架无关交易状态库，定义链适配器契约、元数据校验及跨 EVM 与 Solana 的远程同步钩子。',
         '@tuwaio/pulsar-evm':
@@ -185,7 +193,7 @@ export const zhCN: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'Pulsar (TUWA) 的 L4 Solana 包：基于 @solana/kit 构建的 Wallet Standard 交易适配器、签名追踪器以及签名广播辅助函数。',
         '@tuwaio/quasar-sdk':
-          'Quasar (TUWA) 的 L5 客户端：适用于 Quasar Cloud 与自部署 Quasar 节点的 API 客户端（提供 Pulsar 交易同步与历史查询），以及将 Webhook 转发至 localhost 的 quasar-sdk CLI。',
+          'Quasar (TUWA) 的 L5 客户端：适用于 Quasar Cloud 与自部署 Quasar 节点的 API 客户端（Pulsar 交易同步与历史查询、Payments 发票、退款与订阅、Webhook 验证），以及将 Webhook 转发至 localhost 的 quasar-sdk CLI。',
         '@tuwaio/satellite-core':
           'Satellite Connect (TUWA) 的 L3 核心包：面向 EVM 与 Solana 钱包连接的无头、框架无关 Zustand 状态库，支持自动重连上次钱包及 SIWX 状态类型。',
         '@tuwaio/satellite-evm':

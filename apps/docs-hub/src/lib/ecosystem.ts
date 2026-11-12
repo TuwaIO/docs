@@ -118,7 +118,7 @@ export const layers: EcosystemLayer[] = [
   },
   {
     label: 'Stage 3 — Backend & Sync',
-    subtitle: 'Managed cloud or self-hosted Quasar engine',
+    subtitle: 'Managed cloud or self-hosted Quasar engine, and its API client',
     entries: [
       {
         id: 'quasar',
@@ -157,7 +157,7 @@ export const layers: EcosystemLayer[] = [
   },
   {
     label: 'Stage 4 — User Interface',
-    subtitle: 'React components for Satellite & Pulsar',
+    subtitle: 'React components for Satellite, Pulsar & Quasar Payments',
     entries: [
       {
         id: 'nova',
@@ -178,7 +178,7 @@ export const layers: EcosystemLayer[] = [
   },
   {
     label: 'Stage 5 — SDK Integration Layer',
-    subtitle: 'Core SDK & network-specific adapters',
+    subtitle: 'Core SDK, network add-ons & the Payments module',
     entries: [
       {
         id: 'sdk',

@@ -99,17 +99,17 @@ export const en: DocsHubLabels = {
         3: {
           label: 'Stage 3 — Backend & Sync',
           title: 'Backend & Sync',
-          subtitle: 'Managed cloud or self-hosted Quasar engine',
+          subtitle: 'Managed cloud or self-hosted Quasar engine, and its API client',
         },
         4: {
           label: 'Stage 4 — User Interface',
           title: 'User Interface',
-          subtitle: 'React components for Satellite & Pulsar',
+          subtitle: 'React components for Satellite, Pulsar & Quasar Payments',
         },
         5: {
           label: 'Stage 5 — SDK Integration Layer',
           title: 'SDK Integration Layer',
-          subtitle: 'Core SDK & network-specific adapters',
+          subtitle: 'Core SDK, network add-ons & the Payments module',
         },
       },
     },
@@ -163,12 +163,18 @@ export const en: DocsHubLabels = {
       guidesHeading: 'Guides',
       viewOnNpm: 'View on npm',
       packageDescriptions: {
+        '@tuwaio/create-cosmos-playground':
+          'L8 CLI of the TUWA SDK: scaffolds a Next.js or Vite starter app with the TUWA stack for EVM, Solana or both, with or without Quasar sync.',
         '@tuwaio/evm-sdk':
           'L9 EVM add-on of the TUWA SDK: re-exports the EVM packages of Orbit Utils, SIWX, Satellite Connect, Pulsar and Nova Connect under subpaths.',
         '@tuwaio/nova-connect':
           'L7 wallet connection package of Nova UI Kit (TUWA): connect button, connect and account modals, chain selector and SIWX sign-in for EVM and Solana wallets, with English, Ukrainian and Chinese labels, built on @tuwaio/satellite-react.',
         '@tuwaio/nova-core':
           'L6 core of Nova UI Kit (TUWA): the --tuwa-* theme variables, the dialog, network and wallet icons, and the hooks and helpers shared by the Nova components.',
+        '@tuwaio/nova-icons':
+          'L6 icons of Nova UI Kit (TUWA) in the TUWA retro pixel style: React components drawn on a pixel grid, in the color of the text, with the names, import paths and props of Heroicons.',
+        '@tuwaio/nova-payments':
+          'L8 payments package of Nova UI Kit (TUWA): the checkout of Quasar Payments invoices, with crypto payments from a wallet or a QR code, in a modal, inline or on a page.',
         '@tuwaio/nova-transactions':
           'L7 transactions package of Nova UI Kit (TUWA): toasts, a tracking modal with speed-up and cancel, and the transaction history for transactions tracked by Pulsar.',
         '@tuwaio/orbit-core':
@@ -177,6 +183,8 @@ export const en: DocsHubLabels = {
           'L2 EVM package of Orbit Utils (TUWA): cached viem clients, chain switching, ENS resolution and ERC-4337 smart accounts (Solady with a Pimlico bundler and paymaster), built on viem and @wagmi/core.',
         '@tuwaio/orbit-solana':
           'L2 Solana package of Orbit Utils (TUWA): cached @solana/kit RPC clients, Wallet Standard discovery, cluster and explorer helpers, and SNS name and avatar lookups.',
+        '@tuwaio/payments-sdk':
+          'L9 Payments module of the TUWA SDK: the Nova Payments checkout and the Quasar checkout client, on top of @tuwaio/sdk.',
         '@tuwaio/pulsar-core':
           'L3 core of Pulsar (TUWA): headless, framework-agnostic transaction store with localStorage persistence, a chain adapter contract, metadata validation and remote sync hooks for tracking EVM and Solana transactions.',
         '@tuwaio/pulsar-evm':
@@ -186,7 +194,7 @@ export const en: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'L4 Solana package of Pulsar (TUWA): transaction adapter for Wallet Standard wallets, a signature tracker and a sign-and-send helper, built on @solana/kit.',
         '@tuwaio/quasar-sdk':
-          'L5 client of Quasar (TUWA): the Quasar API client for Quasar Cloud and self-hosted Quasar nodes (transaction sync and history for Pulsar), and the quasar-sdk CLI that relays webhooks to localhost.',
+          'L5 client of Quasar (TUWA): the Quasar API client for Quasar Cloud and self-hosted Quasar nodes (transaction sync and history for Pulsar, Payments invoices, refunds and subscriptions, webhook verification), and the quasar-sdk CLI that relays webhooks to localhost.',
         '@tuwaio/satellite-core':
           'L3 core of Satellite Connect (TUWA): headless, framework-agnostic Zustand store for EVM and Solana wallet connections, with a chain adapter contract, auto-connect of the last wallet and the SIWX state type.',
         '@tuwaio/satellite-evm':

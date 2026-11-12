@@ -100,17 +100,17 @@ export const uk: DocsHubLabels = {
         3: {
           label: 'Етап 3 — Бекенд та синхронізація',
           title: 'Бекенд та синхронізація',
-          subtitle: 'Керована хмара або self-hosted бекенд Quasar',
+          subtitle: 'Керована хмара або self-hosted бекенд Quasar та його клієнт API',
         },
         4: {
           label: 'Етап 4 — Інтерфейс користувача',
           title: 'Інтерфейс користувача',
-          subtitle: 'React-компоненти для Satellite та Pulsar',
+          subtitle: 'React-компоненти для Satellite, Pulsar і Quasar Payments',
         },
         5: {
           label: 'Етап 5 — Рівень інтеграції SDK',
           title: 'Рівень інтеграції SDK',
-          subtitle: 'Єдиний клієнтський SDK та мережеві адаптери',
+          subtitle: 'Єдиний клієнтський SDK, мережеві доповнення та модуль Payments',
         },
       },
     },
@@ -134,7 +134,7 @@ export const uk: DocsHubLabels = {
         tagline: 'Self-hosted бекенд та адмін-панель · Apache-2.0',
       },
       'quasar-client': {
-        tagline: 'API-клієнт, перевірка вебхуків і CLI-ретранслятор',
+        tagline: 'Клієнт API, перевірка вебхуків і CLI для їх ретрансляції',
       },
       nova: {
         tagline: 'Дизайн-система та бібліотека React-компонентів',
@@ -164,12 +164,18 @@ export const uk: DocsHubLabels = {
       guidesHeading: 'Посібники',
       viewOnNpm: 'Переглянути на npm',
       packageDescriptions: {
+        '@tuwaio/create-cosmos-playground':
+          'L8 CLI для TUWA SDK: створює стартовий застосунок на Next.js або Vite зі стеком TUWA для EVM, Solana чи обох мереж, із синхронізацією Quasar або без неї.',
         '@tuwaio/evm-sdk':
           'L9 EVM-доповнення для TUWA SDK: реекспортує EVM-пакети Orbit Utils, SIWX, Satellite Connect, Pulsar та Nova Connect через підшляхи.',
         '@tuwaio/nova-connect':
           'L7 пакет підключення гаманців у складі Nova UI Kit (TUWA): кнопка підключення, модальні вікна гаманців і акаунту, вибір мережі та вхід SIWX для EVM і Solana з англійською, українською та китайською локалізаціями.',
         '@tuwaio/nova-core':
           'L6 ядро Nova UI Kit (TUWA): CSS-змінні теми --tuwa-*, діалогові вікна, іконки мереж і гаманців, а також спільні хуки й утиліти.',
+        '@tuwaio/nova-icons':
+          'L6 іконки Nova UI Kit (TUWA) у ретро-піксельному стилі TUWA: React-компоненти, намальовані на піксельній сітці, у кольорі тексту, з назвами, шляхами імпорту та пропсами Heroicons.',
+        '@tuwaio/nova-payments':
+          'L8 платіжний пакет Nova UI Kit (TUWA): оформлення оплати рахунків Quasar Payments із криптоплатежами з гаманця або за QR-кодом — у модальному вікні, вбудовано чи на окремій сторінці.',
         '@tuwaio/nova-transactions':
           'L7 пакет транзакцій Nova UI Kit (TUWA): спливаючі сповіщення (toasts), модальне вікно відстеження з пришвидшенням і скасуванням та історія транзакцій Pulsar.',
         '@tuwaio/orbit-core':
@@ -178,6 +184,8 @@ export const uk: DocsHubLabels = {
           'L2 EVM-пакет Orbit Utils (TUWA): кешовані клієнти viem, перемикання мереж, резолвінг ENS та смарт-акаунти ERC-4337 (Solady з бандлером і пеймастером Pimlico) на базі viem та @wagmi/core.',
         '@tuwaio/orbit-solana':
           'L2 Solana-пакет Orbit Utils (TUWA): кешовані RPC-клієнти @solana/kit, виявлення гаманців Wallet Standard, утиліти кластерів і експлорерів та пошук імен і аватарів SNS.',
+        '@tuwaio/payments-sdk':
+          'L9 модуль Payments для TUWA SDK: оформлення оплати Nova Payments і клієнт оформлення оплати Quasar поверх @tuwaio/sdk.',
         '@tuwaio/pulsar-core':
           'L3 ядро Pulsar (TUWA): headless-сховище транзакцій зі збереженням у localStorage, контрактом адаптера мережі, валідацією метаданих та хуками серверної синхронізації для EVM і Solana.',
         '@tuwaio/pulsar-evm':
@@ -187,7 +195,7 @@ export const uk: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'L4 Solana-пакет Pulsar (TUWA): адаптер транзакцій для гаманців Wallet Standard, трекер підписів та помічник підписання і відправлення на базі @solana/kit.',
         '@tuwaio/quasar-sdk':
-          'L5 клієнт Quasar (TUWA): API-клієнт для Quasar Cloud і self-hosted вузлів Quasar (синхронізація та історія транзакцій Pulsar), а також CLI quasar-sdk для пересилання вебхуків на localhost.',
+          'L5 клієнт Quasar (TUWA): клієнт API для Quasar Cloud і self-hosted вузлів Quasar (синхронізація та історія транзакцій Pulsar, рахунки Payments, повернення й підписки, перевірка вебхуків), а також CLI quasar-sdk для пересилання вебхуків на localhost.',
         '@tuwaio/satellite-core':
           'L3 ядро Satellite Connect (TUWA): headless Zustand-сховище без прив’язки до фреймворку для підключення гаманців EVM і Solana з автопідключенням останнього гаманця та станом SIWX.',
         '@tuwaio/satellite-evm':
