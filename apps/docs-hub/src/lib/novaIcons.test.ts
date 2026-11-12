@@ -26,3 +26,57 @@ describe('the copy and link icons of the hub', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+// The icons of the hub and of docs-ui are the pixel icons of Nova (`@tuwaio/nova-icons`, in the hub through
+// `@tuwaio/sdk/nova-icons`), which have the names and the props of heroicons. Heroicons stay only where they are listed
+// here, with the reason
+const heroiconsAllowed: { file: RegExp; why: string }[] = [
+  {
+    file: /^apps\/docs-hub\/src\/components\/playground\/(ActionButtons|ControlsPanel|HeadlessStage|Inspector|Stage)\.tsx$/,
+    why: 'the shell of the playground, redrawn with the playground',
+  },
+];
+const repo = path.resolve(root, '../../..');
+
+function allSourceFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const file = path.join(dir, entry);
+    if (statSync(file).isDirectory()) return entry === 'generated' ? [] : allSourceFiles(file);
+    return /\.(tsx?|mdx)$/.test(entry) && !/\.test\.tsx?$/.test(entry) ? [file] : [];
+  });
+}
+
+describe('heroicons', () => {
+  it('are imported nowhere in the hub and in docs-ui but where the list allows', () => {
+    const files = [...allSourceFiles(root), ...allSourceFiles(path.join(repo, 'packages/docs-ui/src'))];
+    expect(files.length).toBeGreaterThan(100);
+    const offenders = files
+      // An import, not a mention in the code examples of a guide
+      .filter((file) => /^import\s[^;]*from\s*'@heroicons\/react/m.test(readFileSync(file, 'utf8')))
+      .map((file) => path.relative(repo, file))
+      .filter((file) => !heroiconsAllowed.some((allowed) => allowed.file.test(file)));
+    expect(offenders).toEqual([]);
+  });
+
+  // The guard itself: every entry of the list still allows something
+  it('have no stale entry in the list', () => {
+    const files = allSourceFiles(root).map((file) => path.relative(repo, file));
+    for (const allowed of heroiconsAllowed)
+      expect(
+        files.some(
+          (file) =>
+            allowed.file.test(file) && /from\s*'@heroicons\/react/.test(readFileSync(path.join(repo, file), 'utf8')),
+        ),
+        allowed.why,
+      ).toBe(true);
+  });
+
+  it('are not a dependency of docs-ui, which imports none', () => {
+    const manifest = JSON.parse(readFileSync(path.join(repo, 'packages/docs-ui/package.json'), 'utf8')) as Record<
+      string,
+      Record<string, string> | undefined
+    >;
+    for (const group of ['dependencies', 'peerDependencies', 'devDependencies'])
+      expect(Object.keys(manifest[group] ?? {})).not.toContain('@heroicons/react');
+  });
+});

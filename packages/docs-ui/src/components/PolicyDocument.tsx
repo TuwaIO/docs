@@ -1,5 +1,5 @@
-import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { cn } from '@tuwaio/nova-core/utils';
+import { ArrowDownTrayIcon } from '@tuwaio/nova-icons/24/outline';
 import parse, { type DOMNode, Element } from 'html-react-parser';
 
 import {
@@ -69,6 +69,10 @@ export interface PolicyDocumentProps {
   };
 }
 
+// The small texts of the page (the date, the languages, the button, the title of the list): mono caps of 11px
+const capsClassName =
+  'tuwadocs:font-mono tuwadocs:text-[11px] tuwadocs:font-bold tuwadocs:uppercase tuwadocs:leading-[1.35] tuwadocs:tracking-[0.12em]';
+
 // Drops elements and attributes a policy never needs and opens external links in a new tab
 function sanitize(node: DOMNode) {
   if (!(node instanceof Element)) return undefined;
@@ -92,9 +96,11 @@ function sanitize(node: DOMNode) {
 }
 
 /**
- * A TUWA policy page (Terms, Privacy, Cookie, Refund, Security): the title, the date of the version, a Download PDF
- * button with the official document in the language of the text, a language switch when the policy exists in more
- * than one language, the text with anchored sections and, from the `lg` breakpoint, a sticky list of the sections.
+ * A TUWA policy page (Terms, Privacy, Cookie, Refund, Security), in paper and ink: the date of the version in mono caps
+ * after a lit square, the title in large mono, a language switch when the policy exists in more than one language (a
+ * frame of 1px, the language of the text a block of ink) and a Download PDF button with the official document in the
+ * language of the text (a square button with a pixel icon); under a line of 1px the text with anchored sections and,
+ * from the `lg` breakpoint, a sticky list of the sections.
  * The sections keep their anchors in every language, and the page marks its language (`lang`) for screen readers and
  * search engines. The text is selectable and readable on phones, by search engines and by screen readers; the PDF is
  * generated from the same source.
@@ -132,63 +138,75 @@ export function PolicyDocument({
       <div className="tuwadocs:min-w-0">
         <header
           className={cn(
-            'tuwadocs:mb-8 tuwadocs:flex tuwadocs:flex-col tuwadocs:gap-4 tuwadocs:border-b tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:pb-6',
+            'tuwadocs:mb-10 tuwadocs:flex tuwadocs:flex-col tuwadocs:border-b tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:pb-8',
             classNames?.header,
           )}
         >
+          <p
+            className={cn(
+              'tuwadocs:m-0 tuwadocs:flex tuwadocs:items-center tuwadocs:gap-3 tuwadocs:text-[var(--tuwa-text-secondary)]',
+              capsClassName,
+              classNames?.updated,
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className="tuwadocs:h-1.5 tuwadocs:w-1.5 tuwadocs:shrink-0 tuwadocs:bg-[var(--tuwa-docs-lit)]"
+            />
+            {texts.updated} {formatPolicyDate(content.updated, language)}
+          </p>
           <h1
             className={cn(
-              'tuwadocs-policy-title tuwadocs:text-3xl tuwadocs:font-extrabold tuwadocs:tracking-tight tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:sm:text-4xl',
+              'tuwadocs-policy-title tuwadocs:m-0 tuwadocs:mt-5 tuwadocs:text-[clamp(2rem,5vw,3.5rem)] tuwadocs:leading-[1.02] tuwadocs:font-medium tuwadocs:text-[var(--tuwa-text-primary)]',
+              // Cyrillic letters in mono need their own width
+              language === 'uk' ? 'tuwadocs:tracking-normal' : 'tuwadocs:tracking-[-0.03em]',
               classNames?.title,
             )}
           >
             {content.title}
           </h1>
-          <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:justify-between tuwadocs:gap-3">
-            <p className={cn('tuwadocs:text-sm tuwadocs:text-[var(--tuwa-text-secondary)]', classNames?.updated)}>
-              {texts.updated} {formatPolicyDate(content.updated, language)}
-            </p>
-            <div className="tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:gap-2">
-              {languages.length > 1 && (
-                <nav
-                  aria-label={texts.language}
-                  className={cn(
-                    'tuwadocs:inline-flex tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:p-0.5',
-                    classNames?.languages,
-                  )}
-                >
-                  {languages.map((item) => (
-                    <a
-                      key={item}
-                      href={languageHref(item)}
-                      hrefLang={item}
-                      lang={item}
-                      aria-current={item === language ? 'page' : undefined}
-                      className={cn(
-                        'tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:px-3 tuwadocs:py-1.5 tuwadocs:text-xs tuwadocs:font-bold tuwadocs:no-underline tuwadocs:transition-colors',
-                        item === language
-                          ? 'tuwadocs:bg-[var(--tuwa-bg-muted)] tuwadocs:text-[var(--tuwa-text-primary)]'
-                          : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:text-[var(--tuwa-text-primary)]',
-                      )}
-                    >
-                      {POLICY_LANGUAGE_NAMES[item]}
-                    </a>
-                  ))}
-                </nav>
-              )}
-              <a
-                href={getPolicyFileUrl(slug, 'pdf', source, language)}
-                target="_blank"
-                rel="noopener noreferrer"
+          <div className="tuwadocs:mt-7 tuwadocs:flex tuwadocs:flex-wrap tuwadocs:items-center tuwadocs:gap-2.5">
+            {languages.length > 1 && (
+              <nav
+                aria-label={texts.language}
                 className={cn(
-                  'tuwadocs-policy-title tuwadocs:inline-flex tuwadocs:h-10 tuwadocs:no-underline tuwadocs:items-center tuwadocs:gap-2 tuwadocs:rounded-[var(--tuwa-rounded-corners)] tuwadocs:border tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:bg-[var(--tuwa-bg-primary)] tuwadocs:px-4 tuwadocs:text-sm tuwadocs:font-bold tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:transition-colors tuwadocs:hover:bg-[var(--tuwa-bg-muted)]',
-                  classNames?.download,
+                  'tuwadocs:inline-flex tuwadocs:border tuwadocs:border-[var(--tuwa-border-strong)]',
+                  classNames?.languages,
                 )}
               >
-                <ArrowDownTrayIcon className="tuwadocs:h-4 tuwadocs:w-4" aria-hidden="true" />
-                {texts.download}
-              </a>
-            </div>
+                {languages.map((item) => (
+                  <a
+                    key={item}
+                    href={languageHref(item)}
+                    hrefLang={item}
+                    lang={item}
+                    aria-current={item === language ? 'page' : undefined}
+                    className={cn(
+                      'tuwadocs:inline-flex tuwadocs:h-8 tuwadocs:items-center tuwadocs:px-3 tuwadocs:no-underline tuwadocs:transition-colors',
+                      capsClassName,
+                      item === language
+                        ? 'tuwadocs:bg-[var(--tuwa-text-primary)] tuwadocs:text-[var(--tuwa-docs-paper)]'
+                        : 'tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:hover:text-[var(--tuwa-text-primary)]',
+                    )}
+                  >
+                    {POLICY_LANGUAGE_NAMES[item]}
+                  </a>
+                ))}
+              </nav>
+            )}
+            <a
+              href={getPolicyFileUrl(slug, 'pdf', source, language)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                'tuwadocs:inline-flex tuwadocs:h-[34px] tuwadocs:items-center tuwadocs:gap-2 tuwadocs:border tuwadocs:border-[var(--tuwa-border-strong)] tuwadocs:px-3 tuwadocs:whitespace-nowrap tuwadocs:text-[var(--tuwa-text-primary)] tuwadocs:no-underline tuwadocs:transition-colors tuwadocs:hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]',
+                capsClassName,
+                classNames?.download,
+              )}
+            >
+              <ArrowDownTrayIcon className="tuwadocs:h-4 tuwadocs:w-4 tuwadocs:shrink-0" aria-hidden="true" />
+              {texts.download}
+            </a>
           </div>
         </header>
         <article className={cn('tuwadocs-policy', classNames?.body)}>
@@ -203,15 +221,15 @@ export function PolicyDocument({
             classNames?.toc,
           )}
         >
-          <p className="tuwadocs:mb-3 tuwadocs:text-xs tuwadocs:font-bold tuwadocs:uppercase tuwadocs:tracking-widest tuwadocs:text-[var(--tuwa-text-tertiary)]">
+          <p className={cn('tuwadocs:m-0 tuwadocs:mb-4 tuwadocs:text-[var(--tuwa-text-secondary)]', capsClassName)}>
             {tocLabel}
           </p>
-          <ol className="tuwadocs:flex tuwadocs:list-none tuwadocs:flex-col tuwadocs:gap-2 tuwadocs:border-l tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:pl-4">
+          <ol className="tuwadocs:m-0 tuwadocs:flex tuwadocs:list-none tuwadocs:flex-col tuwadocs:gap-2.5 tuwadocs:border-l tuwadocs:border-[var(--tuwa-border-primary)] tuwadocs:py-0 tuwadocs:pr-0 tuwadocs:pl-4">
             {content.sections.map((section) => (
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  className="tuwadocs:text-sm tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:no-underline tuwadocs:transition-colors tuwadocs:hover:text-[var(--tuwa-text-primary)]"
+                  className="tuwadocs:text-[13px] tuwadocs:leading-[1.4] tuwadocs:text-[var(--tuwa-text-secondary)] tuwadocs:no-underline tuwadocs:transition-colors tuwadocs:hover:text-[var(--tuwa-text-primary)]"
                 >
                   {section.title}
                 </a>

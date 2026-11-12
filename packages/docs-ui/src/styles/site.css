@@ -360,7 +360,9 @@ article .nextra-border a:hover {
   border-radius: var(--tuwa-rounded-corners);
 }
 
-/* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security */
+/* Policy pages (PolicyDocument): the text of Terms, Privacy, Cookie, Refund and Security, in paper and ink: mono
+   headings, tables on lines of 1px with mono caps for their heads, a note in a frame of 1px with a strip of the accent
+   down its left side, and no fill but the sunken paper of inline code */
 .tuwadocs-policy-title {
   font-family: var(--tuwa-font-mono);
 }
@@ -385,7 +387,9 @@ article .nextra-border a:hover {
 }
 
 .tuwadocs-policy h2 {
-  margin-top: 2.5rem;
+  margin-top: 2.75rem;
+  border-top: 1px solid var(--tuwa-border-primary);
+  padding-top: 1.5rem;
   font-size: 1.25rem;
   line-height: 1.4;
 }
@@ -402,7 +406,7 @@ article .nextra-border a:hover {
 }
 
 .tuwadocs-policy ul {
-  list-style: disc;
+  list-style: square;
 }
 
 .tuwadocs-policy ol {
@@ -420,7 +424,8 @@ article .nextra-border a:hover {
 
 .tuwadocs-policy a {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   overflow-wrap: anywhere;
 }
 
@@ -436,21 +441,24 @@ article .nextra-border a:hover {
 .tuwadocs-policy th,
 .tuwadocs-policy td {
   border: 1px solid var(--tuwa-border-primary);
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 0.75rem;
   text-align: left;
   vertical-align: top;
 }
 
 .tuwadocs-policy th {
-  background: var(--tuwa-bg-muted);
   color: var(--tuwa-text-primary);
-  font-weight: 600;
+  font-family: var(--tuwa-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .tuwadocs-policy blockquote {
-  border-left: 3px solid var(--tuwa-border-primary);
-  border-radius: var(--tuwa-rounded-corners);
-  background: var(--tuwa-bg-muted);
+  border: 1px solid var(--tuwa-border-primary);
+  border-left: 3px solid var(--tuwa-docs-lit);
   padding: 0.75rem 1rem;
 }
 
@@ -459,8 +467,8 @@ article .nextra-border a:hover {
 }
 
 .tuwadocs-policy code {
-  border-radius: var(--tuwa-rounded-corners);
-  background: var(--tuwa-bg-muted);
+  border: 1px solid var(--tuwa-border-secondary);
+  background: var(--tuwa-docs-sunken);
   padding: 0.1em 0.35em;
   font-family: var(--tuwa-font-mono);
   font-size: 0.875em;

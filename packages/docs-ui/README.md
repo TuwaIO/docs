@@ -26,10 +26,10 @@
 ## 💾 Installation
 
 ```bash
-pnpm add @tuwaio/docs-ui next nextra nextra-theme-docs react react-dom @heroicons/react
+pnpm add @tuwaio/docs-ui next nextra nextra-theme-docs react react-dom
 ```
 
-`next`, `nextra` and `nextra-theme-docs` are optional: only the `/nextra` and `/nextra/page` entries need them (`Navbar`, `Footer`, `DocsLayout`, `LocalizedPage`, `createDocsPage`), so the root entry works in any React app. `@heroicons/react` is needed by `PolicyDocument`.
+`next`, `nextra` and `nextra-theme-docs` are optional: only the `/nextra` and `/nextra/page` entries need them (`Navbar`, `Footer`, `DocsLayout`, `LocalizedPage`, `createDocsPage`), so the root entry works in any React app.
 
 Import the stylesheet after the Nextra theme. `dist/index.css` includes the stylesheet of Nova Core, whose fonts it carries in `dist/fonts`. An app that loads Nova Core or the SDK stylesheet itself imports `dist/site.css` instead, which has none of it:
 

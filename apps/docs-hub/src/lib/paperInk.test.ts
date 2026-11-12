@@ -16,8 +16,11 @@ const globalsFile = path.resolve(__dirname, '../app/globals.css');
 const read = (file: string) => readFileSync(file, 'utf8');
 const novaCss = read(createRequire(path.join(docsUi, 'package.json')).resolve('@tuwaio/nova-core/dist/index.css'));
 
-/** The parts of docs-ui not yet redrawn in paper and ink: their rules of site.css and their components. */
-const notYetRedrawn = [{ part: 'the policy pages', selector: /\.tuwadocs-policy/, files: ['PolicyDocument.tsx'] }];
+/**
+ * The parts of docs-ui not yet redrawn in paper and ink: their rules of site.css and their components. None is left:
+ * the whole of docs-ui is checked.
+ */
+const notYetRedrawn: { part: string; selector: RegExp; files: string[] }[] = [];
 
 /**
  * The few drawn details of the redrawn switches, the same as in the Nova Storybook, that the rules below would flag: each
