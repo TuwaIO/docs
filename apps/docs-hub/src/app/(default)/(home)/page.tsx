@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
+import { FlightPlan } from '../../../components/flight/FlightPlan';
 import { HeroSection } from '../../../components/HeroSection';
 import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
 import { homeContentClassName, homeFrameClassName } from '../../../components/home/homeLayout';
@@ -46,19 +47,20 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
     <>
       <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
+      {/* Outside the page below: its strip lies over the line of the header */}
+      <FlightPlan />
 
-      <div className="relative z-10 pb-16">
+      <div className="relative z-10">
         <PixelHandoff />
-        {/* The frame of the column: its sides meet the line under the header and its bottom with a cross */}
-        <div className={`${homeContentClassName} ${homeFrameClassName} pb-16 xl:border-b`}>
+        {/* The frame of the column: its sides meet the line under the header with a cross and run on into the footer
+            (`Footer framed`), so it has no bottom line of its own */}
+        <div className={`${homeContentClassName} ${homeFrameClassName}`}>
           <CrossMark x="left" y="top" />
           <CrossMark x="right" y="top" />
           <HeroSection />
           <EcosystemBoard />
           <StageLedgers releases={getReleases()} packages={getPackageDetails()} />
           <QuickStartSection />
-          <CrossMark x="left" y="bottom" />
-          <CrossMark x="right" y="bottom" />
         </div>
       </div>
     </>

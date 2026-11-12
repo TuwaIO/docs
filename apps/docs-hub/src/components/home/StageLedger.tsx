@@ -8,9 +8,10 @@ import { ledgerCaps, ledgerProductGrid, ledgerRowGrid, ledgerRowPadding } from '
 
 /**
  * The ledger of a stage of the main page (`#stage-<n>`, the target of the stage numbers of the plate and the board):
- * its head — a line of 1px, the number of the stage in a square of ink, its title in mono caps and, on the right from
- * 768px, its subtitle — then, from 768px, the heads of the columns (Project from 1024px, Layer, Package, Version,
- * Licence, Gzip) on the grids of the rows, and the products of the stage. The heads are hidden from assistive
+ * its head — a line of 1px, the number of the stage in a square of ink (of the accent while the reader reads this stage
+ * and the flight plan has locked on it: `data-flight="here"`, set by `useFlight`), its title in mono caps and, on the
+ * right from 768px, its subtitle — then, from 768px, the heads of the columns (Project from 1024px, Layer, Package,
+ * Version, Licence, Gzip) on the grids of the rows, and the products of the stage. The heads are hidden from assistive
  * technology: every row reads its values out with the names of their columns.
  *
  * @param props.stage - The number of the stage, from 1.
@@ -25,11 +26,15 @@ export function StageLedger({ stage, children }: { stage: number; children: Reac
   const head = `${ledgerCaps} text-[var(--tuwa-text-secondary)]`;
 
   return (
-    <section id={`stage-${stage}`} aria-labelledby={titleId} className="scroll-mt-[120px] pt-12 md:pt-[72px]">
+    <section
+      id={`stage-${stage}`}
+      aria-labelledby={titleId}
+      className="group/stage scroll-mt-[120px] pt-12 md:pt-[72px]"
+    >
       <header className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3.5 gap-y-2 border-t border-[var(--tuwa-border-strong)] pt-4 pb-[18px] md:grid-cols-[auto_minmax(0,1fr)_auto]">
         <span
           aria-hidden="true"
-          className="grid h-[34px] w-[34px] place-items-center bg-[var(--tuwa-text-primary)] font-mono text-[13px] font-bold leading-none tracking-[0.04em] text-[var(--tuwa-docs-paper)]"
+          className="grid h-[34px] w-[34px] place-items-center bg-[var(--tuwa-text-primary)] font-mono text-[13px] font-bold leading-none tracking-[0.04em] text-[var(--tuwa-docs-paper)] transition-colors duration-300 group-data-[flight=here]/stage:bg-[var(--tuwa-button-primary-bg)] group-data-[flight=here]/stage:text-[var(--tuwa-text-on-accent)] motion-reduce:transition-none"
         >
           {String(stage).padStart(2, '0')}
         </span>

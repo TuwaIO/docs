@@ -223,6 +223,11 @@ export const zhCN: DocsHubLabels = {
       openWithFiles: '打开完整配置器，查看全部 {count} 个配置文件',
       install: '安装命令',
     },
+    flight: {
+      ariaLabel: '本页飞行计划',
+      overview: '概览',
+      progressLabel: '到快速开始的进度',
+    },
   },
   comparisons: {
     badge: '交互式对比',

@@ -225,6 +225,11 @@ export const uk: DocsHubLabels = {
       openWithFiles: 'Відкрити з усіма {count} файлами налаштування',
       install: 'Встановлення',
     },
+    flight: {
+      ariaLabel: 'План польоту цієї сторінки',
+      overview: 'Огляд',
+      progressLabel: 'Шлях до швидкого старту',
+    },
   },
   comparisons: {
     badge: 'Інтерактивне порівняння',

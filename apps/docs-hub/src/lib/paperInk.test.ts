@@ -294,6 +294,9 @@ const hubRedrawn = [
   'components/QuickStartSection.tsx',
   'components/configurator/CompactConfigurator.tsx',
   'components/configurator/StackOptionsForm.tsx',
+  'components/flight/FlightPlan.tsx',
+  'components/flight/flightArt.ts',
+  'components/flight/useFlight.ts',
   'app/rootDocument.tsx',
 ];
 

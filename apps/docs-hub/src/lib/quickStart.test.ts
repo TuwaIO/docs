@@ -24,7 +24,8 @@ const render = (element: ReactElement, locale: 'en' | 'uk' | 'zh-CN' = 'en') =>
 describe('the quick start section', () => {
   // The third section of the column, inside its frame: before, it stood under the frame in a column of its own width
   it('is the third section of the framed column', () => {
-    expect(page).toMatch(/<StageLedgers[^>]*\/>\s*<QuickStartSection \/>\s*<CrossMark x="left" y="bottom" \/>/);
+    // It closes the column: the frame has no bottom line, its sides run on into the footer
+    expect(page).toMatch(/<StageLedgers[^>]*\/>\s*<QuickStartSection \/>\s*<\/div>/);
     expect(section).toMatch(/<section id="quick-start" aria-labelledby="quick-start-title"/);
     expect(section).toMatch(/<SectionBar\s+number=\{3\}\s+name=\{texts\.section\}/);
   });

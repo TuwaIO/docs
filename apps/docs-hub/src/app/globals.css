@@ -73,6 +73,51 @@ html[data-handoff='plate'] [data-board-icon] {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='8'%3E%3Crect width='1' height='2' fill='%238e8e90' fill-opacity='0.7'/%3E%3C/svg%3E");
 }
 
+/* The flight plan of the main page (`FlightPlan`). The flame of its craft flickers, in steps, only while the craft is
+   under way (`data-moving`, which the scroll sets and a stop removes): the one motion of the hub that repeats, and it
+   ends with the scroll */
+@keyframes tuwa-flight-flicker {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* A craft that turns around is drawn anew: its pixels fly in to their places, one after another, once */
+@keyframes tuwa-flight-assemble {
+  from {
+    transform: translate(var(--dx), var(--dy));
+    opacity: 0;
+  }
+
+  60% {
+    opacity: 1;
+  }
+}
+
+.tuwa-flight-assemble [data-fly] {
+  animation: tuwa-flight-assemble 380ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  animation-delay: calc(var(--i) * 5ms);
+}
+
+/* The corner marks close in on the waypoint the craft has locked on, once */
+@keyframes tuwa-flight-lock {
+  from {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.tuwa-flight-lock {
+  animation: tuwa-flight-lock 560ms cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tuwa-flight-lock,
+  .tuwa-flight-assemble [data-fly] {
+    animation: none;
+  }
+}
+
 /* Monospace font: uses --tuwa-font-mono, which docs-ui sets to Geist Mono */
 .font-geist-mono {
   font-family: var(--tuwa-font-mono) !important;

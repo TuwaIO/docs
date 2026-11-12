@@ -224,6 +224,11 @@ export const en: DocsHubLabels = {
       openWithFiles: 'Open with all {count} setup files',
       install: 'Install',
     },
+    flight: {
+      ariaLabel: 'Flight plan of this page',
+      overview: 'Overview',
+      progressLabel: 'Progress to the quick start',
+    },
   },
   comparisons: {
     badge: 'Interactive Comparison',

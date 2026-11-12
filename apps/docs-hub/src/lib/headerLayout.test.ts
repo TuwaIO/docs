@@ -171,8 +171,8 @@ describe('the header of the hub pages', () => {
     expect(source).toContain("window.matchMedia('(min-width: 64rem)')");
   });
 
-  // The logo cell is as wide as the flight plan of the main page from 1280px, so the two line up
-  it('gives the logo a cell of the width of the flight plan from 1280px', () => {
+  // The logo has a cell of its own from 1280px, as wide on every page of the hub
+  it('gives the logo a cell of 320px from 1280px', () => {
     expect(headerMarkup).toMatch(/className="[^"]*\bxl:w-\[320px\][^"]*"/);
   });
 });

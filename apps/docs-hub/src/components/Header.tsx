@@ -28,12 +28,12 @@ const menuLabelClassName =
 /**
  * The fixed header of the hub pages, in paper and ink: 56px of the paper of the page with its scanlines and a line of
  * 1px below, a little clear over a light blur of the page (`tuwa-docs-glass`) at every width. A row of cells on lines
- * of 1px: the logo (as wide as the flight plan of the main page from 1280px, so the two line up), then from `lg`
- * (1024px) the links in mono caps, the language and the theme (the language first, as on every TUWA site). Below `lg` a
- * square menu button opens a panel of the same glass under the header with the links in mono caps on lines of 1px and,
- * under them, the language and the theme, each on a row with its name: on a phone the header keeps the logo at the size
- * of tuwa.io and the button (at 768px the five links and both switchers need the whole row in Ukrainian). The panel
- * closes on a link, the scrim, Escape or a wider window, and locks the page scroll while open.
+ * of 1px: the logo (in a cell of 320px from 1280px), then from `lg` (1024px) the links in mono caps, the language and
+ * the theme (the language first, as on every TUWA site). Below `lg` a square menu button opens a panel of the same
+ * glass under the header with the links in mono caps on lines of 1px and, under them, the language and the theme, each
+ * on a row with its name: on a phone the header keeps the logo at the size of tuwa.io and the button (at 768px the five
+ * links and both switchers need the whole row in Ukrainian). The panel closes on a link, the scrim, Escape or a wider
+ * window, and locks the page scroll while open.
  *
  * @param props.logo - The logo link, rendered on the server by the layout.
  * @returns The header and the menu panel.

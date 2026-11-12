@@ -1,6 +1,8 @@
 'use client';
 
 import { SiteLogo, SmoothAnchors } from '@tuwaio/docs-ui';
+import { pathWithoutLocale } from '@tuwaio/docs-ui/locale';
+import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -12,13 +14,15 @@ import { Header } from './Header';
 /**
  * The frame of the React pages of the Docs Hub (the main page, comparisons, configurator, playground, policies and the
  * 404 page): a link past the header to the content, first for the keyboard, the fixed header with the logo, the content
- * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`).
+ * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`). Under the main
+ * page, in every language, the footer takes the sides of the frame of its column (`framed`).
  *
  * @param props.children - The page.
  * @returns The frame with the page.
  */
 export function HubShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
+  const isHome = pathWithoutLocale(usePathname()) === '/';
   const navbarLogo = (
     <Link href="/" aria-label={t.nav.homeAria} className="flex items-center px-4 xl:pl-6">
       <SiteLogo />
@@ -38,7 +42,7 @@ export function HubShell({ children }: { children: ReactNode }) {
       <main id="content" className="flex-1 pt-[56px]">
         {children}
       </main>
-      <Footer />
+      <Footer framed={isHome} />
     </div>
   );
 }

@@ -356,6 +356,15 @@ export interface DocsHubLabels {
       openWithFiles: string;
       install: string;
     };
+    /** The flight plan of the main page: the craft that flies with the scroll, past the parts of the page */
+    flight: {
+      /** The name of the navigation of the rail, for assistive technology */
+      ariaLabel: string;
+      /** The name of the first waypoint, the top of the page */
+      overview: string;
+      /** The name of the progress of the flight, which ends at the quick start, for assistive technology */
+      progressLabel: string;
+    };
   };
   comparisons: {
     badge: string;
