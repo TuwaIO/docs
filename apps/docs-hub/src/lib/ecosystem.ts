@@ -9,7 +9,7 @@ import { type PackageType, type ProjectIcon, projectIcons } from '@tuwaio/docs-u
 export interface PackageBadge {
   /** npm name (`@tuwaio/...`) or the label of a link */
   name: string;
-  /** TUWA layer of an npm package (`L1`–`L9`) */
+  /** TUWA layer of an npm package (`L1`–`L10`) */
   layer?: string;
   /** Target of a link row; npm rows link to npm when they have no details */
   url?: string;
@@ -191,7 +191,8 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/create-cosmos-playground', layer: 'L8' },
           { name: '@tuwaio/evm-sdk', layer: 'L9' },
           { name: '@tuwaio/solana-sdk', layer: 'L9' },
-          { name: '@tuwaio/payments-sdk', layer: 'L9' },
+          // One layer above the add-ons: it goes on top of @tuwaio/sdk (L8) and, for Solana, of @tuwaio/solana-sdk (L9)
+          { name: '@tuwaio/payments-sdk', layer: 'L10' },
         ],
       },
     ],

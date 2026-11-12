@@ -184,7 +184,7 @@ export const en: DocsHubLabels = {
         '@tuwaio/orbit-solana':
           'L2 Solana package of Orbit Utils (TUWA): cached @solana/kit RPC clients, Wallet Standard discovery, cluster and explorer helpers, and SNS name and avatar lookups.',
         '@tuwaio/payments-sdk':
-          'L9 Payments module of the TUWA SDK: the Nova Payments checkout and the Quasar checkout client, on top of @tuwaio/sdk.',
+          'L10 Payments module of the TUWA SDK: the Nova Payments checkout and the Quasar checkout client, on top of @tuwaio/sdk.',
         '@tuwaio/pulsar-core':
           'L3 core of Pulsar (TUWA): headless, framework-agnostic transaction store with localStorage persistence, a chain adapter contract, metadata validation and remote sync hooks for tracking EVM and Solana transactions.',
         '@tuwaio/pulsar-evm':

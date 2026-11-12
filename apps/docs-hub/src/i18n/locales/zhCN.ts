@@ -183,7 +183,7 @@ export const zhCN: DocsHubLabels = {
         '@tuwaio/orbit-solana':
           'Orbit Utils (TUWA) 的 L2 Solana 包：带缓存的 @solana/kit RPC 客户端、Wallet Standard 钱包发现、集群与区块浏览器工具，以及 SNS 域名与头像解析。',
         '@tuwaio/payments-sdk':
-          'TUWA SDK 的 L9 Payments 模块：基于 @tuwaio/sdk，提供 Nova Payments 结账组件与 Quasar 结账客户端。',
+          'TUWA SDK 的 L10 Payments 模块：基于 @tuwaio/sdk，提供 Nova Payments 结账组件与 Quasar 结账客户端。',
         '@tuwaio/pulsar-core':
           'Pulsar (TUWA) 的 L3 核心包：支持 localStorage 持久化的无头、框架无关交易状态库，定义链适配器契约、元数据校验及跨 EVM 与 Solana 的远程同步钩子。',
         '@tuwaio/pulsar-evm':

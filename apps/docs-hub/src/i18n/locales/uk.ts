@@ -185,7 +185,7 @@ export const uk: DocsHubLabels = {
         '@tuwaio/orbit-solana':
           'L2 Solana-пакет Orbit Utils (TUWA): кешовані RPC-клієнти @solana/kit, виявлення гаманців Wallet Standard, утиліти кластерів і експлорерів та пошук імен і аватарів SNS.',
         '@tuwaio/payments-sdk':
-          'L9 модуль Payments для TUWA SDK: оформлення оплати Nova Payments і клієнт оформлення оплати Quasar поверх @tuwaio/sdk.',
+          'L10 модуль Payments для TUWA SDK: оформлення оплати Nova Payments і клієнт оформлення оплати Quasar поверх @tuwaio/sdk.',
         '@tuwaio/pulsar-core':
           'L3 ядро Pulsar (TUWA): headless-сховище транзакцій зі збереженням у localStorage, контрактом адаптера мережі, валідацією метаданих та хуками серверної синхронізації для EVM і Solana.',
         '@tuwaio/pulsar-evm':
