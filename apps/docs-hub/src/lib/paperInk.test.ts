@@ -276,49 +276,24 @@ describe('paper and ink in @tuwaio/docs-ui', () => {
   });
 });
 
-/** The parts of the hub redrawn in paper and ink so far; the list grows with each part until it is the whole hub. */
-const hubRedrawn = [
-  'components/Header.tsx',
-  'components/Footer.tsx',
-  'components/HubShell.tsx',
-  'components/PageBackground.tsx',
-  'components/PoliciesContent.tsx',
-  'components/NotFoundContent.tsx',
-  'components/HeroSection.tsx',
-  'components/home/HeroPlate.tsx',
-  'components/home/SectionHead.tsx',
-  'components/home/EcosystemBoard.tsx',
-  'components/home/StageLedgers.tsx',
-  'components/home/StageLedger.tsx',
-  'components/home/ProductRow.tsx',
-  'components/home/PackageRow.tsx',
-  'components/PackagePreview.tsx',
-  'components/PackageDialog.tsx',
-  'components/CommandLine.tsx',
-  'components/buttonStyles.ts',
-  'components/QuickStartSection.tsx',
-  'components/configurator/CompactConfigurator.tsx',
-  'components/configurator/StackOptionsForm.tsx',
-  'components/configurator/StackConfigurator.tsx',
-  'components/configurator/FileTabs.tsx',
-  'components/configurator/CodeBlock.tsx',
-  'components/ScrollArrow.tsx',
-  'components/PixelFold.tsx',
-  'components/home/HomeFlightPlan.tsx',
-  'app/(default)/(home)/configurator/page.tsx',
-  'components/comparisons/ComparisonsContent.tsx',
-  'components/comparisons/ComparisonRadar.tsx',
-  'components/comparisons/CriteriaMatrix.tsx',
-  'components/comparisons/ChooseInstead.tsx',
-  'components/comparisons/BundleSizes.tsx',
-  'components/comparisons/Methodology.tsx',
-  'components/comparisons/MarkIcon.tsx',
-  'components/comparisons/comparisonStyles.ts',
-  'components/flight/FlightPlan.tsx',
-  'components/flight/flightArt.ts',
-  'components/flight/useFlight.ts',
-  'app/rootDocument.tsx',
+/**
+ * The parts of the hub not yet redrawn in paper and ink, by their path under `src`, with what waits for them. Every
+ * other source file of the hub is checked.
+ */
+const hubNotYetRedrawn: { files: RegExp; why: string }[] = [
+  { files: /^components\/playground\//, why: 'the playground, redrawn with its own stage' },
 ];
+
+/** Every source file of the hub (not its tests, nor the data its scripts generate), by its path under `src`. */
+function hubSources(dir = path.resolve(__dirname, '..'), base = dir): string[] {
+  return readdirSync(dir).flatMap((entry) => {
+    const file = path.join(dir, entry);
+    if (statSync(file).isDirectory()) return entry === 'generated' ? [] : hubSources(file, base);
+    return /\.tsx?$/.test(entry) && !/\.test\.tsx?$/.test(entry) ? [path.relative(base, file)] : [];
+  });
+}
+
+const hubRedrawn = hubSources().filter((file) => !hubNotYetRedrawn.some((part) => part.files.test(file)));
 
 /** What breaks paper and ink in a component of the hub: its Tailwind classes, inline styles and colours. */
 function hubViolations(file: string) {
@@ -347,6 +322,17 @@ function hubViolations(file: string) {
 }
 
 describe('paper and ink in the hub', () => {
+  it('checks the whole hub but the parts that wait for their stage', () => {
+    expect(hubRedrawn.length).toBeGreaterThan(80);
+    expect(hubRedrawn).toContain('components/NotFoundContent.tsx');
+    expect(hubRedrawn).toContain('app/rootDocument.tsx');
+    for (const part of hubNotYetRedrawn)
+      expect(
+        hubSources().some((file) => part.files.test(file)),
+        part.why,
+      ).toBe(true);
+  });
+
   it.each(hubRedrawn)('has no gradients, shadows, blur, rounded corners or cosmic colours in %s', (file) => {
     expect(hubViolations(path.resolve(__dirname, '..', file))).toEqual([]);
   });
