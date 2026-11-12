@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FileTabs } from '../components/configurator/FileTabs';
 import { ConfiguratorHeader, StackConfigurator } from '../components/configurator/StackConfigurator';
+import { ARROW_RIGHT } from '../components/home/pixelArrows';
 import { ScrollArrow } from '../components/ScrollArrow';
 import { en, I18nProvider, uk, zhCN } from '../i18n';
 import { allStackOptions, DEFAULT_STACK_OPTIONS, generateStack } from './configurator/generate';
@@ -106,6 +107,37 @@ describe('the file tabs', () => {
     expect(arrowsSource).not.toMatch(/-gradient|gradient\(|mask-image/);
     // The arrow is for the pointer: the tabs are reached by the keyboard, which brings them into sight
     expect(shown).toMatch(/<button type="button" aria-hidden="true" tabindex="-1"/);
+  });
+
+  // The arrows came and went with a plain fade. They are pixel pictures: an arrow unfolds, its pixels flying in to their
+  // places, when its side has more, and folds away, its pixels flying apart, when the row reaches that end
+  it('unfold and fold their arrows pixel by pixel', () => {
+    const arrow = (shown: boolean) =>
+      inEnglish(createElement(ScrollArrow, { side: 'right', shown, onClick: () => {} }));
+    const pixels = ARROW_RIGHT.join('').replace(/\./g, '').length;
+    for (const shown of [true, false]) {
+      const markup = arrow(shown);
+      expect(markup).toContain('tuwa-pixel-fold');
+      expect(markup.match(/<rect /g)).toHaveLength(pixels);
+      expect(markup.match(/style="--i:\d+;--dx:[-\d.]+px;--dy:[-\d.]+px"/g)).toHaveLength(pixels);
+    }
+    expect(arrow(true)).not.toContain('data-folded');
+    expect(arrow(false)).toContain('data-folded=""');
+    // Folded, every pixel is off its place: none stays where the arrow was
+    expect(arrow(false)).not.toMatch(/--dx:0px;--dy:0px/);
+    // The cell fades after the pixels have flown apart
+    expect(arrow(false)).toContain('delay-[240ms]');
+    expect(globals).toMatch(
+      /\.tuwa-pixel-fold\[data-folded\] rect \{\s*transform: translate\(var\(--dx\), var\(--dy\)\);\s*opacity: 0;/,
+    );
+    expect(globals).toMatch(
+      /\.tuwa-pixel-fold rect \{\s*transition:[^}]*transition-delay: calc\(var\(--i\) \* 12ms\);/,
+    );
+    // Once each way, and at once for reduced motion
+    expect(globals).toMatch(
+      /@media \(prefers-reduced-motion: reduce\) \{\s*\.tuwa-pixel-fold rect \{\s*transition: none;/,
+    );
+    expect(read('components/PixelFold.tsx') + arrowsSource).not.toMatch(/animate-|infinite/);
   });
 
   it('move the row smoothly, and at once for reduced motion', () => {

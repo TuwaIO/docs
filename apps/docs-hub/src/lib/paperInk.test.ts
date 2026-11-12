@@ -298,6 +298,8 @@ const hubRedrawn = [
   'components/configurator/FileTabs.tsx',
   'components/configurator/CodeBlock.tsx',
   'components/ScrollArrow.tsx',
+  'components/PixelFold.tsx',
+  'components/home/HomeFlightPlan.tsx',
   'app/(default)/(home)/configurator/page.tsx',
   'components/comparisons/ComparisonsContent.tsx',
   'components/comparisons/ComparisonRadar.tsx',
