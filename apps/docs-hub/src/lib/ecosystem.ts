@@ -170,7 +170,8 @@ export const layers: EcosystemLayer[] = [
           { name: '@tuwaio/nova-icons', layer: 'L6' },
           { name: '@tuwaio/nova-connect', layer: 'L7' },
           { name: '@tuwaio/nova-transactions', layer: 'L7' },
-          { name: '@tuwaio/nova-payments', layer: 'L7' },
+          // One layer above the rest of Nova: the checkout uses the whole of Nova UI Kit
+          { name: '@tuwaio/nova-payments', layer: 'L8' },
         ],
       },
     ],

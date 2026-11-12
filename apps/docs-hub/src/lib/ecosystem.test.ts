@@ -157,7 +157,8 @@ describe('the board of the architecture', () => {
     const home = (name: string) => entries.find((entry) => entry.packages?.some((pkg) => pkg.name === name));
     const layerOf = (name: string) => home(name)?.packages?.find((pkg) => pkg.name === name)?.layer;
     expect([home('@tuwaio/quasar-sdk')?.id, layerOf('@tuwaio/quasar-sdk')]).toEqual(['quasar-client', 'L5']);
-    expect([home('@tuwaio/nova-payments')?.id, layerOf('@tuwaio/nova-payments')]).toEqual(['nova', 'L7']);
+    // The checkout uses the whole of Nova UI Kit (L6–L7), so it is one layer above it: L8, as the SDK is
+    expect([home('@tuwaio/nova-payments')?.id, layerOf('@tuwaio/nova-payments')]).toEqual(['nova', 'L8']);
     expect([home('@tuwaio/payments-sdk')?.id, layerOf('@tuwaio/payments-sdk')]).toEqual(['sdk', 'L9']);
     const packages = readFileSync(path.resolve(__dirname, 'packages.ts'), 'utf8');
     // Their reference and their source are those of that repository, whatever project lists them
@@ -166,7 +167,7 @@ describe('the board of the architecture', () => {
   });
 
   it('names the layers of each stage from its packages', () => {
-    expect([1, 2, 3, 4, 5].map(stageLayerRange)).toEqual(['L1–L2', 'L3–L4', 'L5', 'L6–L7', 'L8–L9']);
+    expect([1, 2, 3, 4, 5].map(stageLayerRange)).toEqual(['L1–L2', 'L3–L4', 'L5', 'L6–L8', 'L8–L9']);
     expect(entryLayerRange('quasar-community')).toBe('');
     expect(entryLayerRange('quasar')).toBe('');
     expect(entryLayerRange('quasar-client')).toBe('L5');
