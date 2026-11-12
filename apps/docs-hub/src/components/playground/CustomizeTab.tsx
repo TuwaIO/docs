@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 
 import { useI18n } from '@/i18n';
 import {
+  CARD_GAPS,
+  cardGapOf,
   CONNECT_LABEL_MAX_LENGTH,
   defaultCustomizationFor,
   type NovaCustomization,
@@ -125,6 +127,28 @@ export function CustomizeTab() {
               </span>
             </button>
           ))}
+        </div>
+        {/* The gap between the cards of the connect modal, as the corners of the theme: a slider in steps of 4 px */}
+        <div className="grid grid-cols-1 gap-1.5 text-xs text-[var(--tuwa-text-secondary)]">
+          <label htmlFor="nova-card-gap">
+            {cust.cardGapLabel} <code className="font-mono text-[11px]">config.layout.mouseGap</code>
+          </label>
+          <div className="flex min-w-0 max-w-sm items-center gap-3">
+            <input
+              id="nova-card-gap"
+              type="range"
+              min={CARD_GAPS[0]}
+              max={CARD_GAPS.at(-1)}
+              step={4}
+              value={cardGapOf(customization)}
+              onChange={(event) => {
+                const gap = CARD_GAPS.find((value) => value === Number(event.target.value));
+                if (gap !== undefined) changeCustomization({ cardGap: gap });
+              }}
+              className="h-5 min-w-0 flex-1 cursor-pointer accent-[var(--tuwa-text-accent)]"
+            />
+            <span className="w-10 shrink-0 text-right font-mono">{cardGapOf(customization)}px</span>
+          </div>
         </div>
       </Layer>
 

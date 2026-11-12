@@ -66,6 +66,21 @@ describe('the shell of the Playground', () => {
     expect(novaStage.match(/icons=\{icons\}/g)).toHaveLength(2);
   });
 
+  // The Isometric kit sets the gap between the wallet cards, and nothing in the Customize tab showed or changed it: a
+  // slider under the style kits does, as the slider of the corners of the theme
+  it('has a slider for the gap between the cards of the connect modal', () => {
+    const customize = read('components/playground/CustomizeTab.tsx');
+    expect(customize).toMatch(
+      /id="nova-card-gap"\s+type="range"\s+min=\{CARD_GAPS\[0\]\}\s+max=\{CARD_GAPS\.at\(-1\)\}\s+step=\{4\}/,
+    );
+    expect(customize).toContain('value={cardGapOf(customization)}');
+    expect(customize).toContain('changeCustomization({ cardGap: gap })');
+    // The stage hands the gap to the wallet groups and to the networks
+    const stageCustomization = read('components/playground/useNovaCustomization.ts');
+    expect(stageCustomization.match(/layout: \{ mouseGap: gapClass \}/g)).toHaveLength(2);
+    expect(stageCustomization).toContain('networkSelections: { config: { scroll: { gap: { mouse: gapClass } } } },');
+  });
+
   it('draws the stage as a window in a frame of 1px, with square marks and no shadow', () => {
     expect(stage).toContain(
       '<div className="overflow-hidden border border-[var(--tuwa-border-strong)] [--playground-frame-radius:var(--tuwa-rounded-corners)]">',

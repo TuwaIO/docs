@@ -11,6 +11,31 @@ export type StyleKit = 'nova' | 'mono' | 'iso';
  */
 export type NovaIconSetChoice = 'pixel' | 'classic';
 
+/**
+ * The gaps the Customize tab offers between the cards of the connect modal (the wallets of a group, the networks), in
+ * pixels, with the class of each. Without a gap the cards share their lines of 1 px, as Nova draws them. Tailwind CSS
+ * generates these classes from this file: each one is a complete string literal.
+ */
+export const CARD_GAP_CLASSES = {
+  0: 'gap-0 [&>*+*]:-mt-px',
+  4: 'gap-1',
+  8: 'gap-2',
+  12: 'gap-3',
+  16: 'gap-4',
+} as const;
+
+/** A gap between the cards of the connect modal, in pixels. */
+export type CardGap = keyof typeof CARD_GAP_CLASSES;
+
+/** The steps of the gap slider, in pixels. */
+export const CARD_GAPS = [0, 4, 8, 12, 16] as const satisfies readonly CardGap[];
+
+/**
+ * The gap each style kit draws its cards with: none for Nova as it ships (cards on shared lines), 8 px for the kits
+ * whose cards are outlined boxes or keys with faces, which need room.
+ */
+export const KIT_CARD_GAP: Record<StyleKit, CardGap> = { nova: 0, mono: 8, iso: 8 };
+
 /** The language of the Nova texts (`labels`). */
 export type NovaLanguage = 'en' | 'zh' | 'uk';
 
@@ -33,6 +58,12 @@ export interface NovaCustomization {
   style: StyleKit;
   /** The icon set (`icons`): the pixel icons of Nova, or `heroicons` of `@tuwaio/sdk/nova-core/heroicons`. */
   icons: NovaIconSetChoice;
+  /**
+   * The gap between the cards of the connect modal on devices without a touch screen (`config.layout.mouseGap` of the
+   * wallet groups, `config.scroll.gap.mouse` of the networks), in pixels; `null` keeps the gap of the style kit
+   * ({@link KIT_CARD_GAP}).
+   */
+  cardGap: CardGap | null;
   /** Texts (`labels`): English, or Ukrainian. */
   language: NovaLanguage;
   /** Text of the connect button (`labels.connectWallet`); empty keeps the text of the language. */
@@ -65,6 +96,7 @@ export interface NovaCustomization {
 export const DEFAULT_CUSTOMIZATION: NovaCustomization = {
   style: 'nova',
   icons: 'pixel',
+  cardGap: null,
   language: 'en',
   connectLabel: '',
   historyIcons: false,
@@ -128,6 +160,26 @@ export function transactionsProviderOptions(customization: NovaCustomization) {
   };
 }
 
+/**
+ * The gap between the cards of the connect modal that the stage shows: the one the reader set, or the one of the style
+ * kit.
+ * @param customization - The customization.
+ * @returns The gap, in pixels.
+ */
+export function cardGapOf(customization: NovaCustomization): CardGap {
+  return customization.cardGap ?? KIT_CARD_GAP[customization.style];
+}
+
+/**
+ * The class of the gap between the cards when it is not the one of the style kit, which sets its own.
+ * @param customization - The customization.
+ * @returns The class for `mouseGap`, or `null` to leave the gap to the style kit.
+ */
+export function cardGapClassOf(customization: NovaCustomization): string | null {
+  const gap = cardGapOf(customization);
+  return gap === KIT_CARD_GAP[customization.style] ? null : CARD_GAP_CLASSES[gap];
+}
+
 /** The text of the connect button, trimmed, or `undefined` to keep the text of the language. */
 export function connectLabelOf(customization: NovaCustomization): string | undefined {
   return customization.connectLabel.trim().slice(0, CONNECT_LABEL_MAX_LENGTH) || undefined;
@@ -148,8 +200,8 @@ const CODE_FLAGS = [
  * Every customization that gives a different `customization.tsx`: every style kit and every language, with and
  * without a text of the connect button, every combination of the switches, with the default and with changed options
  * (4608 variants with the pixel icons); and, for every style kit and language, Heroicons with no switch and with every
- * switch on (18 more): the icon set adds the same import and the same two props whatever else is set. The configurator
- * check compiles the code of each one.
+ * switch on (18 more): the icon set adds the same import and the same two props whatever else is set; and a gap between
+ * the cards of the connect modal (24 more). The configurator check compiles the code of each one.
  */
 export function allCustomizations(): NovaCustomization[] {
   const everyFlag = Object.fromEntries(CODE_FLAGS.map((flag) => [flag, true]));
@@ -159,7 +211,15 @@ export function allCustomizations(): NovaCustomization[] {
       { ...DEFAULT_CUSTOMIZATION, style, language, icons: 'classic', ...everyFlag },
     ]),
   );
-  return [...pixelCustomizations(), ...classic];
+  // A gap of the reader's between the cards: for every style kit, every gap that is not its own, alone and next to
+  // the history of the connected modal, which shares the `modals` of the same object (24 more)
+  const gaps = (['nova', 'mono', 'iso'] as const).flatMap((style) =>
+    CARD_GAPS.filter((cardGap) => cardGap !== KIT_CARD_GAP[style]).flatMap((cardGap): NovaCustomization[] => [
+      { ...DEFAULT_CUSTOMIZATION, style, cardGap },
+      { ...DEFAULT_CUSTOMIZATION, style, cardGap, historyIcons: true },
+    ]),
+  );
+  return [...pixelCustomizations(), ...classic, ...gaps];
 }
 
 // The variants with the pixel icons: see `allCustomizations`
@@ -253,9 +313,30 @@ export function customizationCode(customization: NovaCustomization): string {
   ]);
   const button = merged(kit && `${kit}ConnectButton`, buttonExtra);
 
+  const connectedModal =
+    'connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } }';
+  const gapClass = cardGapClassOf(customization);
   const connectExtra = objectOf([
-    hasHistory &&
-      'modals: { connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } } }',
+    gapClass
+      ? [
+          'modals: {',
+          hasHistory && `  ${connectedModal},`,
+          '  connectModal: {',
+          '    childComponents: {',
+          '      connectorsSelections: {',
+          '        connectorsBlock: {',
+          `          installed: { config: { layout: { mouseGap: ${quote(gapClass)} } } },`,
+          `          popular: { config: { layout: { mouseGap: ${quote(gapClass)} } } },`,
+          '        },',
+          '      },',
+          `      networkSelections: { config: { scroll: { gap: { mouse: ${quote(gapClass)} } } } },`,
+          '    },',
+          '  },',
+          '}',
+        ]
+          .filter(Boolean)
+          .join('\n')
+      : hasHistory && `modals: { ${connectedModal} }`,
   ]);
   const connect = kit || connectExtra ? merged(kit && `${kit}Connect`, connectExtra) : null;
 

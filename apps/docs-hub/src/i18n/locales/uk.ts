@@ -908,6 +908,7 @@ export const uk: DocsHubLabels = {
         textsLayer: 'Тексти',
         behaviorLayer: 'Поведінка',
         languageLabel: 'Мова',
+        cardGapLabel: 'Відступ між картками гаманців і мереж',
         connectTextLabel: 'Текст кнопки підключення',
         toastPositionLabel: 'Позиція спливаючих сповіщень',
         resetNova: 'Скинути до стандартних налаштувань Nova',

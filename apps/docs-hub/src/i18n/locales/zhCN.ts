@@ -857,6 +857,7 @@ export const zhCN: DocsHubLabels = {
         textsLayer: '多语言文案 (Texts)',
         behaviorLayer: '交互行为 (Behavior)',
         languageLabel: '界面语言',
+        cardGapLabel: '钱包与网络卡片之间的间距',
         connectTextLabel: '连接按钮文案',
         toastPositionLabel: '通知弹窗位置',
         resetNova: '重置为 Nova 默认出厂设置',

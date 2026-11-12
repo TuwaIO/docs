@@ -878,6 +878,7 @@ export const en: DocsHubLabels = {
         textsLayer: 'Texts',
         behaviorLayer: 'Behavior',
         languageLabel: 'Language',
+        cardGapLabel: 'Gap between the wallet and network cards',
         connectTextLabel: 'Connect button text',
         toastPositionLabel: 'Toast position',
         resetNova: 'Reset to Nova as it ships',

@@ -567,6 +567,8 @@ export interface DocsHubLabels {
         textsLayer: string;
         behaviorLayer: string;
         languageLabel: string;
+        /** The label of the slider of the gap between the cards of the connect modal */
+        cardGapLabel: string;
         connectTextLabel: string;
         toastPositionLabel: string;
         resetNova: string;

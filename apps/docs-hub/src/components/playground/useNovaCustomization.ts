@@ -16,6 +16,7 @@ import type { Transaction } from '@tuwaio/sdk/pulsar';
 import { useMemo } from 'react';
 
 import {
+  cardGapClassOf,
   connectLabelOf,
   connectProviderOptions,
   type NovaCustomization,
@@ -96,9 +97,26 @@ function buildNovaCustomization(customization: NovaCustomization) {
     }),
   });
 
+  // A gap of the reader's between the cards of the connect modal, where it is not the one of the style kit
+  const gapClass = cardGapClassOf(customization);
   const connectCustomization = deepMerge(
     deepMerge<NovaConnectProviderCustomization>(kit?.connect ?? {}, {
-      modals: { connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } } },
+      modals: {
+        connectedModal: { childCustomizations: { txHistory: { transactionsHistory: historyCustomization } } },
+        ...(gapClass && {
+          connectModal: {
+            childComponents: {
+              connectorsSelections: {
+                connectorsBlock: {
+                  installed: { config: { layout: { mouseGap: gapClass } } },
+                  popular: { config: { layout: { mouseGap: gapClass } } },
+                },
+              },
+              networkSelections: { config: { scroll: { gap: { mouse: gapClass } } } },
+            },
+          },
+        }),
+      },
     }),
     STAGE_WALLET_ICONS,
   );
