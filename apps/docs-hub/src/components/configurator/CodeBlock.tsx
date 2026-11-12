@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import type { HighlighterCore } from 'shiki/core';
 
 import { useI18n } from '@/i18n';
+import { CODE_COLOR_REPLACEMENTS } from '@/lib/codeColors';
 import type { FileLanguage } from '@/lib/configurator/generate';
 
 import { secondaryButtonClassName, smallButtonClassName } from '../buttonStyles';
@@ -34,8 +35,9 @@ const SHIKI_LANGUAGES: Record<FileLanguage, string> = { ts: 'typescript', tsx: '
 /**
  * A code file with a copy button, in paper and ink: the code in Geist Mono on the paper of its frame, the small
  * secondary button over its top right corner. The code is highlighted in the browser with the GitHub light and dark
- * themes (the `--shiki-light` and `--shiki-dark` colors, switched by `.tuwa-code` in `globals.css`); until Shiki
- * loads, it shows as plain text.
+ * themes (the `--shiki-light` and `--shiki-dark` colors, switched by `.tuwa-code` in `globals.css`), with the colors
+ * that are too faint on the paper of the hub replaced (`CODE_COLOR_REPLACEMENTS`); until Shiki loads, it shows as plain
+ * text.
  *
  * Side effects: loads Shiki on the first code block; the button writes the code to the clipboard.
  *
@@ -57,6 +59,7 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
         lang: SHIKI_LANGUAGES[language],
         themes: { light: 'github-light', dark: 'github-dark' },
         defaultColor: false,
+        colorReplacements: CODE_COLOR_REPLACEMENTS,
       });
       setHighlighted({ code, html });
     });
