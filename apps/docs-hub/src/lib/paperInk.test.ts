@@ -279,6 +279,7 @@ const hubRedrawn = [
   'components/Footer.tsx',
   'components/HubShell.tsx',
   'components/PageBackground.tsx',
+  'components/PoliciesContent.tsx',
   'components/HeroSection.tsx',
   'components/home/HeroPlate.tsx',
   'components/home/SectionHead.tsx',
