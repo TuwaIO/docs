@@ -56,11 +56,9 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
           <HeroSection />
           <EcosystemBoard />
           <StageLedgers releases={getReleases()} packages={getPackageDetails()} />
+          <QuickStartSection />
           <CrossMark x="left" y="bottom" />
           <CrossMark x="right" y="bottom" />
-        </div>
-        <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-2 sm:px-6 pt-24">
-          <QuickStartSection />
         </div>
       </div>
     </>

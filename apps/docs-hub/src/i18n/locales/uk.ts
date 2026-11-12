@@ -33,6 +33,7 @@ export const uk: DocsHubLabels = {
     copyCommand: 'Скопіювати команду',
     copyCode: 'Скопіювати код',
     close: 'Закрити',
+    aboutLabel: 'Про «{label}»',
     yes: 'Так',
     partial: 'Частково',
     no: 'Ні',
@@ -212,51 +213,17 @@ export const uk: DocsHubLabels = {
       },
     },
     quickStart: {
-      titlePrefix: 'Почніть розробку за',
-      titleHighlight: 'лічені хвилини',
+      section: 'Швидкий старт',
+      title: 'Почніть розробку з Cosmos Playground',
       subtitle:
-        'Оберіть пакети під свій застосунок, зберіть повноцінний React dApp або розгорніть Quasar на власному сервері.',
-      cards: {
-        choosePackages: {
-          title: 'Оберіть свої пакети',
-          description:
-            'Вирішіть між єдиним @tuwaio/sdk та окремими пакетами для підключення гаманців, входу SIWX, відстеження транзакцій і Nova UI.',
-          cta: 'Підібрати стек',
-        },
-        fullStackReact: {
-          title: 'Full-Stack React застосунок',
-          description:
-            'Підключайте гаманці, авторизуйте через SIWX, відстежуйте транзакції з Pulsar і синхронізуйте з Quasar в одному Next.js застосунку для EVM або Solana.',
-          cta: 'Зібрати застосунок',
-        },
-        selfHostQuasar: {
-          title: 'Self-Hosting Quasar',
-          description:
-            'Запустіть Quasar Community Edition (Apache-2.0) на власному сервері через Docker Compose: PostgreSQL, Redis, воркери відстеження та вебхуки.',
-          cta: 'Розгорнути вузол',
-        },
-      },
-      allGuidesPrefix: 'Шукаєте окремий посібник із входу SIWX, відстеження транзакцій або синхронізації з Quasar?',
-      browseAllGuides: 'Переглянути всі посібники',
-      aiBanner: {
-        badge: 'ШІ-асистенти',
-        title: 'Працюєте з Claude Code, Cursor або Windsurf?',
-        description:
-          'Передайте своєму ШІ-агенту файл TUWA_AGENTS.md: один документ із правильними імпортами, налаштуванням сторів, маршрутами SIWX та правилами синхронізації Quasar для всіх пакетів TUWA.',
-        copyUrl: 'Копіювати URL',
-        copied: 'Скопійовано',
-        copyTitle: 'Скопіювати пряме посилання на TUWA_AGENTS.md',
-        viewOnGithub: 'Відкрити на GitHub',
-      },
+        'Одна команда створює повноцінний застосунок на Next.js або Vite для EVM, Solana чи обох мереж: підключення гаманців і відстеження транзакцій уже налаштовано.',
+      steps: { one: '{n} крок', few: '{n} кроки', many: '{n} кроків', other: '{n} кроку' },
     },
     compactConfigurator: {
-      badge: 'Інтерактивно',
       title: 'Налаштуйте свій стек',
       description: 'Оберіть фреймворк, мережі та функції, щоб отримати команду встановлення та файли налаштування.',
       openWithFiles: 'Відкрити з усіма {count} файлами налаштування',
       install: 'Встановлення',
-      filesGenerated: 'Згенеровані файли для цього стеку ({count})',
-      viewCode: 'Переглянути код',
     },
   },
   comparisons: {

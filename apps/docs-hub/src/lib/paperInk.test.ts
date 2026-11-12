@@ -291,6 +291,9 @@ const hubRedrawn = [
   'components/PackageDialog.tsx',
   'components/CommandLine.tsx',
   'components/buttonStyles.ts',
+  'components/QuickStartSection.tsx',
+  'components/configurator/CompactConfigurator.tsx',
+  'components/configurator/StackOptionsForm.tsx',
   'app/rootDocument.tsx',
 ];
 

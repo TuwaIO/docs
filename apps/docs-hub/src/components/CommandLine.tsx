@@ -53,14 +53,34 @@ export function PackageManagerSwitch({
  *
  * @param props.command - The command.
  * @param props.copyTitle - The title of the copy button (default: "Copy the command").
+ * @param props.compact - The quiet variant inside a framed part: a grey frame and a smaller text.
  * @returns The command line.
  */
-export function CommandLine({ command, copyTitle }: { command: string; copyTitle?: string }) {
+export function CommandLine({
+  command,
+  copyTitle,
+  compact = false,
+}: {
+  command: string;
+  copyTitle?: string;
+  compact?: boolean;
+}) {
   const { t } = useI18n();
   const { isCopied, copy } = useCopyToClipboard(2000);
   return (
-    <div className="flex flex-wrap items-center gap-3 border border-[var(--tuwa-text-primary)] p-4">
-      <code className="flex min-w-0 flex-[1_1_260px] gap-2.5 font-mono text-[15px] font-medium leading-[1.5] text-[var(--tuwa-text-primary)]">
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-3 border',
+        compact ? 'border-[var(--tuwa-border-strong)] px-4 py-3.5' : 'border-[var(--tuwa-text-primary)] p-4',
+      )}
+    >
+      <code
+        className={cn(
+          'flex min-w-0 flex-[1_1_260px] gap-2.5 font-mono font-medium text-[var(--tuwa-text-primary)]',
+          // The line height after the size: merged the other way round, the size drops it
+          compact ? 'text-[13px] leading-[1.5]' : 'text-[15px] leading-[1.5]',
+        )}
+      >
         <span aria-hidden="true" className="shrink-0 select-none font-bold text-[var(--tuwa-text-accent)]">
           $
         </span>

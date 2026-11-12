@@ -1,164 +1,132 @@
 'use client';
 
-import { CommandLineIcon } from '@heroicons/react/24/outline';
-import { Orb } from '@tuwaio/docs-ui';
-import { CopyIcon, ExternalLinkIcon, useCopyToClipboard } from '@tuwaio/nova-core';
+import { ExternalLinkIcon } from '@tuwaio/nova-core';
 
 import Link from '@/components/LocaleNextLink';
+import { formatPlural } from '@/lib/plural';
 
 import { useI18n } from '../i18n';
+import { CommandLine } from './CommandLine';
 import { CompactConfigurator } from './configurator/CompactConfigurator';
+import { SectionBar, SectionHead } from './home/SectionHead';
 
+/** The command that creates an app from a template of Cosmos Playground */
+const command = 'npx @tuwaio/create-cosmos-playground';
+
+const capsClassName = 'font-mono text-[11px] font-bold uppercase leading-[1.35] tracking-[0.12em]';
+
+/**
+ * The quick start of the main page (`#quick-start`), in paper and ink: the bar of the section (`03 / Quick start`),
+ * its title and lead, the command of Cosmos Playground in a frame of ink with a copy button, three links on shared
+ * lines under it (the package on npm, the repository, the guide for AI coding agents), the three steps on lines of 1px
+ * with square numbers, and, for an app that exists already, the compact Stack Configurator. On phones the links and
+ * the steps stand one under another; from 768px they stand three in a row.
+ *
+ * @returns The section.
+ */
 export function QuickStartSection() {
-  const { t } = useI18n();
-  const { isCopied, copy } = useCopyToClipboard(2000);
-  const command = 'npx @tuwaio/create-cosmos-playground';
+  const { locale, t } = useI18n();
+  const texts = t.home.quickStart;
+  const steps = t.ui.quickStartSteps;
 
-  const handleCopyCommand = async () => {
-    await copy(command);
-  };
+  const links = [
+    {
+      label: 'npm',
+      text: '@tuwaio/create-cosmos-playground',
+      href: 'https://www.npmjs.com/package/@tuwaio/create-cosmos-playground',
+    },
+    { label: 'GitHub', text: 'TuwaIO/cosmos-playground', href: 'https://github.com/TuwaIO/cosmos-playground' },
+    {
+      label: steps.aiAgentsBadge,
+      text: 'TUWA_AGENTS.md',
+      href: 'https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md',
+      title: steps.aiAgentsTitle,
+    },
+  ];
+  const stepList = [
+    { title: steps.step1Title, text: steps.step1Desc },
+    {
+      title: steps.step2Title,
+      text: steps.step2Desc,
+      link: { href: '/guides/starter-templates', label: steps.compareTemplates },
+    },
+    { title: steps.step3Title, text: steps.step3Desc },
+  ];
 
   return (
-    <section className="relative w-full mt-16 pt-12 pb-16 border-t border-dashed border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06]">
-      <div className="mx-auto max-w-4xl 2xl:max-w-5xl">
-        {/* Header */}
-        <div className="flex flex-col items-center text-center mb-10">
-          {/* A pixel rocket on a knob as the badges of the projects: it takes off once, when it comes into view */}
-          <Orb packageType="sdk" pixelIcon="rocket" color="var(--tuwa-text-accent)" size={56} className="mb-5" />
-          <h2 className="text-xl sm:text-2xl 2xl:text-3xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
-            {t.home.quickStart.titlePrefix}{' '}
-            <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
-              Cosmos Playground
-            </span>
-          </h2>
-          <p className="text-xs sm:text-sm 2xl:text-base text-[var(--tuwa-text-secondary)] mt-2 max-w-lg 2xl:max-w-xl">
-            {t.home.quickStart.subtitle}
-          </p>
+    <section id="quick-start" aria-labelledby="quick-start-title" className="mt-[104px] scroll-mt-[56px]">
+      <SectionBar
+        number={3}
+        name={texts.section}
+        meta={['Cosmos Playground', formatPlural(texts.steps, stepList.length, locale)]}
+      />
+      <div className="pt-12">
+        <SectionHead id="quick-start-title" title={texts.title} lead={texts.subtitle} />
+      </div>
+
+      <div className="mt-11">
+        <CommandLine command={command} />
+        <div className="grid grid-cols-1 border border-t-0 border-[var(--tuwa-border-primary)] md:grid-cols-3">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={link.title}
+              className="flex min-h-12 min-w-0 items-center gap-3 border-t border-[var(--tuwa-border-primary)] px-4 py-2.5 font-mono text-[13px] leading-[1.3] text-[var(--tuwa-text-primary)] transition-colors first:border-t-0 hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)] hover:text-[var(--tuwa-text-accent)] md:flex-wrap md:content-center md:gap-x-2.5 md:gap-y-1.5 md:border-t-0 md:border-l md:py-3 md:first:border-l-0"
+            >
+              <span className={`min-w-[84px] shrink-0 text-[var(--tuwa-text-secondary)] md:w-full ${capsClassName}`}>
+                {link.label}
+              </span>
+              <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">{link.text}</span>
+              <ExternalLinkIcon className="h-2.5 w-2.5 shrink-0 text-[var(--tuwa-text-secondary)]" />
+            </a>
+          ))}
         </div>
 
-        {/* Terminal Command Box */}
-        <div className="relative group max-w-2xl 2xl:max-w-3xl mx-auto mb-10">
-          <div className="bg-[var(--tuwa-bg-primary)]/80 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 rounded-[var(--tuwa-rounded-corners)] p-4 sm:p-5 2xl:p-6 flex items-center justify-between gap-4 font-mono text-xs sm:text-sm 2xl:text-base text-[var(--tuwa-text-primary)] backdrop-blur-sm shadow-lg">
-            <div className="flex items-center gap-2.5 min-w-0 truncate">
-              <CommandLineIcon
-                className="w-4 h-4 2xl:w-5 2xl:h-5 text-[var(--tuwa-text-accent)] shrink-0"
+        <ol
+          role="list"
+          className="m-0 mt-10 grid list-none grid-cols-1 border-t border-[var(--tuwa-text-primary)] p-0 md:grid-cols-3"
+        >
+          {stepList.map((step, index) => (
+            // `content-start`: the steps of a row are as tall as the tallest, and a shorter one would spread its rows
+            // and drop its title below the titles beside it
+            <li
+              key={step.title}
+              className="grid grid-cols-[34px_minmax(0,1fr)] content-start gap-4 border-b border-[var(--tuwa-border-primary)] py-[22px] md:grid-cols-1 md:gap-3.5 md:border-b-0 md:border-l md:px-5 md:pb-[26px] md:first:border-l-0 md:first:pl-0"
+            >
+              <span
                 aria-hidden="true"
-              />
-              <span className="text-[var(--tuwa-text-accent)] font-bold">$</span>
-              <span className="select-all truncate">{command}</span>
-            </div>
-            <button
-              type="button"
-              disabled={isCopied}
-              onClick={handleCopyCommand}
-              title={t.common.copyCommand}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 2xl:px-4 2xl:py-2 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)] dark:bg-white/5 border border-[var(--tuwa-border-primary)]/60 text-xs 2xl:text-sm font-sans text-[var(--tuwa-text-secondary)] transition-all duration-200 ${
-                isCopied
-                  ? 'cursor-not-allowed opacity-90'
-                  : 'cursor-pointer hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50'
-              }`}
-            >
-              {/* One icon in both states, so its sheets fold into the check mark */}
-              <CopyIcon copied={isCopied} className="w-3.5 h-3.5 2xl:w-4 2xl:h-4" />
-              {isCopied ? (
-                <span className="text-emerald-400 font-medium">{t.common.copied}</span>
-              ) : (
-                <span>{t.common.copy}</span>
-              )}
-            </button>
-          </div>
-
-          {/* NPM and GitHub quick links */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mt-3">
-            <a
-              href="https://www.npmjs.com/package/@tuwaio/create-cosmos-playground"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="NPM Package"
-              className="inline-flex items-center gap-1.5 px-3 py-1 2xl:px-3.5 2xl:py-1.5 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 text-[11px] 2xl:text-xs font-mono text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 transition-all duration-200"
-            >
-              <span className="font-bold text-red-500 dark:text-red-400">npm</span>
-              <span className="truncate">@tuwaio/create-cosmos-playground</span>
-              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
-            </a>
-            <a
-              href="https://github.com/TuwaIO/cosmos-playground"
-              target="_blank"
-              rel="noopener noreferrer"
-              title="GitHub Repository"
-              className="inline-flex items-center gap-1.5 px-3 py-1 2xl:px-3.5 2xl:py-1.5 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 text-[11px] 2xl:text-xs font-mono text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 transition-all duration-200"
-            >
-              <span className="font-bold text-[var(--tuwa-text-primary)]">GitHub</span>
-              <span className="truncate">TuwaIO/cosmos-playground</span>
-              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
-            </a>
-            <a
-              href="https://github.com/TuwaIO/workflows/blob/main/TUWA_AGENTS.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t.ui.quickStartSteps.aiAgentsTitle}
-              className="inline-flex items-center gap-1.5 px-3 py-1 2xl:px-3.5 2xl:py-1.5 rounded-[var(--tuwa-rounded-corners)] bg-[var(--tuwa-bg-secondary)]/60 dark:bg-white/[0.02] border border-[var(--tuwa-border-primary)]/50 text-[11px] 2xl:text-xs font-mono text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 transition-all duration-200"
-            >
-              <span className="font-bold text-[var(--tuwa-text-accent)]">{t.ui.quickStartSteps.aiAgentsBadge}</span>
-              <span className="truncate">TUWA_AGENTS.md</span>
-              <ExternalLinkIcon className="w-3 h-3 2xl:w-3.5 2xl:h-3.5 text-[var(--tuwa-text-secondary)] opacity-70 shrink-0" />
-            </a>
-          </div>
-        </div>
-
-        {/* 3 Numbered Steps */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 text-left">
-          <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
-              1
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                {t.ui.quickStartSteps.step1Title}
-              </h3>
-              <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                {t.ui.quickStartSteps.step1Desc}
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
-              2
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                {t.ui.quickStartSteps.step2Title}
-              </h3>
-              <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                {t.ui.quickStartSteps.step2Desc}{' '}
-                <Link
-                  href="/guides/starter-templates"
-                  className="text-[var(--tuwa-text-accent)] underline-offset-2 hover:underline"
-                >
-                  {t.ui.quickStartSteps.compareTemplates}
-                </Link>
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/20 dark:bg-white/[0.01] p-4 2xl:p-5 flex gap-3">
-            <div className="shrink-0 w-6 h-6 2xl:w-7 2xl:h-7 rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] text-white font-mono font-bold text-xs 2xl:text-sm flex items-center justify-center">
-              3
-            </div>
-            <div>
-              <h3 className="text-xs sm:text-sm 2xl:text-base font-semibold text-[var(--tuwa-text-primary)] font-geist-mono">
-                {t.ui.quickStartSteps.step3Title}
-              </h3>
-              <p className="text-[11px] sm:text-xs 2xl:text-sm text-[var(--tuwa-text-secondary)] mt-1 leading-relaxed">
-                {t.ui.quickStartSteps.step3Desc}
-              </p>
-            </div>
-          </div>
-        </div>
+                className="grid h-[34px] w-[34px] place-items-center border border-[var(--tuwa-text-primary)] font-mono text-[13px] font-bold leading-none text-[var(--tuwa-text-primary)]"
+              >
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <div className="min-w-0">
+                <h3 className="m-0 mt-1.5 font-mono text-base font-semibold leading-[1.3] text-[var(--tuwa-text-primary)] md:mt-0">
+                  {step.title}
+                </h3>
+                <p className="m-0 mt-1.5 text-sm leading-normal text-[var(--tuwa-text-secondary)]">
+                  {step.text}
+                  {step.link && (
+                    <>
+                      {' '}
+                      <Link
+                        href={step.link.href}
+                        className="text-[var(--tuwa-text-accent)] underline decoration-1 underline-offset-[3px]"
+                      >
+                        {step.link.label}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
 
         {/* For an existing app: the install command and the setup files of the picked stack */}
-        <div className="mt-8">
+        <div className="mt-10">
           <CompactConfigurator />
         </div>
       </div>

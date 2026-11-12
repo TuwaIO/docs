@@ -33,6 +33,7 @@ export const en: DocsHubLabels = {
     copyCommand: 'Copy the command',
     copyCode: 'Copy the code',
     close: 'Close',
+    aboutLabel: 'About {label}',
     yes: 'Yes',
     partial: 'Partial',
     no: 'No',
@@ -211,50 +212,17 @@ export const en: DocsHubLabels = {
       },
     },
     quickStart: {
-      titlePrefix: 'Start Building in',
-      titleHighlight: 'Minutes',
-      subtitle: 'Pick the packages that fit your app, build a complete React dApp, or run Quasar on your own server.',
-      cards: {
-        choosePackages: {
-          title: 'Choose Your Packages',
-          description:
-            'Decide between @tuwaio/sdk and individual packages for wallet connection, SIWX sign-in, transaction tracking and Nova UI.',
-          cta: 'Pick Your Stack',
-        },
-        fullStackReact: {
-          title: 'Full-Stack React App',
-          description:
-            'Connect wallets, sign in with SIWX, track transactions with Pulsar and sync to Quasar in one Next.js app for EVM or Solana.',
-          cta: 'Build the App',
-        },
-        selfHostQuasar: {
-          title: 'Self-Host Quasar',
-          description:
-            'Run Quasar Community Edition (Apache-2.0) on your own server with Docker Compose: PostgreSQL, Redis, tracking workers and webhooks.',
-          cta: 'Deploy a Node',
-        },
-      },
-      allGuidesPrefix: 'Looking for SIWX sign-in, transaction tracking or Quasar sync on its own?',
-      browseAllGuides: 'Browse all guides',
-      aiBanner: {
-        badge: 'AI Assistants',
-        title: 'Building with Claude Code, Cursor or Windsurf?',
-        description:
-          'Give your coding agent TUWA_AGENTS.md: one file with the imports, store wiring, SIWX routes and Quasar sync rules across every TUWA package.',
-        copyUrl: 'Copy URL',
-        copied: 'Copied',
-        copyTitle: 'Copy the raw TUWA_AGENTS.md URL',
-        viewOnGithub: 'View on GitHub',
-      },
+      section: 'Quick start',
+      title: 'Start Building in Cosmos Playground',
+      subtitle:
+        'One command creates a complete Next.js or Vite app for EVM, Solana or both, with wallet connection and transaction tracking already wired.',
+      steps: { one: '{n} step', few: '{n} steps', many: '{n} steps', other: '{n} steps' },
     },
     compactConfigurator: {
-      badge: 'Interactive',
       title: 'Configure Your Stack',
       description: 'Pick your framework, chains and features to get the install command and the setup files.',
       openWithFiles: 'Open with all {count} setup files',
       install: 'Install',
-      filesGenerated: 'Files generated for this stack ({count})',
-      viewCode: 'View code',
     },
   },
   comparisons: {

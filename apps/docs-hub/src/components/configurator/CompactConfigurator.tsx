@@ -1,6 +1,6 @@
 'use client';
 
-import { AdjustmentsHorizontalIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { PixelArt, ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
 import { useState } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -9,57 +9,69 @@ import { DEFAULT_STACK_OPTIONS, generateStack, stackQuery } from '@/lib/configur
 import { installCommand, usePackageManager } from '@/lib/packageManager';
 
 import { CommandLine, PackageManagerSwitch } from '../CommandLine';
+import { ARROW_RIGHT } from '../home/pixelArrows';
 import { StackOptionsForm } from './StackOptionsForm';
 
 /**
- * The Stack Configurator on the hub main page: the options, the install command for the chosen package manager, and a
- * link to `/configurator` with the same options for the setup files.
+ * The Stack Configurator on the hub main page, in paper and ink: a frame of 1px with, on shared lines, its head (the
+ * square of a gear, whose icon moves under the pointer, the title in mono caps and what it does), the options in four
+ * cells (two by two from 768px), and the install command for the chosen package manager with a link to `/configurator`,
+ * which opens with the same options and all the setup files.
+ *
+ * Side effects: the package manager the reader picks is saved to `localStorage` (`usePackageManager`).
+ *
+ * @returns The configurator.
  */
 export function CompactConfigurator() {
   const { t } = useI18n();
   const [options, setOptions] = useState(DEFAULT_STACK_OPTIONS);
   const [packageManager, choosePackageManager] = usePackageManager();
   const stack = generateStack(options);
+  const texts = t.home.compactConfigurator;
 
   return (
-    <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] sm:backdrop-blur-sm p-4 sm:p-6 text-left">
-      <div className="flex items-start gap-3 mb-5">
-        <AdjustmentsHorizontalIcon
-          className="w-5 h-5 mt-0.5 shrink-0 text-[var(--tuwa-text-accent)]"
-          aria-hidden="true"
-        />
-        <div>
-          <h3 className="text-sm sm:text-base font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
-            {t.home.compactConfigurator.title}
+    <div className="border border-[var(--tuwa-border-primary)]">
+      <div
+        onMouseEnter={(event) => startPixelMotion(event.currentTarget)}
+        onMouseLeave={(event) => stopPixelMotion(event.currentTarget)}
+        className="group grid grid-cols-[44px_minmax(0,1fr)] gap-4 border-b border-[var(--tuwa-border-primary)] px-4 py-5"
+      >
+        <ProjectSquare icon="gear" />
+        <div className="min-w-0">
+          <h3 className="m-0 mt-0.5 font-mono text-sm font-bold uppercase leading-[1.3] tracking-[0.12em] text-[var(--tuwa-text-primary)]">
+            {texts.title}
           </h3>
-          <p className="text-xs sm:text-sm text-[var(--tuwa-text-secondary)] mt-1">
-            {t.home.compactConfigurator.description}
-          </p>
+          <p className="m-0 mt-1.5 text-sm leading-normal text-[var(--tuwa-text-secondary)]">{texts.description}</p>
         </div>
       </div>
 
       <StackOptionsForm options={options} onChange={setOptions} compact />
 
-      <div className="mt-5 flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
-            {t.home.compactConfigurator.install}
+      <div className="p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="font-mono text-[11px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[var(--tuwa-text-secondary)]">
+            {texts.install}
           </span>
           <PackageManagerSwitch value={packageManager} onChange={choosePackageManager} />
         </div>
-        <CommandLine
-          command={installCommand(packageManager, stack.packages)}
-          copyTitle={t.home.packageDialog.copyInstallTitle}
-        />
+        <div className="mt-2.5">
+          <CommandLine
+            compact
+            command={installCommand(packageManager, stack.packages)}
+            copyTitle={t.home.packageDialog.copyInstallTitle}
+          />
+        </div>
+        <Link
+          href={`/configurator?${stackQuery(stack.options)}`}
+          className="group/link mt-4 inline-flex items-center gap-2.5 font-mono text-xs font-bold uppercase leading-[1.3] tracking-[0.12em] text-[var(--tuwa-text-accent)] underline-offset-4 hover:underline"
+        >
+          {formatLabel(texts.openWithFiles, { count: stack.files.length })}
+          <PixelArt
+            art={ARROW_RIGHT}
+            className="h-3.5 w-3.5 shrink-0 [--tuwa-pixel-ink:currentColor] transition-transform duration-200 ease-out group-hover/link:translate-x-[3px] group-focus-visible/link:translate-x-[3px] motion-reduce:transition-none motion-reduce:!translate-none"
+          />
+        </Link>
       </div>
-
-      <Link
-        href={`/configurator?${stackQuery(stack.options)}`}
-        className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--tuwa-text-accent)] hover:underline"
-      >
-        {formatLabel(t.home.compactConfigurator.openWithFiles, { count: stack.files.length })}
-        <ArrowRightIcon className="w-4 h-4" aria-hidden="true" />
-      </Link>
     </div>
   );
 }

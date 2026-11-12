@@ -247,6 +247,7 @@ export interface DocsHubLabels {
     copyCommand: string;
     copyCode: string;
     close: string;
+    aboutLabel: string;
     yes: string;
     partial: string;
     no: string;
@@ -344,34 +345,16 @@ export interface DocsHubLabels {
       packageDeprecations: Record<string, string>;
     };
     quickStart: {
-      titlePrefix: string;
-      titleHighlight: string;
+      section: string;
+      title: string;
       subtitle: string;
-      cards: {
-        choosePackages: { title: string; description: string; cta: string };
-        fullStackReact: { title: string; description: string; cta: string };
-        selfHostQuasar: { title: string; description: string; cta: string };
-      };
-      allGuidesPrefix: string;
-      browseAllGuides: string;
-      aiBanner: {
-        badge: string;
-        title: string;
-        description: string;
-        copyUrl: string;
-        copied: string;
-        copyTitle: string;
-        viewOnGithub: string;
-      };
+      steps: PluralLabel;
     };
     compactConfigurator: {
-      badge: string;
       title: string;
       description: string;
       openWithFiles: string;
       install: string;
-      filesGenerated: string;
-      viewCode: string;
     };
   };
   comparisons: {

@@ -33,6 +33,7 @@ export const zhCN: DocsHubLabels = {
     copyCommand: '复制命令',
     copyCode: '复制代码',
     close: '关闭',
+    aboutLabel: '关于{label}',
     yes: '支持',
     partial: '部分支持',
     no: '不支持',
@@ -210,49 +211,17 @@ export const zhCN: DocsHubLabels = {
       },
     },
     quickStart: {
-      titlePrefix: '几分钟内',
-      titleHighlight: '快速上手',
-      subtitle: '挑选适合您应用的软件包，构建完整的 React dApp，或者在您自己的服务器上运行 Quasar。',
-      cards: {
-        choosePackages: {
-          title: '选择您的软件包',
-          description: '在统一的 @tuwaio/sdk 与用于钱包连接、SIWX 登录、交易追踪和 Nova UI 的独立包之间做出选择。',
-          cta: '挑选技术栈',
-        },
-        fullStackReact: {
-          title: '全栈 React 应用',
-          description:
-            '在同一个 Next.js 应用中为 EVM 或 Solana 完成钱包连接、SIWX 登录、Pulsar 交易追踪与 Quasar 同步。',
-          cta: '开始构建应用',
-        },
-        selfHostQuasar: {
-          title: '自部署 Quasar',
-          description:
-            '使用 Docker Compose 在您自己的服务器上运行 Quasar 社区版 (Apache-2.0)：包含 PostgreSQL、Redis、追踪工作进程与 Webhook。',
-          cta: '部署节点',
-        },
-      },
-      allGuidesPrefix: '只想单独了解 SIWX 登录、交易追踪或 Quasar 同步？',
-      browseAllGuides: '浏览全部指南',
-      aiBanner: {
-        badge: 'AI 编程助手',
-        title: '正在使用 Claude Code、Cursor 或 Windsurf 构建项目？',
-        description:
-          '将 TUWA_AGENTS.md 提供给您的编程智能体：单文件涵盖所有 TUWA 软件包的导入路径、状态库接线、SIWX 路由及 Quasar 同步规范。',
-        copyUrl: '复制 URL',
-        copied: '已复制',
-        copyTitle: '复制 TUWA_AGENTS.md 的原始 URL',
-        viewOnGithub: '在 GitHub 上查看',
-      },
+      section: '快速开始',
+      title: '从 Cosmos Playground 开始构建',
+      subtitle:
+        '一条命令即可基于模板创建完整的 Next.js 或 Vite 应用，支持 EVM、Solana 或两者兼有，钱包连接与交易追踪均已接好。',
+      steps: { one: '{n} 个步骤', few: '{n} 个步骤', many: '{n} 个步骤', other: '{n} 个步骤' },
     },
     compactConfigurator: {
-      badge: '交互式配置',
       title: '配置您的技术栈',
       description: '选择框架、区块链网络与所需特性，立即生成安装命令与全套配置文件。',
-      openWithFiles: '打开完整配置器（查看全部 {count} 个文件',
+      openWithFiles: '打开完整配置器，查看全部 {count} 个配置文件',
       install: '安装命令',
-      filesGenerated: '为当前技术栈生成的文件 ({count})',
-      viewCode: '查看代码',
     },
   },
   comparisons: {
