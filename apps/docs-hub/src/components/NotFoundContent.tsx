@@ -6,7 +6,7 @@ import { useSyncExternalStore } from 'react';
 
 import Link from '@/components/LocaleNextLink';
 import { useI18n } from '@/i18n';
-import { layers } from '@/lib/ecosystem';
+import { productsInOrder } from '@/lib/ecosystem';
 
 import {
   buttonArrowClassName,
@@ -27,8 +27,7 @@ import { CrossMark, Kicker } from './home/SectionHead';
 const destinationHrefs = ['/guides', '/quasar', '/configurator', '/playground', '/comparisons', '/policies'] as const;
 
 // The reference sites of the projects (absolute URLs only; Quasar lives in this hub)
-const projectSites = layers
-  .flatMap((layer) => layer.entries)
+const projectSites = productsInOrder()
   .filter((entry) => entry.docsUrl.startsWith('https://'))
   .map((entry) => ({ name: entry.name, url: entry.docsUrl }));
 

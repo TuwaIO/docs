@@ -242,6 +242,32 @@ export function stagedEntries(): StagedEntry[] {
   );
 }
 
+/**
+ * The order of the projects wherever they are listed one after another (the plate of the hero, the lists of their
+ * sites), by project id: the order they build on one another. It is the order of the stages but for Quasar Client,
+ * which stands last: its API client is of the backend stage, and its checkout builds on Nova UI Kit and on the SDK.
+ */
+export const productOrder: readonly string[] = [
+  'orbit',
+  'siwx',
+  'pulsar',
+  'satellite',
+  'quasar',
+  'quasar-community',
+  'nova',
+  'sdk',
+  'quasar-client',
+];
+
+/**
+ * The projects of the main page in {@link productOrder}, each with its stage and its icon.
+ *
+ * @returns The projects.
+ */
+export function productsInOrder(): StagedEntry[] {
+  return [...stagedEntries()].sort((a, b) => productOrder.indexOf(a.id) - productOrder.indexOf(b.id));
+}
+
 const packageProjects: ReadonlyMap<string, StagedEntry> = new Map(
   stagedEntries().flatMap((entry) => (entry.packages ?? []).map((pkg) => [pkg.name, entry] as const)),
 );

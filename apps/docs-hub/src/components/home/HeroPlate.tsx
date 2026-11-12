@@ -3,7 +3,7 @@
 import { PixelArt, projectIconArt, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
 
 import { useI18n } from '@/i18n';
-import { ecosystemCounts, stagedEntries, type StagedEntry } from '@/lib/ecosystem';
+import { ecosystemCounts, productsInOrder, type StagedEntry } from '@/lib/ecosystem';
 import { formatPlural } from '@/lib/plural';
 
 /** A cell of the plate: its lines of 1px on the right and below (the plate draws the top and left ones) */
@@ -45,7 +45,7 @@ function PlateLink({ entry, number }: { entry: StagedEntry; number: number }) {
 /**
  * The plate of the hero: a strip of ink with the count of the packages on npm, the products and the stages, all counted
  * from the data, over the nine TUWA projects on a 3 × 3 grid of raised paper on lines of 1px, in the order they build
- * on one another, each a link to its row on the page with its number, its pixel icon (assembling once) and its short
+ * on one another (`productOrder`: Quasar Client last), each a link to its row on the page with its number, its pixel icon (assembling once) and its short
  * name. In the dark theme the strip is sunken
  * and the count lit, with the quiet glow of the dark logo.
  *
@@ -73,7 +73,7 @@ export function HeroPlate() {
           <span className={countClassName}>{formatPlural(t.home.plate.stages, stages, locale)}</span>
         </span>
       </div>
-      {stagedEntries().map((entry, index) => (
+      {productsInOrder().map((entry, index) => (
         <PlateLink key={entry.id} entry={entry} number={index + 1} />
       ))}
     </nav>

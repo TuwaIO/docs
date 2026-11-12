@@ -237,7 +237,8 @@ The stages and projects of the main page are defined in `src/lib/ecosystem.ts` a
 2. Add a new object to the appropriate layer (or introduce a new layer) with its `id`, `name`, `tagline`, links (`docsUrl`, `githubUrl`) and `packages` with their layers; `plateName` gives it a shorter name on the hero plate.
 3. Its pixel icon comes from `projectIcons` of `@tuwaio/docs-ui` by `id`. A project without an icon of its own sets `orb` to another project or `pixelIcon` to an icon of `projectIconArt` (the Quasar Community entry uses `pixelIcon: 'server'`).
 4. Place it on the board: its cell in `boardPlaces` and what it builds on in `boardEdges`, by project id, never by package name (`build-data.mjs` would fetch it). `ecosystem.test.ts` fails until it has a place. A new edge takes a default route; give it its own in `routes` of `src/lib/ecosystemBoard.ts` when it should turn elsewhere. The plate of the hero lists every project three in a row under the counts, so a tenth starts a new row. A project that is a service or a server without npm packages of its own sets `hosting` (`managed` or `self-hosted`), which the board shows where the others count their packages.
-5. Add its tagline to `home.entries` in the three dictionaries of `src/i18n/locales`.
+5. Add its tagline to `home.entries` in the three dictionaries of `src/i18n/locales`, and a description of each of its packages to `home.packageDialog.packageDescriptions` there (`ecosystem.test.ts` fails without them).
+6. Add its id to `productOrder`: the order of the projects on the plate and in the lists of their sites (the order they build on one another, Quasar Client last).
 
 An `@tuwaio/` package added to `packages` gets its details, preview and `llms.txt` entry on the next build. To show a project's latest `vX.Y.Z` tag, add its entry id and repository to `RELEASES` in `scripts/build-data.mjs`.
 

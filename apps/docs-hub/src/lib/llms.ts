@@ -5,7 +5,7 @@ import { getPolicyPageUrl, publishedPolicies } from '@tuwaio/docs-ui';
 
 import packageReadmes from '../generated/package-readmes.json';
 import { AXES, axisScore, COMPETITORS, CRITERIA, PRODUCTS, SEGMENTS, verifiedAsOf } from './comparisons';
-import { layers } from './ecosystem';
+import { layers, productsInOrder } from './ecosystem';
 import { getHubPages, type HubPage, readPageSource } from './hubPages';
 import { getPackageDetails, type PackageDetails } from './packages';
 import { SITE_NAME, SITE_URL, TUWA_AGENTS_URL, TUWA_SUMMARY } from './site';
@@ -106,9 +106,7 @@ export async function getLlmsIndex(): Promise<string> {
     return lines.length > 0 ? `### ${layer.label}\n\n${lines.join('\n')}` : null;
   });
 
-  const sites = layers.flatMap((layer) =>
-    layer.entries.map((entry) => `- [${entry.name}](${absolute(entry.docsUrl)}): ${entry.tagline}`),
-  );
+  const sites = productsInOrder().map((entry) => `- [${entry.name}](${absolute(entry.docsUrl)}): ${entry.tagline}`);
 
   return `# TUWA
 

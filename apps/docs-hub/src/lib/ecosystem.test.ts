@@ -11,6 +11,8 @@ import {
   ecosystemCounts,
   entryLayerRange,
   layers,
+  productOrder,
+  productsInOrder,
   sdkReExports,
   stagedEntries,
   stageLayerRange,
@@ -53,12 +55,48 @@ describe('the plate of the hero', () => {
     // The plate draws them all, three in a row, with no cell kept for the counts, and numbers them 01 to 09: a stage
     // has several projects, so the number of its stage repeated from cell to cell and read as a wrong count
     const plate = readFileSync(path.resolve(__dirname, '../components/home/HeroPlate.tsx'), 'utf8');
-    expect(plate).toContain('{stagedEntries().map((entry, index) => (');
+    expect(plate).toContain('{productsInOrder().map((entry, index) => (');
     expect(plate).toContain('<PlateLink key={entry.id} entry={entry} number={index + 1} />');
     expect(plate).toContain("{String(number).padStart(2, '0')}");
     expect(plate).not.toContain('entry.stage');
     expect(plate).toMatch(/className="col-span-3 [^"]*bg-\[var\(--tuwa-text-primary\)\]/);
     expect(entries.find((entry) => entry.id === 'siwx')?.plateName).toBe('SIWX');
+  });
+});
+
+// Where the projects are listed one after another they stand in one order on every TUWA site: Orbit Utils first, and
+// Quasar Client last, after the SDK its checkout builds on, though its API client is of the backend stage
+describe('the order of the projects', () => {
+  it('is the order they build on one another, Quasar Client last', () => {
+    expect(productsInOrder().map((entry) => entry.id)).toEqual([
+      'orbit',
+      'siwx',
+      'pulsar',
+      'satellite',
+      'quasar',
+      'quasar-community',
+      'nova',
+      'sdk',
+      'quasar-client',
+    ]);
+    // Every project has its place in it, and it names nothing else: a project left out would come first
+    expect([...productOrder].sort()).toEqual(
+      stagedEntries()
+        .map((entry) => entry.id)
+        .sort(),
+    );
+    // The stage of a project stays its own
+    expect(productsInOrder().at(-1)?.stage).toBe(3);
+  });
+
+  it('is the order of the plate of the hero and of the lists of the sites of the projects', () => {
+    const read = (file: string) => readFileSync(path.resolve(__dirname, '..', file), 'utf8');
+    expect(read('components/home/HeroPlate.tsx')).toContain('{productsInOrder().map((entry, index) => (');
+    expect(read('components/NotFoundContent.tsx')).toContain('const projectSites = productsInOrder()');
+    expect(read('lib/llms.ts')).toContain('const sites = productsInOrder().map(');
+    // The board and the ledgers group the projects by stage: there Quasar Client stands with the backend it calls
+    expect(read('components/home/StageLedgers.tsx')).toContain('const entries = stagedEntries();');
+    expect(read('components/home/EcosystemBoard.tsx')).toContain('const entries = stagedEntries();');
   });
 });
 
