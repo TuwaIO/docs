@@ -19,7 +19,7 @@ export default function GlobalNotFound() {
   return (
     <RootDocument lang="en">
       <PageBackground />
-      <HubShell>
+      <HubShell framed>
         <NotFoundContent />
       </HubShell>
     </RootDocument>

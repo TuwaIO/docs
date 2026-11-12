@@ -22,11 +22,14 @@ const FRAMED_PAGES = ['/', '/comparisons', '/configurator', '/policies'];
  * whose column has the frame of the main page, in every language, the footer takes the sides of that frame (`framed`).
  *
  * @param props.children - The page.
+ * @param props.framed - Whether the page has the frame of the main page whatever its address is: the 404 page, which
+ * answers every unknown address (default: `false`, the address decides).
  * @returns The frame with the page.
  */
-export function HubShell({ children }: { children: ReactNode }) {
+export function HubShell({ children, framed = false }: { children: ReactNode; framed?: boolean }) {
   const { t } = useI18n();
-  const isFramed = FRAMED_PAGES.includes(pathWithoutLocale(usePathname()));
+  const pathname = usePathname();
+  const isFramed = framed || FRAMED_PAGES.includes(pathWithoutLocale(pathname));
   const navbarLogo = (
     <Link href="/" aria-label={t.nav.homeAria} className="flex items-center px-4 xl:pl-6">
       <SiteLogo />

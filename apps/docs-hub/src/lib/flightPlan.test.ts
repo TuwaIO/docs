@@ -616,7 +616,8 @@ describe('the frame of the main page and the footer', () => {
     expect(page).not.toMatch(/y="bottom"/);
     expect(page).toContain('<div className={`${homeContentClassName} ${homeFrameClassName}`}>');
     expect(shell).toMatch(/const FRAMED_PAGES = \['\/'[^\]]*\];/);
-    expect(shell).toContain('const isFramed = FRAMED_PAGES.includes(pathWithoutLocale(usePathname()));');
+    // The address decides, or the page itself where every address is its own (the 404)
+    expect(shell).toContain('const isFramed = framed || FRAMED_PAGES.includes(pathWithoutLocale(pathname));');
     expect(shell).toContain('<Footer framed={isFramed} />');
   });
 
