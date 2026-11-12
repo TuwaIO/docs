@@ -3,53 +3,65 @@
 import { formatLabel, useI18n } from '@/i18n';
 import { AXES, CRITERIA, formatCheckDate, sourceIndex, verifiedAsOf } from '@/lib/comparisons';
 
+import { capsClassName, frameClassName, noteClassName } from './comparisonStyles';
 import { MarkIcon } from './MarkIcon';
 
 const DATA_URL = 'https://github.com/TuwaIO/docs/blob/main/apps/docs-hub/src/lib/comparisons.ts';
 const ISSUE_URL = 'https://github.com/TuwaIO/docs/issues/new?title=Comparisons%3A%20correction';
 
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
+const linkClassName = 'text-[var(--tuwa-text-accent)] underline decoration-1 underline-offset-[3px]';
+
 /**
  * How the radar is computed, what the marks mean, the transparency note and the numbered list of sources that the
- * footnotes of the page point to.
+ * footnotes of the page point to, in paper and ink: two cells in one frame, on a shared line of 1px from 1024px; the
+ * note in a frame with a strip of the accent, with no tint.
+ *
+ * @returns The two cells.
  */
 export function Methodology() {
   const { locale, t } = useI18n();
   const sources = [...sourceIndex()];
   const perAxis = CRITERIA.length / AXES.length;
   const ex = t.ui.comparisonsExtra;
+  const heading = `m-0 text-[var(--tuwa-text-primary)] ${capsClassName}`;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
-      <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] sm:backdrop-blur-sm p-5 sm:p-6 flex flex-col gap-5 text-sm leading-relaxed text-[var(--tuwa-text-secondary)]">
+    <div className={`grid grid-cols-1 lg:grid-cols-2 ${frameClassName}`}>
+      <div className="flex flex-col gap-6 p-5 text-sm leading-normal text-[var(--tuwa-text-secondary)] md:p-6">
         <div>
-          <h3 className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-2">
-            {ex.scoringHeading}
-          </h3>
-          <p>
+          <h3 className={heading}>{ex.scoringHeading}</h3>
+          <p className="m-0 mt-2.5">
             {formatLabel(ex.scoringBodyPart1, { count: perAxis })}
-            <code className="text-xs font-mono text-[var(--tuwa-text-primary)]">
+            <code className="font-mono text-[13px] text-[var(--tuwa-text-primary)]">
               (met + ½ · partial) ÷ {perAxis} × 100
             </code>
             {ex.scoringBodyPart2}
           </p>
         </div>
-        <ul className="flex flex-col gap-2 text-xs">
+        <ul className="m-0 flex list-none flex-col gap-2.5 p-0 text-[13px]">
           <li className="flex items-start gap-2.5">
-            <MarkIcon mark="yes" />
+            <span className="mt-0.5 inline-flex">
+              <MarkIcon mark="yes" />
+            </span>
             <span>
               <strong className="text-[var(--tuwa-text-primary)]">{ex.markMetLead}</strong>
               {ex.markMetBody}
             </span>
           </li>
           <li className="flex items-start gap-2.5">
-            <MarkIcon mark="partial" />
+            <span className="mt-0.5 inline-flex">
+              <MarkIcon mark="partial" />
+            </span>
             <span>
               <strong className="text-[var(--tuwa-text-primary)]">{ex.markPartialLead}</strong>
               {ex.markPartialBody}
             </span>
           </li>
           <li className="flex items-start gap-2.5">
-            <MarkIcon mark="no" />
+            <span className="mt-0.5 inline-flex">
+              <MarkIcon mark="no" />
+            </span>
             <span>
               <strong className="text-[var(--tuwa-text-primary)]">{ex.markNoLead}</strong>
               {ex.markNoBody}
@@ -57,32 +69,18 @@ export function Methodology() {
           </li>
         </ul>
         <div>
-          <h3 className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-2">
-            {ex.whatWeCompareHeading}
-          </h3>
-          <p>{ex.whatWeCompareBody}</p>
+          <h3 className={heading}>{ex.whatWeCompareHeading}</h3>
+          <p className="m-0 mt-2.5">{ex.whatWeCompareBody}</p>
         </div>
-        <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-text-accent)]/20 bg-[var(--tuwa-text-accent)]/[0.05] p-4 text-xs">
-          <p className="font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-1.5">
-            {t.comparisons.methodology.transparencyTitle}
-          </p>
-          <p>
+        <div className={`text-[13px] ${noteClassName}`}>
+          <p className={heading}>{t.comparisons.methodology.transparencyTitle}</p>
+          <p className="m-0 mt-2">
             {formatLabel(ex.transparencyPart1, { date: formatCheckDate(verifiedAsOf(), locale) })}
-            <a
-              href={DATA_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--tuwa-text-accent)] hover:underline"
-            >
+            <a href={DATA_URL} target="_blank" rel="noopener noreferrer" className={linkClassName}>
               {ex.transparencyFileLink}
             </a>
             {ex.transparencyPart2}
-            <a
-              href={ISSUE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--tuwa-text-accent)] hover:underline"
-            >
+            <a href={ISSUE_URL} target="_blank" rel="noopener noreferrer" className={linkClassName}>
               {ex.transparencyIssueLink}
             </a>
             {ex.transparencyPart3}
@@ -90,28 +88,27 @@ export function Methodology() {
         </div>
       </div>
 
-      <div className="rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] sm:backdrop-blur-sm p-5 sm:p-6">
-        <h3
-          id="sources"
-          className="text-xs font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)] mb-3"
-        >
+      <div className={`border-t p-5 md:p-6 lg:border-t-0 lg:border-l ${lineClassName}`}>
+        <h3 id="sources" className={heading}>
           {ex.sourcesHeading}
         </h3>
-        <ol className="flex flex-col gap-1.5 text-xs lg:max-h-[560px] lg:overflow-y-auto lg:pr-2 [scrollbar-width:thin]">
+        <ol className="m-0 mt-4 flex list-none flex-col gap-2 p-0 text-[13px] leading-[1.4] lg:max-h-[620px] lg:overflow-y-auto lg:pr-2 [scrollbar-width:thin]">
           {sources.map(([url, index]) => {
             const { hostname, pathname } = new URL(url);
             return (
               <li
                 key={url}
                 id={`source-${index}`}
-                className="flex gap-2 scroll-mt-24 target:text-[var(--tuwa-text-accent)]"
+                className="flex scroll-mt-[120px] gap-2.5 target:text-[var(--tuwa-text-accent)]"
               >
-                <span className="w-7 shrink-0 text-right font-mono text-[var(--tuwa-text-tertiary)]">[{index}]</span>
+                <span className="w-8 shrink-0 text-right font-mono text-xs text-[var(--tuwa-text-secondary)]">
+                  [{index}]
+                </span>
                 <a
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="min-w-0 [overflow-wrap:anywhere] text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-accent)] transition-colors"
+                  className="min-w-0 text-[var(--tuwa-text-secondary)] transition-colors [overflow-wrap:anywhere] hover:text-[var(--tuwa-text-accent)]"
                 >
                   <span className="text-[var(--tuwa-text-primary)]">{hostname.replace(/^www\./, '')}</span>
                   {/* A break opportunity after each slash, so long paths wrap between segments */}

@@ -1,135 +1,207 @@
 'use client';
 
+import { PixelArt } from '@tuwaio/docs-ui';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
+import bundleSizes from '@/generated/bundle-sizes.json';
 import { formatLabel, useI18n } from '@/i18n';
 import { COMPETITORS, CRITERIA, formatCheckDate, SEGMENTS, verifiedAsOf } from '@/lib/comparisons';
 
+import {
+  buttonArrowClassName,
+  largeButtonClassName,
+  primaryButtonClassName,
+  secondaryButtonClassName,
+} from '../buttonStyles';
+import { homeContentClassName, homeFrameClassName } from '../home/homeLayout';
+import { ARROW_RIGHT } from '../home/pixelArrows';
+import { CrossMark, Kicker, SectionBar, SectionHead } from '../home/SectionHead';
 import { BundleSizes } from './BundleSizes';
 import { ChooseInstead } from './ChooseInstead';
 import { ComparisonRadar } from './ComparisonRadar';
+import { capsClassName } from './comparisonStyles';
 import { CriteriaMatrix } from './CriteriaMatrix';
 import { Methodology } from './Methodology';
-import { SEGMENT_COLORS } from './segmentColors';
 
-function SectionHeading({ id, title, children }: { id: string; title: string; children: ReactNode }) {
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
+
+/**
+ * A section of the comparisons page, as a section of the main page: its bar, which sticks under the header (`01 /
+ * Radar`), its title in large mono with its lead, then its content.
+ *
+ * @param props.id - The id of the section, the target of the links to it.
+ * @param props.number - The number of the section, from 1.
+ * @param props.name - The short name of the section, for its bar.
+ * @param props.meta - What the section holds, on the right of its bar.
+ * @param props.title - The title of the section.
+ * @param props.lead - The lead under the title.
+ * @param props.children - The content of the section.
+ * @returns The section.
+ */
+function Section({
+  id,
+  number,
+  name,
+  meta,
+  title,
+  lead,
+  children,
+}: {
+  id: string;
+  number: number;
+  name: string;
+  meta: ReactNode[];
+  title: string;
+  lead: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="mb-6 sm:mb-8 max-w-3xl">
-      <h2
-        id={id}
-        className="scroll-mt-24 text-xl sm:text-2xl 2xl:text-3xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]"
-      >
-        {title}
-      </h2>
-      <p className="mt-2 text-sm sm:text-base text-[var(--tuwa-text-secondary)] leading-relaxed">{children}</p>
-    </div>
+    <section id={id} aria-labelledby={`${id}-title`} className="mt-[104px] scroll-mt-[56px]">
+      <SectionBar number={number} name={name} meta={meta} />
+      <div className="pt-12">
+        <SectionHead id={`${id}-title`} title={title} lead={lead} />
+      </div>
+      <div className="mt-11">{children}</div>
+    </section>
   );
 }
 
 /**
- * Localized content of `/comparisons`.
+ * The content of `/comparisons`, in paper and ink, on the frame of the main page: the kicker (when the facts were
+ * verified, how many products and criteria), the title in large mono and the lead; then five sections, each under its
+ * bar: the radar (with the TUWA projects that do the job of each segment, on shared lines), every criterion with its
+ * sources, when to choose another tool, the bundle sizes and the methodology; and two buttons to start with.
+ *
+ * @returns The page.
  */
 export function ComparisonsContent() {
   const { locale, t } = useI18n();
-  const verified = formatCheckDate(verifiedAsOf(), locale);
+  const extra = t.ui.comparisonsExtra;
+  const sections = t.comparisons.sections;
+  const verified = formatLabel(extra.verifiedBadge, { date: formatCheckDate(verifiedAsOf(), locale) });
+  const products = formatLabel(extra.productsCount, { count: COMPETITORS.length });
+  const criteria = formatLabel(extra.criteriaCount, { count: CRITERIA.length });
+  const measuredAt = (bundleSizes as { measuredAt?: string }).measuredAt;
 
   return (
-    <div className="relative z-10 pt-14 sm:pt-16 pb-16">
-      <div className="mx-auto max-w-5xl 2xl:max-w-6xl px-4 sm:px-6 flex flex-col gap-16 sm:gap-20">
-        {/* Hero */}
-        <header className="text-center max-w-3xl mx-auto">
-          <p className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-4 py-1.5 text-[11px] font-mono text-[var(--tuwa-text-secondary)] mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            {formatLabel(t.ui.comparisonsExtra.verifiedBadge, { date: verified })}
-            <span className="text-[var(--tuwa-text-tertiary)]">·</span>
-            {formatLabel(t.ui.comparisonsExtra.productsCount, { count: COMPETITORS.length })}
-            <span className="text-[var(--tuwa-text-tertiary)]">·</span>
-            {formatLabel(t.ui.comparisonsExtra.criteriaCount, { count: CRITERIA.length })}
-          </p>
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-[var(--tuwa-text-primary)] leading-tight font-geist-mono uppercase tracking-tight">
-            <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
-              {t.comparisons.titlePrefix}
-            </span>
-            <span className="block mt-2 text-xl sm:text-3xl lg:text-4xl text-[var(--tuwa-text-primary)]">
-              {t.comparisons.titleHighlight}
-            </span>
+    <div className="relative z-10">
+      <div className={`${homeContentClassName} ${homeFrameClassName}`}>
+        <CrossMark x="left" y="top" />
+        <CrossMark x="right" y="top" />
+
+        <header className="pt-12 md:pt-16 xl:pt-20">
+          <Kicker>
+            {verified} · {products} · {criteria}
+          </Kicker>
+          <h1
+            className={`mt-5 max-w-[960px] font-mono text-[clamp(36px,6.2vw,76px)] leading-[0.98] font-medium text-[var(--tuwa-text-primary)] ${locale === 'uk' ? 'tracking-normal' : 'tracking-[-0.04em]'}`}
+          >
+            {t.comparisons.titlePrefix} {t.comparisons.titleHighlight}
           </h1>
-          <p className="mt-6 text-base sm:text-lg text-[var(--tuwa-text-secondary)] leading-relaxed">
+          <p className="mt-7 max-w-[680px] text-lg leading-[1.55] text-[var(--tuwa-text-primary)]">
             {t.comparisons.description}
           </p>
         </header>
 
-        {/* Radar */}
-        <section aria-labelledby="radar">
-          <SectionHeading id="radar" title={t.comparisons.radar.sectionTitle}>
-            {t.ui.comparisonsExtra.radarIntro}
-          </SectionHeading>
-          <ul className="flex flex-wrap gap-2 mb-6 -mt-2">
+        <Section
+          id="radar"
+          number={1}
+          name={sections.radar}
+          meta={[products, criteria]}
+          title={t.comparisons.radar.sectionTitle}
+          lead={extra.radarIntro}
+        >
+          {/* The TUWA projects that do the job of each segment */}
+          <dl className={`m-0 grid grid-cols-1 border-t border-l md:grid-cols-2 ${lineClassName}`}>
             {SEGMENTS.map((segment) => (
-              <li
+              <div
                 key={segment.id}
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.08] bg-[var(--tuwa-bg-primary)]/50 dark:bg-white/[0.02] px-3 py-1 text-xs text-[var(--tuwa-text-secondary)]"
+                className={`flex flex-col gap-1.5 border-r border-b bg-[var(--tuwa-docs-raised)] px-4 py-3.5 ${lineClassName}`}
               >
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: SEGMENT_COLORS[segment.id] }} />
-                {t.comparisons.segments[segment.id]?.label ?? segment.label}
-                <span className="text-[var(--tuwa-text-tertiary)]">→</span>
-                <span className="font-semibold text-[var(--tuwa-text-primary)]">{segment.counterpart}</span>
-              </li>
+                <dt className={`text-[var(--tuwa-text-secondary)] ${capsClassName}`}>
+                  {t.comparisons.segments[segment.id]?.label ?? segment.label}
+                </dt>
+                <dd className="m-0 font-mono text-sm leading-[1.35] font-bold text-[var(--tuwa-text-primary)]">
+                  {segment.counterpart}
+                </dd>
+              </div>
             ))}
-          </ul>
-          <ComparisonRadar />
-        </section>
+          </dl>
+          <div className="mt-6">
+            <ComparisonRadar />
+          </div>
+        </Section>
 
-        {/* Every criterion */}
-        <section aria-labelledby="criteria">
-          <SectionHeading id="criteria" title={t.comparisons.matrix.sectionTitle}>
-            {formatLabel(t.ui.comparisonsExtra.criteriaIntro, { count: CRITERIA.length })}
-          </SectionHeading>
+        <Section
+          id="criteria"
+          number={2}
+          name={sections.criteria}
+          meta={[criteria, verified]}
+          title={t.comparisons.matrix.sectionTitle}
+          lead={formatLabel(extra.criteriaIntro, { count: CRITERIA.length })}
+        >
           <CriteriaMatrix />
-        </section>
+        </Section>
 
-        {/* When to choose them */}
-        <section aria-labelledby="choose-instead">
-          <SectionHeading id="choose-instead" title={t.comparisons.chooseInstead.sectionTitle}>
-            {t.ui.comparisonsExtra.chooseInsteadIntro}
-          </SectionHeading>
+        <Section
+          id="choose-instead"
+          number={3}
+          name={sections.alternatives}
+          meta={[products]}
+          title={t.comparisons.chooseInstead.sectionTitle}
+          lead={extra.chooseInsteadIntro}
+        >
           <ChooseInstead />
-        </section>
+        </Section>
 
-        {/* Bundle size */}
-        <section aria-labelledby="bundle-size">
-          <SectionHeading id="bundle-size" title={t.ui.comparisonsExtra.bundleTitle}>
-            {t.ui.comparisonsExtra.bundleIntro}
-          </SectionHeading>
+        <Section
+          id="bundle-size"
+          number={4}
+          name={sections.bundle}
+          meta={['gzip', ...(measuredAt ? [formatCheckDate(measuredAt, locale)] : [])]}
+          title={extra.bundleTitle}
+          lead={extra.bundleIntro}
+        >
           <BundleSizes />
-        </section>
+        </Section>
 
-        {/* Methodology */}
-        <section aria-labelledby="methodology">
-          <SectionHeading id="methodology" title={t.comparisons.methodology.sectionTitle}>
-            {t.ui.comparisonsExtra.methodologyIntro}
-          </SectionHeading>
+        <Section
+          id="methodology"
+          number={5}
+          name={sections.method}
+          meta={[verified]}
+          title={t.comparisons.methodology.sectionTitle}
+          lead={extra.methodologyIntro}
+        >
           <Methodology />
-        </section>
+        </Section>
 
         {/* Next steps */}
-        <section className="text-center">
-          <p className="text-lg sm:text-xl font-bold font-geist-mono uppercase tracking-wide text-[var(--tuwa-text-primary)]">
-            {t.ui.comparisonsExtra.readyHeading}
-          </p>
-          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/guides/starter-templates"
-              className="inline-flex items-center gap-2 rounded-[var(--tuwa-rounded-corners)] bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] px-5 py-2.5 text-sm font-semibold font-geist-mono text-white shadow-md shadow-black/10 hover:opacity-95 transition-opacity"
-            >
-              {t.ui.comparisonsExtra.startFromTemplate}
+        <section
+          aria-labelledby="comparisons-next"
+          className={`mt-[104px] flex flex-col gap-6 border-t pt-10 md:flex-row md:items-center md:justify-between ${lineClassName}`}
+        >
+          <h2
+            id="comparisons-next"
+            className="m-0 font-mono text-[clamp(24px,3vw,34px)] leading-[1.1] font-medium tracking-[-0.03em] text-[var(--tuwa-text-primary)]"
+          >
+            {extra.readyHeading}
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/guides/starter-templates" className={`${largeButtonClassName} ${primaryButtonClassName}`}>
+              {extra.startFromTemplate}
+              <PixelArt
+                art={ARROW_RIGHT}
+                className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
+              />
             </Link>
-            <Link
-              href="/guides/full-stack-react"
-              className="inline-flex items-center gap-2 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-5 py-2.5 text-sm font-semibold font-geist-mono text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/40 transition-colors"
-            >
-              {t.ui.comparisonsExtra.fullStackGuide}
+            <Link href="/guides/full-stack-react" className={`${largeButtonClassName} ${secondaryButtonClassName}`}>
+              {extra.fullStackGuide}
+              <PixelArt
+                art={ARROW_RIGHT}
+                className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
+              />
             </Link>
           </div>
         </section>

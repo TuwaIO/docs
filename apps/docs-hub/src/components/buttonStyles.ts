@@ -14,3 +14,18 @@ export const secondaryButtonClassName =
 /** The small size: 34px high, mono caps of 11px. `group/button` lets an icon inside follow the pointer. */
 export const smallButtonClassName =
   'group/button inline-flex h-[34px] shrink-0 cursor-pointer items-center gap-2 whitespace-nowrap px-3 font-mono text-[11px] font-bold uppercase leading-none tracking-[0.12em] transition-colors';
+
+/**
+ * The large size: 44px high, mono caps of 12px, the buttons under a title. `group` lets the arrow inside step under the
+ * pointer or the keyboard.
+ */
+export const largeButtonClassName =
+  'group inline-flex h-11 items-center gap-2.5 whitespace-nowrap px-[18px] font-mono text-xs font-bold uppercase leading-none tracking-[0.12em] transition-colors';
+
+/**
+ * The pixel arrow of a large button: it steps the way it points while the button is under the pointer or the
+ * keyboard (add the `group-hover` and `group-focus-visible` translate of its direction), once, and stays still for
+ * reduced motion.
+ */
+export const buttonArrowClassName =
+  'h-3.5 w-3.5 [--tuwa-pixel-ink:currentColor] transition-transform duration-200 ease-out motion-reduce:transition-none motion-reduce:!translate-none';

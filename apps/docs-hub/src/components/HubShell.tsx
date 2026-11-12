@@ -11,18 +11,21 @@ import { useI18n } from '@/i18n';
 import { Footer } from './Footer';
 import { Header } from './Header';
 
+/** The pages whose column has the frame of the main page: under them the footer takes the sides of that frame. */
+const FRAMED_PAGES = ['/', '/comparisons'];
+
 /**
  * The frame of the React pages of the Docs Hub (the main page, comparisons, configurator, playground, policies and the
  * 404 page): a link past the header to the content, first for the keyboard, the fixed header with the logo, the content
- * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`). Under the main
- * page, in every language, the footer takes the sides of the frame of its column (`framed`).
+ * under the header and the footer; the links to anchors of the page scroll smoothly (`SmoothAnchors`). Under a page
+ * whose column has the frame of the main page, in every language, the footer takes the sides of that frame (`framed`).
  *
  * @param props.children - The page.
  * @returns The frame with the page.
  */
 export function HubShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
-  const isHome = pathWithoutLocale(usePathname()) === '/';
+  const isFramed = FRAMED_PAGES.includes(pathWithoutLocale(usePathname()));
   const navbarLogo = (
     <Link href="/" aria-label={t.nav.homeAria} className="flex items-center px-4 xl:pl-6">
       <SiteLogo />
@@ -42,7 +45,7 @@ export function HubShell({ children }: { children: ReactNode }) {
       <main id="content" className="flex-1 pt-[56px]">
         {children}
       </main>
-      <Footer framed={isHome} />
+      <Footer framed={isFramed} />
     </div>
   );
 }

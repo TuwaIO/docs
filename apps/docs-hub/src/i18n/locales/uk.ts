@@ -232,6 +232,13 @@ export const uk: DocsHubLabels = {
     },
   },
   comparisons: {
+    sections: {
+      radar: 'Радар',
+      criteria: 'Критерії',
+      alternatives: 'Альтернативи',
+      bundle: 'Розмір',
+      method: 'Методика',
+    },
     badge: 'Інтерактивне порівняння',
     titlePrefix: 'TUWA та',
     titleHighlight: 'Альтернативи',

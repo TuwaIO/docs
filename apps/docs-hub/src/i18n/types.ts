@@ -367,6 +367,8 @@ export interface DocsHubLabels {
     };
   };
   comparisons: {
+    /** The short names of the sections of the page, for their bars (`01 / Radar`) */
+    sections: { radar: string; criteria: string; alternatives: string; bundle: string; method: string };
     badge: string;
     titlePrefix: string;
     titleHighlight: string;

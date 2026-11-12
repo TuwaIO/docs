@@ -600,8 +600,9 @@ describe('the frame of the main page and the footer', () => {
     expect(page).not.toMatch(/xl:border-b/);
     expect(page).not.toMatch(/y="bottom"/);
     expect(page).toContain('<div className={`${homeContentClassName} ${homeFrameClassName}`}>');
-    expect(shell).toContain("const isHome = pathWithoutLocale(usePathname()) === '/';");
-    expect(shell).toContain('<Footer framed={isHome} />');
+    expect(shell).toMatch(/const FRAMED_PAGES = \['\/'[^\]]*\];/);
+    expect(shell).toContain('const isFramed = FRAMED_PAGES.includes(pathWithoutLocale(usePathname()));');
+    expect(shell).toContain('<Footer framed={isFramed} />');
   });
 
   it('carries the sides through the space above the footer and through the footer', () => {

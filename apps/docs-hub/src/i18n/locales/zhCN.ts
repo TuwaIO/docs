@@ -230,6 +230,7 @@ export const zhCN: DocsHubLabels = {
     },
   },
   comparisons: {
+    sections: { radar: '雷达图', criteria: '评估标准', alternatives: '替代方案', bundle: '包体积', method: '评估方法' },
     badge: '交互式对比',
     titlePrefix: 'TUWA 与',
     titleHighlight: '同类方案对比',

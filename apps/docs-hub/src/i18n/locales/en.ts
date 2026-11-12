@@ -231,6 +231,13 @@ export const en: DocsHubLabels = {
     },
   },
   comparisons: {
+    sections: {
+      radar: 'Radar',
+      criteria: 'Criteria',
+      alternatives: 'Alternatives',
+      bundle: 'Bundle size',
+      method: 'Method',
+    },
     badge: 'Interactive Comparison',
     titlePrefix: 'TUWA and the',
     titleHighlight: 'Alternatives',
