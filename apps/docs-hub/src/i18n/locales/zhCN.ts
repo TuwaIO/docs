@@ -636,6 +636,7 @@ export const zhCN: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} 种技术栈', few: '{n} 种技术栈', many: '{n} 种技术栈', other: '{n} 种技术栈' },
     badge: '交互式工具',
     titlePrefix: '技术栈',
     titleHighlight: '配置器',

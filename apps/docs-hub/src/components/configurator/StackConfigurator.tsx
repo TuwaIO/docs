@@ -1,7 +1,8 @@
 'use client';
 
-import { CpuChipIcon, LinkIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
-import { cn, DrawnCheck, ExternalLinkIcon, MorphIcon, useCopyToClipboard } from '@tuwaio/nova-core';
+import { ProjectSquare, startPixelMotion, stopPixelMotion } from '@tuwaio/docs-ui';
+import { DrawnCheck, ExternalLinkIcon, MorphIcon, useCopyToClipboard } from '@tuwaio/nova-core';
+import { CpuChipIcon, LinkIcon } from '@tuwaio/sdk/nova-icons/24/outline';
 import { type ReactNode, useMemo } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -16,34 +17,60 @@ import {
   stackQuery,
 } from '@/lib/configurator/generate';
 import { installCommand, usePackageManager } from '@/lib/packageManager';
+import { formatPlural } from '@/lib/plural';
 import { replaceQuery, useQueryString } from '@/lib/queryState';
 
+import { secondaryButtonClassName, smallButtonClassName } from '../buttonStyles';
 import { CommandLine, PackageManagerSwitch } from '../CommandLine';
+import { homeEdgeToEdgeClassName, homeMarginLeftClassName, homeMarginRightClassName } from '../home/homeLayout';
+import { CrossMark, Kicker } from '../home/SectionHead';
 import { FileTabs } from './FileTabs';
 import { StackOptionsForm } from './StackOptionsForm';
 
 // The options live in the query string of the page, so a configured stack can be shared as a link
 const writeQuery = (options: StackOptions) => replaceQuery(stackQuery(options));
 
+const lineClassName = 'border-[var(--tuwa-border-primary)]';
+const capsClassName = 'font-mono text-[11px] font-bold uppercase leading-[1.35] tracking-[0.12em]';
+const frameClassName = `border bg-[var(--tuwa-docs-raised)] ${lineClassName}`;
+const linkClassName = 'text-[var(--tuwa-text-accent)] underline decoration-1 underline-offset-[3px]';
+
 /**
- * Localized header for `/configurator`.
+ * The head of `/configurator`, in paper and ink: the kicker (how many stacks the configurator generates), the title in
+ * large mono and the lead.
+ *
+ * @returns The head.
  */
 export function ConfiguratorHeader() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
+  const count = allStackOptions().length;
   return (
-    <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-      <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight font-geist-mono uppercase tracking-tight">
-        <span className="bg-gradient-to-r from-[var(--tuwa-hero-gradient-from)] via-[var(--tuwa-hero-gradient-via)] to-[var(--tuwa-hero-gradient-to)] bg-clip-text text-transparent">
-          {t.configurator.titleHighlight}
-        </span>
+    <header className="pt-12 pb-14 md:pt-16 md:pb-16 xl:pt-20">
+      <Kicker>
+        {t.configurator.badge} · {formatPlural(t.configurator.stacks, count, locale)}
+      </Kicker>
+      <h1
+        className={`mt-5 font-mono text-[clamp(36px,6.2vw,76px)] leading-[0.98] font-medium text-[var(--tuwa-text-primary)] ${locale === 'uk' ? 'tracking-normal' : 'tracking-[-0.04em]'}`}
+      >
+        {t.configurator.titleHighlight}
       </h1>
-      <p className="mt-6 text-base sm:text-lg text-[var(--tuwa-text-secondary)] leading-relaxed">
-        {formatLabel(t.ui.configuratorExtra.subtitle, { count: allStackOptions().length })}
+      <p className="mt-7 max-w-[680px] text-lg leading-[1.55] text-[var(--tuwa-text-primary)]">
+        {formatLabel(t.ui.configuratorExtra.subtitle, { count })}
       </p>
     </header>
   );
 }
 
+/**
+ * A step of the result: its number in a square of 1px, its title in mono caps with what stands beside it (the switch
+ * of the package manager), then its content, under the title from 768px. A line of 1px above.
+ *
+ * @param props.index - The number of the step, from 1.
+ * @param props.title - The title.
+ * @param props.aside - What stands on the right of the title.
+ * @param props.children - The content.
+ * @returns The step.
+ */
 function Step({
   index,
   title,
@@ -56,21 +83,35 @@ function Step({
   children: ReactNode;
 }) {
   return (
-    <section className="relative pl-10">
-      <span className="absolute left-0 top-0 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[var(--tuwa-hero-gradient-from)] to-[var(--tuwa-hero-gradient-via)] font-mono text-xs font-bold text-white shadow-md shadow-black/10">
-        {index}
-      </span>
-      <div className="mb-3 flex min-h-7 flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <h2 className="text-sm font-bold font-geist-mono uppercase tracking-wider text-[var(--tuwa-text-primary)]">
-          {title}
-        </h2>
+    <li className={`border-t py-7 ${lineClassName}`}>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="flex min-w-0 items-center gap-4">
+          <span
+            aria-hidden="true"
+            className="grid h-[34px] w-[34px] shrink-0 place-items-center border border-[var(--tuwa-text-primary)] font-mono text-[13px] leading-none font-bold text-[var(--tuwa-text-primary)]"
+          >
+            {String(index).padStart(2, '0')}
+          </span>
+          <h2 className="m-0 font-mono text-[15px] leading-[1.25] font-bold tracking-[0.12em] text-[var(--tuwa-text-primary)] uppercase">
+            {title}
+          </h2>
+        </div>
         {aside}
       </div>
-      {children}
-    </section>
+      <div className="mt-5 md:pl-[50px]">{children}</div>
+    </li>
   );
 }
 
+/**
+ * A small secondary button that copies a text and shows Nova's drawn check for two seconds.
+ *
+ * @param props.text - Gives the text to copy, read when the button is pressed.
+ * @param props.label - The label of the button.
+ * @param props.copiedLabel - The label after the text is copied.
+ * @param props.icon - The icon of the button, 16px.
+ * @returns The button.
+ */
 function CopyButton({
   text,
   label,
@@ -88,24 +129,29 @@ function CopyButton({
       type="button"
       onClick={() => copy(text())}
       disabled={isCopied}
-      className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.03] px-3 py-1.5 text-xs font-semibold text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/50 cursor-pointer disabled:cursor-default transition-colors"
+      className={`w-full justify-center disabled:cursor-default ${smallButtonClassName} ${secondaryButtonClassName}`}
     >
       {/* The icon of the button gives way to Nova's check mark, drawn in the success colour of its copy icon */}
-      <MorphIcon iconKey={isCopied ? 'copied' : 'idle'} className="w-4 h-4">
-        {isCopied ? <DrawnCheck className="w-4 h-4 text-[var(--tuwa-success-icon)]" /> : icon}
+      <MorphIcon iconKey={isCopied ? 'copied' : 'idle'} className="h-4 w-4">
+        {isCopied ? <DrawnCheck className="h-4 w-4 text-[var(--tuwa-success-icon)]" /> : icon}
       </MorphIcon>
       {isCopied ? copiedLabel : label}
     </button>
   );
 }
 
-const cardClass =
-  'rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/40 dark:border-white/[0.06] bg-[var(--tuwa-bg-primary)]/60 dark:bg-white/[0.02] sm:backdrop-blur-sm';
-
 /**
- * The Stack Configurator of `/configurator`: the options (kept in the query string), the closest starter template,
- * the commands with the install command for the chosen package manager, every setup file with highlighted code, the
- * guides to read next, and buttons to copy a link to the stack or the whole setup as a prompt for a coding agent.
+ * The Stack Configurator of `/configurator`, in paper and ink, from line to line of the frame of the page: on the left
+ * (above, below 1024px) the options, kept in the query string, with the buttons that copy the whole setup as a prompt
+ * for a coding agent or a link to the stack, and they stay in sight while the result scrolls; beside them, on a shared
+ * line of 1px, the result: the closest starter template in a frame with the square of a rocket, then the steps with
+ * square numbers on lines (create the app, install with the chosen package manager, add every setup file with
+ * highlighted code, run), and the guides to read next.
+ *
+ * Side effects: the options are written to the query string of the page (`replaceQuery`); the package manager the
+ * reader picks is saved to `localStorage` (`usePackageManager`); the copy buttons write to the clipboard.
+ *
+ * @returns The configurator.
  */
 export function StackConfigurator() {
   const { t } = useI18n();
@@ -120,66 +166,79 @@ export function StackConfigurator() {
   const fullInstall = [install, installDev].filter(Boolean).join(' && ');
   const [createCommand, ...otherCommands] = stack.commands;
   const templateNote = t.configurator.templateNotes[stack.template.note] ?? stack.template.note;
+  const extra = t.ui.configuratorExtra;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] 2xl:grid-cols-[340px_minmax(0,1fr)] gap-6 lg:gap-8 items-start">
+    <div
+      className={`relative grid grid-cols-1 border-t lg:grid-cols-[372px_minmax(0,1fr)] ${lineClassName} ${homeEdgeToEdgeClassName}`}
+    >
+      <CrossMark x="left" y="top" />
+      <CrossMark x="right" y="top" />
+
       {/* Options */}
-      <aside className={cn(cardClass, 'p-5 lg:sticky lg:top-20')} aria-label={t.configurator.steps.step1Title}>
-        <StackOptionsForm options={options} onChange={writeQuery} />
-        <div className="mt-6 flex flex-wrap gap-2 border-t border-[var(--tuwa-border-primary)]/30 dark:border-white/[0.06] pt-5">
-          <CopyButton
-            text={() => agentPrompt(stack, fullInstall)}
-            label={t.configurator.steps.copyPromptForAi}
-            copiedLabel={t.configurator.steps.promptCopied}
-            icon={<CpuChipIcon className="w-4 h-4 text-[var(--tuwa-text-accent)]" />}
-          />
-          <CopyButton
-            text={() => window.location.href}
-            label={t.configurator.steps.copyShareLink}
-            copiedLabel={t.configurator.steps.linkCopied}
-            icon={<LinkIcon className="w-4 h-4" />}
-          />
+      <aside
+        aria-label={t.configurator.steps.step1Title}
+        className={`py-10 pr-4 md:pr-8 lg:border-r ${lineClassName} ${homeMarginLeftClassName}`}
+      >
+        <div className="lg:sticky lg:top-[88px]">
+          <StackOptionsForm options={options} onChange={writeQuery} />
+          <div className={`mt-7 flex flex-col gap-2.5 border-t pt-6 ${lineClassName}`}>
+            <CopyButton
+              text={() => agentPrompt(stack, fullInstall)}
+              label={t.configurator.steps.copyPromptForAi}
+              copiedLabel={t.configurator.steps.promptCopied}
+              icon={<CpuChipIcon className="h-4 w-4 text-[var(--tuwa-text-accent)]" />}
+            />
+            <CopyButton
+              text={() => window.location.href}
+              label={t.configurator.steps.copyShareLink}
+              copiedLabel={t.configurator.steps.linkCopied}
+              icon={<LinkIcon className="h-4 w-4" />}
+            />
+          </div>
         </div>
       </aside>
 
       {/* Result */}
-      <div className="flex min-w-0 flex-col gap-10">
-        <div className={cn(cardClass, 'p-5 flex flex-col sm:flex-row sm:items-center gap-4')}>
-          <RocketLaunchIcon
-            className="hidden sm:block w-8 h-8 shrink-0 text-[var(--tuwa-text-accent)]"
-            aria-hidden="true"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)]">
-              {stack.template.name ? t.ui.configuratorExtra.fastestStart : t.ui.configuratorExtra.starterTemplate}
+      <div
+        className={`min-w-0 border-t py-10 pl-4 md:pl-8 lg:border-t-0 lg:pl-10 ${lineClassName} ${homeMarginRightClassName}`}
+      >
+        <div
+          onMouseEnter={(event) => startPixelMotion(event.currentTarget)}
+          onMouseLeave={(event) => stopPixelMotion(event.currentTarget)}
+          className={`group grid grid-cols-1 gap-4 p-5 md:grid-cols-[44px_minmax(0,1fr)] ${frameClassName}`}
+        >
+          <ProjectSquare icon="rocket" className="max-md:hidden" />
+          <div className="min-w-0">
+            <p className={`m-0 text-[var(--tuwa-text-primary)] ${capsClassName}`}>
+              {stack.template.name ? extra.fastestStart : extra.starterTemplate}
             </p>
-            <p className="mt-1 text-sm text-[var(--tuwa-text-secondary)] leading-relaxed">
+            <p className="m-0 mt-2 text-sm leading-normal text-[var(--tuwa-text-secondary)]">
               {stack.template.name && (
                 <>
-                  {t.ui.configuratorExtra.runCommandAndPick}{' '}
-                  <code className="font-mono text-[var(--tuwa-text-primary)]">{stack.template.name}</code>.{' '}
+                  {extra.runCommandAndPick}{' '}
+                  <code className="font-mono text-[13px] text-[var(--tuwa-text-primary)]">{stack.template.name}</code>
+                  .{' '}
                 </>
               )}
               {templateNote}{' '}
-              <Link href="/guides/starter-templates" className="text-[var(--tuwa-text-accent)] hover:underline">
+              <Link href="/guides/starter-templates" className={linkClassName}>
                 {t.ui.quickStartSteps.compareTemplates}
               </Link>
             </p>
             {stack.template.name && (
-              <div className="mt-3">
-                <CommandLine command="npx @tuwaio/create-cosmos-playground" />
+              <div className="mt-4">
+                <CommandLine compact command="npx @tuwaio/create-cosmos-playground" />
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-8">
-          <p className="text-sm text-[var(--tuwa-text-secondary)]">
-            {formatLabel(t.ui.configuratorExtra.orAddToExisting, {
-              framework: FRAMEWORK_LABELS[stack.options.framework],
-            })}
-          </p>
+        <p className="m-0 mt-10 mb-7 text-[15px] leading-normal text-[var(--tuwa-text-secondary)]">
+          {formatLabel(extra.orAddToExisting, { framework: FRAMEWORK_LABELS[stack.options.framework] })}
+        </p>
 
+        <ol role="list" className="m-0 list-none p-0">
           <Step index={1} title={t.configurator.commandLabels[createCommand.label] ?? createCommand.label}>
             <CommandLine command={createCommand.command} />
           </Step>
@@ -189,28 +248,28 @@ export function StackConfigurator() {
             title={t.home.compactConfigurator.install}
             aside={<PackageManagerSwitch value={packageManager} onChange={choosePackageManager} />}
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               <CommandLine command={install} copyTitle={t.home.packageDialog.copyInstallTitle} />
               {installDev && <CommandLine command={installDev} copyTitle={t.configurator.steps.copyDevPackages} />}
-              <p className="text-xs text-[var(--tuwa-text-secondary)]">
-                {t.ui.configuratorExtra.peersIncluded}
-                {stack.options.framework !== 'vanilla' && t.ui.configuratorExtra.sdkBringsProjects}.
+              <p className="m-0 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
+                {extra.peersIncluded}
+                {stack.options.framework !== 'vanilla' && extra.sdkBringsProjects}.
               </p>
             </div>
           </Step>
 
-          <Step index={3} title={formatLabel(t.ui.configuratorExtra.addFilesTitle, { count: stack.files.length })}>
-            <div className={cn(cardClass, 'overflow-hidden')}>
+          <Step index={3} title={formatLabel(extra.addFilesTitle, { count: stack.files.length })}>
+            <div className={frameClassName}>
               <FileTabs files={stack.files} label={t.configurator.steps.setupFilesAria} />
             </div>
           </Step>
 
           {otherCommands.length > 0 && (
-            <Step index={4} title={t.ui.configuratorExtra.runStepTitle}>
-              <div className="flex flex-col gap-3">
+            <Step index={4} title={extra.runStepTitle}>
+              <div className="flex flex-col gap-4">
                 {otherCommands.map((command) => (
-                  <div key={command.command} className="flex flex-col gap-1.5">
-                    <p className="text-xs text-[var(--tuwa-text-secondary)]">
+                  <div key={command.command} className="flex flex-col gap-2">
+                    <p className="m-0 text-[13px] leading-normal text-[var(--tuwa-text-secondary)]">
                       {t.configurator.commandLabels[command.label] ?? command.label}
                     </p>
                     <CommandLine command={command.command} />
@@ -219,13 +278,11 @@ export function StackConfigurator() {
               </div>
             </Step>
           )}
-        </div>
+        </ol>
 
-        <div className={cn(cardClass, 'p-5')}>
-          <p className="text-xs font-bold uppercase tracking-widest text-[var(--tuwa-text-tertiary)] mb-3">
-            {t.ui.configuratorExtra.readNext}
-          </p>
-          <ul className="flex flex-wrap gap-2">
+        <div className={`border-t pt-7 ${lineClassName}`}>
+          <p className={`m-0 text-[var(--tuwa-text-secondary)] ${capsClassName}`}>{extra.readNext}</p>
+          <ul className="m-0 mt-4 flex list-none flex-wrap gap-2.5 p-0">
             {stack.guides.map((guide) => {
               const external = guide.href.startsWith('http');
               return (
@@ -233,10 +290,10 @@ export function StackConfigurator() {
                   <Link
                     href={guide.href}
                     {...(external && { target: '_blank', rel: 'noopener noreferrer' })}
-                    className="inline-flex items-center gap-1.5 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/50 dark:border-white/10 px-3 py-1.5 text-xs font-medium text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] hover:border-[var(--tuwa-text-accent)]/40 transition-colors"
+                    className={`${smallButtonClassName} ${secondaryButtonClassName}`}
                   >
                     {t.configurator.guideTitles[guide.href] ?? guide.title}
-                    {external && <ExternalLinkIcon className="w-3 h-3 opacity-70" />}
+                    {external && <ExternalLinkIcon className="h-2.5 w-2.5 shrink-0" />}
                   </Link>
                 </li>
               );

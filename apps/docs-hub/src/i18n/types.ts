@@ -423,6 +423,8 @@ export interface DocsHubLabels {
     products: Record<string, ComparisonProductTranslation>;
   };
   configurator: {
+    /** How many stacks the configurator can generate, in its kicker; `{n}` is the count */
+    stacks: PluralLabel;
     badge: string;
     titlePrefix: string;
     titleHighlight: string;

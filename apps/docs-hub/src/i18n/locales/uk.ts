@@ -689,6 +689,7 @@ export const uk: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} стек', few: '{n} стеки', many: '{n} стеків', other: '{n} стека' },
     badge: 'Інтерактивно',
     titlePrefix: 'Конфігуратор',
     titleHighlight: 'Конфігуратор',

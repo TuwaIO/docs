@@ -7,6 +7,8 @@ import type { HighlighterCore } from 'shiki/core';
 import { useI18n } from '@/i18n';
 import type { FileLanguage } from '@/lib/configurator/generate';
 
+import { secondaryButtonClassName, smallButtonClassName } from '../buttonStyles';
+
 // Shiki with only the grammars and themes the configurator needs, loaded on the first code block
 let highlighter: Promise<HighlighterCore> | null = null;
 
@@ -30,12 +32,17 @@ function loadHighlighter(): Promise<HighlighterCore> {
 const SHIKI_LANGUAGES: Record<FileLanguage, string> = { ts: 'typescript', tsx: 'tsx', css: 'css', dotenv: 'dotenv' };
 
 /**
- * A code file with a copy button. The code is highlighted in the browser with the GitHub light and dark themes (the
- * `--shiki-light` and `--shiki-dark` colors, switched by `.tuwa-code` in `globals.css`); until Shiki loads, it shows
- * as plain text.
+ * A code file with a copy button, in paper and ink: the code in Geist Mono on the paper of its frame, the small
+ * secondary button over its top right corner. The code is highlighted in the browser with the GitHub light and dark
+ * themes (the `--shiki-light` and `--shiki-dark` colors, switched by `.tuwa-code` in `globals.css`); until Shiki
+ * loads, it shows as plain text.
+ *
+ * Side effects: loads Shiki on the first code block; the button writes the code to the clipboard.
+ *
  * @param props.code - The code.
  * @param props.language - Its language.
  * @param props.label - Accessible name of the code, for example the file path.
+ * @returns The code with its button.
  */
 export function CodeBlock({ code, language, label }: { code: string; language: FileLanguage; label: string }) {
   const { t } = useI18n();
@@ -59,15 +66,15 @@ export function CodeBlock({ code, language, label }: { code: string; language: F
   }, [code, language]);
 
   return (
-    <div className="relative group/code">
+    <div className="relative">
       <button
         type="button"
         onClick={() => copy(code)}
         disabled={isCopied}
         title={t.common.copyCode}
-        className="absolute right-2 top-2 z-10 inline-flex items-center gap-1 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-primary)] dark:bg-[#0d1117] px-2 py-1 text-xs text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] cursor-pointer disabled:cursor-default transition-colors"
+        className={`absolute top-3 right-3 z-10 bg-[var(--tuwa-docs-raised)] disabled:cursor-default ${smallButtonClassName} ${secondaryButtonClassName}`}
       >
-        <CopyIcon copied={isCopied} className="w-3.5 h-3.5" />
+        <CopyIcon copied={isCopied} className="h-4 w-4" />
         {isCopied ? t.common.copied : t.common.copy}
       </button>
       {highlighted?.code === code ? (

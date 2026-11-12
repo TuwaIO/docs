@@ -661,6 +661,7 @@ export const en: DocsHubLabels = {
     },
   },
   configurator: {
+    stacks: { one: '{n} stack', few: '{n} stacks', many: '{n} stacks', other: '{n} stacks' },
     badge: 'Interactive',
     titlePrefix: 'Stack',
     titleHighlight: 'Configurator',

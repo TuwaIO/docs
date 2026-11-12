@@ -29,3 +29,15 @@ export const homeSectionLayer: Readonly<Record<1 | 2 | 3, string>> = {
  */
 export const homeBleedClassName =
   '-mx-4 px-4 md:-mx-8 md:px-8 xl:-mx-12 xl:px-12 min-[1600px]:-mx-14 min-[1600px]:px-14';
+
+/**
+ * The same reach, from line to line of the frame, for a part whose cells set their own margins (the options and the
+ * result of the Stack Configurator, side by side on a shared line).
+ */
+export const homeEdgeToEdgeClassName = '-mx-4 md:-mx-8 xl:-mx-12 min-[1600px]:-mx-14';
+
+/** The margin of the column on the left of a cell that starts at the left side of the frame. */
+export const homeMarginLeftClassName = 'pl-4 md:pl-8 xl:pl-12 min-[1600px]:pl-14';
+
+/** The margin of the column on the right of a cell that ends at the right side of the frame. */
+export const homeMarginRightClassName = 'pr-4 md:pr-8 xl:pr-12 min-[1600px]:pr-14';
