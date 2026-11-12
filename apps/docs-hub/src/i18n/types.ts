@@ -337,18 +337,11 @@ export interface DocsHubLabels {
       deprecatedPrefix: string;
       install: string;
       copyInstallTitle: string;
-      peersHint: string;
       lighterEntryHeading: string;
       guidesHeading: string;
-      dependenciesHeading: string;
-      includedWith: string;
-      peerDependenciesHeading: string;
-      noRuntimeDeps: string;
-      optional: string;
       viewOnNpm: string;
       packageDescriptions: Record<string, string>;
       packageDeprecations: Record<string, string>;
-      lighterDescriptions: Record<string, string>;
     };
     quickStart: {
       titlePrefix: string;

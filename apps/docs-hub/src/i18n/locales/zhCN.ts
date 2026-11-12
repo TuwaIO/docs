@@ -152,14 +152,8 @@ export const zhCN: DocsHubLabels = {
       deprecatedPrefix: '已弃用：',
       install: '安装命令',
       copyInstallTitle: '复制安装命令',
-      peersHint: '命令已包含必需的同伴依赖 (peerDependencies)。项目中已安装的包仅在版本不满足时才会更新。',
       lighterEntryHeading: '只需要其中一个模块？',
       guidesHeading: '相关指南',
-      dependenciesHeading: '包含依赖',
-      includedWith: '随附安装',
-      peerDependenciesHeading: '同伴依赖 (Peer dependencies)',
-      noRuntimeDeps: '零运行时与零同伴依赖 —— 只要能运行 TypeScript 的环境均可直接运行。',
-      optional: '可选',
       viewOnNpm: '在 npm 上查看',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -213,14 +207,6 @@ export const zhCN: DocsHubLabels = {
       },
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': '请改用 @tuwaio/siwx-react 与 @tuwaio/siwx-server。',
-      },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk 为 React 打包了包含 Nova UI Kit 在内的所有 TUWA 模块。如果您只需要钱包连接、交易追踪或签名登录中的某一项，可以直接安装对应的独立包：',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk 与 @tuwaio/sdk 配合使用。如果不使用 @tuwaio/sdk，可直接安装所需层级的 EVM 独立包：',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk 与 @tuwaio/sdk 配合使用。如果不使用 @tuwaio/sdk，可直接安装所需层级的 Solana 独立包：',
       },
     },
     quickStart: {

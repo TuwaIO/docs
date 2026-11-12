@@ -1,15 +1,18 @@
 'use client';
 
-import { CommandLineIcon } from '@heroicons/react/24/outline';
 import { cn, CopyIcon, useCopyToClipboard } from '@tuwaio/nova-core';
 
 import { useI18n } from '../i18n';
 import { PACKAGE_MANAGERS, type PackageManager } from '../lib/packageManager';
+import { secondaryButtonClassName, smallButtonClassName } from './buttonStyles';
 
 /**
- * Buttons to pick the package manager of the install commands.
+ * The switch of the package manager of the install commands: four square buttons in mono that share their frames, the
+ * chosen one in ink.
+ *
  * @param props.value - The chosen package manager.
  * @param props.onChange - Called with the package manager the reader picks.
+ * @returns The switch.
  */
 export function PackageManagerSwitch({
   value,
@@ -20,11 +23,7 @@ export function PackageManagerSwitch({
 }) {
   const { t } = useI18n();
   return (
-    <div
-      role="group"
-      aria-label={t.common.packageManager}
-      className="flex rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 p-0.5"
-    >
+    <div role="group" aria-label={t.common.packageManager} className="flex pl-px">
       {PACKAGE_MANAGERS.map(({ id }) => (
         <button
           key={id}
@@ -32,10 +31,10 @@ export function PackageManagerSwitch({
           aria-pressed={value === id}
           onClick={() => onChange(id)}
           className={cn(
-            'cursor-pointer rounded-[calc(var(--tuwa-rounded-corners)-2px)] px-2 py-0.5 font-mono text-[11px] transition-colors',
+            '-ml-px h-7 cursor-pointer border px-2.5 font-mono text-[11px] font-bold leading-none tracking-[0.06em] transition-colors',
             value === id
-              ? 'bg-[var(--tuwa-text-accent)]/15 text-[var(--tuwa-text-primary)]'
-              : 'text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)]',
+              ? 'relative border-[var(--tuwa-text-primary)] bg-[var(--tuwa-text-primary)] text-[var(--tuwa-docs-paper)]'
+              : 'border-[var(--tuwa-border-strong)] text-[var(--tuwa-text-primary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]',
           )}
         >
           {id}
@@ -46,28 +45,35 @@ export function PackageManagerSwitch({
 }
 
 /**
- * A terminal command on one line with a copy button. A long command scrolls sideways; the faded right edge shows that
- * it goes on, and the padding lets its end scroll out of the fade.
+ * A terminal command in a frame of ink: the `$` of a prompt in the accent, the command in mono and a small button that
+ * copies it, whose two sheets fold into a check mark. A long command wraps onto the next lines, so all of it is in
+ * sight; on a narrow screen the button goes under it. The prompt is not part of the copied or selected text.
+ *
+ * Side effects: the button writes the command to the clipboard.
+ *
  * @param props.command - The command.
- * @param props.copyTitle - Title of the copy button.
+ * @param props.copyTitle - The title of the copy button (default: "Copy the command").
+ * @returns The command line.
  */
 export function CommandLine({ command, copyTitle }: { command: string; copyTitle?: string }) {
   const { t } = useI18n();
   const { isCopied, copy } = useCopyToClipboard(2000);
   return (
-    <div className="flex items-center gap-3 rounded-[var(--tuwa-rounded-corners)] border border-[var(--tuwa-border-primary)]/60 dark:border-white/10 bg-[var(--tuwa-bg-secondary)]/50 dark:bg-white/[0.02] pl-3 pr-2 font-mono text-xs sm:text-sm text-[var(--tuwa-text-primary)]">
-      <CommandLineIcon className="w-4 h-4 shrink-0 text-[var(--tuwa-text-accent)]" aria-hidden="true" />
-      <code className="min-w-0 flex-1 overflow-x-auto whitespace-nowrap py-2.5 pr-8 select-all [scrollbar-width:thin] [mask-image:linear-gradient(to_right,#000_calc(100%-2rem),transparent)]">
-        {command}
+    <div className="flex flex-wrap items-center gap-3 border border-[var(--tuwa-text-primary)] p-4">
+      <code className="flex min-w-0 flex-[1_1_260px] gap-2.5 font-mono text-[15px] font-medium leading-[1.5] text-[var(--tuwa-text-primary)]">
+        <span aria-hidden="true" className="shrink-0 select-none font-bold text-[var(--tuwa-text-accent)]">
+          $
+        </span>
+        <span className="min-w-0 select-all [overflow-wrap:anywhere]">{command}</span>
       </code>
       <button
         type="button"
         onClick={() => copy(command)}
         disabled={isCopied}
         title={copyTitle ?? t.common.copyCommand}
-        className="shrink-0 inline-flex items-center gap-1 text-xs font-sans cursor-pointer text-[var(--tuwa-text-secondary)] hover:text-[var(--tuwa-text-primary)] disabled:cursor-default"
+        className={`${smallButtonClassName} ${secondaryButtonClassName} disabled:cursor-default`}
       >
-        <CopyIcon copied={isCopied} className="w-4 h-4" />
+        <CopyIcon copied={isCopied} className="h-3.5 w-3.5" />
         {isCopied ? t.common.copied : t.common.copy}
       </button>
     </div>

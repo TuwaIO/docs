@@ -154,15 +154,8 @@ export const uk: DocsHubLabels = {
       deprecatedPrefix: 'Застарілий пакет:',
       install: 'Встановлення',
       copyInstallTitle: 'Скопіювати команду встановлення',
-      peersHint:
-        'Обов’язкові peer-залежності вже включено до команди. Пакети, які вже є у вашому проєкті, оновляться лише за потреби.',
       lighterEntryHeading: 'Потрібна лише одна частина?',
       guidesHeading: 'Посібники',
-      dependenciesHeading: 'Залежності',
-      includedWith: 'Входить до складу',
-      peerDependenciesHeading: 'Peer-залежності',
-      noRuntimeDeps: 'Жодних runtime- або peer-залежностей — працює скрізь, де працює TypeScript.',
-      optional: 'опціонально',
       viewOnNpm: 'Переглянути на npm',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -216,14 +209,6 @@ export const uk: DocsHubLabels = {
       },
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': 'Використовуйте замість нього @tuwaio/siwx-react та @tuwaio/siwx-server.',
-      },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk об’єднує всі проєкти TUWA для React, включно з Nova UI Kit. Якщо вам потрібне лише підключення гаманців, відстеження транзакцій або вхід без решти модулів, встановіть відповідні пакети напряму:',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk працює в парі з @tuwaio/sdk. Якщо ви не використовуєте @tuwaio/sdk, встановіть EVM-пакет потрібного рівня напряму:',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk працює в парі з @tuwaio/sdk. Якщо ви не використовуєте @tuwaio/sdk, встановіть Solana-пакет потрібного рівня напряму:',
       },
     },
     quickStart: {

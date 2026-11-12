@@ -223,6 +223,21 @@ export function stagedEntries(): StagedEntry[] {
   );
 }
 
+const packageProjects: ReadonlyMap<string, StagedEntry> = new Map(
+  stagedEntries().flatMap((entry) => (entry.packages ?? []).map((pkg) => [pkg.name, entry] as const)),
+);
+
+/**
+ * The project of the main page that lists an npm package (`@tuwaio/satellite-react` is of Satellite Connect), with its
+ * stage and its icon.
+ *
+ * @param name - The npm name of the package.
+ * @returns The project, or `undefined` for a package no project lists.
+ */
+export function projectOfPackage(name: string): StagedEntry | undefined {
+  return packageProjects.get(name);
+}
+
 /**
  * The size of the ecosystem, counted from the data so the hero never states an old number: the npm packages that are
  * not deprecated (link rows are not packages), the products and the stages.

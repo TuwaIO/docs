@@ -6,6 +6,7 @@ import type { TuwaLocale } from '@tuwaio/docs-ui/locale';
 import Link from '@/components/LocaleNextLink';
 
 import { useI18n } from '../i18n';
+import { primaryButtonClassName, secondaryButtonClassName } from './buttonStyles';
 import { HeroPlate } from './home/HeroPlate';
 import { ARROW_DOWN, ARROW_RIGHT } from './home/pixelArrows';
 import { Kicker } from './home/SectionHead';
@@ -63,20 +64,14 @@ export function HeroSection() {
           <span>{hero.license}</span>
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a
-            href="#stage-1"
-            className={`${buttonClassName} bg-[var(--tuwa-button-primary-bg)] text-[var(--tuwa-text-on-accent)] hover:bg-[var(--tuwa-button-primary-bg-hover)]`}
-          >
+          <a href="#stage-1" className={`${buttonClassName} ${primaryButtonClassName}`}>
             {hero.explorePackages}
             <PixelArt
               art={ARROW_DOWN}
               className={`${arrowClassName} group-hover:translate-y-[3px] group-focus-visible:translate-y-[3px]`}
             />
           </a>
-          <Link
-            href="/playground"
-            className={`${buttonClassName} border border-[var(--tuwa-border-strong)] text-[var(--tuwa-text-primary)] hover:bg-[color-mix(in_srgb,var(--tuwa-text-primary)_3.5%,transparent)]`}
-          >
+          <Link href="/playground" className={`${buttonClassName} ${secondaryButtonClassName}`}>
             {hero.tryPlayground}
             <PixelArt
               art={ARROW_RIGHT}

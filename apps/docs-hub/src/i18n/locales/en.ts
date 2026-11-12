@@ -153,15 +153,8 @@ export const en: DocsHubLabels = {
       deprecatedPrefix: 'Deprecated:',
       install: 'Install',
       copyInstallTitle: 'Copy the install command',
-      peersHint:
-        'Required peer dependencies are included. Packages already in your project will be updated only if needed.',
       lighterEntryHeading: 'Only need one part?',
       guidesHeading: 'Guides',
-      dependenciesHeading: 'Dependencies',
-      includedWith: 'Included with',
-      peerDependenciesHeading: 'Peer dependencies',
-      noRuntimeDeps: 'No runtime or peer dependencies — runs anywhere TypeScript runs.',
-      optional: 'optional',
       viewOnNpm: 'View on npm',
       packageDescriptions: {
         '@tuwaio/evm-sdk':
@@ -215,14 +208,6 @@ export const en: DocsHubLabels = {
       },
       packageDeprecations: {
         '@tuwaio/satellite-siwe-next-auth': 'Use @tuwaio/siwx-react and @tuwaio/siwx-server instead.',
-      },
-      lighterDescriptions: {
-        '@tuwaio/sdk':
-          '@tuwaio/sdk bundles every TUWA project for React, including Nova UI Kit. If you only need wallet connection, transaction tracking or sign-in without the rest, install its packages directly:',
-        '@tuwaio/evm-sdk':
-          '@tuwaio/evm-sdk pairs with @tuwaio/sdk. If you are not using @tuwaio/sdk, install the EVM package of the layer you need directly:',
-        '@tuwaio/solana-sdk':
-          '@tuwaio/solana-sdk pairs with @tuwaio/sdk. If you are not using @tuwaio/sdk, install the Solana package of the layer you need directly:',
       },
     },
     quickStart: {

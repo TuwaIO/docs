@@ -288,14 +288,25 @@ const hubRedrawn = [
   'components/home/ProductRow.tsx',
   'components/home/PackageRow.tsx',
   'components/PackagePreview.tsx',
+  'components/PackageDialog.tsx',
+  'components/CommandLine.tsx',
+  'components/buttonStyles.ts',
   'app/rootDocument.tsx',
 ];
 
 /** What breaks paper and ink in a component of the hub: its Tailwind classes, inline styles and colours. */
 function hubViolations(file: string) {
   const source = withoutJsComments(read(file));
-  const classes = [...source.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\})/g)].flatMap((match) =>
-    (match[1] ?? match[2] ?? '')
+  // Classes in a `className`, in a constant of classes (`chipClassName = '…'`) and in the strings of a `cn(…)` call
+  const written = [
+    ...[...source.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\})/g)].map((match) => match[1] ?? match[2] ?? ''),
+    ...[...source.matchAll(/\b\w*[cC]lass(?:Name)?\w*\s*=\s*(['"`])([^'"`]*)\1/g)].map((match) => match[2] ?? ''),
+    ...[...source.matchAll(/\bcn\(([\s\S]*?)\)\}/g)].flatMap((call) =>
+      [...(call[1] ?? '').matchAll(/(['"`])([^'"`]*)\1/g)].map((match) => match[2] ?? ''),
+    ),
+  ];
+  const classes = written.flatMap((text) =>
+    text
       .replace(/\$\{[^}]*\}/g, ' ')
       .split(/\s+/)
       .filter(Boolean),
@@ -321,6 +332,15 @@ describe('paper and ink in the hub', () => {
     expect(classViolation('rounded-full')).toBeDefined();
     expect(classViolation('shadow-xl')).toBeDefined();
     expect(classViolation('rounded-none')).toBeUndefined();
+  });
+
+  // Classes kept in a constant or passed to `cn()` are checked as those written in a `className`
+  it('reads the classes of constants and of cn() calls', () => {
+    const file = path.resolve(__dirname, '../components/PackageDialog.tsx');
+    const source = read(file);
+    expect(source).toMatch(/const chipClassName =/);
+    expect(source).toMatch(/className=\{cn\(/);
+    expect(hubViolations(file)).toEqual([]);
   });
 });
 
