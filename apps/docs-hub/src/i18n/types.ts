@@ -241,6 +241,15 @@ export interface DocsHubLabels {
     policyTitles: Record<PolicySlug, string>;
   };
   common: {
+    /** The flight plan of a page: the craft that flies with the scroll, past the parts of the page */
+    flight: {
+      /** The name of the navigation of the rail, for assistive technology */
+      ariaLabel: string;
+      /** The name of the first waypoint, the top of the page */
+      overview: string;
+      /** The name of the progress of the flight, which ends at the last waypoint, for assistive technology */
+      progressLabel: string;
+    };
     packageManager: string;
     copy: string;
     copied: string;
@@ -356,19 +365,10 @@ export interface DocsHubLabels {
       openWithFiles: string;
       install: string;
     };
-    /** The flight plan of the main page: the craft that flies with the scroll, past the parts of the page */
-    flight: {
-      /** The name of the navigation of the rail, for assistive technology */
-      ariaLabel: string;
-      /** The name of the first waypoint, the top of the page */
-      overview: string;
-      /** The name of the progress of the flight, which ends at the quick start, for assistive technology */
-      progressLabel: string;
-    };
   };
   comparisons: {
-    /** The short names of the sections of the page, for their bars (`01 / Radar`) */
-    sections: { radar: string; criteria: string; alternatives: string; bundle: string; method: string };
+    /** The short names of the sections of the page, for their bars (`01 / Radar`); `next` names its end, for the flight plan */
+    sections: { radar: string; criteria: string; alternatives: string; bundle: string; method: string; next: string };
     badge: string;
     titlePrefix: string;
     titleHighlight: string;

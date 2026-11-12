@@ -27,6 +27,11 @@ export const uk: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.uk.footer,
   common: {
+    flight: {
+      ariaLabel: 'План польоту цієї сторінки',
+      overview: 'Огляд',
+      progressLabel: 'Прогрес польоту',
+    },
     packageManager: 'Пакетний менеджер',
     copy: 'Копіювати',
     copied: 'Скопійовано',
@@ -225,11 +230,6 @@ export const uk: DocsHubLabels = {
       openWithFiles: 'Відкрити з усіма {count} файлами налаштування',
       install: 'Встановлення',
     },
-    flight: {
-      ariaLabel: 'План польоту цієї сторінки',
-      overview: 'Огляд',
-      progressLabel: 'Шлях до швидкого старту',
-    },
   },
   comparisons: {
     sections: {
@@ -238,6 +238,7 @@ export const uk: DocsHubLabels = {
       alternatives: 'Альтернативи',
       bundle: 'Розмір',
       method: 'Методика',
+      next: 'Старт',
     },
     badge: 'Інтерактивне порівняння',
     titlePrefix: 'TUWA та',

@@ -14,6 +14,7 @@ import {
   primaryButtonClassName,
   secondaryButtonClassName,
 } from '../buttonStyles';
+import { FlightPlan, type FlightWaypoint } from '../flight/FlightPlan';
 import { homeContentClassName, homeFrameClassName } from '../home/homeLayout';
 import { ARROW_RIGHT } from '../home/pixelArrows';
 import { CrossMark, Kicker, SectionBar, SectionHead } from '../home/SectionHead';
@@ -71,7 +72,8 @@ function Section({
  * The content of `/comparisons`, in paper and ink, on the frame of the main page: the kicker (when the facts were
  * verified, how many products and criteria), the title in large mono and the lead; then five sections, each under its
  * bar: the radar (with the TUWA projects that do the job of each segment, on shared lines), every criterion with its
- * sources, when to choose another tool, the bundle sizes and the methodology; and two buttons to start with.
+ * sources, when to choose another tool, the bundle sizes and the methodology; and two buttons to start with. Beside
+ * it flies the craft of its flight plan (`FlightPlan`), from the top of the page to those buttons, the Earth.
  *
  * @returns The page.
  */
@@ -83,129 +85,150 @@ export function ComparisonsContent() {
   const products = formatLabel(extra.productsCount, { count: COMPETITORS.length });
   const criteria = formatLabel(extra.criteriaCount, { count: CRITERIA.length });
   const measuredAt = (bundleSizes as { measuredAt?: string }).measuredAt;
+  // The flight of the page: from its top past its five sections, and the segments of the alternatives, to its end,
+  // where the reader starts: the Earth
+  const waypoints: FlightWaypoint[] = [
+    { id: 'overview', kind: 'section', number: '00', name: t.common.flight.overview },
+    { id: 'radar', kind: 'section', number: '01', name: sections.radar },
+    { id: 'criteria', kind: 'section', number: '02', name: sections.criteria },
+    { id: 'choose-instead', kind: 'section', number: '03', name: sections.alternatives },
+    ...SEGMENTS.map((segment) => ({
+      id: `segment-${segment.id}`,
+      kind: 'stage' as const,
+      name: t.comparisons.segments[segment.id]?.label ?? segment.label,
+    })),
+    { id: 'bundle-size', kind: 'section', number: '04', name: sections.bundle },
+    { id: 'methodology', kind: 'section', number: '05', name: sections.method },
+    { id: 'next', kind: 'section', name: sections.next },
+  ];
 
   return (
-    <div className="relative z-10">
-      <div className={`${homeContentClassName} ${homeFrameClassName}`}>
-        <CrossMark x="left" y="top" />
-        <CrossMark x="right" y="top" />
+    <>
+      {/* Outside the page below: its strip lies over the line of the header */}
+      <FlightPlan waypoints={waypoints} />
+      <div className="relative z-10">
+        <div className={`${homeContentClassName} ${homeFrameClassName}`}>
+          <CrossMark x="left" y="top" />
+          <CrossMark x="right" y="top" />
 
-        <header className="pt-12 md:pt-16 xl:pt-20">
-          <Kicker>
-            {verified} · {products} · {criteria}
-          </Kicker>
-          <h1
-            className={`mt-5 max-w-[960px] font-mono text-[clamp(36px,6.2vw,76px)] leading-[0.98] font-medium text-[var(--tuwa-text-primary)] ${locale === 'uk' ? 'tracking-normal' : 'tracking-[-0.04em]'}`}
+          <header id="overview" className="scroll-mt-24 pt-12 md:pt-16 xl:pt-20">
+            <Kicker>
+              {verified} · {products} · {criteria}
+            </Kicker>
+            <h1
+              className={`mt-5 max-w-[960px] font-mono text-[clamp(36px,6.2vw,76px)] leading-[0.98] font-medium text-[var(--tuwa-text-primary)] ${locale === 'uk' ? 'tracking-normal' : 'tracking-[-0.04em]'}`}
+            >
+              {t.comparisons.titlePrefix} {t.comparisons.titleHighlight}
+            </h1>
+            <p className="mt-7 max-w-[680px] text-lg leading-[1.55] text-[var(--tuwa-text-primary)]">
+              {t.comparisons.description}
+            </p>
+          </header>
+
+          <Section
+            id="radar"
+            number={1}
+            name={sections.radar}
+            meta={[products, criteria]}
+            title={t.comparisons.radar.sectionTitle}
+            lead={extra.radarIntro}
           >
-            {t.comparisons.titlePrefix} {t.comparisons.titleHighlight}
-          </h1>
-          <p className="mt-7 max-w-[680px] text-lg leading-[1.55] text-[var(--tuwa-text-primary)]">
-            {t.comparisons.description}
-          </p>
-        </header>
+            {/* The TUWA projects that do the job of each segment */}
+            <dl className={`m-0 grid grid-cols-1 border-t border-l md:grid-cols-2 ${lineClassName}`}>
+              {SEGMENTS.map((segment) => (
+                <div
+                  key={segment.id}
+                  className={`flex flex-col gap-1.5 border-r border-b bg-[var(--tuwa-docs-raised)] px-4 py-3.5 ${lineClassName}`}
+                >
+                  <dt className={`text-[var(--tuwa-text-secondary)] ${capsClassName}`}>
+                    {t.comparisons.segments[segment.id]?.label ?? segment.label}
+                  </dt>
+                  <dd className="m-0 font-mono text-sm leading-[1.35] font-bold text-[var(--tuwa-text-primary)]">
+                    {segment.counterpart}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-6">
+              <ComparisonRadar />
+            </div>
+          </Section>
 
-        <Section
-          id="radar"
-          number={1}
-          name={sections.radar}
-          meta={[products, criteria]}
-          title={t.comparisons.radar.sectionTitle}
-          lead={extra.radarIntro}
-        >
-          {/* The TUWA projects that do the job of each segment */}
-          <dl className={`m-0 grid grid-cols-1 border-t border-l md:grid-cols-2 ${lineClassName}`}>
-            {SEGMENTS.map((segment) => (
-              <div
-                key={segment.id}
-                className={`flex flex-col gap-1.5 border-r border-b bg-[var(--tuwa-docs-raised)] px-4 py-3.5 ${lineClassName}`}
-              >
-                <dt className={`text-[var(--tuwa-text-secondary)] ${capsClassName}`}>
-                  {t.comparisons.segments[segment.id]?.label ?? segment.label}
-                </dt>
-                <dd className="m-0 font-mono text-sm leading-[1.35] font-bold text-[var(--tuwa-text-primary)]">
-                  {segment.counterpart}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-6">
-            <ComparisonRadar />
-          </div>
-        </Section>
-
-        <Section
-          id="criteria"
-          number={2}
-          name={sections.criteria}
-          meta={[criteria, verified]}
-          title={t.comparisons.matrix.sectionTitle}
-          lead={formatLabel(extra.criteriaIntro, { count: CRITERIA.length })}
-        >
-          <CriteriaMatrix />
-        </Section>
-
-        <Section
-          id="choose-instead"
-          number={3}
-          name={sections.alternatives}
-          meta={[products]}
-          title={t.comparisons.chooseInstead.sectionTitle}
-          lead={extra.chooseInsteadIntro}
-        >
-          <ChooseInstead />
-        </Section>
-
-        <Section
-          id="bundle-size"
-          number={4}
-          name={sections.bundle}
-          meta={['gzip', ...(measuredAt ? [formatCheckDate(measuredAt, locale)] : [])]}
-          title={extra.bundleTitle}
-          lead={extra.bundleIntro}
-        >
-          <BundleSizes />
-        </Section>
-
-        <Section
-          id="methodology"
-          number={5}
-          name={sections.method}
-          meta={[verified]}
-          title={t.comparisons.methodology.sectionTitle}
-          lead={extra.methodologyIntro}
-        >
-          <Methodology />
-        </Section>
-
-        {/* Next steps */}
-        <section
-          aria-labelledby="comparisons-next"
-          className={`mt-[104px] flex flex-col gap-6 border-t pt-10 md:flex-row md:items-center md:justify-between ${lineClassName}`}
-        >
-          <h2
-            id="comparisons-next"
-            className="m-0 font-mono text-[clamp(24px,3vw,34px)] leading-[1.1] font-medium tracking-[-0.03em] text-[var(--tuwa-text-primary)]"
+          <Section
+            id="criteria"
+            number={2}
+            name={sections.criteria}
+            meta={[criteria, verified]}
+            title={t.comparisons.matrix.sectionTitle}
+            lead={formatLabel(extra.criteriaIntro, { count: CRITERIA.length })}
           >
-            {extra.readyHeading}
-          </h2>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/guides/starter-templates" className={`${largeButtonClassName} ${primaryButtonClassName}`}>
-              {extra.startFromTemplate}
-              <PixelArt
-                art={ARROW_RIGHT}
-                className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
-              />
-            </Link>
-            <Link href="/guides/full-stack-react" className={`${largeButtonClassName} ${secondaryButtonClassName}`}>
-              {extra.fullStackGuide}
-              <PixelArt
-                art={ARROW_RIGHT}
-                className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
-              />
-            </Link>
-          </div>
-        </section>
+            <CriteriaMatrix />
+          </Section>
+
+          <Section
+            id="choose-instead"
+            number={3}
+            name={sections.alternatives}
+            meta={[products]}
+            title={t.comparisons.chooseInstead.sectionTitle}
+            lead={extra.chooseInsteadIntro}
+          >
+            <ChooseInstead />
+          </Section>
+
+          <Section
+            id="bundle-size"
+            number={4}
+            name={sections.bundle}
+            meta={['gzip', ...(measuredAt ? [formatCheckDate(measuredAt, locale)] : [])]}
+            title={extra.bundleTitle}
+            lead={extra.bundleIntro}
+          >
+            <BundleSizes />
+          </Section>
+
+          <Section
+            id="methodology"
+            number={5}
+            name={sections.method}
+            meta={[verified]}
+            title={t.comparisons.methodology.sectionTitle}
+            lead={extra.methodologyIntro}
+          >
+            <Methodology />
+          </Section>
+
+          {/* Next steps */}
+          <section
+            id="next"
+            aria-labelledby="comparisons-next"
+            className={`mt-[104px] flex scroll-mt-[56px] flex-col gap-6 border-t pt-10 md:flex-row md:items-center md:justify-between ${lineClassName}`}
+          >
+            <h2
+              id="comparisons-next"
+              className="m-0 font-mono text-[clamp(24px,3vw,34px)] leading-[1.1] font-medium tracking-[-0.03em] text-[var(--tuwa-text-primary)]"
+            >
+              {extra.readyHeading}
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/guides/starter-templates" className={`${largeButtonClassName} ${primaryButtonClassName}`}>
+                {extra.startFromTemplate}
+                <PixelArt
+                  art={ARROW_RIGHT}
+                  className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
+                />
+              </Link>
+              <Link href="/guides/full-stack-react" className={`${largeButtonClassName} ${secondaryButtonClassName}`}>
+                {extra.fullStackGuide}
+                <PixelArt
+                  art={ARROW_RIGHT}
+                  className={`${buttonArrowClassName} group-hover:translate-x-[3px] group-focus-visible:translate-x-[3px]`}
+                />
+              </Link>
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

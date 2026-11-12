@@ -42,6 +42,8 @@ describe('the comparisons page', () => {
       ['choose-instead', 'choose-instead-title'],
       ['bundle-size', 'bundle-size-title'],
       ['methodology', 'methodology-title'],
+      // The end of the page, where the flight plan ends
+      ['next', 'comparisons-next'],
     ]);
     // Each bar sticks under the header with the number and the short name of its section
     const bars = [
@@ -141,6 +143,31 @@ describe('the comparisons page', () => {
     expect(read('CriteriaMatrix.tsx')).toContain('<div className="relative overflow-x-auto">');
     expect(read('BundleSizes.tsx')).toContain('<div className="relative overflow-x-auto">');
     expect(markup.match(/class="relative overflow-x-auto"/g)?.length).toBeGreaterThanOrEqual(1);
+  });
+
+  // The flight plan of the main page flies here too: from the top of the page past its sections, and the segments of
+  // the alternatives, to its end, where the reader starts: the Earth
+  it('has the flight plan of the main page, to the buttons at its end', () => {
+    const links = [
+      ...markup.matchAll(
+        /<a href="#([\w-]+)" aria-label="([^"]+)"(?: aria-current="location")? class="group\/waypoint/g,
+      ),
+    ].map((match) => [match[1], match[2]?.replace(/&amp;/g, '&')]);
+    expect(links).toEqual([
+      ['overview', '00 Overview'],
+      ['radar', '01 Radar'],
+      ['criteria', '02 Criteria'],
+      ['choose-instead', '03 Alternatives'],
+      ...SEGMENTS.map((segment) => [`segment-${segment.id}`, segment.label]),
+      ['bundle-size', '04 Bundle size'],
+      ['methodology', '05 Method'],
+      ['next', 'Start'],
+    ]);
+    // Every waypoint is a part of the page
+    for (const [id] of links) expect(markup, id).toContain(`id="${id}"`);
+    const content = read('ComparisonsContent.tsx');
+    expect(content).toMatch(/<FlightPlan waypoints=\{waypoints\} \/>\s*<div className="relative z-10">/);
+    expect(content).toContain("{ id: 'next', kind: 'section', name: sections.next },");
   });
 
   it('names the TUWA projects that do the job of each segment, and when to choose each product', () => {

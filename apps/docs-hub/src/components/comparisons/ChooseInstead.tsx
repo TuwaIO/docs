@@ -12,6 +12,8 @@ const lineClassName = 'border-[var(--tuwa-border-primary)]';
  * TUWA projects that do the same job on the right) and its products as cells on shared lines of 1px, two in a row from
  * 768px: what the product is, when it is the better choice and how TUWA differs.
  *
+ * Each segment is a waypoint of the flight plan of the page (`#segment-<id>`).
+ *
  * @returns The segments.
  */
 export function ChooseInstead() {
@@ -21,7 +23,7 @@ export function ChooseInstead() {
   return (
     <div className="flex flex-col gap-14">
       {SEGMENTS.map((segment) => (
-        <div key={segment.id}>
+        <div key={segment.id} id={`segment-${segment.id}`} className="scroll-mt-[120px]">
           <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1.5 border-t border-[var(--tuwa-border-strong)] pt-4 pb-[18px]">
             <h3 className="m-0 font-mono text-[15px] font-bold uppercase leading-[1.25] tracking-[0.12em] text-[var(--tuwa-text-primary)]">
               {t.comparisons.segments[segment.id]?.label ?? segment.label}

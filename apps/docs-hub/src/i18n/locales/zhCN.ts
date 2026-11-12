@@ -27,6 +27,11 @@ export const zhCN: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels['zh-CN'].footer,
   common: {
+    flight: {
+      ariaLabel: '本页飞行计划',
+      overview: '概览',
+      progressLabel: '飞行进度',
+    },
     packageManager: '包管理器',
     copy: '复制',
     copied: '已复制',
@@ -223,14 +228,16 @@ export const zhCN: DocsHubLabels = {
       openWithFiles: '打开完整配置器，查看全部 {count} 个配置文件',
       install: '安装命令',
     },
-    flight: {
-      ariaLabel: '本页飞行计划',
-      overview: '概览',
-      progressLabel: '到快速开始的进度',
-    },
   },
   comparisons: {
-    sections: { radar: '雷达图', criteria: '评估标准', alternatives: '替代方案', bundle: '包体积', method: '评估方法' },
+    sections: {
+      radar: '雷达图',
+      criteria: '评估标准',
+      alternatives: '替代方案',
+      bundle: '包体积',
+      method: '评估方法',
+      next: '开始',
+    },
     badge: '交互式对比',
     titlePrefix: 'TUWA 与',
     titleHighlight: '同类方案对比',

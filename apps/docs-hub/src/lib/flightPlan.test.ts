@@ -14,7 +14,7 @@ import {
   SHIP_FLAME_CELLS,
   STRIP_SHIP,
 } from '../components/flight/flightArt';
-import { FlightPlan } from '../components/flight/FlightPlan';
+import { HomeFlightPlan } from '../components/home/HomeFlightPlan';
 import { en, I18nProvider, uk, zhCN } from '../i18n';
 import {
   activeWaypoint,
@@ -35,13 +35,14 @@ import {
 
 const read = (file: string) => readFileSync(path.resolve(__dirname, '..', file), 'utf8');
 const plan = read('components/flight/FlightPlan.tsx');
+const homePlan = read('components/home/HomeFlightPlan.tsx');
 const hook = read('components/flight/useFlight.ts');
 const page = read('app/(default)/(home)/page.tsx');
 const footer = read('components/Footer.tsx');
 const shell = read('components/HubShell.tsx');
 const globals = read('app/globals.css');
 const render = (locale: 'en' | 'uk' | 'zh-CN' = 'en') =>
-  renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale, children: createElement(FlightPlan) }));
+  renderToStaticMarkup(createElement(I18nProvider, { initialLocale: locale, children: createElement(HomeFlightPlan) }));
 
 describe('the end of the flight', () => {
   const parts = [
@@ -404,7 +405,7 @@ describe('the flight plan on the page', () => {
     );
     expect(plan).toContain('const isEarth = index === lastIndex;');
     expect(plan).toMatch(/index === lastIndex\s*\? travel \+ EARTH_AFTER \+ EARTH_HALF/);
-    expect(plan).toMatch(
+    expect(homePlan).toMatch(
       /\{ id: 'quick-start', kind: 'section', number: '03', name: t\.home\.quickStart\.section \},\s*\];/,
     );
     expect(plan).toContain('group-data-[arrived]/flight:fill-[var(--tuwa-docs-lit)]');
@@ -435,8 +436,8 @@ describe('the flight plan on the page', () => {
   // The caption above the rail ("Flight plan · 9 waypoints") said nothing the rail does not show
   it('has no caption', () => {
     for (const dictionary of [en, uk, zhCN]) {
-      expect(dictionary.home.flight).not.toHaveProperty('title');
-      expect(dictionary.home.flight).not.toHaveProperty('waypoints');
+      expect(dictionary.common.flight).not.toHaveProperty('title');
+      expect(dictionary.common.flight).not.toHaveProperty('waypoints');
     }
     expect(markup).not.toMatch(/waypoints/i);
     expect(plan).not.toContain('formatPlural');
@@ -534,7 +535,7 @@ describe('the flight plan on the page', () => {
       ['uk', uk],
       ['zh-CN', zhCN],
     ] as const) {
-      const flight = dictionary.home.flight;
+      const flight = dictionary.common.flight;
       const html = render(locale);
       expect(html).toContain(`<nav data-flight-rail="" aria-label="${flight.ariaLabel}"`);
       expect(html).toContain(`role="progressbar" aria-label="${flight.progressLabel}"`);
@@ -547,7 +548,9 @@ describe('the flight plan on the page', () => {
 
   // The strip lies over the line of the header: inside the page, which is under the header, it could not
   it('stands outside the page, so its strip lies over the line of the header', () => {
-    expect(page).toMatch(/<PageBackground \/>\s*\{\/\*[^*]*\*\/\}\s*<FlightPlan \/>\s*<div className="relative z-10">/);
+    expect(page).toMatch(
+      /<PageBackground \/>\s*\{\/\*[^*]*\*\/\}\s*<HomeFlightPlan \/>\s*<div className="relative z-10">/,
+    );
     expect(markup).toMatch(/data-flight-strip=""[^>]*class="[^"]*z-\[55\]/);
     expect(read('components/Header.tsx')).toMatch(/<header className="fixed top-0 left-0 right-0 z-50 /);
   });

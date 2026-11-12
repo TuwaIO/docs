@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 
 import { type LanguagePageProps, localizedJsonLd } from '@/lib/languageMetadata';
 
-import { FlightPlan } from '../../../components/flight/FlightPlan';
 import { HeroSection } from '../../../components/HeroSection';
 import { EcosystemBoard } from '../../../components/home/EcosystemBoard';
+import { HomeFlightPlan } from '../../../components/home/HomeFlightPlan';
 import { homeContentClassName, homeFrameClassName } from '../../../components/home/homeLayout';
 import { PixelHandoff } from '../../../components/home/PixelHandoff';
 import { CrossMark } from '../../../components/home/SectionHead';
@@ -48,7 +48,7 @@ export default async function DocsHubPage({ params }: LanguagePageProps) {
       <JsonLd data={localizedJsonLd(structuredData, '/', lang)} />
       <PageBackground />
       {/* Outside the page below: its strip lies over the line of the header */}
-      <FlightPlan />
+      <HomeFlightPlan />
 
       <div className="relative z-10">
         <PixelHandoff />

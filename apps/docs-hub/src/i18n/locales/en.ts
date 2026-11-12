@@ -27,6 +27,11 @@ export const en: DocsHubLabels = {
   // The interface texts of every TUWA documentation site (@tuwaio/docs-ui)
   footer: docsLabels.en.footer,
   common: {
+    flight: {
+      ariaLabel: 'Flight plan of this page',
+      overview: 'Overview',
+      progressLabel: 'Flight progress',
+    },
     packageManager: 'Package manager',
     copy: 'Copy',
     copied: 'Copied',
@@ -224,11 +229,6 @@ export const en: DocsHubLabels = {
       openWithFiles: 'Open with all {count} setup files',
       install: 'Install',
     },
-    flight: {
-      ariaLabel: 'Flight plan of this page',
-      overview: 'Overview',
-      progressLabel: 'Progress to the quick start',
-    },
   },
   comparisons: {
     sections: {
@@ -237,6 +237,7 @@ export const en: DocsHubLabels = {
       alternatives: 'Alternatives',
       bundle: 'Bundle size',
       method: 'Method',
+      next: 'Start',
     },
     badge: 'Interactive Comparison',
     titlePrefix: 'TUWA and the',

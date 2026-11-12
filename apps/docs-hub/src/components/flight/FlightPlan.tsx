@@ -4,7 +4,6 @@ import { CornerMarks } from '@tuwaio/docs-ui';
 import type { CSSProperties } from 'react';
 
 import { useI18n } from '@/i18n';
-import { layers } from '@/lib/ecosystem';
 import { spreadLabels } from '@/lib/flightPlan';
 
 import {
@@ -20,13 +19,17 @@ import {
 } from './flightArt';
 import { type FlightHeading, type FlightMeasure, useFlight } from './useFlight';
 
-/** A part of the main page the craft passes. */
-interface Waypoint {
+/** A part of a page the craft of its flight plan passes. */
+export interface FlightWaypoint {
   /** The id of the part: the target of the link of the waypoint */
   id: string;
-  /** `section`: a part with a number (the overview and the sections with a bar); `stage`: a stage ledger */
+  /**
+   * `section`: a part of the first rank (the overview, the sections with a bar, the last part of the page); `stage`: a
+   * part inside a section (a stage ledger of the main page), with a smaller mark and its name under those of the
+   * sections
+   */
   kind: 'section' | 'stage';
-  /** The number of the part, as its bar shows it (`01`); a stage has none on the rail */
+  /** The number of the part, as its bar shows it (`01`); a stage has none on the rail, nor has a part without a bar */
   number?: string;
   /** The name of the part */
   name: string;
@@ -176,7 +179,7 @@ function Pixels({
  * @param index - The index of the waypoint.
  * @returns `true` for such a stage.
  */
-function sharesMark(waypoints: readonly Waypoint[], places: readonly number[], index: number): boolean {
+function sharesMark(waypoints: readonly FlightWaypoint[], places: readonly number[], index: number): boolean {
   return (
     waypoints[index]?.kind === 'stage' &&
     waypoints[index - 1]?.kind === 'section' &&
@@ -262,7 +265,7 @@ function FlightRail({
   ariaLabel,
   progressLabel,
 }: {
-  waypoints: readonly Waypoint[];
+  waypoints: readonly FlightWaypoint[];
   measure: FlightMeasure | null;
   here: number;
   reached: number;
@@ -279,7 +282,7 @@ function FlightRail({
   const namesShown = numbersShown && fits(measure?.sectionNames);
   const stagesShown = namesShown && fits(measure?.stageNames);
   // Whether the label of a waypoint shows in the margin: its number or its name
-  const labelled = (waypoint: Waypoint) => (waypoint.kind === 'stage' ? stagesShown : numbersShown);
+  const labelled = (waypoint: FlightWaypoint) => (waypoint.kind === 'stage' ? stagesShown : numbersShown);
 
   // The middle of each mark, on whole pixels: where the middle of the craft is when it has reached the waypoint. The
   // last waypoint is the Earth, under the craft at the end of its flight
@@ -369,7 +372,8 @@ function FlightRail({
                 className={`group/waypoint pointer-events-auto absolute inset-y-0 left-0 flex items-center font-mono leading-none whitespace-nowrap uppercase transition-colors ${labelColour(state)}`}
                 style={{ minWidth: LABELS_LEFT - CLEAR, paddingLeft: (isStage ? NAMES_LEFT : LABELS_LEFT) - CLEAR }}
               >
-                {waypoint.number && numbersShown && (
+                {/* A part without a number keeps the place of one: its name stands under the names above it */}
+                {!isStage && numbersShown && (
                   <span className="text-[11px] font-medium tracking-[0.04em]" style={{ width: NUMBER + 8 }}>
                     {waypoint.number}
                   </span>
@@ -432,7 +436,7 @@ function FlightRail({
                     className="pointer-events-none absolute -translate-y-1/2 border border-[var(--tuwa-border-strong)] bg-[var(--tuwa-docs-raised)] px-2 py-1.5 text-[11px] font-bold tracking-[0.12em] text-[var(--tuwa-text-primary)] opacity-0 transition-opacity duration-150 group-hover/waypoint:opacity-100 group-focus-visible/waypoint:opacity-100 motion-reduce:transition-none"
                     style={{ left: (numbersShown ? NAMES_LEFT : LABELS_LEFT) - CLEAR, top: LABEL_ROW / 2 }}
                   >
-                    {numbersShown && waypoint.number ? waypoint.name : text}
+                    {numbersShown && !isStage ? waypoint.name : text}
                   </span>
                 )}
               </a>
@@ -523,7 +527,7 @@ function FlightStrip({
   heading,
   progressLabel,
 }: {
-  waypoints: readonly Waypoint[];
+  waypoints: readonly FlightWaypoint[];
   measure: FlightMeasure | null;
   reached: number;
   heading: FlightHeading;
@@ -597,34 +601,26 @@ function FlightStrip({
 }
 
 /**
- * The flight plan of the main page: the page as one flight, from its top to the quick start, where the reader starts
- * building: the Earth. The reader who goes down the page flies a pixel spacecraft down a ruler in the left margin of
+ * The flight plan of a page of the hub: the page as one flight, from its top to its last waypoint, the Earth, where the
+ * reader starts building. The reader who goes down the page flies a pixel spacecraft down a ruler in the left margin of
  * the page (from 1280px, `FlightRail`) or along the line under the header (narrower, `FlightStrip`); going back up the
- * page turns the craft around. The waypoints are the parts of the page: the overview, the sections with a bar
- * (Ecosystem, Packages, Quick start) and the stage ledgers; the ledger of the stage the reader reads takes
- * `data-flight="here"`, which turns the square of its number to the accent. The craft follows the scroll eased, its
- * flames burning only while it moves; for reduced motion it is where the scroll is at once, with no flames and no
- * pixels in flight.
+ * page turns the craft around. The waypoints are the parts of the page, each an element with its `id`; the part the
+ * reader reads takes `data-flight="here"`. The craft follows the scroll eased, its flames burning only while it moves;
+ * for reduced motion it is where the scroll is at once, with no flames and no pixels in flight.
+ *
+ * It stands outside the content of the page, which lies under the header: so its strip lies over the line of the
+ * header.
  *
  * Side effects: those of `useFlight` (scroll and resize listeners, a `ResizeObserver`, attributes and custom
  * properties written outside React).
  *
+ * @param props.waypoints - The parts of the page, from the top: the first is where the craft starts, the last is the
+ * Earth.
  * @returns The rail and the strip; CSS shows the one the width of the screen has room for.
  */
-export function FlightPlan() {
+export function FlightPlan({ waypoints }: { waypoints: readonly FlightWaypoint[] }) {
   const { t } = useI18n();
-  const flight = t.home.flight;
-  const waypoints: Waypoint[] = [
-    { id: 'overview', kind: 'section', number: '00', name: flight.overview },
-    { id: 'ecosystem', kind: 'section', number: '01', name: t.home.board.section },
-    { id: 'packages', kind: 'section', number: '02', name: t.home.ledger.section },
-    ...layers.map((_, index) => ({
-      id: `stage-${index + 1}`,
-      kind: 'stage' as const,
-      name: t.home.timeline.stages[index + 1]?.title ?? '',
-    })),
-    { id: 'quick-start', kind: 'section', number: '03', name: t.home.quickStart.section },
-  ];
+  const flight = t.common.flight;
   const { rootRef, measure, here, reached, heading } = useFlight(
     waypoints.map((waypoint) => waypoint.id),
     { rail: RAIL_FIXED, strip: STRIP_FIXED },
