@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.11.0...docs-ui-v0.12.0) (2026-11-12)
+
+
+### Features
+
+* **docs-ui:** the flight plan and the pixel handoff for every TUWA site, and a card icon for Quasar Client ([#73](https://github.com/TuwaIO/docs/issues/73)) ([3887102](https://github.com/TuwaIO/docs/commit/3887102b563ce2cab90ceb48a2c0073d649a8753))
+
 ## [0.11.0](https://github.com/TuwaIO/docs/compare/docs-ui-v0.10.1...docs-ui-v0.11.0) (2026-11-12)
 
 
