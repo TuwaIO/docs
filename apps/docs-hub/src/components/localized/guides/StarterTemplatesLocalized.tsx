@@ -89,17 +89,6 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
             </Tr>
             <Tr>
               <Td>
-                <Code>custom-style</Code>
-              </Td>
-              <Td>
-                Кастомізація UI: стилізація Nova Connect та Transactions через змінні <Code>--tuwa-*</Code> (
-                <A href="https://custom-style.tuwa.io/">демо</A>)
-              </Td>
-              <Td>Vite 8, @tuwaio/sdk</Td>
-              <Td>Intermediate</Td>
-            </Tr>
-            <Tr>
-              <Td>
                 <Code>nextjs-tuwa-quasar</Code>
               </Td>
               <Td>
@@ -223,17 +212,6 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
             </Td>
             <Td>细粒度架构：拆解 SDK，按需引入 Satellite、Pulsar 与 Nova 核心原子包</Td>
             <Td>Next.js 16, @wagmi/core, @solana/kit, @tuwaio/pulsar-*</Td>
-            <Td>中级 (Intermediate)</Td>
-          </Tr>
-          <Tr>
-            <Td>
-              <Code>custom-style</Code>
-            </Td>
-            <Td>
-              深度定制设计系统：通过 CSS 变量 <Code>--tuwa-*</Code> 实现定制换肤 (
-              <A href="https://custom-style.tuwa.io/">在线 Demo</A>)
-            </Td>
-            <Td>Vite 8, @tuwaio/sdk</Td>
             <Td>中级 (Intermediate)</Td>
           </Tr>
           <Tr>
