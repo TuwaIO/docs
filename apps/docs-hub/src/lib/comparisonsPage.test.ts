@@ -189,9 +189,7 @@ describe('the comparisons page', () => {
     // Every waypoint is a part of the page
     for (const [id] of links) expect(markup, id).toContain(`id="${id}"`);
     const content = read('ComparisonsContent.tsx');
-    expect(content).toMatch(
-      /<FlightPlan waypoints=\{waypoints\} labels=\{t\.common\.flight\} \/>\s*<div className="relative z-10">/,
-    );
+    expect(content).toMatch(/<PageFlightPlan waypoints=\{waypoints\} \/>\s*<div className="relative z-10">/);
     expect(content).toContain("{ id: 'next', kind: 'section', name: sections.next },");
   });
 

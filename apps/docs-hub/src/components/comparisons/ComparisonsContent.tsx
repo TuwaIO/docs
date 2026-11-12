@@ -1,6 +1,6 @@
 'use client';
 
-import { ARROW_RIGHT, FlightPlan, type FlightWaypoint, PixelArt } from '@tuwaio/docs-ui';
+import { ARROW_RIGHT, type FlightWaypoint, PixelArt } from '@tuwaio/docs-ui';
 import type { ReactNode } from 'react';
 
 import Link from '@/components/LocaleNextLink';
@@ -16,6 +16,7 @@ import {
 } from '../buttonStyles';
 import { homeContentClassName, homeFrameClassName } from '../home/homeLayout';
 import { CrossMark, Kicker, SectionBar, SectionHead } from '../home/SectionHead';
+import { PageFlightPlan } from '../PageFlightPlan';
 import { BundleSizes } from './BundleSizes';
 import { ChooseInstead } from './ChooseInstead';
 import { ComparisonRadar } from './ComparisonRadar';
@@ -71,7 +72,7 @@ function Section({
  * verified, how many products and criteria), the title in large mono and the lead; then five sections, each under its
  * bar: the radar (with the TUWA projects that do the job of each segment, on shared lines), every criterion with its
  * sources, when to choose another tool, the bundle sizes and the methodology; and two buttons to start with. Beside
- * it flies the craft of its flight plan (`FlightPlan`), from the top of the page to those buttons, the Earth.
+ * it flies the craft of its flight plan (`PageFlightPlan`), from the top of the page to those buttons, the Earth.
  *
  * @returns The page.
  */
@@ -103,7 +104,7 @@ export function ComparisonsContent() {
   return (
     <>
       {/* Outside the page below: its strip lies over the line of the header */}
-      <FlightPlan waypoints={waypoints} labels={t.common.flight} />
+      <PageFlightPlan waypoints={waypoints} />
       <div className="relative z-10">
         <div className={`${homeContentClassName} ${homeFrameClassName}`}>
           <CrossMark x="left" y="top" />
