@@ -5,6 +5,12 @@ import type { GeneratedFile } from '../configurator/generate';
 /** A set of class names for every part of Nova UI Kit (`customization.classNames` of the components). */
 export type StyleKit = 'nova' | 'mono' | 'iso';
 
+/**
+ * The icon set of Nova UI Kit (the `icons` prop of its providers): its own pixel icons, or Heroicons, the set Nova drew
+ * before.
+ */
+export type NovaIconSetChoice = 'pixel' | 'classic';
+
 /** The language of the Nova texts (`labels`). */
 export type NovaLanguage = 'en' | 'zh' | 'uk';
 
@@ -25,6 +31,8 @@ export type ToastPosition = (typeof TOAST_POSITIONS)[number];
 export interface NovaCustomization {
   /** Class names of every part (`customization.classNames`). */
   style: StyleKit;
+  /** The icon set (`icons`): the pixel icons of Nova, or `heroicons` of `@tuwaio/sdk/nova-core/heroicons`. */
+  icons: NovaIconSetChoice;
   /** Texts (`labels`): English, or Ukrainian. */
   language: NovaLanguage;
   /** Text of the connect button (`labels.connectWallet`); empty keeps the text of the language. */
@@ -56,6 +64,7 @@ export interface NovaCustomization {
 /** Nova as it ships: its class names, English texts and default options. */
 export const DEFAULT_CUSTOMIZATION: NovaCustomization = {
   style: 'nova',
+  icons: 'pixel',
   language: 'en',
   connectLabel: '',
   historyIcons: false,
@@ -83,7 +92,7 @@ export function defaultCustomizationFor(locale: 'en' | 'uk' | 'zh-CN'): NovaCust
 
 /** The style kits of the Customize tab. */
 export const STYLE_KITS: Record<StyleKit, { label: string; description: string }> = {
-  nova: { label: 'Nova', description: 'The class names Nova UI Kit ships with.' },
+  nova: { label: 'Nova', description: 'The class names Nova UI Kit ships with: paper and ink.' },
   mono: { label: 'TUWA Mono', description: 'Monospace type, outlined surfaces and accent rings on every part.' },
   iso: {
     label: 'Isometric',
@@ -136,11 +145,25 @@ const CODE_FLAGS = [
 ] as const;
 
 /**
- * Every customization that gives a different `customization.tsx`: every style kit and both languages, with and
- * without a text of the connect button, every combination of the switches, with the default and with changed options.
- * The configurator check compiles the code of each one (3072 variants).
+ * Every customization that gives a different `customization.tsx`: every style kit and every language, with and
+ * without a text of the connect button, every combination of the switches, with the default and with changed options
+ * (4608 variants with the pixel icons); and, for every style kit and language, Heroicons with no switch and with every
+ * switch on (18 more): the icon set adds the same import and the same two props whatever else is set. The configurator
+ * check compiles the code of each one.
  */
 export function allCustomizations(): NovaCustomization[] {
+  const everyFlag = Object.fromEntries(CODE_FLAGS.map((flag) => [flag, true]));
+  const classic = (['nova', 'mono', 'iso'] as const).flatMap((style) =>
+    (['en', 'zh', 'uk'] as const).flatMap((language): NovaCustomization[] => [
+      { ...DEFAULT_CUSTOMIZATION, style, language, icons: 'classic' },
+      { ...DEFAULT_CUSTOMIZATION, style, language, icons: 'classic', ...everyFlag },
+    ]),
+  );
+  return [...pixelCustomizations(), ...classic];
+}
+
+// The variants with the pixel icons: see `allCustomizations`
+function pixelCustomizations(): NovaCustomization[] {
   return (['nova', 'mono', 'iso'] as const).flatMap((style) =>
     (['en', 'zh', 'uk'] as const).flatMap((language) =>
       ['', "Let's go"].flatMap((connectLabel) =>
@@ -206,6 +229,7 @@ export function customizationCode(customization: NovaCustomization): string {
   const zh = customization.language === 'zh';
   const label = connectLabelOf(customization);
   const { historyIcons, confirmationsBar, emptyHistory, logButtonClicks, toastPosition } = customization;
+  const classic = customization.icons === 'classic';
 
   const historyExtra = objectOf([
     (historyIcons || emptyHistory) &&
@@ -259,6 +283,7 @@ export function customizationCode(customization: NovaCustomization): string {
     uk && "import { ukrainianLabels } from '@tuwaio/sdk/nova-connect/i18n';",
     zh && "import { chineseLabels } from '@tuwaio/sdk/nova-connect/i18n';",
     zh && "import { chineseLabels as chineseTransactionsLabels } from '@tuwaio/sdk/nova-transactions';",
+    classic && "import { heroicons } from '@tuwaio/sdk/nova-core/heroicons';",
     usesDeepMerge && "import { deepMerge } from '@tuwaio/sdk/nova-core/utils';",
     "import type { TransactionsHistoryCustomization } from '@tuwaio/sdk/nova-transactions';",
     "import type { NovaTransactionsProviderProps } from '@tuwaio/sdk/nova-transactions/providers';",
@@ -278,6 +303,7 @@ export function customizationCode(customization: NovaCustomization): string {
     customization.popularWallet && `popularConnectors: [${POPULAR_WALLETS.map(quote).join(', ')}]`,
     customization.legalLinks &&
       `legal: { termsUrl: ${quote(LEGAL_LINKS.termsUrl)}, privacyUrl: ${quote(LEGAL_LINKS.privacyUrl)} }`,
+    classic && 'icons: heroicons',
     connectLabels && `labels: ${connectLabels}`,
     connect && `customization: ${connect}`,
   ]);
@@ -285,6 +311,7 @@ export function customizationCode(customization: NovaCustomization): string {
     toastPosition !== 'bottom-right' && `position: ${quote(toastPosition)}`,
     customization.autoCloseToasts && 'autoClose: 5000',
     !customization.trackingModal && 'features: { trackingTxModal: false }',
+    classic && 'icons: heroicons',
     uk && 'labels: ukrainianTransactionsLabels',
     zh && 'labels: chineseTransactionsLabels',
     transactions && `customization: ${transactions}`,
@@ -296,6 +323,9 @@ export function customizationCode(customization: NovaCustomization): string {
     '// <NovaTransactionsProvider {...novaTransactionsProps} {...pulsarStoreProps} />',
     '// <ConnectButton customization={connectButtonCustomization} />',
     '// <TransactionsHistory customization={historyCustomization} {...historyProps} />',
+    ...(classic
+      ? ['// The Heroicons set needs @heroicons/react (2.x), an optional peer dependency of the SDK: install it.']
+      : []),
     ...(uk
       ? [
           '// <NovaTransactionsLabelsProvider labels={ukrainianTransactionsLabels}> around the app, for TransactionsHistory',

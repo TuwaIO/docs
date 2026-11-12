@@ -15,6 +15,7 @@ import { SIMULATED_RPC_URL } from '@/lib/playground/satelliteAdapters';
 import { ActionButtons } from './ActionButtons';
 import { usePlayground } from './PlaygroundContext';
 import { useNovaCustomization } from './useNovaCustomization';
+import { useNovaIconSet } from './useNovaIconSet';
 
 const APP_CHAINS = [mainnet, base, arbitrum] as const;
 const SOLANA_RPC_URLS = { mainnet: SIMULATED_RPC_URL, devnet: SIMULATED_RPC_URL };
@@ -33,12 +34,16 @@ function useHistoryPagination(): TxInMemoryPagination {
  * The dApp with Nova UI Kit, wired as in the Quasar guide: Nova Connect for the wallets and SIWX, Nova Transactions
  * for the toasts, the tracking modal and the history, all fed by the pool of the device (`useStagePool`). The props
  * and `customization` objects come from the Customize tab; `NovaTransactionsLabelsProvider` gives its texts to the
- * histories outside `NovaTransactionsProvider` (on the stage and in the connected modal).
+ * histories outside `NovaTransactionsProvider` (on the stage and in the connected modal). Both providers take the icon
+ * set of the controls (`icons`): Nova's pixel icons, or Heroicons.
  */
 export function NovaStage() {
   const { t } = useI18n();
-  const { settings, device, novaSiwx } = usePlayground();
+  const { settings, device, novaSiwx, customization } = usePlayground();
   const nova = useNovaCustomization();
+  // The pixel icons of Nova, or Heroicons: one set for the toasts and the tracking modal, and for everything under the
+  // connect provider (the modals, the button, the history of the stage)
+  const icons = useNovaIconSet(customization.icons);
   const transactionsPool = device.useStagePool();
   // Pages of the cloud history exist only with Quasar
   const historyPagination = useHistoryPagination();
@@ -57,6 +62,7 @@ export function NovaStage() {
     <>
       <NovaTransactionsProvider
         {...nova.transactionsProps}
+        icons={icons}
         sounds
         transactionsPool={transactionsPool}
         pagination={pagination}
@@ -71,6 +77,7 @@ export function NovaStage() {
       <NovaTransactionsLabelsProvider labels={nova.transactionsLabels}>
         <NovaConnectProvider
           {...nova.connectProps}
+          icons={icons}
           sounds
           appChains={APP_CHAINS}
           solanaRPCUrls={SOLANA_RPC_URLS}

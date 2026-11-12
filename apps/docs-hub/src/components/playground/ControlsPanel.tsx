@@ -282,6 +282,23 @@ function LookGroups({ compact }: { compact: boolean }) {
               </Choice>
             ))}
           </Group>
+          {/* The names of the two sets are names of products: the same in every language */}
+          <Group label={t.ui.playgroundExtra.iconsGroup} info={t.ui.playgroundExtra.info.icons} compact={compact}>
+            <Choice
+              pressed={customization.icons === 'pixel'}
+              onClick={() => changeCustomization({ icons: 'pixel' })}
+              compact={compact}
+            >
+              Nova
+            </Choice>
+            <Choice
+              pressed={customization.icons === 'classic'}
+              onClick={() => changeCustomization({ icons: 'classic' })}
+              compact={compact}
+            >
+              Heroicons
+            </Choice>
+          </Group>
           {/* Minimal: the connect button alone, without the balance and the network selector */}
           <Group
             label={t.ui.playgroundExtra.connectButtonGroup}

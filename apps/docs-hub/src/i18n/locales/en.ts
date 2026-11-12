@@ -1174,6 +1174,7 @@ export const en: DocsHubLabels = {
         'The real TUWA stores and Nova components run in your browser on simulated wallets and a simulated chain: nothing is signed or sent.',
       loadingAria: 'Loading the Playground',
       connectButtonGroup: 'Connect button',
+      iconsGroup: 'Icons',
       minimal: 'Minimal',
       full: 'Full',
       nextTxGroup: 'Next transaction',
@@ -1220,6 +1221,8 @@ export const en: DocsHubLabels = {
           'The --tuwa-* variables of Nova on the stage. Customize › Theme edits each one and gives the CSS to paste.',
         style:
           'Class names for every Nova part (customization.classNames): Nova as it ships, TUWA Mono, or Isometric, drawn for its own themes.',
+        icons:
+          'The icon set Nova UI Kit draws (the icons prop of its providers): its own pixel icons, or Heroicons, the set it drew before.',
         connectButton:
           'Full: the balance and the network selector next to the button. Minimal: the button alone (withBalance and withChain off).',
         language:

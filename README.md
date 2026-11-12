@@ -38,7 +38,7 @@ docs/
 ```
 
 - **[`apps/docs-hub`](./apps/docs-hub)**: the hub. See its [README](./apps/docs-hub/README.md) for local development and for adding a project or a guide.
-- **[`@tuwaio/docs-ui`](./packages/docs-ui)**: published to npm and used by every TUWA documentation site, the hub, the landing page and the Quasar dashboards. Peer dependencies: `react`, `next`, `nextra-theme-docs`, `@heroicons/react`.
+- **[`@tuwaio/docs-ui`](./packages/docs-ui)**: published to npm and used by every TUWA documentation site, the hub, the landing page and the Quasar dashboards. Peer dependencies: `react`; `next`, `nextra` and `nextra-theme-docs` are optional (the `/nextra` entries).
 
 ---
 

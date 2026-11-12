@@ -48,8 +48,22 @@ describe('the shell of the Playground', () => {
   });
 
   it('takes every icon from Nova, none from heroicons', () => {
-    for (const file of shell) expect(read(`components/playground/${file}`), file).not.toContain('@heroicons/react');
+    // An import of heroicons; the hook of the icon set only names the package it loads through the SDK
+    for (const file of shell)
+      expect(read(`components/playground/${file}`), file).not.toMatch(/from '@heroicons\/react/);
     expect(controls).toContain("} from '@tuwaio/sdk/nova-icons/24/outline';");
+  });
+
+  // The switch of the controls: Nova's pixel icons, or Heroicons through the `icons` prop of the two providers. The
+  // Heroicons set is loaded when it is first picked, not with the page
+  it('lets the reader switch the icons of Nova to Heroicons, loaded only when picked', () => {
+    expect(controls).toMatch(/<Group label=\{t\.ui\.playgroundExtra\.iconsGroup\}/);
+    expect(controls).toContain("onClick={() => changeCustomization({ icons: 'classic' })}");
+    const hook = read('components/playground/useNovaIconSet.ts');
+    expect(hook).toContain("void import('@tuwaio/sdk/nova-core/heroicons').then(");
+    expect(hook).not.toMatch(/^import .*heroicons/m);
+    const novaStage = read('components/playground/NovaStage.tsx');
+    expect(novaStage.match(/icons=\{icons\}/g)).toHaveLength(2);
   });
 
   it('draws the stage as a window in a frame of 1px, with square marks and no shadow', () => {

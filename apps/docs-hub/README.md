@@ -27,7 +27,7 @@ Both consume shared UI primitives and design tokens from [`@tuwaio/docs-ui`](../
 - **Search:** Pagefind, indexed after every production build, with an index for each language
 - **Languages:** English, Ukrainian and Simplified Chinese at their own URLs: English without a prefix, `/uk/...` and `/zh-CN/...`
 - **Styling:** Tailwind CSS 4+ with PostCSS, plus TUWA design tokens from `@tuwaio/nova-core` and `@tuwaio/docs-ui`
-- **Icons:** `@heroicons/react`
+- **Icons:** the pixel icons of Nova (`@tuwaio/sdk/nova-icons`); `@heroicons/react` only for the Heroicons set the Playground can hand to Nova (`@tuwaio/sdk/nova-core/heroicons`)
 - **Theme:** `next-themes` for dark/light mode
 - **Utilities:** `clsx`, `tailwind-merge`, `nextjs-toploader`
 - **Deployment:** Vercel
@@ -118,7 +118,7 @@ A step that fails (registry, jsDelivr or GitHub unreachable) keeps its last save
 cd ../../tools/configurator-check
 pnpm install --ignore-workspace   # once, and after bumping the versions in its package.json
 pnpm check                        # type-checks the 45 stacks, their install commands and their formatting,
-                                  # and the 3072 variants of the Playground customization
+                                  # and the 4626 variants of the Playground customization
 ```
 
 The generator has no runtime imports and uses only erasable TypeScript, because the check runs it with Node's type stripping.

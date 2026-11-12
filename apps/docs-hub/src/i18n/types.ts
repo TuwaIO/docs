@@ -735,6 +735,8 @@ export interface DocsHubLabels {
       subnote: string;
       loadingAria: string;
       connectButtonGroup: string;
+      /** The legend of the icon set switch (Nova pixel icons or Heroicons) */
+      iconsGroup: string;
       minimal: string;
       full: string;
       nextTxGroup: string;
@@ -764,6 +766,7 @@ export interface DocsHubLabels {
         features: string;
         theme: string;
         style: string;
+        icons: string;
         connectButton: string;
         language: string;
         outcome: string;

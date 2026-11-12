@@ -1147,6 +1147,7 @@ export const zhCN: DocsHubLabels = {
         '真实的 TUWA 状态仓库与 Nova 组件在您的浏览器中直接运行在模拟钱包与模拟链上：不会签署或广播任何真实链上交易。',
       loadingAria: '正在加载交互演练场',
       connectButtonGroup: '连接按钮',
+      iconsGroup: '图标',
       minimal: '极简',
       full: '完整',
       nextTxGroup: '下一笔交易结果',
@@ -1192,6 +1193,7 @@ export const zhCN: DocsHubLabels = {
         theme: '舞台上 Nova 组件的 --tuwa-* CSS 变量。可在下方“深度定制 › 主题”中逐项微调并复制生成的 CSS。',
         style:
           'Nova 各组件的样式类套件 (customization.classNames)：支持原生 Nova、TUWA Mono 或 Isometric 等距线稿风格。',
+        icons: 'Nova UI Kit 使用的图标集（其 provider 的 icons 属性）：自带的像素图标，或它此前使用的 Heroicons。',
         connectButton:
           '完整：在按钮旁展示余额与网络选择器。极简：仅展示连接按钮本体（关闭 withBalance 与 withChain）。',
         language: 'Nova UI Kit 界面文本与弹窗的语言：英语 (EN)、简体中文 (CN) 或乌克兰语 (UA)。',

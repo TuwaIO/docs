@@ -19,6 +19,7 @@ const NOVA_FILES = new URL('../../components/playground/nova/', import.meta.url)
 
 const everything: NovaCustomization = {
   style: 'mono',
+  icons: 'pixel',
   language: 'uk',
   connectLabel: 'Launch app',
   historyIcons: true,
@@ -133,10 +134,27 @@ describe('Nova customization', () => {
     ]);
   });
 
+  // 4608 with the pixel icons, and Heroicons for every style kit and language, with no switch and with every switch on
   it('gives every variant of the configurator check its own code', () => {
     const variants = allCustomizations();
-    expect(variants).toHaveLength(4608);
-    expect(new Set(variants.map(customizationCode)).size).toBe(4608);
+    expect(variants).toHaveLength(4608 + 18);
+    expect(new Set(variants.map(customizationCode)).size).toBe(4608 + 18);
+    expect(variants.filter((variant) => variant.icons === 'classic')).toHaveLength(18);
+  });
+
+  // Nova draws its own pixel icons unless a provider is given another set: Heroicons come from a separate entry of
+  // the SDK, so only an app that picks them loads them
+  it('gives Heroicons to both providers when they are picked, and nothing for the pixel icons', () => {
+    const pixel = customizationCode(DEFAULT_CUSTOMIZATION);
+    expect(pixel).not.toContain('heroicons');
+    const classic = customizationCode({ ...DEFAULT_CUSTOMIZATION, icons: 'classic' });
+    expect(classic).toContain("import { heroicons } from '@tuwaio/sdk/nova-core/heroicons';");
+    expect(classic.match(/^ {2}icons: heroicons,$/gm)).toHaveLength(2);
+    expect(classic).toContain('@heroicons/react (2.x), an optional peer dependency of the SDK');
+    // The props of the two providers, each with the set
+    const [, connect = '', transactions = ''] = classic.split(/export const nova(?:Connect|Transactions)Props = /);
+    expect(connect).toContain('icons: heroicons');
+    expect(transactions).toContain('icons: heroicons');
   });
 
   it('ships every copyable file, importing only published packages', () => {
