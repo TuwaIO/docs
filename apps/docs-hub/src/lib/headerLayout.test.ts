@@ -79,6 +79,41 @@ describe('the Nextra header of @tuwaio/docs-ui', () => {
     expect(mediaBlockOf(css, '.nextra-navbar {')).toBeUndefined();
   });
 
+  // A search field of 256px left the top-level pages 86 to 218px of the header between the phone menu and 1024px:
+  // there the search is a square with a magnifier, which opens into the field while the reader is in it
+  it.each([
+    ['source', 'src/styles/site.css'],
+    ['build', 'dist/index.css'],
+  ])('folds the search into a square with a magnifier between 768px and 1024px (%s)', (_, file) => {
+    const css = read(file).replace(/\s+/g, ' ');
+    const start = css.search(
+      /@media \(min-width: ?768px\) and \(max-width: ?1023\.98px\) ?\{ ?\.nextra-navbar \.nextra-search ?\{/,
+    );
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, start + 2600);
+    expect(block).toMatch(/\.nextra-navbar \.nextra-search ?\{ ?width: ?34px; ?height: ?34px;? ?\}/);
+    expect(block).toMatch(/\.nextra-navbar \.nextra-search input ?\{[^}]*width: ?34px ?!important/);
+    expect(block).toMatch(/\.nextra-navbar \.nextra-search kbd ?\{ ?display: ?none;? ?\}/);
+    // The magnifier is a mask in the ink of the labels, so it follows the theme
+    expect(block).toMatch(
+      /\.nextra-navbar \.nextra-search:{1,2}before ?\{[^}]*background-color: ?var\(--tuwa-text-secondary\)[^}]*mask: ?url\(/,
+    );
+    // Open, the field is back at its width, over the pages
+    expect(block).toMatch(/\.nextra-navbar \.nextra-search:focus-within input ?\{[^}]*width: ?16rem ?!important/);
+    expect(block).toMatch(/\.nextra-navbar \.nextra-search:focus-within:{1,2}before ?\{ ?display: ?none;? ?\}/);
+  });
+
+  // The band of the footer had a darker line of its own right over the grey separator Nextra draws there (its `hr`),
+  // and the two lines read as a shadow before the footer
+  it.each([
+    ['source', 'src/styles/site.css'],
+    ['build', 'dist/index.css'],
+  ])('leaves one line above the footer of Nextra: the grey separator (%s)', (_, file) => {
+    const band = ruleBlockOf(read(file), "[class*='x:bg-gray-100'][class*='x:dark:bg-neutral-900']");
+    expect(band).toMatch(/background-color:\s*var\(--tuwa-docs-paper\)/);
+    expect(band).not.toMatch(/border|shadow/);
+  });
+
   // The logo of the docs is the logo of tuwa.io, at its size there (110px on phones, 126px from 640px): at 20px high it
   // was too small to read. The row of the navbar still fits a 320px phone, checked in the browser
   it('gives the logo the size of the logo of tuwa.io, and keeps it from shrinking', () => {

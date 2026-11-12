@@ -229,6 +229,75 @@ hr.nextra-border,
   outline-offset: 2px;
 }
 
+/* Between the phone menu and 1024px the search of the header is a square with a pixel magnifier, so the top-level
+   pages keep the room of the header: a field of 256px left them 86 to 218px. Under a click, the keyboard or its
+   shortcut the square opens into the field, over the pages on its left, and closes when the reader leaves it */
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .nextra-navbar .nextra-search {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nextra-navbar .nextra-search input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 34px !important;
+    height: 34px;
+    padding: 0 !important;
+    color: transparent;
+    cursor: pointer;
+  }
+
+  .nextra-navbar .nextra-search input::placeholder {
+    color: transparent !important;
+  }
+
+  /* The shortcut of the field has no room in the square */
+  .nextra-navbar .nextra-search kbd {
+    display: none;
+  }
+
+  /* The magnifier, drawn in pixels on a grid of 12, in the ink of the labels of the header */
+  .nextra-navbar .nextra-search::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: var(--tuwa-text-secondary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h1v1h-1zM2 7h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM8 8h1v1h-1zM9 9h1v1h-1zM10 10h1v1h-1z'/%3E%3C/svg%3E")
+      center / 14px 14px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h1v1h-1zM2 7h1v1h-1zM3 7h1v1h-1zM4 7h1v1h-1zM5 7h1v1h-1zM7 7h1v1h-1zM8 8h1v1h-1zM9 9h1v1h-1zM10 10h1v1h-1z'/%3E%3C/svg%3E")
+      center / 14px 14px no-repeat;
+    pointer-events: none;
+  }
+
+  .nextra-navbar .nextra-search:hover::before {
+    background-color: var(--tuwa-text-primary);
+  }
+
+  /* Open: the field at its width, on the raised paper, over the row of the pages and its arrows */
+  .nextra-navbar .nextra-search:focus-within {
+    z-index: 3;
+  }
+
+  .nextra-navbar .nextra-search:focus-within input {
+    width: 16rem !important;
+    padding: 0.5rem 0.75rem !important;
+    background-color: var(--tuwa-docs-raised) !important;
+    color: var(--tuwa-text-primary);
+    cursor: text;
+  }
+
+  .nextra-navbar .nextra-search:focus-within input::placeholder {
+    color: var(--tuwa-text-secondary) !important;
+  }
+
+  .nextra-navbar .nextra-search:focus-within::before {
+    display: none;
+  }
+}
+
 .nextra-breadcrumb,
 .nextra-breadcrumbs {
   font-family: var(--tuwa-font-mono) !important;
@@ -988,10 +1057,11 @@ article a[href^='http']:after {
   color: var(--tuwa-text-primary);
 }
 
-/* The footer of Nextra stands on the paper, below a line of 1px, not on its grey band */
+/* The footer of Nextra stands on the paper, not on its grey band, below the one line Nextra draws above it (its `hr`,
+   the grey separator of 1px). A second, darker line on the band itself stood right over that one and the two read as a
+   shadow */
 [class*='x:bg-gray-100'][class*='x:dark:bg-neutral-900'] {
   background-color: var(--tuwa-docs-paper);
-  border-top: 1px solid var(--tuwa-border-strong);
 }
 
 @media (max-width: 768px) {
