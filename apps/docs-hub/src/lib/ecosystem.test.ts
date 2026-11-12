@@ -22,29 +22,41 @@ describe('the counts of the hero', () => {
   it('come from the data: the packages on npm that are not deprecated, the products and the stages', () => {
     const counts = ecosystemCounts();
     // nova-icons (a dependency of nova-core) and create-cosmos-playground (the CLI of the SDK) joined the 23 of before
-    expect(counts).toEqual({ packages: 25, products: 8, stages: 5 });
+    // Quasar Client is a product of its own, and the two checkout packages of its repository joined the 25 of before
+    expect(counts).toEqual({ packages: 27, products: 9, stages: 5 });
     const npm = layers.flatMap((layer) => layer.entries.flatMap((entry) => entry.packages ?? []));
     expect(npm.filter((pkg) => pkg.isDeprecated).map((pkg) => pkg.name)).toEqual(['@tuwaio/satellite-siwe-next-auth']);
   });
 });
 
 describe('the plate of the hero', () => {
-  // A 3 × 3 plate: the eight projects around the count
-  it('has eight projects, each with its stage and an icon that exists', () => {
+  // A 3 × 3 plate of the nine projects, under the counts. In every stage the project the others build on comes first:
+  // Orbit Utils before SIWX, Pulsar before Satellite Connect; Quasar Client stands with the backend it calls
+  it('has nine projects, each with its stage and an icon that exists', () => {
     const entries = stagedEntries();
-    expect(entries).toHaveLength(8);
+    expect(entries).toHaveLength(9);
     expect(entries.map((entry) => `${entry.stage}:${entry.id}`)).toEqual([
-      '1:siwx',
       '1:orbit',
-      '2:satellite',
+      '1:siwx',
       '2:pulsar',
+      '2:satellite',
       '3:quasar',
       '3:quasar-community',
+      '3:quasar-client',
       '4:nova',
       '5:sdk',
     ]);
     for (const entry of entries) expect(projectIconArt[entry.icon], entry.id).toBeDefined();
     expect(entries.find((entry) => entry.id === 'quasar-community')?.icon).toBe('server');
+    expect(entries.find((entry) => entry.id === 'quasar-client')?.icon).toBe('card');
+    // The plate draws them all, three in a row, with no cell kept for the counts, and numbers them 01 to 09: a stage
+    // has several projects, so the number of its stage repeated from cell to cell and read as a wrong count
+    const plate = readFileSync(path.resolve(__dirname, '../components/home/HeroPlate.tsx'), 'utf8');
+    expect(plate).toContain('{stagedEntries().map((entry, index) => (');
+    expect(plate).toContain('<PlateLink key={entry.id} entry={entry} number={index + 1} />');
+    expect(plate).toContain("{String(number).padStart(2, '0')}");
+    expect(plate).not.toContain('entry.stage');
+    expect(plate).toMatch(/className="col-span-3 [^"]*bg-\[var\(--tuwa-text-primary\)\]/);
     expect(entries.find((entry) => entry.id === 'siwx')?.plateName).toBe('SIWX');
   });
 });
@@ -120,12 +132,44 @@ describe('the board of the architecture', () => {
       'siwx>nova optional',
       'nova>sdk',
       'quasar-community>quasar or',
+      'quasar-community>quasar-client',
     ]);
+  });
+
+  // Quasar Cloud listed the package of the client and so counted "1 package": without it the board would call the
+  // managed cloud self-hosted, the words it has for a project without packages
+  it('says how a project without packages is run: managed or self-hosted', () => {
+    const hosting = Object.fromEntries(
+      entries.filter((entry) => entry.hosting).map((entry) => [entry.id, entry.hosting]),
+    );
+    expect(hosting).toEqual({ quasar: 'managed', 'quasar-community': 'self-hosted' });
+    for (const entry of entries)
+      expect(Boolean(entry.hosting), entry.id).toBe(
+        !(entry.packages ?? []).some((pkg) => pkg.name.startsWith('@tuwaio/')),
+      );
+    const board = readFileSync(path.resolve(__dirname, '../components/home/EcosystemBoard.tsx'), 'utf8');
+    expect(board).toMatch(/entry\.hosting === 'managed' \? \(\s*board\.managed\s*\) : \(\s*board\.selfHosted/);
+  });
+
+  // The repository of Quasar Client has three packages of three layers: each is listed with the project of its layer,
+  // so the layers of the stages stay what they are
+  it('lists the packages of the Quasar Client repository where their layers are', () => {
+    const home = (name: string) => entries.find((entry) => entry.packages?.some((pkg) => pkg.name === name));
+    const layerOf = (name: string) => home(name)?.packages?.find((pkg) => pkg.name === name)?.layer;
+    expect([home('@tuwaio/quasar-sdk')?.id, layerOf('@tuwaio/quasar-sdk')]).toEqual(['quasar-client', 'L5']);
+    expect([home('@tuwaio/nova-payments')?.id, layerOf('@tuwaio/nova-payments')]).toEqual(['nova', 'L7']);
+    expect([home('@tuwaio/payments-sdk')?.id, layerOf('@tuwaio/payments-sdk')]).toEqual(['sdk', 'L9']);
+    const packages = readFileSync(path.resolve(__dirname, 'packages.ts'), 'utf8');
+    // Their reference and their source are those of that repository, whatever project lists them
+    for (const prefix of ['quasar-sdk', 'payments-sdk', 'nova-payments'])
+      expect(packages).toContain(`{ prefix: '${prefix}', ...quasarClient },`);
   });
 
   it('names the layers of each stage from its packages', () => {
     expect([1, 2, 3, 4, 5].map(stageLayerRange)).toEqual(['L1–L2', 'L3–L4', 'L5', 'L6–L7', 'L8–L9']);
     expect(entryLayerRange('quasar-community')).toBe('');
+    expect(entryLayerRange('quasar')).toBe('');
+    expect(entryLayerRange('quasar-client')).toBe('L5');
     expect(entryLayerRange('siwx')).toBe('L1–L2');
   });
 

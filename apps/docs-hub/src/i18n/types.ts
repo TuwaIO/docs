@@ -296,6 +296,8 @@ export interface DocsHubLabels {
       cloudOrSelfHosted: string;
       /** Instead of the packages of a project that has none on npm */
       selfHosted: string;
+      /** What a project run by TUWA shows where the others count their packages: Quasar Cloud */
+      managed: string;
       /** The number of packages of a project (`{n}`) */
       packages: PluralLabel;
       /** Before the marks of the projects the SDK re-exports */

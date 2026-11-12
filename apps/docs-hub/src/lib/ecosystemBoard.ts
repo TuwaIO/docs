@@ -56,9 +56,13 @@ const routes: Record<string, Route> = {
     [along(pulsar!, 0.55), pulsar!.bottom],
     [along(pulsar!, 0.55), quasar!.top],
   ],
-  'satellite>nova': ({ satellite, nova }) => [
+  // Round Quasar Client, which stands under Satellite Connect: down the gutter between the first and the second lane,
+  // 6px on the left of the trace from Pulsar
+  'satellite>nova': ({ satellite, nova }, laneEdge) => [
     [along(satellite!, 0.5), satellite!.bottom],
-    [along(satellite!, 0.5), crisp(nova!.top - 16)],
+    [along(satellite!, 0.5), crisp(satellite!.bottom + 10)],
+    [laneEdge(1) - 6, crisp(satellite!.bottom + 10)],
+    [laneEdge(1) - 6, crisp(nova!.top - 16)],
     [along(nova!, 0.25), crisp(nova!.top - 16)],
     [along(nova!, 0.25), nova!.top],
   ],
@@ -95,6 +99,15 @@ const routes: Record<string, Route> = {
     [along(nova!, 0.45), nova!.bottom],
     [along(nova!, 0.45), sdk!.top],
   ],
+  // Across the third row, from the left side of Quasar Community
+  'quasar-community>quasar-client': (boxes) => {
+    const community = boxes['quasar-community']!;
+    const client = boxes['quasar-client']!;
+    return [
+      [community.left, middle(community)],
+      [client.right, middle(community)],
+    ];
+  },
   'quasar-community>quasar': (boxes) => {
     const community = boxes['quasar-community']!;
     const quasar = boxes.quasar!;

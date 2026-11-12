@@ -73,6 +73,7 @@ export const uk: DocsHubLabels = {
       or: 'АБО',
       cloudOrSelfHosted: 'Хмара або self-hosted',
       selfHosted: 'Self-hosted',
+      managed: 'Керований сервіс',
       packages: { one: '{n} пакет', few: '{n} пакети', many: '{n} пакетів', other: '{n} пакета' },
       reExports: 'Реекспортує',
       relationsLabel: 'На чому будується кожен проєкт',
@@ -131,6 +132,9 @@ export const uk: DocsHubLabels = {
       },
       'quasar-community': {
         tagline: 'Self-hosted бекенд та адмін-панель · Apache-2.0',
+      },
+      'quasar-client': {
+        tagline: 'API-клієнт, перевірка вебхуків і CLI-ретранслятор',
       },
       nova: {
         tagline: 'Дизайн-система та бібліотека React-компонентів',

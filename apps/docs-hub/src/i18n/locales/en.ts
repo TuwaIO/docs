@@ -72,6 +72,7 @@ export const en: DocsHubLabels = {
       or: 'OR',
       cloudOrSelfHosted: 'Cloud or self-hosted',
       selfHosted: 'Self-hosted',
+      managed: 'Managed',
       packages: { one: '{n} package', few: '{n} packages', many: '{n} packages', other: '{n} packages' },
       reExports: 'Re-exports',
       relationsLabel: 'What each project builds on',
@@ -130,6 +131,9 @@ export const en: DocsHubLabels = {
       },
       'quasar-community': {
         tagline: 'Self-hosted engine & admin · Apache-2.0',
+      },
+      'quasar-client': {
+        tagline: 'API client, webhook verification & relay CLI',
       },
       nova: {
         tagline: 'Design system & component library',

@@ -72,6 +72,7 @@ export const zhCN: DocsHubLabels = {
       or: '或',
       cloudOrSelfHosted: '云端或自部署',
       selfHosted: '自部署',
+      managed: '托管服务',
       packages: { one: '{n} 个包', few: '{n} 个包', many: '{n} 个包', other: '{n} 个包' },
       reExports: '重新导出',
       relationsLabel: '各项目的构建基础',
@@ -129,6 +130,9 @@ export const zhCN: DocsHubLabels = {
       },
       'quasar-community': {
         tagline: '私有化自部署引擎与管理后台 · Apache-2.0',
+      },
+      'quasar-client': {
+        tagline: 'API 客户端、Webhook 验签与中继 CLI',
       },
       nova: {
         tagline: '设计系统与开箱即用的 React 组件库',

@@ -156,7 +156,6 @@ ${sites.join('\n')}
 
 - [Quasar API (OpenAPI)](${OPENAPI_URL}): The endpoints that \`@tuwaio/quasar-sdk\` calls, as an OpenAPI 3 document
 - [Nova UI Kit Storybook](https://stories.tuwa.io/): Live examples of the Nova components
-- [Quasar Client](https://payments.docs.tuwa.io/): The live checkout of Nova Payments and the reference of \`@tuwaio/quasar-sdk\`, \`@tuwaio/nova-payments\` and \`@tuwaio/payments-sdk\`
 - [Cosmos Playground](https://github.com/TuwaIO/cosmos-playground): Source of the starter templates
 - [Quasar Community Edition](https://github.com/TuwaIO/quasar-community): The self-hosted Quasar
 - [TUWA website](https://tuwa.io): Product overview and Quasar Cloud
