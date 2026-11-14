@@ -195,7 +195,7 @@ export const uk: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'L4 Solana-пакет Pulsar (TUWA): адаптер транзакцій для гаманців Wallet Standard, трекер підписів та помічник підписання і відправлення на базі @solana/kit.',
         '@tuwaio/quasar-sdk':
-          'L5 клієнт Quasar (TUWA): клієнт API для Quasar Cloud і self-hosted вузлів Quasar (синхронізація та історія транзакцій Pulsar, рахунки Payments, повернення й підписки, перевірка вебхуків), а також CLI quasar-sdk для пересилання вебхуків на localhost.',
+          'L5 клієнт Quasar (TUWA): клієнт API для Quasar Cloud і self-hosted вузлів Quasar (синхронізація та історія транзакцій Pulsar, рахунки й повернення Payments, перевірка вебхуків), а також CLI quasar-sdk для пересилання вебхуків на localhost.',
         '@tuwaio/satellite-core':
           'L3 ядро Satellite Connect (TUWA): headless Zustand-сховище без прив’язки до фреймворку для підключення гаманців EVM і Solana з автопідключенням останнього гаманця та станом SIWX.',
         '@tuwaio/satellite-evm':

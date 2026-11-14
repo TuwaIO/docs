@@ -193,7 +193,7 @@ export const zhCN: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'Pulsar (TUWA) 的 L4 Solana 包：基于 @solana/kit 构建的 Wallet Standard 交易适配器、签名追踪器以及签名广播辅助函数。',
         '@tuwaio/quasar-sdk':
-          'Quasar (TUWA) 的 L5 客户端：适用于 Quasar Cloud 与自部署 Quasar 节点的 API 客户端（Pulsar 交易同步与历史查询、Payments 发票、退款与订阅、Webhook 验证），以及将 Webhook 转发至 localhost 的 quasar-sdk CLI。',
+          'Quasar (TUWA) 的 L5 客户端：适用于 Quasar Cloud 与自部署 Quasar 节点的 API 客户端（Pulsar 交易同步与历史查询、Payments 发票与退款、Webhook 验证），以及将 Webhook 转发至 localhost 的 quasar-sdk CLI。',
         '@tuwaio/satellite-core':
           'Satellite Connect (TUWA) 的 L3 核心包：面向 EVM 与 Solana 钱包连接的无头、框架无关 Zustand 状态库，支持自动重连上次钱包及 SIWX 状态类型。',
         '@tuwaio/satellite-evm':

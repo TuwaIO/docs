@@ -194,7 +194,7 @@ export const en: DocsHubLabels = {
         '@tuwaio/pulsar-solana':
           'L4 Solana package of Pulsar (TUWA): transaction adapter for Wallet Standard wallets, a signature tracker and a sign-and-send helper, built on @solana/kit.',
         '@tuwaio/quasar-sdk':
-          'L5 client of Quasar (TUWA): the Quasar API client for Quasar Cloud and self-hosted Quasar nodes (transaction sync and history for Pulsar, Payments invoices, refunds and subscriptions, webhook verification), and the quasar-sdk CLI that relays webhooks to localhost.',
+          'L5 client of Quasar (TUWA): the Quasar API client for Quasar Cloud and self-hosted Quasar nodes (transaction sync and history for Pulsar, Payments invoices and refunds, webhook verification), and the quasar-sdk CLI that relays webhooks to localhost.',
         '@tuwaio/satellite-core':
           'L3 core of Satellite Connect (TUWA): headless, framework-agnostic Zustand store for EVM and Solana wallet connections, with a chain adapter contract, auto-connect of the last wallet and the SIWX state type.',
         '@tuwaio/satellite-evm':
