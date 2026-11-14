@@ -4945,6 +4945,7 @@ paths:
             it), `invoice_expired`, `invoice_processing`, `invoice_not_payable`, `amount_out_of_range`,
             `method_not_priced`, `payment_on_its_way` (a payment of the invoice is being followed: wait for it, the
             quote it pays stays), `native_from_contract` (a smart wallet cannot pay in this coin: choose a token),
+            `payer_is_recipient` (the payer is the wallet the method is paid to: its transfer would pay nothing),
             `too_many_payments` (the invoice was handed 50 transactions already: the buyer contacts the seller, before
             any money moves)."
           content:
@@ -5025,7 +5026,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`invoice_not_payable` (not `open`, `underpaid` or `processing`), `invoice_expired`."
+          description: "`invoice_not_payable` (not `open`, `underpaid` or `processing`), `invoice_expired`, `payer_is_recipient`
+            (every method of the wallet's network is paid to it)."
           content:
             application/json:
               schema:
@@ -5103,7 +5105,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`invoice_not_payable` (not `open`, `underpaid` or `processing`), `invoice_expired`."
+          description: "`invoice_not_payable` (not `open`, `underpaid` or `processing`), `invoice_expired`, `payer_is_recipient`
+            (every method of the wallet's network is paid to it)."
           content:
             application/json:
               schema:
