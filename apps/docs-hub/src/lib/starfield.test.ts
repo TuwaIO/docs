@@ -187,10 +187,13 @@ describe('the place of the star field', () => {
     expect(read(path.join(docsUi, 'src/styles/site.css'))).toMatch(/\nbody \{\s*isolation: isolate;\s*\}/);
   });
 
-  it('is on every documentation site and on every page of the hub, once', () => {
-    expect(read(path.join(docsUi, 'src/components/DocsLayout.tsx'))).toMatch(/<StarryBackground \/>\s*<Layout/);
+  // A page of the documentation is for reading: the stars moved behind its text and drew the eye away from it
+  it('is on the pages of the hub that are not documentation, and never behind a page of the documentation', () => {
+    const layout = read(path.join(docsUi, 'src/components/DocsLayout.tsx'));
+    expect(layout).not.toContain('<StarryBackground');
+    expect(layout).not.toContain("from './StarryBackground'");
     expect(read(path.resolve(__dirname, '../components/PageBackground.tsx'))).toContain('<StarryBackground />');
-    // The Nextra sections of the hub take it from the layout of docs-ui, the other pages from their background
+    // The Nextra sections of the hub take no background of the other pages either
     expect(read(path.resolve(__dirname, '../lib/nextraSection.tsx'))).not.toContain('PageBackground');
     expect(read(path.resolve(__dirname, '../components/NextraLocalizedShell.tsx'))).not.toContain('PageBackground');
   });
