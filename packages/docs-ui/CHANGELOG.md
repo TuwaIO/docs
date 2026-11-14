@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.1...docs-ui-v0.12.2) (2026-11-14)
+
+
+### Bug Fixes
+
+* **docs-ui:** the pages of the documentation on plain paper, and the TUWA packages at their latest ([#81](https://github.com/TuwaIO/docs/issues/81)) ([80c1576](https://github.com/TuwaIO/docs/commit/80c157670c8f98764450ce3dc9528b67b745626a))
+
 ## [0.12.1](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.0...docs-ui-v0.12.1) (2026-11-12)
 
 
