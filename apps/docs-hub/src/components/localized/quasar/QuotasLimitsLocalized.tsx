@@ -2,6 +2,7 @@
 
 import { Callout } from 'nextra/components';
 
+import { PaymentsNotLive } from '@/components/PaymentsNotLive';
 import type { Locale } from '@/i18n';
 import { useMDXComponents } from '@/mdx-components';
 
@@ -9,6 +10,7 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
   const mdx = useMDXComponents();
   const H1 = mdx.h1 ?? 'h1';
   const H2 = mdx.h2 ?? 'h2';
+  const H3 = mdx.h3 ?? 'h3';
   const P = mdx.p ?? 'p';
   const Ul = mdx.ul ?? 'ul';
   const Li = mdx.li ?? 'li';
@@ -91,6 +93,59 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
           <Code>duplicate: true</Code> (коли транзакція з таким <Code>txKey</Code> вже відстежується). Повторний запит
           не створює дублікатів і не навантажує повторний трекінг, тому виклик <Code>onRemoteCreate</Code> залишається
           безпечним, але витрачає одиниці квоти.
+        </P>
+        <H3 id="payments">💳 Payments</H3>
+        <PaymentsNotLive locale="uk" />
+        <P>Payments оплачується за результат, а не відсотком від грошей, які надходять просто на гаманець мерчанта:</P>
+        <Table>
+          <thead>
+            <Tr>
+              <Th>Операція</Th>
+              <Th>Одиниці</Th>
+            </Tr>
+          </thead>
+          <tbody>
+            <Tr>
+              <Td>Рахунок, що став оплаченим: один раз, незалежно від суми й кількості платежів</Td>
+              <Td>88 (43 у тестовому застосунку)</Td>
+            </Tr>
+            <Tr>
+              <Td>Платіж або повернення, які Quasar відстежує й перевіряє, кожен</Td>
+              <Td>12 (7 у тестовому застосунку)</Td>
+            </Tr>
+            <Tr>
+              <Td>Рахунок, виставлений через API</Td>
+              <Td>1</Td>
+            </Tr>
+            <Tr>
+              <Td>Лист покупцеві або мерчанту</Td>
+              <Td>1</Td>
+            </Tr>
+            <Tr>
+              <Td>AML-перевірка з ключем GoPlus від TUWA (той самий платник протягом 6 годин — безкоштовно)</Td>
+              <Td>5</Td>
+            </Tr>
+            <Tr>
+              <Td>AML-перевірка з власним ключем GoPlus мерчанта, OFAC, Chainalysis</Td>
+              <Td>0</Td>
+            </Tr>
+            <Tr>
+              <Td>Фінансові події на вебхуки — на перші 3 ендпоінти, що на них підписані</Td>
+              <Td>0</Td>
+            </Tr>
+            <Tr>
+              <Td>Інші платіжні події на вебхуки (виставлення, прострочення, скасування, заміна), за доставку</Td>
+              <Td>1</Td>
+            </Tr>
+            <Tr>
+              <Td>Сторінка оплати, котирування, документи рахунку (PDF, UBL, Factur-X), дії в дашборді</Td>
+              <Td>0</Td>
+            </Tr>
+          </tbody>
+        </Table>
+        <P>
+          Тож оплачений рахунок, виставлений через API, коштує 101 одиницю, а з листами та сповіщеннями, які ввімкне
+          мерчант, — до 105.
         </P>
         <Hr />
         <H2 id="when-the-quota-is-used-up">📉 Що відбувається при вичерпанні квоти</H2>
@@ -228,6 +283,56 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
         已存在）的重复请求。重复请求不会创建新记录，也不会发起二次链上追踪，因此客户端重试 <Code>onRemoteCreate</Code>{' '}
         是幂等安全的，但会扣减基础调用点数。
       </P>
+      <H3 id="payments">💳 Payments</H3>
+      <PaymentsNotLive locale="zh-CN" />
+      <P>Payments 按结果计费，从不按金额抽成，资金直接进入商户的钱包：</P>
+      <Table>
+        <thead>
+          <Tr>
+            <Th>操作</Th>
+            <Th>单位</Th>
+          </Tr>
+        </thead>
+        <tbody>
+          <Tr>
+            <Td>发票变为已付款：一次性计费，与金额和付款笔数无关</Td>
+            <Td>88（测试应用为 43）</Td>
+          </Tr>
+          <Tr>
+            <Td>Quasar 跟踪并核验的每一笔付款或退款</Td>
+            <Td>12（测试应用为 7）</Td>
+          </Tr>
+          <Tr>
+            <Td>通过 API 开具的发票</Td>
+            <Td>1</Td>
+          </Tr>
+          <Tr>
+            <Td>发给买方或商户的电子邮件</Td>
+            <Td>1</Td>
+          </Tr>
+          <Tr>
+            <Td>使用 TUWA GoPlus 密钥的 AML 筛查（同一付款方 6 小时内免费）</Td>
+            <Td>5</Td>
+          </Tr>
+          <Tr>
+            <Td>使用商户自己的 GoPlus 密钥、OFAC、Chainalysis 的 AML 筛查</Td>
+            <Td>0</Td>
+          </Tr>
+          <Tr>
+            <Td>发送到 Webhook 的资金事件（订阅它们的前 3 个端点）</Td>
+            <Td>0</Td>
+          </Tr>
+          <Tr>
+            <Td>发送到 Webhook 的其他付款事件（已开具、已过期、已取消、已替换），按每次投递</Td>
+            <Td>1</Td>
+          </Tr>
+          <Tr>
+            <Td>收银台、报价、支付页面、发票单据（PDF、UBL、Factur-X）、控制台操作</Td>
+            <Td>0</Td>
+          </Tr>
+        </tbody>
+      </Table>
+      <P>因此，一张通过 API 开具并已付款的发票消耗 101 个单位；加上商户开启的电子邮件和通知，最多 105 个。</P>
       <Hr />
       <H2 id="when-the-quota-is-used-up">📉 配额耗尽时的降级机制</H2>
       <Ul>

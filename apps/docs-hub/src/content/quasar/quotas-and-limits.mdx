@@ -3,6 +3,8 @@ title: Quotas & Limits
 description: What Quasar counts against the quota of an organization, what happens when the quota is used up, and the other limits of the API.
 ---
 
+import { PaymentsNotLive } from '@/components/PaymentsNotLive';
+
 # Quotas & Limits
 
 Quasar Cloud meters usage per organization in **quota units**. The Community Edition keeps the same accounting, but its limits are set so high (a balance of 100,000,000 units and 100,000 requests per second) that they do not limit a single node.
@@ -30,6 +32,26 @@ Quasar Cloud is in public beta and free of charge:
 | Health check (`GET /v1/engine/monitoring/health`)            | 0 (public, no key)            |
 
 Every sync request is counted, also one that Quasar answers with `duplicate: true` because it already has a transaction with that `txKey`. A duplicate creates no second record and no second tracking, so a retried `onRemoteCreate` is safe, but not free.
+
+### 💳 Payments [#payments]
+
+<PaymentsNotLive />
+
+A Payments app pays for the outcome, never a percentage of the money, which goes straight to the merchant's wallet:
+
+| Operation                                                                                     | Units                 |
+| --------------------------------------------------------------------------------------------- | --------------------- |
+| An invoice that becomes paid: once, whatever its amount and however many payments paid it     | 88 (43 on a test app) |
+| A payment or refund that Quasar tracks and verifies, each                                     | 12 (7 on a test app)  |
+| An invoice issued through the API                                                             | 1                     |
+| An email to the buyer or to the merchant                                                      | 1                     |
+| An AML screening with the TUWA GoPlus key (the same payer within 6 hours is free)             | 5                     |
+| An AML screening with the merchant's own GoPlus key, OFAC, Chainalysis                        | 0                     |
+| Money events to webhooks, on the first 3 endpoints that subscribe to them                     | 0                     |
+| Other payment events to webhooks (issued, expired, cancelled, replaced), per delivery         | 1                     |
+| Checkout, quotes, the payment page, invoice documents (PDF, UBL, Factur-X), dashboard actions | 0                     |
+
+A paid invoice issued through the API therefore costs 101 units, and up to 105 with the emails and notices the merchant turns on.
 
 ---
 
