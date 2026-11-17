@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.2...docs-ui-v0.12.3) (2026-11-17)
+
+
+### Bug Fixes
+
+* **deps:** Next.js 16.4.6 and the latest external packages ([#86](https://github.com/TuwaIO/docs/issues/86)) ([dac11c3](https://github.com/TuwaIO/docs/commit/dac11c39aaeb3bf4b1a2a1bc96ac9a2b975e05fe))
+
 ## [0.12.2](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.1...docs-ui-v0.12.2) (2026-11-14)
 
 
