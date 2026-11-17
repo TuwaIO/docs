@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@hono/node-server": "^2.1.6",
+    "@hono/node-server": "^2.1.8",
     "@solana/kit": "^8.6.0",
     "@tuwaio/evm-sdk": "^0.8.1",
     "@tuwaio/orbit-core": "^0.6.2",
@@ -17,11 +17,11 @@
     "@tuwaio/pulsar-core": "^0.12.4",
     "@tuwaio/pulsar-evm": "^0.13.3",
     "@tuwaio/pulsar-solana": "^0.11.2",
-    "@tuwaio/quasar-sdk": "^0.8.0",
+    "@tuwaio/quasar-sdk": "^0.14.0",
     "@tuwaio/satellite-core": "^0.12.0",
     "@tuwaio/satellite-evm": "^0.11.1",
     "@tuwaio/satellite-solana": "^0.11.4",
-    "@tuwaio/sdk": "^0.9.1",
+    "@tuwaio/sdk": "^0.9.4",
     "@tuwaio/siwx-core": "^0.7.2",
     "@tuwaio/siwx-evm": "^0.5.4",
     "@tuwaio/siwx-server": "^0.8.2",
@@ -34,11 +34,11 @@
     "@wallet-standard/react": "^1.0.3",
     "@wallet-standard/ui": "^1.0.3",
     "@wallet-standard/ui-registry": "^1.1.1",
-    "immer": "^11.2.9",
-    "next": "16.4.5",
+    "immer": "^11.2.10",
+    "next": "16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "viem": "^2.57.16",
+    "viem": "^2.57.20",
     "zustand": "^5.1.0"
   },
   "devDependencies": {
@@ -46,9 +46,9 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-react": "^6.3.0",
     "tailwindcss": "^4.3.5",
     "typescript": "6.0.3",
-    "vite": "^8.3.6"
+    "vite": "^8.3.8"
   }
 }
