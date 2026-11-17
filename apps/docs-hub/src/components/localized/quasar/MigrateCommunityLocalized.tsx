@@ -62,6 +62,12 @@ export function MigrateCommunityLocalized({ locale }: { locale: Locale }) {
               <Td>Записи додатку Payments: налаштування прийому платежів та інвойси</Td>
               <Td />
             </Tr>
+            <Tr>
+              <Td>
+                Ключі адрес рахунків, вимкнені: увімкніть їх знову в панелі <Code>/admin</Code> вашої ноди
+              </Td>
+              <Td />
+            </Tr>
           </tbody>
         </Table>
         <Hr />
@@ -203,6 +209,12 @@ export function MigrateCommunityLocalized({ locale }: { locale: Locale }) {
           </Tr>
           <Tr>
             <Td>Payments 应用关联数据：已支持的加密货币收款通道及发票明细</Td>
+            <Td />
+          </Tr>
+          <Tr>
+            <Td>
+              发票专属地址的密钥（导入后为停用状态：请在节点的 <Code>/admin</Code> 控制面板中重新启用）
+            </Td>
             <Td />
           </Tr>
         </tbody>

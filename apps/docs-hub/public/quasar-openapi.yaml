@@ -489,6 +489,14 @@ components:
             - string
             - "null"
           description: "The payment page while it can be paid: the link its emails carry."
+        receivingAddress:
+          type:
+            - string
+            - "null"
+          description: "The address of its own the invoice is paid to (ERC-5564), on the networks the payout wallet's meta-address
+            record names: given at its first quote on one of them and kept for good; only the merchant's keys (from the
+            payout wallet's signature and a password) open it. `null` while it has none: it is paid to the wallets of
+            its methods. Left out by Quasar versions before invoice addresses."
         quote:
           type:
             - object
@@ -2757,6 +2765,12 @@ components:
                   the quote answers `409 payer_proof_required`), `unless_relayed` (an EVM method the gasless relay may
                   pay: the price first; the relay confirms the wallet itself, a transfer or a paymaster payment needs
                   the proof first), `none` (Solana: the quote reference ties the transfer)."
+              ownAddress:
+                type: boolean
+                description: "Whether a quote of the method goes to an address of the invoice's own (ERC-5564): a payment there is tied
+                  to the invoice by its address, so it needs no confirmed wallet, and the page may lock the price with
+                  no payer for a QR code that a phone wallet, or an exchange, pays (`quote.invoiceAddress`). Left out by
+                  Quasar versions before invoice addresses."
             required:
               - id
               - name
@@ -3059,6 +3073,33 @@ components:
             network and address, the signature is the address's own, and the merchant's pinned addresses (`#payout=` of
             the payment link), when given, include it. `null`: no record covers the address (Quasar no longer offers or
             quotes such a method). Left out by Quasar versions before payout records."
+        invoiceAddress:
+          type:
+            - object
+            - "null"
+          properties:
+            record:
+              $ref: "#/components/schemas/MetaAddressRecord"
+            signature:
+              type: string
+              description: "Of the text of the record: hex (EIP-191 `personal_sign`)."
+            index:
+              type: string
+              description: The invoice's index under its keys, in decimal.
+            ephemeralPrivateKey:
+              type: string
+              description: "The one-time private key `r` of the address (`0x` hex): with the meta-address it gives the address. It
+                shows only that the address comes from the meta-address; it opens nothing."
+          required:
+            - record
+            - signature
+            - index
+            - ephemeralPrivateKey
+          description: "When the quote is paid to the invoice's own address (`instructions.to`): the payout wallet's signed
+            meta-address record and the one-time key the address comes from. A checkout derives the address from them
+            and checks the record's signature before it shows the address (`checkQuotePayee` of
+            `@tuwaio/quasar-sdk/checkout`); the merchant's pinned addresses name the payout wallet, as the address of
+            each invoice is new. Left out, or `null`, when the quote is paid to the method's wallet."
       required:
         - object
         - methodId
@@ -3175,6 +3216,54 @@ components:
         wallet signs the text the record makes, line by line (`payoutRecordText` of `@tuwaio/quasar-sdk/checkout`):
         EIP-191 `personal_sign` on EVM (an ordinary wallet once for every EVM network, a smart wallet for one network,
         through its contract: ERC-1271 or ERC-6492), Ed25519 on Solana."
+    MetaAddressRecord:
+      type: object
+      properties:
+        version:
+          type: number
+          enum:
+            - 2
+        type:
+          type: string
+          enum:
+            - meta-address
+        app:
+          type: string
+          description: The Quasar app whose invoices get the addresses.
+        chains:
+          type: array
+          items:
+            type: string
+          description: "The EVM networks the addresses take payments on: CAIP-2, sorted and without repeats."
+        address:
+          type: string
+          description: "The payout wallet that made the keys and signed the record: an ordinary wallet (EOA), in its checksum form."
+        metaAddress:
+          type: string
+          description: "The ERC-5564 meta-address: `st:eth:0x`, then the spending and the viewing public key, compressed."
+        keyDomain:
+          type: string
+          description: The host the keys were made on.
+        keyAppId:
+          type: string
+          description: The app the keys were made for.
+        issuedAt:
+          type: string
+          description: "When the record was made: ISO 8601 in UTC with milliseconds."
+      required:
+        - version
+        - type
+        - app
+        - chains
+        - address
+        - metaAddress
+        - keyDomain
+        - keyAppId
+        - issuedAt
+      description: "A payout wallet's signed word that its keys receive the payments of a Quasar app at an address of their
+        own for each invoice (ERC-5564). The wallet signs the text the record makes (`metaAddressRecordText` of
+        `@tuwaio/quasar-sdk/checkout`) with EIP-191 `personal_sign`: an ordinary wallet only, as the keys come from its
+        signature."
     PayerProofMessage:
       type: object
       properties:
@@ -5010,7 +5099,7 @@ paths:
             `payer_is_recipient` (the payer is the wallet the method is paid to: its transfer would pay nothing),
             `too_many_payments` (the invoice was handed 50 transactions already: the buyer contacts the seller, before
             any money moves), `payee_unsigned` (the wallet of the receiving address has not signed its payout record
-            yet: the merchant signs it in the dashboard)."
+            yet: the merchant signs it in the dashboard, or in the admin panel of a self-hosted node)."
           content:
             application/json:
               schema:
