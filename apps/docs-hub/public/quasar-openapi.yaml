@@ -71,10 +71,15 @@ components:
             - invoice.replaced
             - refund.confirmed
             - refund.failed
+            - refund.reverted
             - payment.reverted
             - payment.unverified
         createdAt:
           type: string
+        seq:
+          type: integer
+          description: "Its number in the ledger of its invoice. Deliveries keep no order of their own: order the events of an
+            invoice by it. Left out by Quasar versions before November 2026."
         sentAt:
           type: string
           description: When this delivery was sent; signed with the body.
@@ -99,7 +104,8 @@ components:
                     - "null"
                 txHash:
                   type: string
-                  description: The last transfer; `payments` of the invoice names them all.
+                  description: "The last transfer; `payments` of the invoice names them all. One transaction may pay several invoices (an
+                    exchange's batch withdrawal to several invoice addresses): it is then the `txHash` of each."
                 blockRef:
                   type:
                     - string
@@ -152,8 +158,18 @@ components:
                 - txHash
                 - chainId
               description: "The transaction to check: `payment.reverted` (a payment Quasar credited is gone from the chain, the
-                invoice waits for you with `reviewReason` `payment_reverted`) and `payment.unverified` (a native coin
-                sent through a contract no receipt shows: check it and record it by hand)."
+                invoice waits for you with `reviewReason` `payment_reverted`), `refund.reverted` (a confirmed refund the
+                network dropped after its confirmations: the refund and its credit note stay, the invoice of the payment
+                waits for you with `reviewReason` `refund_reverted`; Quasar takes no second refund for it, send the
+                money again outside it) and `payment.unverified` (a native coin sent through a contract no receipt
+                shows: check it and record it by hand)."
+            mightHaveLanded:
+              type: boolean
+              enum:
+                - true
+              description: "Nothing proves that the money stayed: `invoice.expired` of an invoice whose gasless or sponsored payment
+                was still on its way, `refund.failed` of a refund whose transaction may still land. A system that sells
+                the goods on or pays again on this event should check first."
             aml:
               type: object
               properties:
@@ -563,7 +579,8 @@ components:
                 - "null"
             txHash:
               type: string
-              description: The last transfer; `payments` of the invoice names them all.
+              description: "The last transfer; `payments` of the invoice names them all. One transaction may pay several invoices (an
+                exchange's batch withdrawal to several invoice addresses): it is then the `txHash` of each."
             blockRef:
               type:
                 - string
@@ -602,10 +619,13 @@ components:
             after its locked quote expired (in an asset not pegged to the invoice currency, a block more than 60 seconds
             past the end of the quote), `payment_reverted` when a payment Quasar credited is gone from the chain (the
             invoice keeps its status: check the transaction, `payment.reverted` names it, the replacement of a corrected
-            invoice is marked too). A transfer Quasar could tie to no invoice never puts the invoice under review: it is
-            an unmatched transfer of its own (`/unmatched-transfers`). A payment under review because it came late
-            (handed over after `dueAt`, or arrived after the invoice expired or was cancelled) has no reason here: the
-            ledger marks it `late` (screened like any payment: a sender the screening blocks waits as an AML review)."
+            invoice is marked too), `refund_reverted` when a confirmed refund of its payment is gone from the chain
+            (`refund.reverted` names it: the refund, what the invoice was refunded and its credit note stay, and Quasar
+            takes no second refund for it: send the money again outside it; `payment_reverted` wins when the payment
+            itself went too). A transfer Quasar could tie to no invoice never puts the invoice under review: it is an
+            unmatched transfer of its own (`/unmatched-transfers`). A payment under review because it came late (handed
+            over after `dueAt`, or arrived after the invoice expired or was cancelled) has no reason here: the ledger
+            marks it `late` (screened like any payment: a sender the screening blocks waits as an AML review)."
         aml:
           type:
             - object
@@ -639,6 +659,11 @@ components:
         refundedTotal:
           type: string
           description: Refunded so far.
+          example: "49.00"
+        refundLimit:
+          type: string
+          description: "The most all refunds may return together: the total, or for an underpaid invoice that expired the value of
+            what arrived at the quoted rate; once refunded, what all its refunds returned."
           example: "49.00"
         refundShort:
           type: string
@@ -698,6 +723,7 @@ components:
         - receiptNumber
         - eInvoiceSkipped
         - refundedTotal
+        - refundLimit
         - replaces
         - replacedBy
         - createdAt
@@ -867,6 +893,10 @@ components:
         at:
           type: string
           description: When it was mined, or when it was verified if the network named no time.
+        revertedAt:
+          type: string
+          description: When the network dropped or reverted the transfer after it was credited. Such a transfer no longer pays the
+            invoice; absent while it stands.
       required:
         - txHash
         - chainId
@@ -894,6 +924,8 @@ components:
             - submitted
             - confirmed
             - failed
+            - withdrawn
+          description: "`requested` waits for its transaction; `withdrawn` was taken back before anything was sent for it."
         amount:
           type: string
         currency:
@@ -903,6 +935,10 @@ components:
           enum:
             - fiat_value
             - exact_received
+            - excess
+          description: "`fiat_value` (an amount in the invoice currency at the price of the day), `exact_received` (the payment as
+            it came) or `excess` (the overpaid excess alone, as it came: no credit note, no refunded total, the invoice
+            keeps its status)."
         cryptoAmount:
           type: string
         assetId:
@@ -928,6 +964,11 @@ components:
           type:
             - string
             - "null"
+        replacedBy:
+          type:
+            - string
+            - "null"
+          description: The transaction that took the place of a cancelled one, when Quasar knows it.
         creditNoteNumber:
           type:
             - string
@@ -939,6 +980,11 @@ components:
           description: The unmatched transfer it returns to its sender, or `null` for a refund of the invoice.
         createdAt:
           type: string
+        updatedAt:
+          type:
+            - string
+            - "null"
+          description: When it last changed.
         confirmedAt:
           type:
             - string
@@ -963,6 +1009,8 @@ components:
         - unmatchedTransfer
         - createdAt
         - confirmedAt
+      description: "The refund of a refund event; an `excess` one (`mode`) sends back the overpaid excess alone: no
+        `invoice.refunded`, `invoice.partially_refunded` or credit note follows it."
     Transaction:
       oneOf:
         - $ref: "#/components/schemas/EvmTransaction"
@@ -1379,7 +1427,8 @@ components:
         - type
         - connectorType
         - adapter
-      description: Reserved by the Pulsar types for a Starknet adapter. Neither Pulsar nor Quasar tracks Starknet transactions.
+      description: "Reserved by the Pulsar types for a Starknet adapter. Neither Pulsar nor Quasar tracks Starknet
+        transactions: a sync of one is refused (`400`)."
     CreateTransactionRequest:
       oneOf:
         - $ref: "#/components/schemas/EvmTransaction"
@@ -1494,10 +1543,11 @@ components:
           description: Array of transaction documents for the current page.
         totalDocs:
           type: number
-          description: Total matching documents across all pages.
+          description: "Matching documents, counted up to 10,001: the pages reach back 10,000 transactions, and more than that
+            reads as 10,001."
         totalPages:
           type: number
-          description: Total number of pages.
+          description: Pages within the 10,000 transactions the history reaches back; the last one may be shorter.
         page:
           type: number
           description: Current page number (1-indexed).
@@ -1595,6 +1645,20 @@ components:
         - invoice
         - checkoutToken
         - payUrl
+    QuotaRefusal:
+      type: object
+      properties:
+        code:
+          type: string
+          enum:
+            - quota_exhausted
+        message:
+          type: string
+      required:
+        - code
+        - message
+      description: The organization's quota is used up. The reads (`GET`) and `POST /refunds/{id}/submit` (a refund your
+        wallet already sent) of the secret key of a payments app are answered anyway.
     CreateInvoiceRequest:
       type: object
       properties:
@@ -1733,6 +1797,15 @@ components:
               items:
                 $ref: "#/components/schemas/InvoiceWalletConfirmation"
               description: What the wallets that confirmed it signed, oldest first.
+            pendingPayments:
+              type: integer
+              description: "Payments handed over (to `/submit`, through the gasless relay or a sponsored smart wallet) and still on
+                their way. `invoice.processing` comes in the same step as `invoice.paid`, `invoice.underpaid` or
+                `invoice.needs_review`: there is no earlier webhook, read this."
+            refundExcess:
+              type: string
+              description: The overpaid excess left to send back alone with a refund of mode `excess`, in base units; `0` when there
+                is none.
           required:
             - refunds
             - refundsTotal
@@ -2092,6 +2165,22 @@ components:
         - refund
         - instructions
       description: The refund and the transfer to make from your wallet.
+    UnmatchedTransferPage:
+      type: object
+      properties:
+        unmatchedTransfers:
+          type: array
+          items:
+            $ref: "#/components/schemas/UnmatchedTransfer"
+        nextCursor:
+          type:
+            - string
+            - "null"
+          description: Pass it as `cursor` for the next page.
+      required:
+        - unmatchedTransfers
+        - nextCursor
+      description: A page, newest first.
     UnmatchedTransfer:
       type: object
       properties:
@@ -3415,13 +3504,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessCreateResponse"
         "400":
-          description: The body is not a valid transaction or exceeds the safety limits.
+          description: "The body is not a valid transaction, exceeds the safety limits, or names `adapter: starknet` (Quasar has
+            no Starknet tracker)."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up past the small allowance a sync has (work
+            under way finishes; `mode: lazy` within it)."
           content:
             application/json:
               schema:
@@ -3523,8 +3620,9 @@ paths:
   /v1/engine/pulsar/history:
     get:
       summary: Read the transaction history
-      description: Returns the transactions of the app, newest first, filtered by every given filter. Used by
-        `quasar.pulsar.getHistory`.
+      description: "Returns the transactions of the app, newest first, filtered by every given filter. The pages reach back
+        10,000 transactions: filter by `status`, `chainId`, `walletAddress` or `txKey` to reach older ones. Used by
+        `quasar.pulsar.getHistory`."
       tags:
         - Pulsar
       security:
@@ -3598,6 +3696,13 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaginatedHistoryResponse"
+        "400":
+          description: "`invalid_status` (not one of the final statuses), `page_too_deep` (a page past the 10,000 transactions the
+            history reaches back)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Missing or invalid key.
           content:
@@ -3643,8 +3748,10 @@ paths:
       tags:
         - Invoices
       summary: Issue an invoice
-      description: Issues a numbered invoice with its PDF (and e-invoice, when on and the buyer details allow) and sends
-        `invoice.issued`. Used by `quasar.payments.createInvoice`.
+      description: "Issues a numbered invoice and sends `invoice.issued`; its PDF (and e-invoice, when on and the buyer
+        details allow) follows within a second or two (`invoice.document_issued` in the ledger): until then
+        `invoice.issued` carries `document: null` and `documentPending` (`render`, or `buyer` while the checkout
+        collects the buyer details). Used by `quasar.payments.createInvoice`."
       security: &a1
         - SecretKey: []
       parameters:
@@ -3681,6 +3788,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -3692,6 +3805,12 @@ paths:
                   - $ref: "#/components/schemas/KeyRefusal"
         "429":
           description: The rate limit of the organization.
+        "503":
+          description: "`documents_busy`: another document of the series is being numbered; retry with the same `Idempotency-Key`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
     get:
       tags:
         - Invoices
@@ -3758,6 +3877,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -3798,6 +3923,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -3858,6 +3989,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -3906,6 +4043,9 @@ paths:
               properties:
                 reason:
                   type: string
+                acceptShortfall:
+                  type: boolean
+                  description: "For a payment that is less than the invoice asks: you accept the shortfall."
               required:
                 - reason
       responses:
@@ -3927,6 +4067,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -3994,6 +4140,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4018,6 +4170,13 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "429":
           description: The rate limit of the organization.
+        "503":
+          description: "`document_pending`: the document of the invoice is still being issued (waited for up to 5 seconds);
+            `documents_busy`: another document of the series is being numbered. Try again."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
   /v1/payments/invoices/{id}/checkout:
     post:
       tags:
@@ -4048,6 +4207,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4125,6 +4290,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4192,6 +4363,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4242,14 +4419,23 @@ paths:
               properties:
                 amount:
                   type: string
-                  description: In the invoice currency; everything left when omitted.
+                  description: In the invoice currency; everything left when omitted. Leave it out with `exact_received` and `excess`
+                    (`invalid_request` otherwise).
                 mode:
                   type: string
                   enum:
                     - fiat_value
                     - exact_received
+                    - excess
+                  description: "`fiat_value` (default), `exact_received` (the whole payment as received, less the overpaid excess already
+                    sent back) or `excess` (all of the overpaid excess left, as received, outside what the invoice may
+                    refund)."
                 reason:
                   type: string
+                to:
+                  type: string
+                  description: "Where it goes instead of the wallet that paid: needed when that sender is a contract
+                    (`refund_destination_required`)."
       responses:
         "201":
           description: The refund and what to send where.
@@ -4269,6 +4455,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4289,7 +4481,12 @@ paths:
             not known; `sender_blocked`: the AML check blocks the wallet the refund would go to;
             `refund_top_up_waiting`: a top-up of a short refund waits for its transaction; `idempotency_key_reused`: the
             key was used for another invoice, mode or amount; `refund_not_waiting`: the key was used for a refund
-            already sent, finished, failed or taken back (`details.refund`): a new refund needs a new key."
+            already sent, finished, failed or taken back (`details.refund`): a new refund needs a new key;
+            `refund_destination_required`: the payment came from a contract, give `to`; `nothing_overpaid`: `excess` of
+            an invoice that was not overpaid; `excess_refunded`: the overpaid excess went back already;
+            `excess_refund_under_way`: a refund of the excess waits for its transaction (`details.refundId`), also for
+            `exact_received` meanwhile; `refund_may_have_landed`: an earlier refund's transaction may have reached the
+            buyer, check it (`details.refundId`)."
           content:
             application/json:
               schema:
@@ -4347,6 +4544,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4406,6 +4609,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4423,6 +4632,13 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "429":
           description: The rate limit of the organization.
+        "503":
+          description: "`document_pending`: the document is still being issued (waited for up to 5 seconds); ask again in a few
+            seconds."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
   /v1/payments/invoices/{id}/documents/credit-note/{ref}:
     get:
       tags:
@@ -4459,6 +4675,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4501,14 +4723,23 @@ paths:
               properties:
                 amount:
                   type: string
-                  description: In the invoice currency; everything left when omitted.
+                  description: In the invoice currency; everything left when omitted. Leave it out with `exact_received` and `excess`
+                    (`invalid_request` otherwise).
                 mode:
                   type: string
                   enum:
                     - fiat_value
                     - exact_received
+                    - excess
+                  description: "`fiat_value` (default), `exact_received` (the whole payment as received, less the overpaid excess already
+                    sent back) or `excess` (all of the overpaid excess left, as received, outside what the invoice may
+                    refund)."
                 reason:
                   type: string
+                to:
+                  type: string
+                  description: "Where it goes instead of the wallet that paid: needed when that sender is a contract
+                    (`refund_destination_required`)."
       responses:
         "200":
           description: What the refund would send.
@@ -4528,6 +4759,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4545,7 +4782,8 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
           description: "`invoice_not_refundable`, `exact_refund_needs_whole_invoice`, `payment_unknown`, `sender_blocked`: the AML
-            check blocks the wallet the refund would go to."
+            check blocks the wallet the refund would go to; `refund_destination_required`; `nothing_overpaid`,
+            `excess_refunded`, `excess_refund_under_way` (`details.refundId`) as the refund would be."
           content:
             application/json:
               schema:
@@ -4557,8 +4795,8 @@ paths:
       tags:
         - Refunds
       summary: List unmatched transfers
-      description: Transfers that reached your invoices without being tied to them by proof, newest first (at most 100). Used
-        by `quasar.payments.listUnmatchedTransfers`.
+      description: Transfers that reached your invoices without being tied to them by proof, newest first, a page at a time.
+        Used by `quasar.payments.listUnmatchedTransfers` and `listUnmatchedTransfersPage`.
       security: *a1
       parameters:
         - schema:
@@ -4571,26 +4809,47 @@ paths:
           required: false
           name: status
           in: query
+        - schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            description: Page size, 1 to 100 (default 100).
+          required: false
+          description: Page size, 1 to 100 (default 100).
+          name: limit
+          in: query
+        - schema:
+            type: string
+            description: "`nextCursor` of the previous page."
+          required: false
+          description: "`nextCursor` of the previous page."
+          name: cursor
+          in: query
       responses:
         "200":
-          description: The unmatched transfers.
+          description: A page of unmatched transfers.
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  unmatchedTransfers:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/UnmatchedTransfer"
-                required:
-                  - unmatchedTransfers
+                $ref: "#/components/schemas/UnmatchedTransferPage"
+        "400":
+          description: "`invalid_request`, `invalid_cursor`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
         "401":
           description: Missing or invalid key.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4637,6 +4896,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4664,6 +4929,15 @@ paths:
           description: Unmatched transfer ID.
           name: id
           in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                to:
+                  type: string
+                  description: "Where it goes instead of its sender: needed when a contract sent it (`refund_destination_required`)."
       responses:
         "201":
           description: The refund and what to send where.
@@ -4671,12 +4945,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RefundStart"
+        "400":
+          description: "`invalid_request` with `issues`."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
         "401":
           description: Missing or invalid key.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4694,7 +4980,7 @@ paths:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
           description: "`unmatched_transfer_not_refundable` (it is not `awaiting_refund`), `sender_blocked` (AML blocked its
-            sender)."
+            sender), `refund_destination_required`."
           content:
             application/json:
               schema:
@@ -4706,8 +4992,8 @@ paths:
       tags:
         - Refunds
       summary: Take back a refund that waits
-      description: A refund nothing has been sent for yet ends as `failed` with `failureReason` `withdrawn`, and an unmatched
-        transfer it was for waits for its refund again (`awaiting_refund`). Used by `quasar.payments.withdrawRefund`.
+      description: A refund nothing has been sent for yet ends as `withdrawn`, and an unmatched transfer it was for waits for
+        its refund again (`awaiting_refund`). Used by `quasar.payments.withdrawRefund`.
       security: *a1
       parameters:
         - schema:
@@ -4719,7 +5005,7 @@ paths:
           in: path
       responses:
         "200":
-          description: The refund, `failed`.
+          description: The refund, `withdrawn`.
           content:
             application/json:
               schema:
@@ -4730,6 +5016,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4746,7 +5038,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`refund_not_waiting`: a transaction was submitted for it already, or it ended."
+          description: "`refund_not_waiting`: a transaction was submitted for it already, or it ended; `refund_operation_open`: a
+            refund sent from the invoice's own address is under way (`details.operationId`)."
           content:
             application/json:
               schema:
@@ -4781,6 +5074,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4803,7 +5102,11 @@ paths:
       tags:
         - Refunds
       summary: Submit the refund transaction
-      description: Once final, the refund is confirmed, its credit note issued and `refund.confirmed` sent.
+      description: "Once final, the refund is confirmed, its credit note issued and `refund.confirmed` sent (an `excess`
+        refund issues no credit note). It may come from any wallet but the buyer's: the recipient and every wallet that
+        paid the invoice. A transaction submitted for a refund taken back meanwhile is answered `409` and still recorded
+        on the refund (`failed`, `transaction_failed`); `refund.failed` with `mightHaveLanded` may follow. Answered when
+        the organization's quota is used up: the money has moved already."
       security: *a1
       parameters:
         - schema:
@@ -4821,12 +5124,10 @@ paths:
               properties:
                 txHash:
                   type: string
+                  description: The refund transaction (hash or Solana signature).
                 from:
                   type: string
-                confirmedByHand:
-                  type: boolean
-                  description: "You checked it yourself: a native coin sent through a smart wallet, which no receipt shows, is confirmed
-                    on your word."
+                  description: The wallet it was sent from.
               required:
                 - txHash
                 - from
@@ -4838,8 +5139,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/Refund"
         "400":
-          description: "`invalid_request` with `issues`, `invalid_transaction`, `invalid_sender`: the transaction must come from
-            the app wallet."
+          description: "`invalid_request` with `issues`, `invalid_transaction` (not a transaction of the refund chain),
+            `invalid_sender` (not an address of the refund chain)."
           content:
             application/json:
               schema:
@@ -4850,6 +5151,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4866,8 +5173,10 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`refund_not_submittable`; `transaction_already_used`: an invoice credited the transaction as a payment
-            (one handed over as a payment through a checkout that paid nothing becomes the refund's)."
+          description: "`refund_not_submittable`; `refund_from_buyer`: a wallet that paid the invoice cannot send its refund;
+            `refund_operation_open`: a refund sent from the invoice's own address is under way;
+            `transaction_already_used`: an invoice credited the transaction as a payment, or another refund has it (one
+            handed over as a payment through a checkout that paid nothing becomes the refund's)."
           content:
             application/json:
               schema:
@@ -4915,6 +5224,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4976,6 +5291,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KeyRefusal"
+        "402":
+          description: "`quota_exhausted`: the quota of the organization is used up."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuotaRefusal"
         "403":
           description: "`secret_key_required` (a public key), `not_a_payments_app`, `payments_disabled` (the node does not run
             Payments for the organization); or a `KeyRefusal` of the key or the app."
@@ -4992,8 +5313,9 @@ paths:
       tags:
         - Checkout
       summary: Open a checkout
-      description: "The invoice, its methods and the locked quote. Used by `createCheckoutStore`. No key: the token opens this
-        invoice only; a browser may call from the app's domains (any, when it lists none)."
+      description: "The invoice, its methods and the locked quote. A method whose stored minimum or maximum cannot be read is
+        not offered. Used by `createCheckoutStore`. No key: the token opens this invoice only; a browser may call from
+        the app's domains (any, when it lists none)."
       parameters:
         - schema:
             type: string
@@ -5037,8 +5359,11 @@ paths:
         first, at the rate that payment was quoted, with no consent asked again and no gasless offer, in new quote
         windows up to the due date (`rateHeldUntil` says until when the rate of a moving asset holds). A Solana Pay QR
         quote has no payer. An EVM payer must have confirmed the invoice first (`payer-proof`), checked before screening
-        and pricing, unless the gasless relay may pay the method (`methods[].payerProof` `unless_relayed`). No key: the
-        token opens this invoice only; a browser may call from the app's domains (any, when it lists none)."
+        and pricing, unless the gasless relay may pay the method (`methods[].payerProof` `unless_relayed`). A gasless
+        relay or a sponsored smart wallet counts as a payment on its way for up to 66 minutes (the relay's give-up time
+        and a minute; a sponsorship as long as its quote, up to an hour): meanwhile `payment_on_its_way`, no plain
+        payment. No key: the token opens this invoice only; a browser may call from the app's domains (any, when it
+        lists none)."
       parameters:
         - schema:
             type: string
@@ -5099,7 +5424,9 @@ paths:
             `payer_is_recipient` (the payer is the wallet the method is paid to: its transfer would pay nothing),
             `too_many_payments` (the invoice was handed 50 transactions already: the buyer contacts the seller, before
             any money moves), `payee_unsigned` (the wallet of the receiving address has not signed its payout record
-            yet: the merchant signs it in the dashboard, or in the admin panel of a self-hosted node)."
+            yet: the merchant signs it in the dashboard, or in the admin panel of a self-hosted node), `too_many_quotes`
+            (the link was priced 500 times, before the wallet is screened or the invoice priced: the seller gives a new
+            link, `POST /invoices/{id}/checkout`, which quotes again)."
           content:
             application/json:
               schema:
@@ -5281,8 +5608,11 @@ paths:
       tags:
         - Checkout
       summary: Send the buyer details
-      description: "Issues the invoice document that waited for them; `company: true` asks for an invoice for a company. No
-        key: the token opens this invoice only; a browser may call from the app's domains (any, when it lists none)."
+      description: "Issues the invoice document that waited for them; `company: true` asks for an invoice for a company. Takes
+        from the page only what the merchant's buyer lacks: the merchant's fields stay. Counts as a quote against the
+        limits (10 a minute per invoice). Refuses only what the invoice cannot be issued without (`buyer_incomplete`,
+        and `buyer_tax_id_required` of a reverse charge), never a rule of the merchant's settings. No key: the token
+        opens this invoice only; a browser may call from the app's domains (any, when it lists none)."
       parameters:
         - schema:
             type: string
@@ -5298,7 +5628,32 @@ paths:
               type: object
               properties:
                 buyer:
-                  $ref: "#/components/schemas/Buyer"
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    email:
+                      type: string
+                      description: Quasar Cloud sends the invoice, receipt and credit notes to it.
+                    addressLine1:
+                      type: string
+                    addressLine2:
+                      type: string
+                    postalCode:
+                      type: string
+                    city:
+                      type: string
+                    region:
+                      type: string
+                    country:
+                      type: string
+                      description: ISO 3166-1 alpha-2, for example `DE`.
+                    registrationNumber:
+                      type: string
+                    taxId:
+                      type: string
+                      description: Needed for a reverse-charge invoice.
+                  description: The buyer as the page collects it; `externalId` is the merchant's and is refused here.
                 company:
                   type: boolean
               required:
@@ -5311,7 +5666,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/CheckoutView"
         "400":
-          description: "`invalid_request` with `issues`, `buyer_incomplete`."
+          description: "`invalid_request` with `issues`, `buyer_incomplete`, `buyer_tax_id_required`."
           content:
             application/json:
               schema:
@@ -5329,13 +5684,20 @@ paths:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "409":
-          description: "`buyer_not_requested`, `invoice_not_payable`."
+          description: "`buyer_not_requested`, `invoice_not_payable`, `document_issued` (the document of the invoice is already
+            queued or issued)."
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
         "429":
-          description: "`rate_limited`: 120 calls a minute per token."
+          description: "`rate_limited`: 10 quotes and buyer details a minute per invoice, 120 calls a minute per token."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
+        "503":
+          description: "`documents_busy`: another document of the series is being numbered; try again."
           content:
             application/json:
               schema:
@@ -5365,8 +5727,14 @@ paths:
         invoice that reached the merchant is an unmatched transfer, refunded only (`/unmatched-transfers`). A
         transaction is found by its `txKey` and by its executed hash. Until then the claim counts in `pendingPayments`
         and `unresolvedPayments` (and in `onTimeTxKeys` when made before `dueAt`): the page tells the buyer that the
-        transaction was handed over for another invoice and offers no second payment. No key: the token opens this
-        invoice only; a browser may call from the app's domains (any, when it lists none)."
+        transaction was handed over for another invoice and offers no second payment. A payment the app's own sync
+        recorded with no invoice is taken only from the quote's payer, on its network, recorded since the quote (else
+        `409 tx_already_used`); a refund recorded with no invoice is always refused so. A link the merchant cut off
+        (`POST /invoices/{id}/checkout`) while its quote had a payer and may still be paid takes this call, and nothing
+        else, until 15 minutes after the quote expires: one transaction, taken as sent from that quote's payer whatever
+        `from` says, never tying a payment the app's sync recorded with no invoice nor claiming one tracked for another
+        invoice (both `409 tx_already_used`). No key: the token opens this invoice only; a browser may call from the
+        app's domains (any, when it lists none)."
       parameters:
         - schema:
             type: string
@@ -5389,6 +5757,9 @@ paths:
                   description: The sender, for a Solana Pay quote without a payer.
                 connectorType:
                   type: string
+                methodId:
+                  type: string
+                  description: "The method the transaction was sent with: a wallet prompt can outlive its quote."
               required:
                 - txKey
       responses:
@@ -5654,6 +6025,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PaymentsError"
+        "503":
+          description: "`receipt_pending`: the receipt is still being issued (waited for up to 5 seconds); ask again."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentsError"
   /v1/payments/checkout/{token}/logo:
     get:
       tags:
@@ -5812,11 +6189,12 @@ webhooks:
   payment-event:
     post:
       summary: Payment event (payments.v1)
-      description: Sent to the webhook endpoints subscribed to `invoice:*`, `refund:*` or the event itself
-        (`invoice.transfer_unmatched` and `invoice.transfer_unmatched_voided`, notices, are in the default subscriptions
-        of a shop endpoint). `x-quasar-signature` is the hex HMAC-SHA256 of the raw body keyed with the endpoint's
-        signing secret; check it, and `sentAt`, with `verifyWebhook` of `@tuwaio/quasar-sdk`. `data.invoice` is the
-        invoice when the delivery was sent.
+      description: "Sent to the webhook endpoints subscribed to `invoice:*`, `refund:*` or the event itself (`invoice:paid`,
+        `refund:reverted`…; `invoice.transfer_unmatched` and `invoice.transfer_unmatched_voided`, notices, are in the
+        default subscriptions of a shop endpoint). Payment events are delivered at least once and in no order of their
+        own: deduplicate by `id`, order the events of an invoice by `seq`. `x-quasar-signature` is the hex HMAC-SHA256
+        of the raw body keyed with the endpoint's signing secret; check it, and `sentAt`, with `verifyWebhook` of
+        `@tuwaio/quasar-sdk`. `data.invoice` is the invoice when the delivery was sent."
       tags:
         - Webhooks
       parameters:
