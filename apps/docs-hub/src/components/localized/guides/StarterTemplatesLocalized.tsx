@@ -98,6 +98,18 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
               <Td>Next.js 16, @tuwaio/sdk, @tuwaio/quasar-sdk</Td>
               <Td>Advanced</Td>
             </Tr>
+            <Tr>
+              <Td>
+                <Code>nextjs-tuwa-payments</Code>
+              </Td>
+              <Td>
+                Cosmos Store, магазин на Quasar Payments: рахунок на кожне замовлення, оформлення оплати Nova Payments,
+                власні замовлення відвідувача та вебхуки (<A href="https://cosmos-shop.tuwa.io/">демо</A>, лише тестові
+                мережі)
+              </Td>
+              <Td>Next.js 16, @tuwaio/nova-payments, @tuwaio/quasar-sdk</Td>
+              <Td>Advanced</Td>
+            </Tr>
           </tbody>
         </Table>
         <P>
@@ -125,8 +137,9 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
         </P>
         <CodeSnippet index={1} />
         <P>
-          Щоб отримувати вебхуки Quasar локально у шаблоні <Code>nextjs-tuwa-quasar</Code>, виконайте команду{' '}
-          <Code>pnpm webhooks</Code> у сусідньому терміналі поруч із <Code>pnpm dev</Code>.
+          Щоб отримувати вебхуки Quasar локально у шаблоні <Code>nextjs-tuwa-quasar</Code> або{' '}
+          <Code>nextjs-tuwa-payments</Code>, виконайте команду <Code>pnpm webhooks</Code> у сусідньому терміналі поруч
+          із <Code>pnpm dev</Code>.
         </P>
         <H3 id="3-build-with-an-ai-agent">3. Спільна розробка зі штучним інтелектом (AI Agents)</H3>
         <P>
@@ -225,6 +238,17 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
             <Td>Next.js 16, @tuwaio/sdk, @tuwaio/quasar-sdk</Td>
             <Td>高级 (Advanced)</Td>
           </Tr>
+          <Tr>
+            <Td>
+              <Code>nextjs-tuwa-payments</Code>
+            </Td>
+            <Td>
+              Cosmos Store：基于 Quasar Payments 的商店：每笔订单一张发票、Nova Payments 结账、访客自己的订单与 Webhook
+              (<A href="https://cosmos-shop.tuwa.io/">在线 Demo</A>，仅测试网络)
+            </Td>
+            <Td>Next.js 16, @tuwaio/nova-payments, @tuwaio/quasar-sdk</Td>
+            <Td>高级 (Advanced)</Td>
+          </Tr>
         </tbody>
       </Table>
       <P>
@@ -245,8 +269,8 @@ export function StarterTemplatesLocalized({ locale }: { locale: Locale }) {
       <P>复制模版自带的配置文件并启动本地开发服务：</P>
       <CodeSnippet index={1} />
       <P>
-        在 <Code>nextjs-tuwa-quasar</Code> 模板中，若要在本地调试 Webhook 回调通知，只需另起终端窗口执行{' '}
-        <Code>pnpm webhooks</Code> 启动本地中继转发服务。
+        在 <Code>nextjs-tuwa-quasar</Code> 或 <Code>nextjs-tuwa-payments</Code> 模板中，若要在本地调试 Webhook
+        回调通知，只需另起终端窗口执行 <Code>pnpm webhooks</Code> 启动本地中继转发服务。
       </P>
       <H3 id="3-build-with-an-ai-agent">3. 借助 AI 编码 Agent 协同开发</H3>
       <P>
