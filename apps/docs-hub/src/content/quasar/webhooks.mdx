@@ -104,6 +104,7 @@ Answer with a `2xx` status quickly and do slow work afterwards: Quasar waits at 
 - A delivery that fails (network error, timeout or a non-`2xx` status) is retried, up to 5 attempts in total, with an exponential backoff that starts at one minute.
 - Every attempt is logged under **Webhook Deliveries** in the dashboard, with the status code and the response. Keys that look like secrets (`secret`, `token`, `password`, `key`, `privatekey`, `secretkey`, `apikey`, `signingsecret`, `credential`) are masked in the logs.
 - A failed delivery can be sent again from its log entry, at most once a minute.
+- **Send test event** on an endpoint's page delivers a signed `webhook.test` event (header `x-quasar-event: webhook.test`) through the same worker as real events, so a receiver being set up is checked at once. Answer it with `2xx` and act on nothing; `isWebhookTestEvent` of `@tuwaio/quasar-sdk` tells it apart. It uses no quota, is tried once and is not sent again; owners and admins send one every few seconds at most.
 - A tracker can lose sight of a transaction, and a node forgets a replaced hash. When Quasar later finds that it was mined or replaced, the row is corrected and the endpoint gets another webhook with the new `status`: treat the last one as the result.
 - Delivery logs are kept for up to 3 months. For a longer audit trail, keep the events your endpoint receives.
 - Each delivery uses 1 quota unit, counted for the first attempt only (see [Quotas & Limits](/quasar/quotas-and-limits)).
