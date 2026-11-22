@@ -60,10 +60,14 @@ describe('the logo in motion', () => {
     const markup = renderToStaticMarkup(createElement(LogoMotion));
     expect(LOGO_FILTER_ID).toBe('tuwa-logo-pixels');
     expect(markup).toContain(`<filter id="${LOGO_FILTER_ID}"`);
-    // At rest the filter moves nothing, and the logo has no filter at all
+    // At rest the filter moves nothing, and the logo has no filter or transform layer at all. While active,
+    // `transform: translateZ(0)` keeps `feImage` in the logo's local coordinate space in Safari/WebKit so a logo
+    // placed past y=180px (footers, scrolled fixed headers) stays inside the points mask instead of vanishing
     expect(markup).toMatch(/<feDisplacementMap in="SourceGraphic" in2="blocks" scale="0"/);
-    expect(siteCss).toMatch(/\.tuwa-logo\[data-pixels\] \{\s*filter: url\(#tuwa-logo-pixels\);\s*\}/);
-    expect(siteCss).not.toMatch(/\.tuwa-logo \{[^}]*filter/);
+    expect(siteCss).toMatch(
+      /\.tuwa-logo\[data-pixels\] \{\s*filter: url\(#tuwa-logo-pixels\);\s*transform: translateZ\(0\);\s*\}/,
+    );
+    expect(siteCss).not.toMatch(/\.tuwa-logo \{[^}]*(?:filter|transform)/);
     // The noise moves blocks the size of a pixel of the logo, so a pixel moves whole
     expect(markup).toMatch(/<feMorphology in="samples" operator="dilate" radius="1" result="blocks"/);
   });
