@@ -68,6 +68,21 @@ describe('the logo in motion', () => {
     expect(markup).toMatch(/<feMorphology in="samples" operator="dilate" radius="1" result="blocks"/);
   });
 
+  // In Safari the logo vanished under the pointer: WebKit draws nothing at all for a filter that tiles a point with
+  // `feTile`. The points come from an image of them instead, which every engine draws
+  it('draws its points without feTile, over the filter region of the logo', () => {
+    const markup = renderToStaticMarkup(createElement(LogoMotion));
+    expect(markup).not.toMatch(/<feTile|<feFlood/);
+    const image = markup.match(/<feImage [^>]*>/)?.[0] ?? '';
+    expect(image).toContain('result="points"');
+    expect(image).toMatch(/x="-60" y="-60" width="600" height="240"/);
+    const points = decodeURIComponent(image.match(/href="data:image\/svg\+xml;utf8,([^"]+)"/)?.[1] ?? '');
+    // A point every 3px, at the same place in each block as before
+    expect(points).toContain('<pattern id="p" width="3" height="3" patternUnits="userSpaceOnUse">');
+    expect(points).toContain('<rect x="1" y="1" width="1" height="1"/>');
+    expect(markup).toMatch(/<feComposite in="noise" in2="points" operator="in" result="samples"/);
+  });
+
   it('trembles under the pointer and bursts on a press, and stops when the pointer leaves', () => {
     for (const event of ['pointerover', 'pointerout', 'pointerdown']) {
       expect(motion).toContain(`document.addEventListener('${event}',`);
