@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.4...docs-ui-v0.12.5) (2026-11-22)
+
+
+### Bug Fixes
+
+* updated TUWA logo styles for support in all browsers ([524d6cf](https://github.com/TuwaIO/docs/commit/524d6cf9e5e9c85b88fd0aa04c4c92afe051e97f))
+
 ## [0.12.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.3...docs-ui-v0.12.4) (2026-11-22)
 
 
