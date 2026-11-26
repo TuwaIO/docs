@@ -29,7 +29,7 @@ export function AppsKeysLocalized({ locale }: { locale: Locale }) {
         <P>
           Кожна інтеграція з Quasar починається зі створення <strong>додатка (App)</strong>: саме він володіє
           синхронізованими транзакціями, точками підключення вебхуків та API-ключами. У Quasar Cloud додаток належить
-          організації (до 30 додатків на кожну); версія Community Edition використовує єдиний робочий простір.
+          організації (до 10 додатків на кожну); версія Community Edition використовує єдиний робочий простір.
         </P>
         <Hr />
         <H2 id="create-an-app">🛠️ Створення додатка</H2>
@@ -186,7 +186,7 @@ export function AppsKeysLocalized({ locale }: { locale: Locale }) {
       <H1>应用与密钥管理 (Apps & Keys)</H1>
       <P>
         与 Quasar 的每一次系统集成均以 <strong>应用 (App)</strong> 为边界起点：应用独立拥有所有已同步的链上交易、Webhook
-        终端配置和 API 凭据。在 Quasar Cloud 中，每个组织最多可创建 30 个应用；开源社区版 (Community Edition)
+        终端配置和 API 凭据。在 Quasar Cloud 中，每个组织最多可创建 10 个应用；开源社区版 (Community Edition)
         则提供统一的单租户工作区。
       </P>
       <Hr />
