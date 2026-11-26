@@ -60,12 +60,31 @@ describe('the logo in motion', () => {
     const markup = renderToStaticMarkup(createElement(LogoMotion));
     expect(LOGO_FILTER_ID).toBe('tuwa-logo-pixels');
     expect(markup).toContain(`<filter id="${LOGO_FILTER_ID}"`);
-    // At rest the filter moves nothing, and the logo has no filter at all
+    // At rest the filter moves nothing, and the logo has no filter or transform layer at all. While active,
+    // `transform: translateZ(0)` keeps `feImage` in the logo's local coordinate space in Safari/WebKit so a logo
+    // placed past y=180px (footers, scrolled fixed headers) stays inside the points mask instead of vanishing
     expect(markup).toMatch(/<feDisplacementMap in="SourceGraphic" in2="blocks" scale="0"/);
-    expect(siteCss).toMatch(/\.tuwa-logo\[data-pixels\] \{\s*filter: url\(#tuwa-logo-pixels\);\s*\}/);
-    expect(siteCss).not.toMatch(/\.tuwa-logo \{[^}]*filter/);
+    expect(siteCss).toMatch(
+      /\.tuwa-logo\[data-pixels\] \{\s*filter: url\(#tuwa-logo-pixels\);\s*transform: translateZ\(0\);\s*\}/,
+    );
+    expect(siteCss).not.toMatch(/\.tuwa-logo \{[^}]*(?:filter|transform)/);
     // The noise moves blocks the size of a pixel of the logo, so a pixel moves whole
     expect(markup).toMatch(/<feMorphology in="samples" operator="dilate" radius="1" result="blocks"/);
+  });
+
+  // In Safari the logo vanished under the pointer: WebKit draws nothing at all for a filter that tiles a point with
+  // `feTile`. The points come from an image of them instead, which every engine draws
+  it('draws its points without feTile, over the filter region of the logo', () => {
+    const markup = renderToStaticMarkup(createElement(LogoMotion));
+    expect(markup).not.toMatch(/<feTile|<feFlood/);
+    const image = markup.match(/<feImage [^>]*>/)?.[0] ?? '';
+    expect(image).toContain('result="points"');
+    expect(image).toMatch(/x="-60" y="-60" width="600" height="240"/);
+    const points = decodeURIComponent(image.match(/href="data:image\/svg\+xml;utf8,([^"]+)"/)?.[1] ?? '');
+    // A point every 3px, at the same place in each block as before
+    expect(points).toContain('<pattern id="p" width="3" height="3" patternUnits="userSpaceOnUse">');
+    expect(points).toContain('<rect x="1" y="1" width="1" height="1"/>');
+    expect(markup).toMatch(/<feComposite in="noise" in2="points" operator="in" result="samples"/);
   });
 
   it('trembles under the pointer and bursts on a press, and stops when the pointer leaves', () => {

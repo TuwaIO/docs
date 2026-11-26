@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.5](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.4...docs-ui-v0.12.5) (2026-11-22)
+
+
+### Bug Fixes
+
+* updated TUWA logo styles for support in all browsers ([524d6cf](https://github.com/TuwaIO/docs/commit/524d6cf9e5e9c85b88fd0aa04c4c92afe051e97f))
+
+## [0.12.4](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.3...docs-ui-v0.12.4) (2026-11-22)
+
+
+### Bug Fixes
+
+* **docs-ui:** the TUWA logo stays on screen under the pointer in Safari ([#94](https://github.com/TuwaIO/docs/issues/94)) ([f5d85fd](https://github.com/TuwaIO/docs/commit/f5d85fdf5b14cad661e0f12d921a493a2cc74e0d))
+
 ## [0.12.3](https://github.com/TuwaIO/docs/compare/docs-ui-v0.12.2...docs-ui-v0.12.3) (2026-11-17)
 
 

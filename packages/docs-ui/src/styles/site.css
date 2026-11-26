@@ -565,9 +565,13 @@ article .nextra-border a:hover {
 }
 
 /* The TUWA logo in motion (`LogoMotion`): while its pixels tremble under the pointer, or fly apart on a press, a filter
-   moves what its images show; at rest it has no filter at all */
+   moves what its images show; at rest it has no filter at all. `transform: translateZ(0)` gives the logo its own
+   compositing layer while the filter runs: in Safari/WebKit, `feImage` coordinates (`userSpaceOnUse`) are otherwise
+   evaluated in document space, so a logo past y=180px (a footer, or a fixed header once scrolled) falls outside the
+   points mask and vanishes under the pointer */
 .tuwa-logo[data-pixels] {
   filter: url(#tuwa-logo-pixels);
+  transform: translateZ(0);
 }
 
 /* The light/dark switch (ThemeSwitcher), in the cosmic manner of TUWA and in paper and ink: a frame of 1px with no fill,
