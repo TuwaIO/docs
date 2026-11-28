@@ -100,6 +100,19 @@ export function SelfHostingLocalized({ locale }: { locale: Locale }) {
           Щоб перенести організацію з Quasar Cloud разом із ключами, секретами вебхуків та історією транзакцій, дивіться{' '}
           <A href="/quasar/migrate-to-community">Перенесення з Quasar Cloud у Community Edition</A>.
         </P>
+        <Hr />
+        <H2 id="who-is-responsible">⚖️ Хто за що відповідає</H2>
+        <P>
+          <em>Юрист ще не перевіряв цей розділ.</em>
+        </P>
+        <P>
+          TUWA розробляє та публікує Quasar Community Edition під ліцензією Apache-2.0, на умовах «як є» і без гарантій.
+          TUWA не експлуатує вашу ноду й не має до неї доступу, а нода не надсилає TUWA жодних даних. Ноду експлуатуєте
+          ви: ви відповідаєте за дані, які вона обробляє, і за сервіси, якими вона користується, і самі з&apos;ясовуєте
+          з юристом, чи можете приймати криптоактиви у своїй країні та в країнах своїх покупців. Платежі надходять
+          безпосередньо на ваші гаманці, і ні TUWA, ні нода не отримують і не зберігають жодних коштів. Докладніше — у{' '}
+          <A href="https://github.com/TuwaIO/quasar-community#8-who-is-responsible">README</A>.
+        </P>
       </>
     );
   }
@@ -176,6 +189,18 @@ export function SelfHostingLocalized({ locale }: { locale: Locale }) {
       <P>
         如需将云端组织的 API 密钥、Webhook 密钥及完整历史交易平滑迁移至自建节点，请参考{' '}
         <A href="/quasar/migrate-to-community">从 Quasar Cloud 迁移至社区版</A>。
+      </P>
+      <Hr />
+      <H2 id="who-is-responsible">⚖️ 责任归属</H2>
+      <P>
+        <em>律师尚未审阅本节。</em>
+      </P>
+      <P>
+        TUWA 依据 Apache-2.0 许可证开发并发布 Quasar Community Edition，按“原样”提供，不附带担保。TUWA
+        不运行您的节点，也无法访问它，节点也不会向 TUWA
+        发送任何数据。节点由您运行：您对节点处理的数据及其使用的服务负责，并由您咨询律师，确认您是否可以在您所在的国家以及您的买方所在的国家接受加密资产。付款直接进入您的钱包，TUWA
+        和节点都不会接收或存放任何资金。详情请参阅{' '}
+        <A href="https://github.com/TuwaIO/quasar-community#8-who-is-responsible">README</A>。
       </P>
     </>
   );
