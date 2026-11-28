@@ -83,7 +83,7 @@ Keep `next` at 16.3.7: with the Vercel build adapter, 16.3.8 writes the prerende
 Hovering an npm package of the timeline (or focusing it with the keyboard) shows `PackagePreview` over the rows around it after a short delay: version, description, required peers and the packages that use it. A click opens `PackageDialog`:
 
 - version and description, and the SDK packages that include it (`@tuwaio/sdk`, `evm-sdk`, `solana-sdk`): apps on the SDK import it from there;
-- the install command for pnpm, npm, yarn or bun (the choice is saved to `localStorage`), with the required peers the app needs: the package's own and those of its TUWA peers, without what an installed SDK package already brings, and without `react`/`react-dom`, which the dialog names below the command. Ranges become arguments that need no shell quoting (`5.x.x` → `zustand@5`, `>=0.3` → the bare name);
+- the install command for pnpm, npm, yarn or bun (the choice is saved to `localStorage` for 30 days), with the required peers the app needs: the package's own and those of its TUWA peers, without what an installed SDK package already brings, and without `react`/`react-dom`, which the dialog names below the command. Ranges become arguments that need no shell quoting (`5.x.x` → `zustand@5`, `>=0.3` → the bare name);
 - required and optional peers, the TUWA packages it includes and the ones that use it (TUWA packages open in the same dialog);
 - up to three hub pages that mention the package, and links to its reference, npm and source.
 
@@ -216,7 +216,7 @@ apps/docs-hub/
 │   │   ├── hubPages.ts              # MDX pages in sidebar order (sitemap, llms.txt)
 │   │   ├── llms.ts                  # Text of llms.txt and llms-full.txt
 │   │   ├── packages.ts              # Package details and install commands from the saved npm data
-│   │   ├── packageManager.ts        # The package manager of the install commands (saved in localStorage)
+│   │   ├── packageManager.ts        # The package manager of the install commands (saved in localStorage for 30 days)
 │   │   ├── playground/              # Simulated wallets, chain, adapters, SIWX and Quasar; settings, themes, Nova customization
 │   │   ├── queryState.ts            # Query-string state of the hub tools
 │   │   ├── site.ts                  # Site URL, page metadata, structured data ids
