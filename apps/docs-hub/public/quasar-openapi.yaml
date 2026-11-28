@@ -1585,6 +1585,176 @@ components:
         code:
           type: string
           description: A stable code where a client acts on it, such as `data_processing_required`.
+    AddressEraseRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: "The wallet address of the person: an EVM address (`0x` and 40 hex digits, in any letter case) or a Solana
+            address. It goes in the body only, never in the path or the query."
+          example: "0x52908400098527886E0F7030069857D2E4169EE7"
+        block:
+          type: boolean
+          default: false
+          description: Refuse the syncs of transactions from the address from now on (`403 address_blocked`). The app keeps only a
+            keyed hash of the address for that, never the address.
+        dryRun:
+          type: boolean
+          default: false
+          description: Only count what would be erased; nothing is erased or blocked.
+      required:
+        - address
+      additionalProperties: false
+    AddressErasure:
+      type: object
+      properties:
+        erasure:
+          type:
+            - string
+            - "null"
+          description: The ID of the record of the erasure; `null` in a dry run.
+        transactions:
+          type: integer
+          description: The transactions that name the address and are erased (in a dry run, would be).
+        deliveries:
+          type: integer
+          description: Their webhook deliveries, erased with them.
+        keptPayments:
+          type: integer
+          description: "Payments of invoices and refunds that name the address: accounting records, which stay."
+        keptReason:
+          type:
+            - string
+            - "null"
+          enum:
+            - invoice_records
+            - null
+          description: "`invoice_records` while `keptPayments` stay; otherwise `null`."
+        blocked:
+          type: boolean
+          description: Whether the app refuses the syncs of the address now.
+        dryRun:
+          type: boolean
+          description: Whether this was a dry run.
+        erasedAt:
+          type:
+            - string
+            - "null"
+          description: When the address was erased (ISO 8601); `null` in a dry run.
+      required:
+        - erasure
+        - transactions
+        - deliveries
+        - keptPayments
+        - keptReason
+        - blocked
+        - dryRun
+        - erasedAt
+    AddressExportRequest:
+      type: object
+      properties:
+        address:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: "The wallet address of the person: an EVM address (`0x` and 40 hex digits, in any letter case) or a Solana
+            address. It goes in the body only, never in the path or the query."
+          example: "0x52908400098527886E0F7030069857D2E4169EE7"
+        cursor:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: The `next` of the page before; none for the first page.
+      required:
+        - address
+      additionalProperties: false
+    ExportedDelivery:
+      type: object
+      properties:
+        id:
+          type: string
+        eventType:
+          type: string
+          description: The webhook event the delivery carried.
+        txKey:
+          type: string
+          description: The key of its transaction.
+        httpStatus:
+          type:
+            - string
+            - "null"
+          description: The HTTP status the endpoint answered.
+        success:
+          type: boolean
+          description: Whether the endpoint took it.
+        attempts:
+          type:
+            - string
+            - "null"
+          description: How many times it was sent.
+        requestPayload:
+          description: The body sent to the endpoint.
+        createdAt:
+          type: string
+          description: When it was recorded (ISO 8601).
+      required:
+        - id
+        - eventType
+        - txKey
+        - httpStatus
+        - success
+        - attempts
+        - createdAt
+    AddressExport:
+      type: object
+      properties:
+        export:
+          type: string
+          description: The ID of the record of this page.
+        transactions:
+          type: array
+          items:
+            allOf:
+              - $ref: "#/components/schemas/Transaction"
+              - type: object
+                properties:
+                  kept:
+                    type: boolean
+                    description: "Whether an erasure keeps this transaction: a payment of an invoice or a refund."
+                required:
+                  - kept
+          description: The transactions that name the address, oldest first, with the fields of the history; at most 500 a page.
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExportedDelivery"
+          description: The webhook deliveries of these transactions, as they were sent.
+        next:
+          type:
+            - string
+            - "null"
+          description: The cursor of the next page; `null` on the last one.
+        total:
+          type:
+            - integer
+            - "null"
+          description: How many transactions name the address, on the first page only; `null` after it.
+      required:
+        - export
+        - transactions
+        - deliveries
+        - next
+        - total
+    AddressRateLimited:
+      allOf:
+        - $ref: "#/components/schemas/ErrorResponse"
+        - type: object
+          properties:
+            retryAfterSeconds:
+              type: integer
+              description: Seconds until the minute ends and the app may erase or export again (`rate_limited`).
     PaymentsError:
       type: object
       properties:
@@ -3531,7 +3701,9 @@ paths:
           description: "Public key (read-only), disabled app, app being deleted, or IP address or origin not allowed by the app
             settings. In Quasar Cloud also an organization whose data processing is not set up (`code:
             data_processing_required`): transactions are accepted once an owner concludes the Data Processing Addendum,
-            and the standard contractual clauses where they apply, in the dashboard."
+            and the standard contractual clauses where they apply, in the dashboard. `address_blocked`: the app erased
+            the data of the sending wallet at its owner's request and refuses its transactions from then on (`POST
+            /v1/engine/pulsar/address/erase` with `block: true`)."
           content:
             application/json:
               schema:
@@ -3728,6 +3900,157 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "429":
           description: Too many requests per second for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/pulsar/address/erase:
+    post:
+      summary: Erase a wallet address
+      description: "Erases what the app keeps of a wallet address when the person behind it asks to be forgotten (GDPR Article
+        17): the transactions that name it (as the sender, the recipient, the smart account or the contract, or in the
+        call data, the instructions of a Solana transaction, the title, the description, the payload or the error) and
+        their webhook deliveries. Payments of invoices and refunds that name it stay as accounting records
+        (`keptPayments`). With `block: true` the app also refuses the syncs of the address from then on; `dryRun: true`
+        only counts what would go. Free: an erasure costs no quota. An erasure runs 30 seconds at most; an app that
+        keeps more is erased by the operator, as [the erasure
+        guide](https://github.com/TuwaIO/quasar-community/blob/main/docs/ADDRESS_ERASURE.md) describes. Each erasure is
+        recorded, never with the address."
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressEraseRequest"
+      responses:
+        "200":
+          description: Erased, or counted in a dry run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressErasure"
+        "400":
+          description: "`invalid_request` (the body names `address` and, as `true` or `false`, `block` and `dryRun`, nothing else;
+            `issues` says what is wrong) or `address_invalid` (neither an EVM nor a Solana address)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`secret_key_required`: a public key. Erasing needs the secret key of the app; call it from your server.
+            Also a disabled app, an app being deleted, or an IP address or origin not allowed by the app settings. Never
+            refused for the quota or for the data processing of the organization."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "`app_not_found`: the app is gone."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: "`app_deleting`: the app is being deleted, and its data with it."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`rate_limited`: an app erases or exports at most 10 times a minute, dry runs and every page of an export
+            included; `retryAfterSeconds` says how long to wait. Also too many requests per second for the app."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressRateLimited"
+        "503":
+          description: "`erase_too_large`: nothing was erased, because the app keeps too many transactions to erase the address
+            within 30 seconds; the operator erases it by hand."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/engine/pulsar/address/export:
+    post:
+      summary: Export a wallet address
+      description: "Gives a copy of what the app keeps of a wallet address, for the person behind it (GDPR Articles 15 and
+        20), a page at a time: the transactions that name it, found exactly as an erasure finds them, with their webhook
+        deliveries, and whether an erasure would keep each one. Ask for the next page with the `next` of the page
+        before, until it is `null`. An export gives at most 10,000 transactions; each page takes one of the 10 erasures
+        and exports of the minute and runs 30 seconds at most. A larger export is done by the operator, as [the erasure
+        guide](https://github.com/TuwaIO/quasar-community/blob/main/docs/ADDRESS_ERASURE.md) describes. Free: an export
+        costs no quota. Each page is recorded, never with the address."
+      tags:
+        - Pulsar
+      security:
+        - SecretKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressExportRequest"
+      responses:
+        "200":
+          description: A page of the export.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressExport"
+        "400":
+          description: "`invalid_request` (the body names `address` and, after the first page, `cursor`, nothing else; `issues`
+            says what is wrong), `address_invalid` (neither an EVM nor a Solana address) or `invalid_cursor` (a cursor
+            other than the `next` of a page)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: "`secret_key_required`: a public key. Exporting needs the secret key of the app; call it from your server.
+            Also a disabled app, an app being deleted, or an IP address or origin not allowed by the app settings. Never
+            refused for the quota or for the data processing of the organization."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: "`app_not_found`: the app is gone."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: "`app_deleting`: the app is being deleted, and its data with it."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: "`rate_limited`: an app erases or exports at most 10 times a minute, dry runs and every page of an export
+            included; `retryAfterSeconds` says how long to wait. Also too many requests per second for the app."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddressRateLimited"
+        "503":
+          description: "`export_too_large`: more than 10,000 transactions name the address, or reading them takes longer than 30
+            seconds; the operator exports them by hand."
           content:
             application/json:
               schema:
