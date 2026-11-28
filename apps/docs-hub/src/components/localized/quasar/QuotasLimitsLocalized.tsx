@@ -376,7 +376,7 @@ export function QuotasLimitsLocalized({ locale }: { locale: Locale }) {
           </Tr>
           <Tr>
             <Td>单个组织可创建的应用数量</Td>
-            <Td>最多 30 个 App</Td>
+            <Td>最多 10 个 App</Td>
           </Tr>
           <Tr>
             <Td>单应用 Webhook 终端节点数量</Td>
