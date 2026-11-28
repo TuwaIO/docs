@@ -7,6 +7,7 @@ import { Head } from 'nextra/components';
 import type { ReactNode } from 'react';
 
 import { SITE_URL, X_HANDLE } from '../lib/site';
+import { STORED_PREFERENCES } from '../lib/storedPreferences';
 import { Providers } from './providers';
 
 /** The metadata of the whole site. */
@@ -85,9 +86,9 @@ export function RootDocument({ lang, children }: { lang: string; children: React
           The colors are the paper of each theme, as the body below: Nextra paints its sticky header and the foot of its
           sidebar with them. */}
       <Head backgroundColor={{ light: '#f2f1ee', dark: '#101014' }}>
-        {/* Before the theme script of next-themes and the tabs of Nextra: the theme, guide tab and locale are kept 30 days
-            after they are chosen (Cookie Policy) */}
-        <PreferenceExpiry keys={['theme', 'tuwa-guide-network', 'tuwa-locale']} />
+        {/* Before the theme script of next-themes and the tabs of Nextra: every interface setting of the hub is kept 30
+            days after it is chosen (Cookie Policy) */}
+        <PreferenceExpiry keys={STORED_PREFERENCES} />
       </Head>
       <body className={`antialiased bg-[var(--tuwa-docs-paper)] text-[var(--tuwa-text-primary)]`}>
         <Providers urlLocale={localeOfPath(`/${lang}`) ?? undefined}>{children}</Providers>
